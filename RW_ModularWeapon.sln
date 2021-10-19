@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.31702.278
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RW_ModualWeapon", "RW_ModualWeapon\RW_ModualWeapon.csproj", "{8881636F-16E7-4D7C-8BB7-71806FB8C582}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{8881636F-16E7-4D7C-8BB7-71806FB8C582}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8881636F-16E7-4D7C-8BB7-71806FB8C582}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8881636F-16E7-4D7C-8BB7-71806FB8C582}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8881636F-16E7-4D7C-8BB7-71806FB8C582}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {F2300756-BBCA-40D9-ABBD-FAD63D95C9A1}
+	EndGlobalSection
+EndGlobal
