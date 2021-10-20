@@ -7,8 +7,8 @@
     <ProjectGuid>{8881636F-16E7-4D7C-8BB7-71806FB8C582}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>RW_ModularWeapon</RootNamespace>
-    <AssemblyName>RW_ModularWeapon</AssemblyName>
+    <RootNamespace>RW_NodeTree</RootNamespace>
+    <AssemblyName>RW_NodeTree</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>

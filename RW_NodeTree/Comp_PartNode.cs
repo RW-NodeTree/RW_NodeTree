@@ -7,11 +7,15 @@ using System.Threading.Tasks;
 using UnityEngine;
 using Verse;
 
-namespace RW_ModularWeapon
+namespace RW_NodeTree
 {
     public class Comp_ThingsNode : ThingComp
     {
-
+        /// <summary>
+        /// get currect node of index
+        /// </summary>
+        /// <param name="index">node index</param>
+        /// <returns>currect node</returns>
         public Comp_ThingsNode this[int index]
         {
             get
@@ -22,12 +26,16 @@ namespace RW_ModularWeapon
             {
                 if(AllowNode(value))
                 {
+                    if ((value?.parent?.Spawned).GetValueOrDefault()) value.parent.DeSpawn();
                     childNodes[index] = value;
                     UpdateNode();
                 }
             }
         }
 
+        /// <summary>
+        /// find all comp for node
+        /// </summary>
         public IEnumerable<ThingComp_BasicNodeComp> AllNodeComp
         {
             get
@@ -43,6 +51,17 @@ namespace RW_ModularWeapon
             }
         }
 
+        public Texture CombinedIconTexture(Rot4 rot)
+        {
+            Graphic graphic = base.parent.Graphic;
+            if(graphic as )
+        }
+
+        /// <summary>
+        /// all 
+        /// </summary>
+        /// <param name="node"></param>
+        /// <returns></returns>
         public bool AllowNode(Comp_ThingsNode node)
         {
             foreach (ThingComp_BasicNodeComp comp in AllNodeComp)
@@ -50,6 +69,16 @@ namespace RW_ModularWeapon
                 if (!comp.AllowNode(node)) return false;
             }
             return true;
+        }
+
+        public Vector2 IconTexturePostion(Rot4 rot)
+        {
+            Vector2 result = Vector2.zero;
+            foreach (ThingComp_BasicNodeComp comp in AllNodeComp)
+            {
+                result += comp.IconTexturePostionOffset(rot);
+            }
+            return result;
         }
 
         public Comp_ThingsNode FindNode(Predicate<Comp_ThingsNode> func)
@@ -72,6 +101,11 @@ namespace RW_ModularWeapon
         public static implicit operator ThingWithComps(Comp_ThingsNode node)
         {
             return node.parent;
+        }
+
+        public static explicit operator Comp_ThingsNode(ThingWithComps thing)
+        {
+            return thing.GetComp<Comp_ThingsNode>();
         }
 
         private bool onUpdateNode = false;
