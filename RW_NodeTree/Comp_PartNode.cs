@@ -9,27 +9,22 @@ using Verse;
 
 namespace RW_NodeTree
 {
-    public class Comp_ThingsNode : ThingComp
+    public class Comp_ThingsNode : ThingComp, IThingHolder
     {
         /// <summary>
         /// get currect node of index
         /// </summary>
         /// <param name="index">node index</param>
         /// <returns>currect node</returns>
-        public Comp_ThingsNode this[int index]
+        public Thing this[int index]
         {
             get
             {
-                return childNodes[index];
+                return GetDirectlyHeldThings()[index];
             }
             set
             {
-                if(AllowNode(value))
-                {
-                    if ((value?.parent?.Spawned).GetValueOrDefault()) value.parent.DeSpawn();
-                    childNodes[index] = value;
-                    UpdateNode();
-                }
+                ((Node)GetDirectlyHeldThings())[index] = value;
             }
         }
 
@@ -51,68 +46,121 @@ namespace RW_NodeTree
             }
         }
 
-        public Texture CombinedIconTexture(Rot4 rot)
+        public RenderTexture CombinedIconTexture(Rot4 rot,Vector2Int TextureSize)
         {
-            Graphic graphic = base.parent.Graphic;
-            if(graphic as )
-        }
-
-        /// <summary>
-        /// all 
-        /// </summary>
-        /// <param name="node"></param>
-        /// <returns></returns>
-        public bool AllowNode(Comp_ThingsNode node)
-        {
+            RenderTexture result = new RenderTexture(TextureSize.x, TextureSize.y, 0);
+            Vector2 startPoint = Vector2.zero;
             foreach (ThingComp_BasicNodeComp comp in AllNodeComp)
             {
-                if (!comp.AllowNode(node)) return false;
+                comp.DrawTexture(ref result, ref startPoint);
             }
-            return true;
-        }
-
-        public Vector2 IconTexturePostion(Rot4 rot)
-        {
-            Vector2 result = Vector2.zero;
-            foreach (ThingComp_BasicNodeComp comp in AllNodeComp)
+            for(int i = 0; i < node.Count;i++)
             {
-                result += comp.IconTexturePostionOffset(rot);
+                Vector2 pos = IconTexturePostion(rot, i) * TextureSize;
+                Comp_ThingsNode nodeComp = node[i];
+                if(nodeComp != null)
+                {
+                    RenderTexture childTex = nodeComp.CombinedIconTexture(rot, TextureSize);
+                    RenderTexture boxedCache = result;
+                    Vector2 endPoint = startPoint + boxedCache.texelSize;
+                    endPoint.x = Math.Max(endPoint.x, childTex.width + (int)pos.x);
+                    endPoint.y = Math.Max(endPoint.y, childTex.height + (int)pos.y);
+                    startPoint.x = Math.Min(startPoint.x, pos.x);
+                    startPoint.y = Math.Min(startPoint.y, pos.y);
+                    result = new RenderTexture(
+                        (int)(endPoint.x - startPoint.x),
+                        (int)(endPoint.y - startPoint.y),
+                        0);
+
+                    Vector2 scale = boxedCache.texelSize / result.texelSize;
+                    Vector2 offset = -(startPoint / result.texelSize);
+                    UnityEngine.Graphics.Blit(boxedCache, result, scale, offset);
+                    boxedCache.Release();
+
+                    scale = childTex.texelSize / result.texelSize;
+                    offset = (pos - startPoint) / result.texelSize;
+                    UnityEngine.Graphics.Blit(childTex, result, scale, offset);
+                    childTex.Release();
+                }
             }
             return result;
         }
 
-        public Comp_ThingsNode FindNode(Predicate<Comp_ThingsNode> func)
+        public Vector2 IconTexturePostion(Rot4 rot,int index)
         {
-            return childNodes.Find(func);
+            Vector2 result = Vector2.zero;
+            foreach (ThingComp_BasicNodeComp comp in AllNodeComp)
+            {
+                result += comp.IconTexturePostionOffset(rot, index);
+            }
+            return result;
         }
 
-        public void UpdateNode()
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="node"></param>
+        /// <param name="index"></param>
+        /// <returns></returns>
+        public bool AllowNode(Comp_ThingsNode node, int index = -1)
         {
-            foreach(ThingComp_BasicNodeComp comp in AllNodeComp)
+            foreach (ThingComp_BasicNodeComp comp in AllNodeComp)
             {
-                comp.UpdateNode();
+                if (!comp.AllowNode(node, index)) return false;
             }
-            foreach(Comp_ThingsNode node in childNodes)
+            return true;
+        }
+
+        public void UpdateNode(Comp_ThingsNode actionNode = null)
+        {
+            if (actionNode == null) actionNode = this;
+            foreach (ThingComp_BasicNodeComp comp in AllNodeComp)
             {
-                node.UpdateNode();
+                comp.UpdateNode(actionNode);
+            }
+            foreach(Thing node in this.node)
+            {
+                ((Comp_ThingsNode)node)?.UpdateNode(actionNode);
             }
         }
 
-        public static implicit operator ThingWithComps(Comp_ThingsNode node)
+        public void GetChildHolders(List<IThingHolder> outChildren)
+        {
+            ThingOwnerUtility.AppendThingHoldersFromThings(outChildren, this.GetDirectlyHeldThings());
+        }
+
+        public ThingOwner GetDirectlyHeldThings()
+        {
+            if(node == null)
+            {
+                node = new Node(this);
+            }
+            return node;
+        }
+
+        #region operator
+        public static explicit operator ThingWithComps(Comp_ThingsNode node)
         {
             return node.parent;
         }
 
-        public static explicit operator Comp_ThingsNode(ThingWithComps thing)
+        public static explicit operator Node(Comp_ThingsNode node)
         {
-            return thing.GetComp<Comp_ThingsNode>();
+            return (Node)(node.GetDirectlyHeldThings());
         }
 
-        private bool onUpdateNode = false;
+        public static implicit operator Comp_ThingsNode(Thing thing)
+        {
+            return thing.TryGetComp<Comp_ThingsNode>();
+        }
 
-        private Comp_ThingsNode parentNode = null;
+        public static implicit operator Comp_ThingsNode(Node node)
+        {
+            return node.Comp;
+        }
+        #endregion
 
-        private List<Comp_ThingsNode> childNodes = new List<Comp_ThingsNode>();
+        private Node node;
     }
 
     public class CompProperties_PartNode : CompProperties
