@@ -8,18 +8,18 @@ using Verse;
 
 namespace RW_NodeTree
 {
-    public class Node : ThingOwner
+    public class NodeContainer : ThingOwner
     {
-        public Node(Comp_ThingsNode comp) : base(comp,true)
+        public NodeContainer(Comp_ChildNodeProccesser comp) : base(comp,true)
         {
 
         }
 
-        public Comp_ThingsNode Comp
+        public Comp_ChildNodeProccesser Comp
         {
             get
             {
-                return (Comp_ThingsNode)base.Owner;
+                return (Comp_ChildNodeProccesser)base.Owner;
             }
         }
 

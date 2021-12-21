@@ -9,7 +9,7 @@ using Verse;
 
 namespace RW_NodeTree
 {
-    public class Comp_ThingsNode : ThingComp, IThingHolder
+    public class Comp_ChildNodeProccesser : ThingComp, IThingHolder
     {
         /// <summary>
         /// get currect node of index
@@ -24,7 +24,7 @@ namespace RW_NodeTree
             }
             set
             {
-                ((Node)GetDirectlyHeldThings())[index] = value;
+                ((NodeContainer)GetDirectlyHeldThings())[index] = value;
             }
         }
 
@@ -57,7 +57,7 @@ namespace RW_NodeTree
             for(int i = 0; i < node.Count;i++)
             {
                 Vector2 pos = IconTexturePostion(rot, i) * TextureSize;
-                Comp_ThingsNode nodeComp = node[i];
+                Comp_ChildNodeProccesser nodeComp = node[i];
                 if(nodeComp != null)
                 {
                     RenderTexture childTex = nodeComp.CombinedIconTexture(rot, TextureSize);
@@ -102,7 +102,7 @@ namespace RW_NodeTree
         /// <param name="node"></param>
         /// <param name="index"></param>
         /// <returns></returns>
-        public bool AllowNode(Comp_ThingsNode node, int index = -1)
+        public bool AllowNode(Comp_ChildNodeProccesser node, int index = -1)
         {
             foreach (ThingComp_BasicNodeComp comp in AllNodeComp)
             {
@@ -111,7 +111,7 @@ namespace RW_NodeTree
             return true;
         }
 
-        public void UpdateNode(Comp_ThingsNode actionNode = null)
+        public void UpdateNode(Comp_ChildNodeProccesser actionNode = null)
         {
             if (actionNode == null) actionNode = this;
             foreach (ThingComp_BasicNodeComp comp in AllNodeComp)
@@ -120,7 +120,7 @@ namespace RW_NodeTree
             }
             foreach(Thing node in this.node)
             {
-                ((Comp_ThingsNode)node)?.UpdateNode(actionNode);
+                ((Comp_ChildNodeProccesser)node)?.UpdateNode(actionNode);
             }
         }
 
@@ -133,34 +133,34 @@ namespace RW_NodeTree
         {
             if(node == null)
             {
-                node = new Node(this);
+                node = new NodeContainer(this);
             }
             return node;
         }
 
         #region operator
-        public static explicit operator ThingWithComps(Comp_ThingsNode node)
+        public static explicit operator ThingWithComps(Comp_ChildNodeProccesser node)
         {
             return node.parent;
         }
 
-        public static explicit operator Node(Comp_ThingsNode node)
+        public static explicit operator NodeContainer(Comp_ChildNodeProccesser node)
         {
-            return (Node)(node.GetDirectlyHeldThings());
+            return (NodeContainer)(node.GetDirectlyHeldThings());
         }
 
-        public static implicit operator Comp_ThingsNode(Thing thing)
+        public static implicit operator Comp_ChildNodeProccesser(Thing thing)
         {
-            return thing.TryGetComp<Comp_ThingsNode>();
+            return thing.TryGetComp<Comp_ChildNodeProccesser>();
         }
 
-        public static implicit operator Comp_ThingsNode(Node node)
+        public static implicit operator Comp_ChildNodeProccesser(NodeContainer node)
         {
             return node.Comp;
         }
         #endregion
 
-        private Node node;
+        private NodeContainer node;
     }
 
     public class CompProperties_PartNode : CompProperties
