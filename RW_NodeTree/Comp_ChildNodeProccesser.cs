@@ -87,9 +87,15 @@ namespace RW_NodeTree
                             info.matrix.m23 += pos.z;
                             info.matrix *= matrix;
                             forAdd[j] = info;
+
                             Bounds bounds = info.mesh.bounds;
-                            Vector3 max = info.matrix * bounds.max;
-                            Vector3 min = info.matrix * bounds.min;
+
+                            Vector3 max = bounds.max;
+                            max = info.matrix * new Vector4(max.x, max.y, max.z, 1);
+
+                            Vector3 min = bounds.min;
+                            min = info.matrix * new Vector4(min.x, min.y, min.z, 1);
+
                             TextureSize = Math.Max(TextureSize >> 1, (int)Math.Abs(max.x) >> 8) << 1;
                             TextureSize = Math.Max(TextureSize >> 1, (int)Math.Abs(min.x) >> 8) << 1;
                             TextureSize = Math.Max(TextureSize >> 1, (int)Math.Abs(max.y) >> 8) << 1;
@@ -101,17 +107,21 @@ namespace RW_NodeTree
             RenderingPatch.BlockingState = false;
             if (Surface == null || Surface.texelSize.x != TextureSize || Surface.texelSize.y != TextureSize)
             {
+                if(Surface != null) Surface.DiscardContents(true,true);
                 Surface = new RenderTexture(TextureSize, TextureSize, 24);
             }
             else
             {
-                Graphics.Blit(SolidColorMaterials.SimpleSolidColorMaterial(default(Color)).mainTexture, Surface);
+                Graphics.Blit(SolidColorMaterials.SimpleSolidColorMaterial(default(Color)).mainTexture, Surface, Surface.texelSize, Vector2.zero);
             }
 
             foreach (ThingComp_BasicNodeComp comp in AllNodeComp)
             {
                 comp.DrawTexture(ref Surface);
             }
+
+            float size = 1f / (TextureSize >> 8);
+            Vector3 scale = new Vector3(size, size, 1);
             RenderTexture.active = Surface;
             foreach (List<RenderInfo> renderInfos in RenderInfos)
             {
@@ -122,7 +132,7 @@ namespace RW_NodeTree
                         for (int i = 0; i < info.material.passCount; i++)
                         {
                             info.material.SetPass(i);
-                            Graphics.DrawMeshNow(info.mesh, info.matrix * Matrix4x4.Scale(Vector3.one * (1f / (TextureSize >> 8))), info.submeshIndex);
+                            Graphics.DrawMeshNow(info.mesh, info.matrix * Matrix4x4.Scale(scale), info.submeshIndex);
                         }
                     }
                 }
@@ -204,8 +214,6 @@ namespace RW_NodeTree
         private RenderTexture Surface = null;
 
         private static AccessTools.FieldRef<ThingOwner<Thing>, List<Thing>> innerListRef = AccessTools.FieldRefAccess<ThingOwner<Thing>, List<Thing>>("innerList");
-
-        private static AccessTools.FieldRef<Thing, IntVec3> positionIntRef = AccessTools.FieldRefAccess<Thing, IntVec3>("positionInt");
 
         private static Matrix4x4 matrix =
                             new Matrix4x4(
