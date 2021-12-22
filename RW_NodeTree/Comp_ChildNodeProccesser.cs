@@ -4,8 +4,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using HarmonyLib;
 using UnityEngine;
 using Verse;
+using RW_NodeTree.Patch;
 
 namespace RW_NodeTree
 {
@@ -24,7 +26,20 @@ namespace RW_NodeTree
             }
             set
             {
-                ((NodeContainer)GetDirectlyHeldThings())[index] = value;
+                ThingOwner<Thing> things = (ThingOwner<Thing>)GetDirectlyHeldThings();
+                if(this.AllowNode(value))
+                {
+                    value = value.SplitOff(1);
+                    if(things.TryAdd(value))
+                    {
+                        List<Thing> innerList = innerListRef(things);
+                        if(innerList != null)
+                        {
+                            innerList.RemoveAt(innerList.Count - 1);
+                            innerList.Insert(index, value);
+                        }
+                    }
+                }
             }
         }
 
@@ -46,49 +61,79 @@ namespace RW_NodeTree
             }
         }
 
-        public RenderTexture CombinedIconTexture(Rot4 rot,Vector2Int TextureSize)
+        public RenderTexture CombinedIconTexture(Rot4 rot)
         {
-            RenderTexture result = new RenderTexture(TextureSize.x, TextureSize.y, 0);
-            Vector2 startPoint = Vector2.zero;
-            foreach (ThingComp_BasicNodeComp comp in AllNodeComp)
+            int TextureSize = 0;
+            RenderTexture cache = RenderTexture.active;
+            List<List<RenderInfo>> RenderInfos = new List<List<RenderInfo>>();
+            for (int i = 0; i < childNodes.Count;i++)
             {
-                comp.DrawTexture(ref result, ref startPoint);
-            }
-            for(int i = 0; i < node.Count;i++)
-            {
-                Vector2 pos = IconTexturePostion(rot, i) * TextureSize;
-                Comp_ChildNodeProccesser nodeComp = node[i];
-                if(nodeComp != null)
+                RenderingPatch.BlockingState = true;
+                Vector3 pos = IconTexturePostion(rot, i);
+                Thing child = childNodes[i];
+                if(child != null)
                 {
-                    RenderTexture childTex = nodeComp.CombinedIconTexture(rot, TextureSize);
-                    RenderTexture boxedCache = result;
-                    Vector2 endPoint = startPoint + boxedCache.texelSize;
-                    endPoint.x = Math.Max(endPoint.x, childTex.width + (int)pos.x);
-                    endPoint.y = Math.Max(endPoint.y, childTex.height + (int)pos.y);
-                    startPoint.x = Math.Min(startPoint.x, pos.x);
-                    startPoint.y = Math.Min(startPoint.y, pos.y);
-                    result = new RenderTexture(
-                        (int)(endPoint.x - startPoint.x),
-                        (int)(endPoint.y - startPoint.y),
-                        0);
-
-                    Vector2 scale = boxedCache.texelSize / result.texelSize;
-                    Vector2 offset = -(startPoint / result.texelSize);
-                    UnityEngine.Graphics.Blit(boxedCache, result, scale, offset);
-                    boxedCache.Release();
-
-                    scale = childTex.texelSize / result.texelSize;
-                    offset = (pos - startPoint) / result.texelSize;
-                    UnityEngine.Graphics.Blit(childTex, result, scale, offset);
-                    childTex.Release();
+                    pos -= child.DrawPos;
+                    child.Draw();
+                    List<RenderInfo> forAdd = new List<RenderInfo>(RenderingPatch.RenderInfos);
+                    RenderInfos.Add(forAdd);
+                    for (int j = 0; j < forAdd.Count; j++)
+                    {
+                        RenderInfo info = forAdd[j];
+                        if(info.mesh != null)
+                        {
+                            info.matrix.m03 += pos.x;
+                            info.matrix.m13 += pos.y;
+                            info.matrix.m23 += pos.z;
+                            info.matrix *= matrix;
+                            forAdd[j] = info;
+                            Bounds bounds = info.mesh.bounds;
+                            Vector3 max = info.matrix * bounds.max;
+                            Vector3 min = info.matrix * bounds.min;
+                            TextureSize = Math.Max(TextureSize >> 1, (int)Math.Abs(max.x) >> 8) << 1;
+                            TextureSize = Math.Max(TextureSize >> 1, (int)Math.Abs(min.x) >> 8) << 1;
+                            TextureSize = Math.Max(TextureSize >> 1, (int)Math.Abs(max.y) >> 8) << 1;
+                            TextureSize = Math.Max(TextureSize >> 1, (int)Math.Abs(min.y) >> 8) << 1;
+                        }
+                    }
                 }
             }
-            return result;
+            RenderingPatch.BlockingState = false;
+            if (Surface == null || Surface.texelSize.x != TextureSize || Surface.texelSize.y != TextureSize)
+            {
+                Surface = new RenderTexture(TextureSize, TextureSize, 24);
+            }
+            else
+            {
+                Graphics.Blit(SolidColorMaterials.SimpleSolidColorMaterial(default(Color)).mainTexture, Surface);
+            }
+
+            foreach (ThingComp_BasicNodeComp comp in AllNodeComp)
+            {
+                comp.DrawTexture(ref Surface);
+            }
+            RenderTexture.active = Surface;
+            foreach (List<RenderInfo> renderInfos in RenderInfos)
+            {
+                foreach (RenderInfo info in renderInfos)
+                {
+                    if (info.material != null && info.mesh != null)
+                    {
+                        for (int i = 0; i < info.material.passCount; i++)
+                        {
+                            info.material.SetPass(i);
+                            Graphics.DrawMeshNow(info.mesh, info.matrix * Matrix4x4.Scale(Vector3.one * (1f / (TextureSize >> 8))), info.submeshIndex);
+                        }
+                    }
+                }
+            }
+            RenderTexture.active = cache;
+            return Surface;
         }
 
-        public Vector2 IconTexturePostion(Rot4 rot,int index)
+        public Vector3 IconTexturePostion(Rot4 rot,int index)
         {
-            Vector2 result = Vector2.zero;
+            Vector3 result = Vector3.zero;
             foreach (ThingComp_BasicNodeComp comp in AllNodeComp)
             {
                 result += comp.IconTexturePostionOffset(rot, index);
@@ -102,8 +147,12 @@ namespace RW_NodeTree
         /// <param name="node"></param>
         /// <param name="index"></param>
         /// <returns></returns>
-        public bool AllowNode(Comp_ChildNodeProccesser node, int index = -1)
+        public bool AllowNode(Thing node, int index = -1)
         {
+            if(index < 0)
+            {
+                index = this.childNodes.Count;
+            }
             foreach (ThingComp_BasicNodeComp comp in AllNodeComp)
             {
                 if (!comp.AllowNode(node, index)) return false;
@@ -118,7 +167,7 @@ namespace RW_NodeTree
             {
                 comp.UpdateNode(actionNode);
             }
-            foreach(Thing node in this.node)
+            foreach(Thing node in this.childNodes)
             {
                 ((Comp_ChildNodeProccesser)node)?.UpdateNode(actionNode);
             }
@@ -131,36 +180,40 @@ namespace RW_NodeTree
 
         public ThingOwner GetDirectlyHeldThings()
         {
-            if(node == null)
+            if(childNodes == null)
             {
-                node = new NodeContainer(this);
+                childNodes = new ThingOwner<Thing>(this);
             }
-            return node;
+            return childNodes;
         }
 
         #region operator
-        public static explicit operator ThingWithComps(Comp_ChildNodeProccesser node)
+        public static implicit operator ThingWithComps(Comp_ChildNodeProccesser node)
         {
             return node.parent;
-        }
-
-        public static explicit operator NodeContainer(Comp_ChildNodeProccesser node)
-        {
-            return (NodeContainer)(node.GetDirectlyHeldThings());
         }
 
         public static implicit operator Comp_ChildNodeProccesser(Thing thing)
         {
             return thing.TryGetComp<Comp_ChildNodeProccesser>();
         }
-
-        public static implicit operator Comp_ChildNodeProccesser(NodeContainer node)
-        {
-            return node.Comp;
-        }
         #endregion
 
-        private NodeContainer node;
+        private ThingOwner<Thing> childNodes;
+
+        private RenderTexture Surface = null;
+
+        private static AccessTools.FieldRef<ThingOwner<Thing>, List<Thing>> innerListRef = AccessTools.FieldRefAccess<ThingOwner<Thing>, List<Thing>>("innerList");
+
+        private static AccessTools.FieldRef<Thing, IntVec3> positionIntRef = AccessTools.FieldRefAccess<Thing, IntVec3>("positionInt");
+
+        private static Matrix4x4 matrix =
+                            new Matrix4x4(
+                                new Vector4(     1,      0,      0,      0      ),
+                                new Vector4(     0,      0,      1,      0      ),
+                                new Vector4(     0,     -0.001f, 0,      0.5f   ),
+                                new Vector4(     0,      0,      0,      1      )
+                            );
     }
 
     public class CompProperties_PartNode : CompProperties
