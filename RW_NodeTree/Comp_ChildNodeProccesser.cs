@@ -218,9 +218,9 @@ namespace RW_NodeTree
         private static Matrix4x4 matrix =
                             new Matrix4x4(
                                 new Vector4(     1,      0,      0,      0      ),
-                                new Vector4(     0,      0,      1,      0      ),
-                                new Vector4(     0,     -0.001f, 0,      0.5f   ),
-                                new Vector4(     0,      0,      0,      1      )
+                                new Vector4(     0,      0,     -0.001f, 0      ),
+                                new Vector4(     0,      1,      0,      0      ),
+                                new Vector4(     0,      0,      0.5f,   1      )
                             );
     }
 
