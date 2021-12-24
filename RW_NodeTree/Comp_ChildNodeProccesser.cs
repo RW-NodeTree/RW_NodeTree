@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using HarmonyLib;
 using UnityEngine;
 using Verse;
-using RW_NodeTree.Patch;
+using RW_NodeTree.Rendering;
 
 namespace RW_NodeTree
 {
@@ -27,19 +27,50 @@ namespace RW_NodeTree
             set
             {
                 ThingOwner<Thing> things = (ThingOwner<Thing>)GetDirectlyHeldThings();
-                if(this.AllowNode(value))
+                if(this.AllowNode(value,index))
                 {
-                    value = value.SplitOff(1);
-                    if(things.TryAdd(value))
+                    if(things.TryAdd(value,false))
                     {
-                        List<Thing> innerList = innerListRef(things);
-                        if(innerList != null)
+                        Thing droped;
+                        if(things.TryDrop(this[index],ThingPlaceMode.Near,out droped))
                         {
-                            innerList.RemoveAt(innerList.Count - 1);
-                            innerList.Insert(index, value);
+                            List<Thing> innerList = innerListRef(things);
+                            if (innerList != null)
+                            {
+                                innerList.RemoveAt(innerList.Count - 1);
+                                innerList.Insert(index, value);
+                            }
+                        }
+                        else
+                        {
+                            things.TryDrop(value, ThingPlaceMode.Near, out droped);
                         }
                     }
                 }
+            }
+        }
+
+        /// <summary>
+        /// get parent node if it is a node
+        /// </summary>
+        public Comp_ChildNodeProccesser ParentProccesser => (Comp_ChildNodeProccesser)this.ParentHolder;
+
+        /// <summary>
+        /// root of this node tree
+        /// </summary>
+        public Thing RootNode
+        {
+            get
+            {
+                Comp_ChildNodeProccesser proccesser = this;
+                Comp_ChildNodeProccesser next = ParentProccesser;
+                while (next != null) 
+                {
+                    proccesser = next;
+                    next = next.ParentProccesser;
+                }
+
+                return proccesser;
             }
         }
 
@@ -65,18 +96,17 @@ namespace RW_NodeTree
         {
             int TextureSize = 0;
             RenderTexture cache = RenderTexture.active;
-            List<List<RenderInfo>> RenderInfos = new List<List<RenderInfo>>();
+            List<RenderInfo> RenderInfos = new List<RenderInfo>();
             for (int i = 0; i < childNodes.Count;i++)
             {
-                RenderingPatch.BlockingState = true;
+                RenderingTools.BlockingState = true;
                 Vector3 pos = IconTexturePostion(rot, i);
                 Thing child = childNodes[i];
                 if(child != null)
                 {
                     pos -= child.DrawPos;
                     child.Draw();
-                    List<RenderInfo> forAdd = new List<RenderInfo>(RenderingPatch.RenderInfos);
-                    RenderInfos.Add(forAdd);
+                    List<RenderInfo> forAdd = new List<RenderInfo>(RenderingTools.RenderInfos);
                     for (int j = 0; j < forAdd.Count; j++)
                     {
                         RenderInfo info = forAdd[j];
@@ -85,7 +115,7 @@ namespace RW_NodeTree
                             info.matrix.m03 += pos.x;
                             info.matrix.m13 += pos.y;
                             info.matrix.m23 += pos.z;
-                            info.matrix *= matrix;
+                            //info.matrix *= matrix;
                             forAdd[j] = info;
 
                             Bounds bounds = info.mesh.bounds;
@@ -96,23 +126,20 @@ namespace RW_NodeTree
                             Vector3 min = bounds.min;
                             min = info.matrix * new Vector4(min.x, min.y, min.z, 1);
 
-                            TextureSize = Math.Max(TextureSize >> 1, (int)Math.Abs(max.x) >> 8) << 1;
-                            TextureSize = Math.Max(TextureSize >> 1, (int)Math.Abs(min.x) >> 8) << 1;
-                            TextureSize = Math.Max(TextureSize >> 1, (int)Math.Abs(max.y) >> 8) << 1;
-                            TextureSize = Math.Max(TextureSize >> 1, (int)Math.Abs(min.y) >> 8) << 1;
+                            TextureSize = (int)Math.Max(TextureSize, Math.Abs(max.x) * 256);
+                            TextureSize = (int)Math.Max(TextureSize, Math.Abs(max.y) * 256);
+                            TextureSize = (int)Math.Max(TextureSize, Math.Abs(min.x) * 256);
+                            TextureSize = (int)Math.Max(TextureSize, Math.Abs(min.y) * 256);
                         }
                     }
+                    RenderInfos.AddRange(forAdd);
                 }
             }
-            RenderingPatch.BlockingState = false;
+            RenderingTools.BlockingState = false;
             if (Surface == null || Surface.texelSize.x != TextureSize || Surface.texelSize.y != TextureSize)
             {
-                if(Surface != null) Surface.DiscardContents(true,true);
-                Surface = new RenderTexture(TextureSize, TextureSize, 24);
-            }
-            else
-            {
-                Graphics.Blit(SolidColorMaterials.SimpleSolidColorMaterial(default(Color)).mainTexture, Surface, Surface.texelSize, Vector2.zero);
+                if(Surface != null) GameObject.Destroy(Surface);
+                Surface = new RenderTexture(TextureSize, TextureSize, 16);
             }
 
             foreach (ThingComp_BasicNodeComp comp in AllNodeComp)
@@ -120,24 +147,8 @@ namespace RW_NodeTree
                 comp.DrawTexture(ref Surface);
             }
 
-            float size = 1f / (TextureSize >> 8);
-            Vector3 scale = new Vector3(size, size, 1);
-            RenderTexture.active = Surface;
-            foreach (List<RenderInfo> renderInfos in RenderInfos)
-            {
-                foreach (RenderInfo info in renderInfos)
-                {
-                    if (info.material != null && info.mesh != null)
-                    {
-                        for (int i = 0; i < info.material.passCount; i++)
-                        {
-                            info.material.SetPass(i);
-                            Graphics.DrawMeshNow(info.mesh, info.matrix * Matrix4x4.Scale(scale), info.submeshIndex);
-                        }
-                    }
-                }
-            }
-            RenderTexture.active = cache;
+            RenderingTools.RenderToTarget(RenderInfos, Surface, TextureSize / 256);
+
             return Surface;
         }
 
@@ -215,6 +226,7 @@ namespace RW_NodeTree
 
         private static AccessTools.FieldRef<ThingOwner<Thing>, List<Thing>> innerListRef = AccessTools.FieldRefAccess<ThingOwner<Thing>, List<Thing>>("innerList");
 
+        /*
         private static Matrix4x4 matrix =
                             new Matrix4x4(
                                 new Vector4(     1,      0,      0,      0      ),
@@ -222,6 +234,8 @@ namespace RW_NodeTree
                                 new Vector4(     0,      1,      0,      0      ),
                                 new Vector4(     0,      0,      0.5f,   1      )
                             );
+        */
+
     }
 
     public class CompProperties_PartNode : CompProperties

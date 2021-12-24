@@ -49,14 +49,6 @@
     <Reference Include="HarmonyMod">
       <HintPath>I:\SteamLibrary\steamapps\workshop\content\294100\2009463077\Current\Assemblies\HarmonyMod.dll</HintPath>
     </Reference>
-    <Reference Include="NAudio">
-      <HintPath>I:\SteamLibrary\steamapps\common\RimWorld\RimWorldWin64_Data\Managed\NAudio.dll</HintPath>
-      <EmbedInteropTypes>True</EmbedInteropTypes>
-    </Reference>
-    <Reference Include="NVorbis">
-      <HintPath>I:\SteamLibrary\steamapps\common\RimWorld\RimWorldWin64_Data\Managed\NVorbis.dll</HintPath>
-      <EmbedInteropTypes>True</EmbedInteropTypes>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
     <Reference Include="System.Runtime.Serialization" />
@@ -255,7 +247,7 @@
     </Reference>
     <Compile Include="ThingComp_BasicNodeComp.cs" />
     <Compile Include="Comp_ChildNodeProccesser.cs" />
-    <Compile Include="RenderingPatch.cs" />
+    <Compile Include="RenderingTools.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

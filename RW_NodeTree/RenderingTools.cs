@@ -10,21 +10,31 @@ using Verse;
 using UnityEngine;
 using System.Runtime.CompilerServices;
 
-namespace RW_NodeTree.Patch
+namespace RW_NodeTree.Rendering
 {
     [StaticConstructorOnStartup]
-    public static class RenderingPatch
+    public static class RenderingTools
     {
-        static RenderingPatch()
+        static RenderingTools()
         {
-            patcher = new Harmony("RW_NodeTree.Patch.RenderingPatch");
+            camera.orthographic = true;
+            camera.orthographicSize = 1;
+            camera.nearClipPlane = 0;
+            camera.farClipPlane = 2048;
+            camera.transform.position = new Vector3(0, 5120, 0);
+            camera.transform.rotation = Quaternion.Euler(90, 0, 0);
+            camera.enabled = false;
+            camera.backgroundColor = Color.clear;
+            camera.clearFlags = CameraClearFlags.SolidColor;
+            camera.cullingMask = 31;
+            patcher.PatchAll();
         }
 
         public static bool BlockingState
         {
             get
             {
-                bool result = false;
+                bool result;
                 Thread current = Thread.CurrentThread;
                 if (!blockingState.TryGetValue(current, out result))
                 {
@@ -36,7 +46,7 @@ namespace RW_NodeTree.Patch
             {
                 Thread current = Thread.CurrentThread;
                 blockingState.SetOrAdd(current, value);
-                List<RenderInfo> list = null;
+                List<RenderInfo> list;
                 if (!renderInfos.TryGetValue(current, out list))
                 {
                     list = new List<RenderInfo>();
@@ -64,9 +74,25 @@ namespace RW_NodeTree.Patch
             }
         }
 
-        private static Harmony patcher = null;
-        private static Dictionary<Thread,bool> blockingState = new Dictionary<Thread,bool>();
+        public static void RenderToTarget(List<RenderInfo> infos, RenderTexture target, float size = 1)
+        {
+            RenderTexture cache = camera.targetTexture;
+            camera.targetTexture = target;
+            camera.orthographicSize = size;
+            for (int i = 0; i < infos.Count; i++)
+            {
+                RenderInfo info = infos[i];
+                info.matrix.m13 += 4096;
+                Graphics.DrawMesh(info.mesh, info.matrix, info.material, 1 << 31, camera, info.submeshIndex);
+            }
+            camera.Render();
+            camera.targetTexture = cache;
+        }
+
+        private static Harmony patcher = new Harmony("RW_NodeTree.Patch.RenderingPatch");
+        private static Dictionary<Thread, bool> blockingState = new Dictionary<Thread,bool>();
         private static Dictionary<Thread, List<RenderInfo>> renderInfos = new Dictionary<Thread, List<RenderInfo>>();
+        private static Camera camera = new Camera();
     }
 
     public struct RenderInfo
@@ -91,9 +117,9 @@ namespace RW_NodeTree.Patch
     {
         public static bool Internal_DrawMesh_Catcher(Mesh mesh, int submeshIndex, Matrix4x4 matrix, Material material, int layer)
         {
-            if(RenderingPatch.BlockingState)
+            if(RenderingTools.BlockingState)
             {
-                RenderingPatch.RenderInfos.Add(new RenderInfo(mesh, submeshIndex, matrix, material));
+                RenderingTools.RenderInfos.Add(new RenderInfo(mesh, submeshIndex, matrix, material));
                 return false;
             }
             return true;
