@@ -253,6 +253,18 @@
     <Compile Include="Rendering\RenderingTools.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Content Include="PackUp\About\About.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="PackUp\1.3\Assemblies\" />
+    <Folder Include="PackUp\1.3\Defs\" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>copy $(TargetPath) $(ProjectDir)\PackUp\1.3\Assemblies
+rmdir /s/q %25RW_HOME%25\Mods\RW_NodeTree
+mkdir %25RW_HOME%25\Mods\RW_NodeTree
+xcopy $(ProjectDir)PackUp "%25RW_HOME%25\Mods\RW_NodeTree" /e/s/q</PostBuildEvent>
+  </PropertyGroup>
 </Project>
