@@ -94,8 +94,20 @@ namespace RW_NodeTree
                 {
                     innerIdList.Add(null);
                     needUpdate = true;
+                    item.DeSpawn();
                     return true;
                 }
+            }
+            return false;
+        }
+
+        public override bool Remove(Thing item)
+        {
+            int index = IndexOf(item);
+            if(base.Remove(item))
+            {
+                innerIdList.RemoveAt(index);
+                return true;
             }
             return false;
         }
