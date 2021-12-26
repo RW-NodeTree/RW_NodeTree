@@ -11,44 +11,18 @@ using RW_NodeTree.Rendering;
 
 namespace RW_NodeTree
 {
+    /// <summary>
+    /// Node function proccesser
+    /// </summary>
     public class Comp_ChildNodeProccesser : ThingComp, IThingHolder
     {
-        /// <summary>
-        /// get currect node of index
-        /// </summary>
-        /// <param name="index">node index</param>
-        /// <returns>currect node</returns>
-        public Thing this[int index]
+
+        public Comp_ChildNodeProccesser()
         {
-            get
-            {
-                return GetDirectlyHeldThings()[index];
-            }
-            set
-            {
-                ThingOwner<Thing> things = (ThingOwner<Thing>)GetDirectlyHeldThings();
-                if(this.AllowNode(value,index))
-                {
-                    if(things.TryAdd(value,false))
-                    {
-                        Thing droped;
-                        if(things.TryDrop(this[index],ThingPlaceMode.Near,out droped))
-                        {
-                            List<Thing> innerList = innerListRef(things);
-                            if (innerList != null)
-                            {
-                                innerList.RemoveAt(innerList.Count - 1);
-                                innerList.Insert(index, value);
-                            }
-                        }
-                        else
-                        {
-                            things.TryDrop(value, ThingPlaceMode.Near, out droped);
-                        }
-                    }
-                }
-            }
+            childNodes = new NodeContainer(this);
         }
+
+        public NodeContainer ChildNodes => (NodeContainer)GetDirectlyHeldThings();
 
         /// <summary>
         /// get parent node if it is a node
@@ -92,105 +66,226 @@ namespace RW_NodeTree
             }
         }
 
-        public RenderTexture CombinedIconTexture(Rot4 rot)
+        public override bool AllowStackWith(Thing other)
         {
-            int TextureSize = 0;
-            RenderTexture cache = RenderTexture.active;
-            List<RenderInfo> RenderInfos = new List<RenderInfo>();
-            for (int i = 0; i < childNodes.Count;i++)
-            {
-                RenderingTools.BlockingState = true;
-                Vector3 pos = IconTexturePostion(rot, i);
-                Thing child = childNodes[i];
-                if(child != null)
-                {
-                    pos -= child.DrawPos;
-                    child.Draw();
-                    List<RenderInfo> forAdd = new List<RenderInfo>(RenderingTools.RenderInfos);
-                    for (int j = 0; j < forAdd.Count; j++)
-                    {
-                        RenderInfo info = forAdd[j];
-                        if(info.mesh != null)
-                        {
-                            info.matrix.m03 += pos.x;
-                            info.matrix.m13 += pos.y;
-                            info.matrix.m23 += pos.z;
-                            //info.matrix *= matrix;
-                            forAdd[j] = info;
-
-                            Bounds bounds = info.mesh.bounds;
-
-                            Vector3 max = bounds.max;
-                            max = info.matrix * new Vector4(max.x, max.y, max.z, 1);
-
-                            Vector3 min = bounds.min;
-                            min = info.matrix * new Vector4(min.x, min.y, min.z, 1);
-
-                            TextureSize = (int)Math.Max(TextureSize, Math.Abs(max.x) * 256);
-                            TextureSize = (int)Math.Max(TextureSize, Math.Abs(max.y) * 256);
-                            TextureSize = (int)Math.Max(TextureSize, Math.Abs(min.x) * 256);
-                            TextureSize = (int)Math.Max(TextureSize, Math.Abs(min.y) * 256);
-                        }
-                    }
-                    RenderInfos.AddRange(forAdd);
-                }
-            }
-            RenderingTools.BlockingState = false;
-            if (Surface == null || Surface.texelSize.x != TextureSize || Surface.texelSize.y != TextureSize)
-            {
-                if(Surface != null) GameObject.Destroy(Surface);
-                Surface = new RenderTexture(TextureSize, TextureSize, 16);
-            }
-
-            foreach (ThingComp_BasicNodeComp comp in AllNodeComp)
-            {
-                comp.DrawTexture(ref Surface);
-            }
-
-            RenderingTools.RenderToTarget(RenderInfos, Surface, TextureSize / 256);
-
-            return Surface;
+            return false;
         }
 
-        public Vector3 IconTexturePostion(Rot4 rot,int index)
+        public override void CompTick()
         {
-            Vector3 result = Vector3.zero;
-            foreach (ThingComp_BasicNodeComp comp in AllNodeComp)
-            {
-                result += comp.IconTexturePostionOffset(rot, index);
-            }
-            return result;
+            base.CompTick();
+            UpdateNode();
+        }
+
+        public override void PostExposeData()
+        {
+            Scribe_Deep.Look<NodeContainer>(ref this.childNodes, "innerContainer", this);
         }
 
         /// <summary>
         /// 
         /// </summary>
         /// <param name="node"></param>
-        /// <param name="index"></param>
+        /// <param name="id"></param>
         /// <returns></returns>
-        public bool AllowNode(Thing node, int index = -1)
+        public bool AppendChild(Thing node, string id = null)
         {
-            if(index < 0)
+            NodeContainer child = ChildNodes;
+            if (child != null)
             {
-                index = this.childNodes.Count;
+                ThingOwner owner = node.holdingOwner;
+                if(owner != null)
+                {
+                    owner.Remove(node);
+                }
+                if (child.TryAdd(node))
+                {
+                    if (id != null) child[node] = id;
+                    return true;
+                }
+                else
+                {
+                    if (owner != null)
+                    {
+                        owner.TryAdd(node);
+                    }
+                }
             }
+            return false;
+        }
+
+        public bool InsertNode(Thing node, int index, string id = null)
+        {
+            NodeContainer child = ChildNodes;
+            if (child != null)
+            {
+                ThingOwner owner = node.holdingOwner;
+                if (owner != null)
+                {
+                    owner.Remove(node);
+                }
+                if (child.Insert(index, node))
+                {
+                    if (id != null) child[node] = id;
+                    return true;
+                }
+                else
+                {
+                    if (owner != null)
+                    {
+                        owner.TryAdd(node);
+                    }
+                }
+            }
+            return false;
+        }
+
+        public Material ChildCombinedTexture(Rot4 rot, Shader shader)
+        {
+            List<Thing> nodes = new List<Thing>(childNodes.InnerListForReading);
+            List<string> ids = new List<string>(childNodes.InnerIdListForReading);
+            List<List<RenderInfo>> RenderInfos = new List<List<RenderInfo>>(nodes.Count);
+
+            foreach (string id in ids)
+            {
+                RenderingTools.BlockingState = true;
+                Thing child = childNodes[id];
+                if(child != null)
+                {
+                    child.Rotation = rot;
+                    Vector3 pos = child.DrawPos;
+                    child.Draw();
+                    List<RenderInfo> forAdd = new List<RenderInfo>(RenderingTools.RenderInfos);
+                    for (int i = 0; i < forAdd.Count; i++)
+                    {
+                        RenderInfo info = forAdd[i];
+                        if(info.mesh != null)
+                        {
+                            for (int j = 0; j < info.matrices.Length; ++j)
+                            {
+                                info.matrices[j].m03 -= pos.x;
+                                info.matrices[j].m13 -= pos.y;
+                                info.matrices[j].m23 -= pos.z;
+                            }
+                            //info.matrix *= matrix;
+                            forAdd[i] = info;
+                        }
+                    }
+                    RenderInfos.Add(forAdd);
+                }
+            }
+            RenderingTools.BlockingState = false;
+
             foreach (ThingComp_BasicNodeComp comp in AllNodeComp)
             {
-                if (!comp.AllowNode(node, index)) return false;
+                comp.AdapteDrawSteep(ids, nodes, RenderInfos);
+            }
+
+            List<RenderInfo> final = new List<RenderInfo>();
+            foreach(List<RenderInfo> infos in RenderInfos)
+            {
+                final.AddRange(infos);
+            }
+
+            switch (rot.AsInt)
+            {
+                case 0:
+                    {
+                        RenderTexture cache = texture_North;
+                        texture_North = RenderingTools.RenderToTarget(final, texture_North);
+                        if (material_North == null)
+                        {
+                            if (shader == null) shader = ShaderDatabase.Cutout;
+                            material_North = new Material(shader);
+                            material_North.mainTexture = texture_North;
+                        }
+                        else if (cache != texture_North)
+                        {
+                            material_North.mainTexture = texture_North;
+                        }
+                        return material_North;
+                    }
+                case 1:
+                    {
+                        RenderTexture cache = texture_East;
+                        texture_East = RenderingTools.RenderToTarget(final, texture_East);
+                        if (material_East == null)
+                        {
+                            if (shader == null) shader = ShaderDatabase.Cutout;
+                            material_East = new Material(shader);
+                            material_East.mainTexture = texture_East;
+                        }
+                        else if (cache != texture_East)
+                        {
+                            material_East.mainTexture = texture_East;
+                        }
+                        return material_East;
+                    }
+                case 2:
+                    {
+                        RenderTexture cache = texture_South;
+                        texture_South = RenderingTools.RenderToTarget(final, texture_South);
+                        if (material_South == null)
+                        {
+                            if (shader == null) shader = ShaderDatabase.Cutout;
+                            material_South = new Material(shader);
+                            material_South.mainTexture = texture_South;
+                        }
+                        else if (cache != texture_South)
+                        {
+                            material_South.mainTexture = texture_South;
+                        }
+                        return material_South;
+                    }
+                case 3:
+                    {
+                        RenderTexture cache = texture_West;
+                        texture_West = RenderingTools.RenderToTarget(final, texture_West);
+                        if (material_West == null)
+                        {
+                            if (shader == null) shader = ShaderDatabase.Cutout;
+                            material_West = new Material(shader);
+                            material_West.mainTexture = texture_West;
+                        }
+                        else if (cache != texture_West)
+                        {
+                            material_West.mainTexture = texture_West;
+                        }
+                        return material_West;
+                    }
+                default:
+                    return BaseContent.BadMat;
+            }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="node"></param>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public bool AllowNode(Thing node, string id = null)
+        {
+            foreach (ThingComp_BasicNodeComp comp in AllNodeComp)
+            {
+                if (!comp.AllowNode(node, id)) return false;
             }
             return true;
         }
 
         public void UpdateNode(Comp_ChildNodeProccesser actionNode = null)
         {
-            if (actionNode == null) actionNode = this;
-            foreach (ThingComp_BasicNodeComp comp in AllNodeComp)
+            if (ChildNodes.NeedUpdate)
             {
-                comp.UpdateNode(actionNode);
-            }
-            foreach(Thing node in this.childNodes)
-            {
-                ((Comp_ChildNodeProccesser)node)?.UpdateNode(actionNode);
+                if (actionNode == null) actionNode = this;
+                foreach (ThingComp_BasicNodeComp comp in AllNodeComp)
+                {
+                    comp.UpdateNode(actionNode);
+                }
+                foreach (Thing node in this.childNodes)
+                {
+                    ((Comp_ChildNodeProccesser)node)?.UpdateNode(actionNode);
+                }
             }
         }
 
@@ -203,7 +298,7 @@ namespace RW_NodeTree
         {
             if(childNodes == null)
             {
-                childNodes = new ThingOwner<Thing>(this);
+                childNodes = new NodeContainer(this);
             }
             return childNodes;
         }
@@ -220,11 +315,23 @@ namespace RW_NodeTree
         }
         #endregion
 
-        private ThingOwner<Thing> childNodes;
+        private NodeContainer childNodes;
 
-        private RenderTexture Surface = null;
+        private RenderTexture texture_North = null;
 
-        private static AccessTools.FieldRef<ThingOwner<Thing>, List<Thing>> innerListRef = AccessTools.FieldRefAccess<ThingOwner<Thing>, List<Thing>>("innerList");
+        private Material material_North = null;
+
+        private RenderTexture texture_East = null;
+
+        private Material material_East = null;
+
+        private RenderTexture texture_South = null;
+
+        private Material material_South = null;
+
+        private RenderTexture texture_West = null;
+
+        private Material material_West = null;
 
         /*
         private static Matrix4x4 matrix =
@@ -237,7 +344,7 @@ namespace RW_NodeTree
         */
 
     }
-
+    /*
     public class CompProperties_PartNode : CompProperties
     {
 
@@ -317,4 +424,5 @@ namespace RW_NodeTree
 
         public List<StatModifier> statOffset = new List<StatModifier>();
     }
+    */
 }

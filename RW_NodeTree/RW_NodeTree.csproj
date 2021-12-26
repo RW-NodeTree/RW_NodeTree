@@ -8,7 +8,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>RW_NodeTree</RootNamespace>
     <AssemblyName>RW_NodeTree</AssemblyName>
-    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
     <TargetFrameworkProfile />
@@ -245,10 +245,14 @@
     <Reference Include="UnityEngine.XRModule">
       <HintPath>I:\SteamLibrary\steamapps\common\RimWorld\RimWorldWin64_Data\Managed\UnityEngine.XRModule.dll</HintPath>
     </Reference>
+    <Compile Include="Graphic_ChildNode.cs" />
+    <Compile Include="NodeComponent\NodeComp_InitializeConstructor.cs" />
+    <Compile Include="NodeContainer.cs" />
     <Compile Include="ThingComp_BasicNodeComp.cs" />
     <Compile Include="Comp_ChildNodeProccesser.cs" />
-    <Compile Include="RenderingTools.cs" />
+    <Compile Include="Rendering\RenderingTools.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

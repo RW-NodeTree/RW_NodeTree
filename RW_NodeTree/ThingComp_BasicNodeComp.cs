@@ -1,4 +1,5 @@
-﻿using System;
+﻿using RW_NodeTree.Rendering;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -10,11 +11,9 @@ namespace RW_NodeTree
 {
     public abstract class ThingComp_BasicNodeComp : ThingComp
     {
-        public abstract void DrawTexture(ref RenderTexture renderTexture);
-        public abstract Vector3 IconTexturePostionOffset(Rot4 rot, int index);
+        public Comp_ChildNodeProccesser nodeProccesser => (Comp_ChildNodeProccesser)parent;
         public abstract void UpdateNode(Comp_ChildNodeProccesser actionNode);
-        public abstract bool AllowNode(Comp_ChildNodeProccesser node, int index = -1);
-
-
+        public abstract bool AllowNode(Comp_ChildNodeProccesser node, string id = null);
+        public abstract void AdapteDrawSteep(List<string> ids, List<Thing> nodes, List<List<RenderInfo>> renderInfos);
     }
 }
