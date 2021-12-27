@@ -75,6 +75,7 @@ namespace RW_NodeTree
         {
             base.CompTick();
             UpdateNode();
+            ChildNodes.ThingOwnerTick();
         }
 
         public override void PostExposeData()
