@@ -28,34 +28,50 @@ namespace RW_NodeTree.Rendering
             camera.backgroundColor = Color.clear;
             camera.clearFlags = CameraClearFlags.SolidColor;
             camera.cullingMask = 31;
-            patcher.PatchAll();
+            camera.name = "Preview Rander Camera";
         }
 
-        public static bool BlockingState
+
+        /// <summary>
+        /// getter: if there has any block,it will return true;setter:for setting block start or end
+        /// </summary>
+        public static bool StartOrEndDrawCatchingBlock
         {
             get
             {
-                bool result;
                 Thread current = Thread.CurrentThread;
-                if (!blockingState.TryGetValue(current, out result))
+                Stack<List<RenderInfo>> list;
+                if (!renderInfos.TryGetValue(current, out list))
                 {
-                    blockingState.Add(current, false);
+                    list = new Stack<List<RenderInfo>>();
+                    renderInfos.Add(current, list);
                 }
-                return result;
+                else if(list.Count > 0) return true;
+                return false;
             }
             set
             {
                 Thread current = Thread.CurrentThread;
-                blockingState.SetOrAdd(current, value);
-                List<RenderInfo> list;
+                Stack<List<RenderInfo>> list;
                 if (!renderInfos.TryGetValue(current, out list))
                 {
-                    list = new List<RenderInfo>();
+                    list = new Stack<List<RenderInfo>>();
+                    if (value)
+                    {
+                        list.Push(new List<RenderInfo>());
+                    }
                     renderInfos.Add(current, list);
                 }
                 else
                 {
-                    list.Clear();
+                    if (value)
+                    {
+                        list.Push(new List<RenderInfo>());
+                    }
+                    else
+                    {
+                        list.Pop();
+                    }
                 }
             }
         }
@@ -64,14 +80,14 @@ namespace RW_NodeTree.Rendering
         {
             get
             {
-                List<RenderInfo> result;
+                Stack<List<RenderInfo>> result;
                 Thread current = Thread.CurrentThread;
                 if (!renderInfos.TryGetValue(current, out result))
                 {
-                    result = new List<RenderInfo>();
+                    result = new Stack<List<RenderInfo>>();
                     renderInfos.Add(current, result);
                 }
-                return result;
+                return result.Peek();
             }
         }
 
@@ -102,7 +118,8 @@ namespace RW_NodeTree.Rendering
                 }
                 if(info.probeAnchor != null)
                 {
-                    for (int j = 0; j < info.matrices.Length && j < info.count; ++j) Graphics.DrawMesh(info.mesh, info.matrices[j], info.material, 31, camera, info.submeshIndex, info.properties, info.castShadows, info.receiveShadows, info.probeAnchor, info.lightProbeUsage, info.lightProbeProxyVolume);
+                    for (int j = 0; j < info.matrices.Length && j < info.count; ++j)
+                        Graphics.DrawMesh(info.mesh, info.matrices[j], info.material, 31, camera, info.submeshIndex, info.properties, info.castShadows, info.receiveShadows, info.probeAnchor, info.lightProbeUsage, info.lightProbeProxyVolume);
                 }
                 else
                 {
@@ -189,100 +206,7 @@ namespace RW_NodeTree.Rendering
             return result;
         }
 
-        private static Harmony patcher = new Harmony("RW_NodeTree.Patch.RenderingPatch");
-        private static Dictionary<Thread, bool> blockingState = new Dictionary<Thread,bool>();
-        private static Dictionary<Thread, List<RenderInfo>> renderInfos = new Dictionary<Thread, List<RenderInfo>>();
+        private static Dictionary<Thread, Stack<List<RenderInfo>>> renderInfos = new Dictionary<Thread, Stack<List<RenderInfo>>>();
         private static Camera camera = new Camera();
-    }
-
-    public struct RenderInfo
-    {
-
-        public Mesh mesh;
-        public int submeshIndex;
-        public Matrix4x4[] matrices;
-        public Material material;
-        public MaterialPropertyBlock properties;
-        public ShadowCastingMode castShadows;
-        public bool receiveShadows;
-        public Transform probeAnchor;
-        public LightProbeUsage lightProbeUsage;
-        public LightProbeProxyVolume lightProbeProxyVolume;
-        public int count;
-
-        public RenderInfo(Mesh mesh, int submeshIndex, Matrix4x4 matrix, Material material)
-        {
-            this.mesh = mesh;
-            this.submeshIndex = submeshIndex;
-            this.matrices = new Matrix4x4[] { matrix };
-            this.material = material;
-            this.properties = null;
-            this.castShadows = ShadowCastingMode.On;
-            this.receiveShadows = true;
-            this.probeAnchor = null;
-            this.lightProbeUsage = LightProbeUsage.BlendProbes;
-            this.lightProbeProxyVolume = null;
-            this.count = 1;
-        }
-
-        public RenderInfo(Mesh mesh, int submeshIndex, Matrix4x4 matrix, Material material, MaterialPropertyBlock properties, ShadowCastingMode castShadows, bool receiveShadows, Transform probeAnchor, LightProbeUsage lightProbeUsage, LightProbeProxyVolume lightProbeProxyVolume)
-        {
-            this.mesh = mesh;
-            this.submeshIndex = submeshIndex;
-            this.matrices = new Matrix4x4[] { matrix };
-            this.material = material;
-            this.properties = properties;
-            this.castShadows = castShadows;
-            this.receiveShadows = receiveShadows;
-            this.probeAnchor = probeAnchor;
-            this.lightProbeUsage = lightProbeUsage;
-            this.lightProbeProxyVolume = lightProbeProxyVolume;
-            this.count = 1;
-        }
-
-        public RenderInfo(Mesh mesh, int submeshIndex, Material material, Matrix4x4[] matrices, int count, MaterialPropertyBlock properties, ShadowCastingMode castShadows, bool receiveShadows, LightProbeUsage lightProbeUsage, LightProbeProxyVolume lightProbeProxyVolume)
-        {
-            this.mesh = mesh;
-            this.submeshIndex = submeshIndex;
-            this.matrices = matrices;
-            this.material = material;
-            this.properties = properties;
-            this.castShadows = castShadows;
-            this.receiveShadows = receiveShadows;
-            this.probeAnchor = null;
-            this.lightProbeUsage = lightProbeUsage;
-            this.lightProbeProxyVolume = lightProbeProxyVolume;
-            this.count = count;
-        }
-    }
-
-    [HarmonyPatch(typeof(Graphics),"Internal_DrawMesh")]
-    public static class Internal_DrawMesh_Patcher
-    {
-        [HarmonyPrefix]
-        public static bool Internal_DrawMesh_Catcher(Mesh mesh, int submeshIndex, Matrix4x4 matrix, Material material, MaterialPropertyBlock properties, ShadowCastingMode castShadows, bool receiveShadows, Transform probeAnchor, LightProbeUsage lightProbeUsage, LightProbeProxyVolume lightProbeProxyVolume)
-        {
-            if(RenderingTools.BlockingState)
-            {
-                RenderingTools.RenderInfos.Add(new RenderInfo(mesh, submeshIndex, matrix, material,properties,castShadows,receiveShadows,probeAnchor,lightProbeUsage,lightProbeProxyVolume));
-                return false;
-            }
-            return true;
-        }
-    }
-
-    [HarmonyPatch(typeof(Graphics), "DrawMeshInstanced")]
-    public static class DrawMeshInstanced_Patcher
-    {
-        [HarmonyPrefix]
-        public static bool DrawMeshInstanced_Catcher(Mesh mesh, int submeshIndex, Material material, Matrix4x4[] matrices, int count, MaterialPropertyBlock properties, ShadowCastingMode castShadows, bool receiveShadows, LightProbeUsage lightProbeUsage, LightProbeProxyVolume lightProbeProxyVolume)
-        {
-            if (RenderingTools.BlockingState)
-            {
-                RenderingTools.RenderInfos.Add(new RenderInfo(mesh, submeshIndex, material, matrices, count, properties, castShadows, receiveShadows, lightProbeUsage, lightProbeProxyVolume));
-                return false;
-            }
-            return true;
-        }
     }
 }

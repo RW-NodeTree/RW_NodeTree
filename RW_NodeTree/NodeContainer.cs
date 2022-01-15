@@ -55,7 +55,7 @@ namespace RW_NodeTree
                 foreach(Thing thing in this)
                 {
                     Comp_ChildNodeProccesser comp_ChildNodeProccesser = thing;
-                    if(comp_ChildNodeProccesser != null && ((NodeContainer)comp_ChildNodeProccesser.GetDirectlyHeldThings()).NeedUpdate)
+                    if(comp_ChildNodeProccesser != null && (comp_ChildNodeProccesser.ChildNodes).NeedUpdate)
                     {
                         return true;
                     }

@@ -149,34 +149,41 @@ namespace RW_NodeTree
 
             foreach (string id in ids)
             {
-                RenderingTools.BlockingState = true;
+                RenderingTools.StartOrEndDrawCatchingBlock = true;
                 Thing child = childNodes[id];
-                if(child != null)
+                try
                 {
-                    child.Rotation = rot;
-                    Vector3 pos = child.DrawPos;
-                    child.Draw();
-                    List<RenderInfo> forAdd = new List<RenderInfo>(RenderingTools.RenderInfos);
-                    for (int i = 0; i < forAdd.Count; i++)
+                    if (child != null)
                     {
-                        RenderInfo info = forAdd[i];
-                        if(info.mesh != null)
+                        child.Rotation = rot;
+                        Vector3 pos = child.DrawPos;
+                        child.Draw();
+                        List<RenderInfo> forAdd = new List<RenderInfo>(RenderingTools.RenderInfos);
+                        for (int i = 0; i < forAdd.Count; i++)
                         {
-                            for (int j = 0; j < info.matrices.Length; ++j)
+                            RenderInfo info = forAdd[i];
+                            if (info.mesh != null)
                             {
-                                info.matrices[j].m03 -= pos.x;
-                                info.matrices[j].m13 -= pos.y;
-                                info.matrices[j].m23 -= pos.z;
+                                for (int j = 0; j < info.matrices.Length; ++j)
+                                {
+                                    info.matrices[j].m03 -= pos.x;
+                                    info.matrices[j].m13 -= pos.y;
+                                    info.matrices[j].m23 -= pos.z;
+                                }
+                                //info.matrix *= matrix;
+                                forAdd[i] = info;
                             }
-                            //info.matrix *= matrix;
-                            forAdd[i] = info;
                         }
+                        RenderInfos.Add(forAdd);
                     }
-                    RenderInfos.Add(forAdd);
                 }
+                catch (Exception ex)
+                {
+                    RenderingTools.StartOrEndDrawCatchingBlock = false;
+                    throw ex;
+                }
+                RenderingTools.StartOrEndDrawCatchingBlock = false;
             }
-            RenderingTools.BlockingState = false;
-
             foreach (ThingComp_BasicNodeComp comp in AllNodeComp)
             {
                 comp.AdapteDrawSteep(ids, nodes, RenderInfos);
@@ -292,7 +299,7 @@ namespace RW_NodeTree
 
         public void GetChildHolders(List<IThingHolder> outChildren)
         {
-            ThingOwnerUtility.AppendThingHoldersFromThings(outChildren, this.GetDirectlyHeldThings());
+            ThingOwnerUtility.AppendThingHoldersFromThings(outChildren, this.ChildNodes);
         }
 
         public ThingOwner GetDirectlyHeldThings()
