@@ -71,6 +71,24 @@ namespace RW_NodeTree
             Scribe_Collections.Look<string>(ref this.innerIdList, "innerIdList", LookMode.Value);
         }
 
+        public void UpdateNode(Comp_ChildNodeProccesser actionNode = null)
+        {
+            if (NeedUpdate)
+            {
+                Comp_ChildNodeProccesser proccess = this.Comp;
+                if (actionNode == null) actionNode = proccess;
+                foreach (Thing node in this)
+                {
+                    ((Comp_ChildNodeProccesser)node)?.UpdateNode(actionNode);
+                }
+                foreach (ThingComp_BasicNodeComp comp in proccess.AllNodeComp)
+                {
+                    comp.UpdateNode(actionNode);
+                }
+                this.needUpdate = false;
+            }
+        }
+
         public override int GetCountCanAccept(Thing item, bool canMergeWithExistingStacks = true)
         {
             Comp_ChildNodeProccesser comp_ChildNodeProccesser = (Comp_ChildNodeProccesser)Owner;
@@ -115,26 +133,6 @@ namespace RW_NodeTree
         protected override Thing GetAt(int index)
         {
             return base.GetAt(index);
-        }
-
-        public bool Insert(int index, Thing item)
-        {
-            if (this.TryAdd(item))
-            {
-                InnerListForReading.Remove(item);
-                InnerListForReading.Insert(index, item);
-                string id = innerIdList[innerIdList.Count - 1];
-                innerIdList.RemoveAt(innerIdList.Count - 1);
-                innerIdList.Insert(index, id);
-                needUpdate = true;
-                return true;
-            }
-            return false;
-        }
-
-        void IList<Thing>.Insert(int index, Thing item)
-        {
-            Insert(index, item);
         }
 
         private bool needUpdate = false;

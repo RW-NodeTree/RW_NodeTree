@@ -30,7 +30,11 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject />
+  </PropertyGroup>
   <ItemGroup>
+    <Compile Include="Tools\ObjectHelper.cs" />
     <Reference Include="0Harmony">
       <HintPath>I:\SteamLibrary\steamapps\workshop\content\294100\2009463077\Current\Assemblies\0Harmony.dll</HintPath>
     </Reference>
@@ -248,11 +252,15 @@
     <Compile Include="Graphic_ChildNode.cs" />
     <Compile Include="NodeComponent\NodeComp_InitializeConstructor.cs" />
     <Compile Include="NodeContainer.cs" />
+    <Compile Include="Patch\GraphicData_Patcher.cs" />
     <Compile Include="Patch\Graphics_DrawMeshInstanced_Patcher.cs" />
     <Compile Include="Patch\0HarmonyInjector.cs" />
     <Compile Include="Patch\Graphics_Internal_DrawMesh_Patcher.cs" />
-    <Compile Include="Patch\StatWorker_GetValue_Patcher.cs" />
+    <Compile Include="Patch\StatWorker_Explanation_Patcher.cs" />
+    <Compile Include="Patch\IVerbOwner_Patcher.cs" />
+    <Compile Include="Patch\StatWorker_Value_Patcher.cs" />
     <Compile Include="Rendering\RenderInfo.cs" />
+    <Compile Include="Test\Test.cs" />
     <Compile Include="ThingComp_BasicNodeComp.cs" />
     <Compile Include="Comp_ChildNodeProccesser.cs" />
     <Compile Include="Rendering\RenderingTools.cs" />

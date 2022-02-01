@@ -13,9 +13,15 @@ namespace RW_NodeTree.Patch
     {
         static HarmonyInjector()
         {
+            foreach(Type t in AccessTools.AllTypes())
+            {
+                StatWorker_Patcher.PatchExplanation(t, patcher);
+                StatWorker_Patcher.PatchValue(t, patcher);
+                IVerbOwner_Patcher.PatchIVerbOwner(t, patcher);
+            }
             patcher.PatchAll();
         }
 
-        private static Harmony patcher = new Harmony("RW_NodeTree.Patch");
+        public static Harmony patcher = new Harmony("RW_NodeTree.Patch");
     }
 }

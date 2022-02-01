@@ -1,4 +1,5 @@
-﻿using RW_NodeTree.Rendering;
+﻿using RimWorld;
+using RW_NodeTree.Rendering;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -27,7 +28,7 @@ namespace RW_NodeTree.NodeComponent
             }
         }
 
-        public override void AdapteDrawSteep(List<string> ids, List<Thing> nodes, List<List<RenderInfo>> renderInfos)
+        public override void AdapteDrawSteep(ref List<string> ids, ref List<Thing> nodes, ref List<List<RenderInfo>> renderInfos)
         {
             return;
         }
@@ -40,6 +41,36 @@ namespace RW_NodeTree.NodeComponent
         public override void UpdateNode(Comp_ChildNodeProccesser actionNode)
         {
             return;
+        }
+
+        public override void PostStatWorker_GetValueUnfinalized(ref float result, StatWorker statWorker, StatRequest req, bool applyPostProcess)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override void PostStatWorker_FinalizeValue(ref float result, StatWorker statWorker, StatRequest req, bool applyPostProcess)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override void PostStatWorker_GetExplanationUnfinalized(ref string result, StatWorker statWorker, StatRequest req, ToStringNumberSense numberSense)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override void PostStatWorker_GetExplanationFinalizePart(ref string result, StatWorker statWorker, StatRequest req, ToStringNumberSense numberSense, float finalVal)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override void PostIVerbOwner_GetVerbProperties(IVerbOwner owner, ref List<VerbProperties> verbProperties)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override void PostIVerbOwner_GetTools(IVerbOwner owner, ref List<Tool> tools)
+        {
+            throw new NotImplementedException();
         }
     }
 

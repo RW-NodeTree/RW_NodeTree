@@ -16,8 +16,12 @@ namespace RW_NodeTree
         public Comp_ChildNodeProccesser NodeProccesser => parent;
         public abstract void UpdateNode(Comp_ChildNodeProccesser actionNode);
         public abstract bool AllowNode(Comp_ChildNodeProccesser node, string id = null);
-        public abstract void AdapteDrawSteep(List<string> ids, List<Thing> nodes, List<List<RenderInfo>> renderInfos);
-        public abstract void PostStatWorker_GetValueUnfinalized(ref float result, StatWorker statWorker, StatRequest req, bool applyPostProcess = true);
-        public abstract void PostStatWorker_FinalizeValue(ref float result, StatWorker statWorker, StatRequest req, bool applyPostProcess = true);
+        public abstract void AdapteDrawSteep(ref List<string> ids, ref List<Thing> nodes, ref List<List<RenderInfo>> renderInfos);
+        public abstract void PostStatWorker_GetValueUnfinalized(ref float result, StatWorker statWorker, StatRequest req, bool applyPostProcess);
+        public abstract void PostStatWorker_FinalizeValue(ref float result, StatWorker statWorker, StatRequest req, bool applyPostProcess);
+        public abstract void PostStatWorker_GetExplanationUnfinalized(ref string result, StatWorker statWorker, StatRequest req, ToStringNumberSense numberSense);
+        public abstract void PostStatWorker_GetExplanationFinalizePart(ref string result, StatWorker statWorker, StatRequest req, ToStringNumberSense numberSense, float finalVal);
+        public abstract void PostIVerbOwner_GetVerbProperties(IVerbOwner owner, ref List<VerbProperties> verbProperties);
+        public abstract void PostIVerbOwner_GetTools(IVerbOwner owner, ref List<Tool> tools);
     }
 }

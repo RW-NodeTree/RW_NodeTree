@@ -18,17 +18,21 @@ namespace RW_NodeTree.Rendering
     {
         static RenderingTools()
         {
-            camera.orthographic = true;
-            camera.orthographicSize = 1;
-            camera.nearClipPlane = 0;
-            camera.farClipPlane = 2048;
-            camera.transform.position = new Vector3(0, 5120, 0);
-            camera.transform.rotation = Quaternion.Euler(90, 0, 0);
-            camera.enabled = false;
-            camera.backgroundColor = Color.clear;
-            camera.clearFlags = CameraClearFlags.SolidColor;
-            camera.cullingMask = 31;
-            camera.name = "Preview Rander Camera";
+            if(camera == null)
+            {
+                GameObject gameObject = new GameObject("Thing_Preview_Rander_Camera");
+                camera = gameObject.AddComponent<Camera>();
+                camera.orthographic = true;
+                camera.orthographicSize = 1;
+                camera.nearClipPlane = 0;
+                camera.farClipPlane = 71.5f;
+                camera.transform.position = new Vector3(0, FocusHeight + 65, 0);
+                camera.transform.rotation = Quaternion.Euler(90, 0, 0);
+                camera.enabled = false;
+                camera.backgroundColor = Color.clear;
+                camera.clearFlags = CameraClearFlags.SolidColor;
+                camera.cullingMask = 31;
+            }
         }
 
 
@@ -114,7 +118,7 @@ namespace RW_NodeTree.Rendering
                 RenderInfo info = infos[i];
                 for (int j = 0; j < info.matrices.Length; ++j)
                 {
-                    info.matrices[j].m13 += 4096;
+                    info.matrices[j].m13 += FocusHeight;
                 }
                 if(info.probeAnchor != null)
                 {
@@ -149,57 +153,57 @@ namespace RW_NodeTree.Rendering
                     Vector3 extents = bounds.extents;
                     Vector3 vert3d = center + extents;
                     Vector4 vert4d = matrix * new Vector4(vert3d.x, vert3d.y, vert3d.z, 1);
-                    result = (int)Math.Max(result, Math.Abs(vert4d.x) * 256);
-                    result = (int)Math.Max(result, Math.Abs(vert4d.z) * 256);
+                    result = (int)Math.Max(result, Math.Abs(vert4d.x) * TexSizeFactor);
+                    result = (int)Math.Max(result, Math.Abs(vert4d.z) * TexSizeFactor);
 
                     //(-1, 1, 1)
                     extents.x *= -1;
                     vert3d = center + extents;
                     vert4d = matrix * new Vector4(vert3d.x, vert3d.y, vert3d.z, 1);
-                    result = (int)Math.Max(result, Math.Abs(vert4d.x) * 256);
-                    result = (int)Math.Max(result, Math.Abs(vert4d.z) * 256);
+                    result = (int)Math.Max(result, Math.Abs(vert4d.x) * TexSizeFactor);
+                    result = (int)Math.Max(result, Math.Abs(vert4d.z) * TexSizeFactor);
 
                     //(-1,-1, 1)
                     extents.y *= -1;
                     vert3d = center + extents;
                     vert4d = matrix * new Vector4(vert3d.x, vert3d.y, vert3d.z, 1);
-                    result = (int)Math.Max(result, Math.Abs(vert4d.x) * 256);
-                    result = (int)Math.Max(result, Math.Abs(vert4d.z) * 256);
+                    result = (int)Math.Max(result, Math.Abs(vert4d.x) * TexSizeFactor);
+                    result = (int)Math.Max(result, Math.Abs(vert4d.z) * TexSizeFactor);
 
                     //( 1,-1, 1)
                     extents.x *= -1;
                     vert3d = center + extents;
                     vert4d = matrix * new Vector4(vert3d.x, vert3d.y, vert3d.z, 1);
-                    result = (int)Math.Max(result, Math.Abs(vert4d.x) * 256);
-                    result = (int)Math.Max(result, Math.Abs(vert4d.z) * 256);
+                    result = (int)Math.Max(result, Math.Abs(vert4d.x) * TexSizeFactor);
+                    result = (int)Math.Max(result, Math.Abs(vert4d.z) * TexSizeFactor);
 
                     //( 1,-1,-1)
                     extents.z *= -1;
                     vert3d = center + extents;
                     vert4d = matrix * new Vector4(vert3d.x, vert3d.y, vert3d.z, 1);
-                    result = (int)Math.Max(result, Math.Abs(vert4d.x) * 256);
-                    result = (int)Math.Max(result, Math.Abs(vert4d.z) * 256);
+                    result = (int)Math.Max(result, Math.Abs(vert4d.x) * TexSizeFactor);
+                    result = (int)Math.Max(result, Math.Abs(vert4d.z) * TexSizeFactor);
 
                     //(-1,-1,-1)
                     extents.x *= -1;
                     vert3d = center + extents;
                     vert4d = matrix * new Vector4(vert3d.x, vert3d.y, vert3d.z, 1);
-                    result = (int)Math.Max(result, Math.Abs(vert4d.x) * 256);
-                    result = (int)Math.Max(result, Math.Abs(vert4d.z) * 256);
+                    result = (int)Math.Max(result, Math.Abs(vert4d.x) * TexSizeFactor);
+                    result = (int)Math.Max(result, Math.Abs(vert4d.z) * TexSizeFactor);
 
                     //(-1, 1,-1)
                     extents.y *= -1;
                     vert3d = center + extents;
                     vert4d = matrix * new Vector4(vert3d.x, vert3d.y, vert3d.z, 1);
-                    result = (int)Math.Max(result, Math.Abs(vert4d.x) * 256);
-                    result = (int)Math.Max(result, Math.Abs(vert4d.z) * 256);
+                    result = (int)Math.Max(result, Math.Abs(vert4d.x) * TexSizeFactor);
+                    result = (int)Math.Max(result, Math.Abs(vert4d.z) * TexSizeFactor);
 
                     //( 1, 1,-1)
                     extents.x *= -1;
                     vert3d = center + extents;
                     vert4d = matrix * new Vector4(vert3d.x, vert3d.y, vert3d.z, 1);
-                    result = (int)Math.Max(result, Math.Abs(vert4d.x) * 256);
-                    result = (int)Math.Max(result, Math.Abs(vert4d.z) * 256);
+                    result = (int)Math.Max(result, Math.Abs(vert4d.x) * TexSizeFactor);
+                    result = (int)Math.Max(result, Math.Abs(vert4d.z) * TexSizeFactor);
                 }
 
             }
@@ -207,6 +211,8 @@ namespace RW_NodeTree.Rendering
         }
 
         private static Dictionary<Thread, Stack<List<RenderInfo>>> renderInfos = new Dictionary<Thread, Stack<List<RenderInfo>>>();
-        private static Camera camera = new Camera();
+        private static Camera camera = null;
+        public const float FocusHeight = 4096;
+        public const float TexSizeFactor = 256;
     }
 }
