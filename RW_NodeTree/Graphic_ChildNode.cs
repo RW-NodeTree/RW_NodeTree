@@ -12,95 +12,152 @@ namespace RW_NodeTree
 {
     public class Graphic_ChildNode : Graphic
     {
-        public override Mesh MeshAt(Rot4 rot)
+        public Graphic_ChildNode(Comp_ChildNodeProccesser thing, Graphic org)
         {
-            Comp_ChildNodeProccesser comp_ChildNodeProccesser = _THIS;
-            if (_DRAW_ORIGIN || comp_ChildNodeProccesser == null)
+            currentProccess = thing;
+            subGraphic = org;
+            //base.drawSize = _THING.DrawSize(_THING.parent.Rotation);
+            //base.data = _GRAPHIC.data;
+        }
+
+        public override Material MatSingle
+        {
+            get
             {
-                return _GRAPHIC?.MeshAt(rot);
+                if (currentProccess == null) return subGraphic?.MatSingle;
+                base.drawSize = currentProccess.DrawSize(currentProccess.parent.Rotation, subGraphic);
+                return currentProccess.ChildCombinedTexture(currentProccess.parent.Rotation, subGraphic);
             }
-            base.drawSize = comp_ChildNodeProccesser.DrawSize(rot);
-            return base.MeshAt(rot);
         }
-        public override Material MatAt(Rot4 rot, Thing thing = null)
-        {
-            Comp_ChildNodeProccesser comp_ChildNodeProccesser = thing;
-            if (_DRAW_ORIGIN || comp_ChildNodeProccesser == null)
-            {
-                return _GRAPHIC?.MatAt(rot, thing);
-            }
-            return comp_ChildNodeProccesser.ChildCombinedTexture(rot, _GRAPHIC.MatAt(rot, thing).shader);
-        }
-        public override Material MatSingleFor(Thing thing)
-        {
-            Comp_ChildNodeProccesser comp_ChildNodeProccesser = thing;
-            if (_DRAW_ORIGIN || comp_ChildNodeProccesser == null)
-            {
-                return _GRAPHIC?.MatSingleFor(thing);
-            }
-            return comp_ChildNodeProccesser.ChildCombinedTexture(Rot4.South, _GRAPHIC.MatSingleFor(thing).shader);
-        }
-        public override void DrawWorker(Vector3 loc, Rot4 rot, ThingDef thingDef, Thing thing, float extraRotation)
-        {
-            Comp_ChildNodeProccesser comp_ChildNodeProccesser = thing;
-            if (_DRAW_ORIGIN || comp_ChildNodeProccesser == null) _GRAPHIC?.DrawWorker(loc, rot, thingDef, thing, extraRotation);
-            else base.DrawWorker(loc, rot, thingDef, thing, extraRotation);
-        }
+
         public override Material MatNorth
         {
             get
             {
-                Comp_ChildNodeProccesser comp_ChildNodeProccesser = _THIS;
-                if (_DRAW_ORIGIN || comp_ChildNodeProccesser == null)
-                {
-                    return _GRAPHIC?.MatNorth;
-                }
-                base.drawSize = comp_ChildNodeProccesser.DrawSize(_THIS.Rotation);
-                return comp_ChildNodeProccesser.ChildCombinedTexture(Rot4.North, _GRAPHIC.MatNorth.shader);
+                if (currentProccess == null) return subGraphic?.MatNorth;
+                base.drawSize = currentProccess.DrawSize(Rot4.North, subGraphic);
+                return currentProccess.ChildCombinedTexture(Rot4.North, subGraphic);
             }
         }
+
         public override Material MatEast
         {
             get
             {
-                Comp_ChildNodeProccesser comp_ChildNodeProccesser = _THIS;
-                if (_DRAW_ORIGIN || comp_ChildNodeProccesser == null)
-                {
-                    return _GRAPHIC?.MatEast;
-                }
-                base.drawSize = comp_ChildNodeProccesser.DrawSize(_THIS.Rotation);
-                return comp_ChildNodeProccesser.ChildCombinedTexture(Rot4.East, _GRAPHIC.MatEast.shader);
+                if (currentProccess == null) return subGraphic?.MatEast;
+                base.drawSize = currentProccess.DrawSize(Rot4.East, subGraphic);
+                return currentProccess.ChildCombinedTexture(Rot4.East, subGraphic);
             }
         }
+
         public override Material MatSouth
         {
             get
             {
-                Comp_ChildNodeProccesser comp_ChildNodeProccesser = _THIS;
-                if (_DRAW_ORIGIN || comp_ChildNodeProccesser == null)
-                {
-                    return _GRAPHIC?.MatSouth;
-                }
-                base.drawSize = comp_ChildNodeProccesser.DrawSize(_THIS.Rotation);
-                return comp_ChildNodeProccesser.ChildCombinedTexture(Rot4.South, _GRAPHIC.MatSouth.shader);
+                if (currentProccess == null) return subGraphic?.MatSouth;
+                base.drawSize = currentProccess.DrawSize(Rot4.South, subGraphic);
+                return currentProccess.ChildCombinedTexture(Rot4.South, subGraphic);
             }
         }
+
         public override Material MatWest
         {
             get
             {
-                Comp_ChildNodeProccesser comp_ChildNodeProccesser = _THIS;
-                if (_DRAW_ORIGIN || comp_ChildNodeProccesser == null)
-                {
-                    return _GRAPHIC?.MatWest;
-                }
-                base.drawSize = comp_ChildNodeProccesser.DrawSize(_THIS.Rotation);
-                return comp_ChildNodeProccesser.ChildCombinedTexture(Rot4.West, _GRAPHIC.MatWest.shader);
+                if (currentProccess == null) return subGraphic.MatWest;
+                base.drawSize = currentProccess.DrawSize(Rot4.West, subGraphic);
+                return currentProccess.ChildCombinedTexture(Rot4.West, subGraphic);
             }
         }
 
-        internal Thing _THIS = null;
-        internal Graphic _GRAPHIC = null;
-        internal bool _DRAW_ORIGIN = false;
+        public override bool WestFlipped
+        {
+            get
+            {
+                if (subGraphic != null && (currentProccess == null)) return subGraphic.WestFlipped;
+                return base.WestFlipped;
+            }
+        }
+
+        public override bool UseSameGraphicForGhost
+        {
+            get
+            {
+                if (subGraphic != null && (currentProccess == null)) return subGraphic.UseSameGraphicForGhost;
+                return base.UseSameGraphicForGhost;
+            }
+        }
+
+        public override bool ShouldDrawRotated
+        {
+            get
+            {
+                if (subGraphic != null && (currentProccess == null)) return subGraphic.ShouldDrawRotated;
+                return base.ShouldDrawRotated;
+            }
+        }
+
+        public override bool EastFlipped
+        {
+            get
+            {
+                if (subGraphic != null && (currentProccess == null)) return subGraphic.EastFlipped;
+                return base.EastFlipped;
+            }
+        }
+
+        public override float DrawRotatedExtraAngleOffset
+        {
+            get
+            {
+                if (subGraphic != null && (currentProccess == null)) return subGraphic.DrawRotatedExtraAngleOffset;
+                return base.DrawRotatedExtraAngleOffset;
+            }
+        }
+
+        public override Mesh MeshAt(Rot4 rot)
+        {
+            if (currentProccess == null) return subGraphic?.MeshAt(rot);
+            base.drawSize = currentProccess.DrawSize(rot, subGraphic);
+            if (Prefs.DevMode) Log.Message(" DrawSize: currentProccess=" + currentProccess + "; Rot4=" + rot + "; size=" + base.drawSize + ";\n");
+            return base.MeshAt(rot);
+        }
+
+        public override Material MatAt(Rot4 rot, Thing thing = null)
+        {
+            Comp_ChildNodeProccesser comp_ChildNodeProccesser = thing;
+            if (comp_ChildNodeProccesser == null) return subGraphic?.MatAt(rot, thing);
+            base.drawSize = comp_ChildNodeProccesser.DrawSize(rot, subGraphic);
+            return comp_ChildNodeProccesser.ChildCombinedTexture(rot, subGraphic);
+        }
+
+        public override Material MatSingleFor(Thing thing)
+        {
+            Comp_ChildNodeProccesser comp_ChildNodeProccesser = thing;
+            if (comp_ChildNodeProccesser == null) return subGraphic?.MatSingleFor(thing);
+            base.drawSize = comp_ChildNodeProccesser.DrawSize(thing.Rotation, subGraphic);
+            return comp_ChildNodeProccesser.ChildCombinedTexture(thing.Rotation, subGraphic);
+        }
+
+        public override void DrawWorker(Vector3 loc, Rot4 rot, ThingDef thingDef, Thing thing, float extraRotation)
+        {
+            Comp_ChildNodeProccesser comp_ChildNodeProccesser = thing;
+            if (comp_ChildNodeProccesser == null) subGraphic?.DrawWorker(loc, rot, thingDef, thing, extraRotation);
+            else base.DrawWorker(loc, rot, thingDef, thing, extraRotation);
+        }
+
+        public override void Print(SectionLayer layer, Thing thing, float extraRotation)
+        {
+            Comp_ChildNodeProccesser comp_ChildNodeProccesser = thing;
+            if (comp_ChildNodeProccesser == null) subGraphic?.Print(layer, thing, extraRotation);
+            else
+            {
+                base.drawSize = comp_ChildNodeProccesser.DrawSize(thing.Rotation, subGraphic);
+                base.Print(layer, thing, extraRotation);
+            }
+        }
+
+        private Comp_ChildNodeProccesser currentProccess = null;
+        private Graphic subGraphic = null;
     }
 }

@@ -17,17 +17,12 @@ namespace RW_NodeTree.Patch
             "GraphicColoredFor",
             typeof(Thing)
         )]
-        private static void PreGraphicData_GraphicColoredFor(GraphicData __instance, Thing t,ref Graphic __result)
+        private static void PostGraphicData_GraphicColoredFor(GraphicData __instance, Thing t,ref Graphic __result)
         {
 
             Comp_ChildNodeProccesser comp_ChildNodeProccesser = t;
-            if (comp_ChildNodeProccesser != null)
-            {
-                Graphic_ChildNode graphic = new Graphic_ChildNode();
-                graphic._THIS = t;
-                graphic._GRAPHIC = __result;
-                __result = graphic;
-            }
+            __result = comp_ChildNodeProccesser?.CreateGraphic_ChildNode(__result, __instance) ?? __result;
         }
+
     }
 }

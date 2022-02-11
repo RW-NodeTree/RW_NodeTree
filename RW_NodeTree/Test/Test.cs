@@ -13,6 +13,9 @@ using Verse;
 
 namespace RW_NodeTree.Test
 {
+    /// <summary>
+    /// testing console app
+    /// </summary>
     internal class Test
     {
         /*

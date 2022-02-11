@@ -22,32 +22,22 @@ namespace RW_NodeTree.Patch
         private static void PostStatWorker_GetExplanationUnfinalized(StatWorker __instance, MethodInfo __originalMethod, StatRequest req, ToStringNumberSense numberSense, ref string __result)
         {
             if (__originalMethod
-                !=
+                ==
                 __instance.GetType().GetMethod(
                 "GetExplanationUnfinalized",
                 StatWorker_GetExplanationUnfinalized_ParmsType
             ))
-                return;
-            Comp_ChildNodeProccesser proccess = req.Thing;
-            if (proccess != null)
-            {
-                proccess.PostStatWorker_GetExplanationUnfinalized(ref __result, __instance, req, numberSense);
-            }
+                ((Comp_ChildNodeProccesser)req.Thing)?.PostStatWorker_GetExplanationUnfinalized(ref __result, __instance, req, numberSense);
         }
         private static void PostStatWorker_GetExplanationFinalizePart(StatWorker __instance, MethodBase __originalMethod, StatRequest req, ToStringNumberSense numberSense, float finalVal, ref string __result)
         {
             if (__originalMethod 
-                !=
+                ==
                 __instance.GetType().GetMethod(
                 "GetExplanationFinalizePart",
                 StatWorker_GetExplanationFinalizePart_ParmsType
-            )) 
-                return;
-            Comp_ChildNodeProccesser proccess = req.Thing;
-            if (proccess != null)
-            {
-                proccess.PostStatWorker_GetExplanationFinalizePart(ref __result, __instance, req, numberSense, finalVal);
-            }
+            ))
+                ((Comp_ChildNodeProccesser)req.Thing)?.PostStatWorker_GetExplanationFinalizePart(ref __result, __instance, req, numberSense, finalVal);
         }
 
         public static void PatchExplanation(Type type, Harmony patcher)
@@ -61,7 +51,7 @@ namespace RW_NodeTree.Patch
                 if (_GetExplanationUnfinalized?.DeclaringType == type && _GetExplanationUnfinalized.HasMethodBody())
                 {
                     patcher.Patch(_GetExplanationUnfinalized, null, new HarmonyMethod(_PostStatWorker_GetExplanationUnfinalized));
-                    if (Prefs.DevMode) Log.Message(type + "::" + _GetExplanationUnfinalized + " PatchSuccess\n");
+                    //if (Prefs.DevMode) Log.Message(type + "::" + _GetExplanationUnfinalized + " PatchSuccess\n");
                 }
                 MethodInfo _GetExplanationFinalizePart = type.GetMethod(
                     "GetExplanationFinalizePart",
@@ -70,7 +60,7 @@ namespace RW_NodeTree.Patch
                 if (_GetExplanationFinalizePart?.DeclaringType == type && _GetExplanationFinalizePart.HasMethodBody())
                 {
                     patcher.Patch(_GetExplanationFinalizePart, null, new HarmonyMethod(_PostStatWorker_GetExplanationFinalizePart));
-                    if (Prefs.DevMode) Log.Message(type + "::" + _GetExplanationFinalizePart + " PatchSuccess\n");
+                    //if (Prefs.DevMode) Log.Message(type + "::" + _GetExplanationFinalizePart + " PatchSuccess\n");
                 }
             }
         }

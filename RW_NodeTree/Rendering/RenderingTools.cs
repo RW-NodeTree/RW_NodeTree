@@ -13,25 +13,36 @@ using UnityEngine.Rendering;
 
 namespace RW_NodeTree.Rendering
 {
+    /// <summary>
+    /// Preview Rander Controler and Unity Graphics Draw Blocker in hear
+    /// </summary>
     [StaticConstructorOnStartup]
     public static class RenderingTools
     {
-        static RenderingTools()
+
+        /// <summary>
+        /// Preview Rander Camera
+        /// </summary>
+        internal static Camera Camera
         {
-            if(camera == null)
+            get
             {
-                GameObject gameObject = new GameObject("Thing_Preview_Rander_Camera");
-                camera = gameObject.AddComponent<Camera>();
-                camera.orthographic = true;
-                camera.orthographicSize = 1;
-                camera.nearClipPlane = 0;
-                camera.farClipPlane = 71.5f;
-                camera.transform.position = new Vector3(0, FocusHeight + 65, 0);
-                camera.transform.rotation = Quaternion.Euler(90, 0, 0);
-                camera.enabled = false;
-                camera.backgroundColor = Color.clear;
-                camera.clearFlags = CameraClearFlags.SolidColor;
-                camera.cullingMask = 31;
+                if (camera == null)
+                {
+                    GameObject gameObject = new GameObject("Preview_Rander_Camera");
+                    camera = gameObject.AddComponent<Camera>();
+                    camera.orthographic = true;
+                    camera.orthographicSize = 1;
+                    camera.nearClipPlane = 0;
+                    camera.farClipPlane = 71.5f;
+                    camera.transform.position = new Vector3(0, FocusHeight + 65, 0);
+                    camera.transform.rotation = Quaternion.Euler(90, 0, 0);
+                    camera.backgroundColor = Color.clear;
+                    camera.clearFlags = CameraClearFlags.SolidColor;
+                    camera.targetTexture = empty;
+                    camera.enabled = false;
+                }
+                return camera;
             }
         }
 
@@ -43,49 +54,49 @@ namespace RW_NodeTree.Rendering
         {
             get
             {
-                Thread current = Thread.CurrentThread;
+                int current = Thread.CurrentThread.ManagedThreadId;
+
                 Stack<List<RenderInfo>> list;
                 if (!renderInfos.TryGetValue(current, out list))
                 {
                     list = new Stack<List<RenderInfo>>();
                     renderInfos.Add(current, list);
                 }
-                else if(list.Count > 0) return true;
+                if(list.Count > 0) return true;
+
                 return false;
             }
             set
             {
-                Thread current = Thread.CurrentThread;
+                int current = Thread.CurrentThread.ManagedThreadId;
+
                 Stack<List<RenderInfo>> list;
                 if (!renderInfos.TryGetValue(current, out list))
                 {
                     list = new Stack<List<RenderInfo>>();
-                    if (value)
-                    {
-                        list.Push(new List<RenderInfo>());
-                    }
                     renderInfos.Add(current, list);
+                }
+
+                if (value)
+                {
+                    list.Push(new List<RenderInfo>());
                 }
                 else
                 {
-                    if (value)
-                    {
-                        list.Push(new List<RenderInfo>());
-                    }
-                    else
-                    {
-                        list.Pop();
-                    }
+                    list.Pop();
                 }
             }
         }
 
+        /// <summary>
+        /// Catched rendering infos
+        /// </summary>
         public static List<RenderInfo> RenderInfos
         {
             get
             {
                 Stack<List<RenderInfo>> result;
-                Thread current = Thread.CurrentThread;
+                int current = Thread.CurrentThread.ManagedThreadId;
                 if (!renderInfos.TryGetValue(current, out result))
                 {
                     result = new Stack<List<RenderInfo>>();
@@ -95,24 +106,28 @@ namespace RW_NodeTree.Rendering
             }
         }
 
-        public static RenderTexture RenderToTarget(List<RenderInfo> infos, RenderTexture target, int size = 0)
+        /// <summary>
+        /// Render a perview texture by infos
+        /// </summary>
+        /// <param name="infos">all arranged render infos</param>
+        /// <param name="size">force render texture size</param>
+        /// <returns></returns>
+        public static RenderTexture RenderToTarget(List<RenderInfo> infos, int size = 0)
         {
-            RenderTexture cache = camera.targetTexture;
-            camera.targetTexture = target;
             if (size <= 0)
             {
                 size = pixelSize(infos);
-                if (target == null || target.texelSize.x > size || target.texelSize.y > size)
-                {
-                    if (target != null) GameObject.Destroy(target);
-                    target = new RenderTexture(size, size, 16);
-                }
             }
-            else if (target == null)
+            else if(size > MaxTexSize)
             {
-                target = new RenderTexture(size, size, 16);
+                size = (int)MaxTexSize;
             }
-            camera.orthographicSize = size;
+
+            Camera.Render();
+            //if (Prefs.DevMode) Log.Message("RenderToTarget size:" + size);
+            RenderTexture target = new RenderTexture(size, size, 16, RenderTextureFormat.ARGB32);
+            Camera.targetTexture = target;
+            Camera.orthographicSize = size / TexSizeFactor;
             for (int i = 0; i < infos.Count; i++)
             {
                 RenderInfo info = infos[i];
@@ -120,21 +135,26 @@ namespace RW_NodeTree.Rendering
                 {
                     info.matrices[j].m13 += FocusHeight;
                 }
-                if(info.probeAnchor != null)
+                if(info.probeAnchor != null || !info.DrawMeshInstanced)
                 {
                     for (int j = 0; j < info.matrices.Length && j < info.count; ++j)
-                        Graphics.DrawMesh(info.mesh, info.matrices[j], info.material, 31, camera, info.submeshIndex, info.properties, info.castShadows, info.receiveShadows, info.probeAnchor, info.lightProbeUsage, info.lightProbeProxyVolume);
+                        Graphics.DrawMesh(info.mesh, info.matrices[j], info.material, info.layer, Camera, info.submeshIndex, info.properties, info.castShadows, info.receiveShadows, info.probeAnchor, info.lightProbeUsage, info.lightProbeProxyVolume);
                 }
                 else
                 {
-                    Graphics.DrawMeshInstanced(info.mesh, info.submeshIndex, info.material, info.matrices, info.count, info.properties, info.castShadows, info.receiveShadows, 31, camera, info.lightProbeUsage, info.lightProbeProxyVolume);
+                    Graphics.DrawMeshInstanced(info.mesh, info.submeshIndex, info.material, info.matrices, info.count, info.properties, info.castShadows, info.receiveShadows, info.layer, Camera, info.lightProbeUsage, info.lightProbeProxyVolume);
                 }
             }
-            camera.Render();
-            camera.targetTexture = cache;
+            Camera.Render();
+            Camera.targetTexture = empty;
             return target;
         }
 
+        /// <summary>
+        /// get the standard texture size of rendering infos
+        /// </summary>
+        /// <param name="infos">all arranged render infos</param>
+        /// <returns>standard size of texture</returns>
         public static int pixelSize(List<RenderInfo> infos)
         {
             int result = 1;
@@ -204,15 +224,21 @@ namespace RW_NodeTree.Rendering
                     vert4d = matrix * new Vector4(vert3d.x, vert3d.y, vert3d.z, 1);
                     result = (int)Math.Max(result, Math.Abs(vert4d.x) * TexSizeFactor);
                     result = (int)Math.Max(result, Math.Abs(vert4d.z) * TexSizeFactor);
-                }
 
+                    if (result >= MaxTexSize)
+                    {
+                        return result;
+                    }
+                }
             }
             return result;
         }
 
-        private static Dictionary<Thread, Stack<List<RenderInfo>>> renderInfos = new Dictionary<Thread, Stack<List<RenderInfo>>>();
+        private static Dictionary<int, Stack<List<RenderInfo>>> renderInfos = new Dictionary<int, Stack<List<RenderInfo>>>();
         private static Camera camera = null;
+        private static RenderTexture empty = new RenderTexture(1, 1, 0, RenderTextureFormat.ARGB32);
         public const float FocusHeight = 4096;
+        public const float MaxTexSize = 4096;
         public const float TexSizeFactor = 256;
     }
 }

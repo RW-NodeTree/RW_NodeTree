@@ -11,7 +11,6 @@ using Verse;
 
 namespace RW_NodeTree.Patch
 {
-    [StaticConstructorOnStartup]
     internal static partial class StatWorker_Patcher
     {
         private readonly static MethodInfo _PostStatWorker_GetValueUnfinalized = typeof(StatWorker_Patcher).GetMethod("PostStatWorker_GetValueUnfinalized", BindingFlags.NonPublic | BindingFlags.Static);
@@ -34,33 +33,23 @@ namespace RW_NodeTree.Patch
         private static void PostStatWorker_GetValueUnfinalized(StatWorker __instance, MethodInfo __originalMethod, StatRequest req, bool applyPostProcess, ref float __result)
         {
             if (__originalMethod
-                !=
+                ==
                 __instance.GetType().GetMethod(
                 "GetValueUnfinalized",
                 StatWorker_GetValueUnfinalized_ParmsType
             ))
-                return;
-            Comp_ChildNodeProccesser proccess = req.Thing;
-            if (proccess != null)
-            {
-                proccess.PostStatWorker_GetValueUnfinalized(ref __result, __instance, req, applyPostProcess);
-            }
+                ((Comp_ChildNodeProccesser)req.Thing)?.PostStatWorker_GetValueUnfinalized(ref __result, __instance, req, applyPostProcess);
         }
         private static void PostStatWorker_FinalizeValue(StatWorker __instance, MethodInfo __originalMethod, StatRequest req, bool applyPostProcess, ref float val)
         {
             if (
                 __originalMethod 
-                !=
+                ==
                 __instance.GetType().GetMethod(
                 "FinalizeValue",
                 StatWorker_FinalizeValue_ParmsType
             ))
-                return;
-            Comp_ChildNodeProccesser proccess = req.Thing;
-            if (proccess != null)
-            {
-                proccess.PostStatWorker_FinalizeValue(ref val, __instance, req, applyPostProcess);
-            }
+                ((Comp_ChildNodeProccesser)req.Thing)?.PostStatWorker_FinalizeValue(ref val, __instance, req, applyPostProcess);
         }
 
         public static void PatchValue(Type type, Harmony patcher)
@@ -74,7 +63,7 @@ namespace RW_NodeTree.Patch
                 if (_GetValueUnfinalized?.DeclaringType == type && _GetValueUnfinalized.HasMethodBody())
                 {
                     patcher.Patch(_GetValueUnfinalized, null, new HarmonyMethod(_PostStatWorker_GetValueUnfinalized));
-                    if(Prefs.DevMode) Log.Message(type + "::" + _GetValueUnfinalized + " PatchSuccess\n");
+                    //if(Prefs.DevMode) Log.Message(type + "::" + _GetValueUnfinalized + " PatchSuccess\n");
                 }
                 MethodInfo _FinalizeValue = type.GetMethod(
                     "FinalizeValue",
@@ -83,7 +72,7 @@ namespace RW_NodeTree.Patch
                 if (_FinalizeValue?.DeclaringType == type && _FinalizeValue.HasMethodBody())
                 {
                     patcher.Patch(_FinalizeValue, null, new HarmonyMethod(_PostStatWorker_FinalizeValue));
-                    if (Prefs.DevMode) Log.Message(type + "::" + _FinalizeValue + " PatchSuccess\n");
+                    //if (Prefs.DevMode) Log.Message(type + "::" + _FinalizeValue + " PatchSuccess\n");
                 }
             }
         }

@@ -33,37 +33,15 @@ namespace RW_NodeTree.Patch
             typeof(LightProbeUsage),
             typeof(LightProbeProxyVolume)
         )]
-        public static bool DrawMeshInstanced_Catcher(Mesh mesh, int submeshIndex, Material material, Matrix4x4[] matrices, int count, MaterialPropertyBlock properties, ShadowCastingMode castShadows, bool receiveShadows, LightProbeUsage lightProbeUsage, LightProbeProxyVolume lightProbeProxyVolume)
+        public static bool DrawMeshInstanced_Catcher(Mesh mesh, int submeshIndex, Material material, Matrix4x4[] matrices, int count, MaterialPropertyBlock properties, ShadowCastingMode castShadows, bool receiveShadows, int layer, Camera camera, LightProbeUsage lightProbeUsage, LightProbeProxyVolume lightProbeProxyVolume)
         {
-            if (RenderingTools.StartOrEndDrawCatchingBlock)
+            if (camera != RenderingTools.Camera && RenderingTools.StartOrEndDrawCatchingBlock)
             {
-                RenderingTools.RenderInfos.Add(new RenderInfo(mesh, submeshIndex, material, matrices, count, properties, castShadows, receiveShadows, lightProbeUsage, lightProbeProxyVolume));
+                //if (Prefs.DevMode) Log.Message(" Internal_DrawMesh: camera=" + camera + "; layer=" + layer + "\n");
+                RenderingTools.RenderInfos.Add(new RenderInfo(mesh, submeshIndex, material, matrices, count, properties, castShadows, receiveShadows, layer, lightProbeUsage, lightProbeProxyVolume));
                 return false;
             }
             return true;
-        }
-
-        [HarmonyTranspiler]
-        [HarmonyPatch(
-            typeof(Graphics),
-            "DrawMeshInstanced",
-            typeof(Mesh),
-            typeof(int),
-            typeof(Material),
-            typeof(Matrix4x4[]),
-            typeof(int),
-            typeof(MaterialPropertyBlock),
-            typeof(ShadowCastingMode),
-            typeof(bool),
-            typeof(int),
-            typeof(Camera),
-            typeof(LightProbeUsage),
-            typeof(LightProbeProxyVolume)
-        )]
-        public static IEnumerable<CodeInstruction> DrawMeshInstanced_DebugCheck(IEnumerable<CodeInstruction> instructions, MethodBase __originalMethod)
-        {
-            if (Prefs.DevMode) Log.Message(typeof(Graphics) + "::" + __originalMethod + " PatchSuccess\n");
-            return instructions;
         }
     }
 }

@@ -1,15 +1,22 @@
-﻿using System;
+﻿using HarmonyLib;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using UnityEngine;
 
 namespace RW_NodeTree.Tools
 {
     public static class ObjectHelper
     {
-        public static object SimpleCopy(object obj)
+        /// <summary>
+        /// try copy an object on one level
+        /// </summary>
+        /// <param name="obj">source</param>
+        /// <returns>copyed object</returns>
+        public static object SimpleCopy(this object obj)
         {
             if(obj == null)
             {
@@ -22,7 +29,7 @@ namespace RW_NodeTree.Tools
                 if(type.IsClass && !type.IsAbstract)
                 {
                     result = Activator.CreateInstance(type);
-                    foreach (FieldInfo f in type.GetFields(BindingFlagsAll))
+                    foreach (FieldInfo f in type.GetFields(AccessTools.all))
                     {
                         f.SetValue(result, f.GetValue(obj));
                     }
@@ -30,7 +37,5 @@ namespace RW_NodeTree.Tools
                 return result;
             }
         }
-
-        public const BindingFlags BindingFlagsAll = BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic;
     }
 }

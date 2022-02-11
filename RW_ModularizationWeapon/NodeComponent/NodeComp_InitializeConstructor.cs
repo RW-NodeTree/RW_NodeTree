@@ -1,4 +1,5 @@
 ﻿using RimWorld;
+using RW_NodeTree;
 using RW_NodeTree.Rendering;
 using System;
 using System.Collections.Generic;
@@ -7,7 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Verse;
 
-namespace RW_NodeTree.NodeComponent
+namespace RW_ModularizationWeapon.NodeComponent
 {
     internal class NodeComp_InitializeConstructor : ThingComp_BasicNodeComp
     {
@@ -45,32 +46,37 @@ namespace RW_NodeTree.NodeComponent
 
         public override void PostStatWorker_GetValueUnfinalized(ref float result, StatWorker statWorker, StatRequest req, bool applyPostProcess)
         {
-            throw new NotImplementedException();
+            return;
         }
 
         public override void PostStatWorker_FinalizeValue(ref float result, StatWorker statWorker, StatRequest req, bool applyPostProcess)
         {
-            throw new NotImplementedException();
+            return;
         }
 
         public override void PostStatWorker_GetExplanationUnfinalized(ref string result, StatWorker statWorker, StatRequest req, ToStringNumberSense numberSense)
         {
-            throw new NotImplementedException();
+            return;
         }
 
         public override void PostStatWorker_GetExplanationFinalizePart(ref string result, StatWorker statWorker, StatRequest req, ToStringNumberSense numberSense, float finalVal)
         {
-            throw new NotImplementedException();
+            return;
         }
 
         public override void PostIVerbOwner_GetVerbProperties(IVerbOwner owner, ref List<VerbProperties> verbProperties)
         {
-            throw new NotImplementedException();
+            return;
         }
 
         public override void PostIVerbOwner_GetTools(IVerbOwner owner, ref List<Tool> tools)
         {
-            throw new NotImplementedException();
+            return;
+        }
+
+        public override Thing GetVerbCorrespondingThing(Verb verb)
+        {
+            return null;
         }
     }
 

@@ -23,7 +23,20 @@ namespace RW_NodeTree
             get
             {
                 int index = innerIdList.IndexOf(id);
-                return this[index];
+                return ((index >= 0) ? this[index] : null);
+            }
+            set
+            {
+                int index = innerIdList.IndexOf(id);
+                Thing t = ((index >= 0) ? this[index] : null);
+                if (t != null)
+                {
+                    Remove(t);
+                }
+                if (value != null && TryAdd(value))
+                {
+                    innerIdList[innerIdList.Count - 1] = id;
+                }
             }
         }
 
@@ -39,7 +52,7 @@ namespace RW_NodeTree
             {
                 int index = base.IndexOf(item);
                 innerIdList[index] = value;
-                needUpdate = true;
+                NeedUpdate = true;
             }
         }
 
@@ -47,26 +60,23 @@ namespace RW_NodeTree
 
         public Comp_ChildNodeProccesser Comp => (Comp_ChildNodeProccesser)base.Owner;
 
+        public NodeContainer ParentContainer => Comp?.ParentProccesser?.ChildNodes;
+
         public bool NeedUpdate
         {
-            get
+            get => needUpdate;
+            set
             {
-                if(needUpdate) return true;
-                foreach(Thing thing in this)
+                if(needUpdate = value)
                 {
-                    Comp_ChildNodeProccesser comp_ChildNodeProccesser = thing;
-                    if(comp_ChildNodeProccesser != null && (comp_ChildNodeProccesser.ChildNodes).NeedUpdate)
-                    {
-                        return true;
-                    }
+                    NodeContainer parent = ParentContainer;
+                    if(parent != null) parent.NeedUpdate = true;
                 }
-                return false;
             }
         }
 
         public override void ExposeData()
         {
-            Scribe_Values.Look<bool>(ref this.needUpdate, "needUpdate");
             base.ExposeData();
             Scribe_Collections.Look<string>(ref this.innerIdList, "innerIdList", LookMode.Value);
         }
@@ -85,7 +95,13 @@ namespace RW_NodeTree
                 {
                     comp.UpdateNode(actionNode);
                 }
-                this.needUpdate = false;
+                foreach(ThingComp comp in proccess.parent.AllComps)
+                {
+                    (comp as IVerbOwner)?.VerbTracker?.VerbsNeedReinitOnLoad();
+                }
+                (proccess.parent as IVerbOwner)?.VerbTracker?.VerbsNeedReinitOnLoad();
+                proccess.ResetRenderedTexture();
+                NeedUpdate = false;
             }
         }
 
@@ -111,8 +127,8 @@ namespace RW_NodeTree
                 if (base.TryAdd(item, false))
                 {
                     innerIdList.Add(null);
-                    needUpdate = true;
-                    item.DeSpawn();
+                    NeedUpdate = true;
+                    if(item.Spawned) item.DeSpawn();
                     return true;
                 }
             }
@@ -135,7 +151,7 @@ namespace RW_NodeTree
             return base.GetAt(index);
         }
 
-        private bool needUpdate = false;
+        private bool needUpdate = true;
 
         private List<string> innerIdList = new List<string>();
     }

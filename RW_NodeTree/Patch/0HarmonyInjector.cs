@@ -15,8 +15,9 @@ namespace RW_NodeTree.Patch
         {
             foreach(Type t in AccessTools.AllTypes())
             {
-                StatWorker_Patcher.PatchExplanation(t, patcher);
                 StatWorker_Patcher.PatchValue(t, patcher);
+                StatWorker_Patcher.PatchExplanation(t, patcher);
+                StatWorker_Patcher.PatchGetInfoCardHyperlinks(t, patcher);
                 IVerbOwner_Patcher.PatchIVerbOwner(t, patcher);
             }
             patcher.PatchAll();
