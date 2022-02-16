@@ -12,13 +12,15 @@ namespace RW_NodeTree
 {
     public class Graphic_ChildNode : Graphic
     {
-        public Graphic_ChildNode(Comp_ChildNodeProccesser thing, Graphic org)
+        public Graphic_ChildNode(CompChildNodeProccesser thing, Graphic org)
         {
             currentProccess = thing;
             subGraphic = org;
             //base.drawSize = _THING.DrawSize(_THING.parent.Rotation);
             //base.data = _GRAPHIC.data;
         }
+
+        public Graphic SubGraphic => subGraphic;
 
         public override Material MatSingle
         {
@@ -119,13 +121,14 @@ namespace RW_NodeTree
         {
             if (currentProccess == null) return subGraphic?.MeshAt(rot);
             base.drawSize = currentProccess.DrawSize(rot, subGraphic);
-            if (Prefs.DevMode) Log.Message(" DrawSize: currentProccess=" + currentProccess + "; Rot4=" + rot + "; size=" + base.drawSize + ";\n");
+            //if (Prefs.DevMode) Log.Message(" DrawSize: currentProccess=" + currentProccess + "; Rot4=" + rot + "; size=" + base.drawSize + ";\n");
             return base.MeshAt(rot);
         }
 
         public override Material MatAt(Rot4 rot, Thing thing = null)
         {
-            Comp_ChildNodeProccesser comp_ChildNodeProccesser = thing;
+            CompChildNodeProccesser comp_ChildNodeProccesser = thing;
+            if (thing == null) comp_ChildNodeProccesser = currentProccess;
             if (comp_ChildNodeProccesser == null) return subGraphic?.MatAt(rot, thing);
             base.drawSize = comp_ChildNodeProccesser.DrawSize(rot, subGraphic);
             return comp_ChildNodeProccesser.ChildCombinedTexture(rot, subGraphic);
@@ -133,7 +136,8 @@ namespace RW_NodeTree
 
         public override Material MatSingleFor(Thing thing)
         {
-            Comp_ChildNodeProccesser comp_ChildNodeProccesser = thing;
+            CompChildNodeProccesser comp_ChildNodeProccesser = thing;
+            if (thing == null) comp_ChildNodeProccesser = currentProccess;
             if (comp_ChildNodeProccesser == null) return subGraphic?.MatSingleFor(thing);
             base.drawSize = comp_ChildNodeProccesser.DrawSize(thing.Rotation, subGraphic);
             return comp_ChildNodeProccesser.ChildCombinedTexture(thing.Rotation, subGraphic);
@@ -141,14 +145,16 @@ namespace RW_NodeTree
 
         public override void DrawWorker(Vector3 loc, Rot4 rot, ThingDef thingDef, Thing thing, float extraRotation)
         {
-            Comp_ChildNodeProccesser comp_ChildNodeProccesser = thing;
+            CompChildNodeProccesser comp_ChildNodeProccesser = thing;
+            if (thing == null) comp_ChildNodeProccesser = currentProccess;
             if (comp_ChildNodeProccesser == null) subGraphic?.DrawWorker(loc, rot, thingDef, thing, extraRotation);
             else base.DrawWorker(loc, rot, thingDef, thing, extraRotation);
         }
 
         public override void Print(SectionLayer layer, Thing thing, float extraRotation)
         {
-            Comp_ChildNodeProccesser comp_ChildNodeProccesser = thing;
+            CompChildNodeProccesser comp_ChildNodeProccesser = thing;
+            if (thing == null) comp_ChildNodeProccesser = currentProccess;
             if (comp_ChildNodeProccesser == null) subGraphic?.Print(layer, thing, extraRotation);
             else
             {
@@ -157,7 +163,7 @@ namespace RW_NodeTree
             }
         }
 
-        private Comp_ChildNodeProccesser currentProccess = null;
+        private CompChildNodeProccesser currentProccess = null;
         private Graphic subGraphic = null;
     }
 }

@@ -14,7 +14,7 @@ namespace RW_NodeTree
     public class NodeContainer : ThingOwner<Thing>,IList<Thing>
     {
 
-        public NodeContainer(Comp_ChildNodeProccesser proccesser) : base(proccesser)
+        public NodeContainer(CompChildNodeProccesser proccesser) : base(proccesser)
         {
         }
 
@@ -58,7 +58,7 @@ namespace RW_NodeTree
 
         public List<string> InnerIdListForReading => this.innerIdList;
 
-        public Comp_ChildNodeProccesser Comp => (Comp_ChildNodeProccesser)base.Owner;
+        public CompChildNodeProccesser Comp => (CompChildNodeProccesser)base.Owner;
 
         public NodeContainer ParentContainer => Comp?.ParentProccesser?.ChildNodes;
 
@@ -81,15 +81,15 @@ namespace RW_NodeTree
             Scribe_Collections.Look<string>(ref this.innerIdList, "innerIdList", LookMode.Value);
         }
 
-        public void UpdateNode(Comp_ChildNodeProccesser actionNode = null)
+        public void UpdateNode(CompChildNodeProccesser actionNode = null)
         {
             if (NeedUpdate)
             {
-                Comp_ChildNodeProccesser proccess = this.Comp;
+                CompChildNodeProccesser proccess = this.Comp;
                 if (actionNode == null) actionNode = proccess;
                 foreach (Thing node in this)
                 {
-                    ((Comp_ChildNodeProccesser)node)?.UpdateNode(actionNode);
+                    ((CompChildNodeProccesser)node)?.UpdateNode(actionNode);
                 }
                 foreach (ThingComp_BasicNodeComp comp in proccess.AllNodeComp)
                 {
@@ -107,7 +107,7 @@ namespace RW_NodeTree
 
         public override int GetCountCanAccept(Thing item, bool canMergeWithExistingStacks = true)
         {
-            Comp_ChildNodeProccesser comp_ChildNodeProccesser = (Comp_ChildNodeProccesser)Owner;
+            CompChildNodeProccesser comp_ChildNodeProccesser = (CompChildNodeProccesser)Owner;
             if(comp_ChildNodeProccesser != null && comp_ChildNodeProccesser.AllowNode(item))
             {
                 return base.GetCountCanAccept(item, false);

@@ -19,9 +19,10 @@ namespace RW_NodeTree.Patch
             typeof(Thing),
             typeof(Verb)
         )]
-        private static void PreVerbTracker_CreateVerbTargetCommand(ref Thing ownerThing, Verb verb)
+        private static void PreVerbTracker_CreateVerbTargetCommand(ref Thing ownerThing, VerbTracker __instance, Verb verb)
         {
-            ownerThing = ((Comp_ChildNodeProccesser)ownerThing)?.GetVerbCorrespondingThing(verb) ?? ownerThing;
+            Verb _ = null;
+            ownerThing = ((CompChildNodeProccesser)ownerThing)?.GetVerbCorrespondingThing(__instance, ref _, ref verb) ?? ownerThing;
         }
 
         [HarmonyPostfix]

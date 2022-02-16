@@ -17,10 +17,10 @@ namespace RW_NodeTree
     /// <summary>
     /// Node function proccesser
     /// </summary>
-    public class Comp_ChildNodeProccesser : ThingComp, IThingHolder
+    public partial class CompChildNodeProccesser : ThingComp, IThingHolder
     {
 
-        public Comp_ChildNodeProccesser()
+        public CompChildNodeProccesser()
         {
             childNodes = new NodeContainer(this);
         }
@@ -30,10 +30,11 @@ namespace RW_NodeTree
         /// </summary>
         public NodeContainer ChildNodes => (NodeContainer)GetDirectlyHeldThings();
 
+
         /// <summary>
         /// get parent node if it is a node
         /// </summary>
-        public Comp_ChildNodeProccesser ParentProccesser => (Comp_ChildNodeProccesser)this.ParentHolder;
+        public CompChildNodeProccesser ParentProccesser => this.ParentHolder as CompChildNodeProccesser;
 
         /// <summary>
         /// root of this node tree
@@ -42,8 +43,8 @@ namespace RW_NodeTree
         {
             get
             {
-                Comp_ChildNodeProccesser proccesser = this;
-                Comp_ChildNodeProccesser next = ParentProccesser;
+                CompChildNodeProccesser proccesser = this;
+                CompChildNodeProccesser next = ParentProccesser;
                 while (next != null) 
                 {
                     proccesser = next;
@@ -53,6 +54,7 @@ namespace RW_NodeTree
                 return proccesser;
             }
         }
+
 
         /// <summary>
         /// find all comp for node
@@ -82,6 +84,22 @@ namespace RW_NodeTree
         {
             if(parent.def.tickerType == TickerType.Normal) UpdateNode();
             ChildNodes.ThingOwnerTick();
+            IList<Thing> list = ChildNodes;
+            for (int i = list.Count - 1; i >= 0; i--)
+            {
+                Thing t = list[i];
+                if (t.def.tickerType == TickerType.Never)
+                {
+                    if((t is IVerbOwner) || (t as ThingWithComps)?.AllComps.Find(x => x is IVerbOwner) != null || (CompChildNodeProccesser)t != null)
+                    {
+                        t.Tick();
+                        if (t.Destroyed)
+                        {
+                            list.Remove(t);
+                        }
+                    }
+                }
+            }
             if (Find.TickManager.TicksGame % 250 == 0)
             {
                 CompTickRare();
@@ -105,140 +123,28 @@ namespace RW_NodeTree
         }
 
         #region Post
-
-        /// <summary>
-        /// event proccesser after StatWorker.GetValueUnfinalized()
-        /// (WARRING!!!: Don't invoke any method if that will invoke StatWorker.GetValueUnfinalized)
-        /// </summary>
-        /// <param name="result">result of StatWorker.GetValueUnfinalized(), modifiable</param>
-        /// <param name="statWorker">StatWorker</param>
-        /// <param name="req">parm 'req' of StatWorker.GetValueUnfinalized()</param>
-        /// <param name="applyPostProcess">parm 'applyPostProcess' of StatWorker.GetValueUnfinalized()</param>
-        public void PostStatWorker_GetValueUnfinalized(ref float result, StatWorker statWorker, StatRequest req, bool applyPostProcess)
-        {
-            foreach (ThingComp_BasicNodeComp comp in AllNodeComp)
-            {
-                comp.PostStatWorker_GetValueUnfinalized(ref result, statWorker, req, applyPostProcess);
-            }
-        }
-
-        /// <summary>
-        /// event proccesser after StatWorker.FinalizeValue()
-        /// (WARRING!!!: Don't invoke any method if thet will invoke StatWorker.FinalizeValue)
-        /// </summary>
-        /// <param name="result">result of StatWorker.FinalizeValue(), modifiable</param>
-        /// <param name="statWorker">StatWorker</param>
-        /// <param name="req">parm 'req' of StatWorker.FinalizeValue()</param>
-        /// <param name="applyPostProcess">parm 'applyPostProcess' of StatWorker.FinalizeValue()</param>
-        public void PostStatWorker_FinalizeValue(ref float result, StatWorker statWorker, StatRequest req, bool applyPostProcess)
-        {
-            foreach (ThingComp_BasicNodeComp comp in AllNodeComp)
-            {
-                comp.PostStatWorker_FinalizeValue(ref result, statWorker, req, applyPostProcess);
-            }
-        }
-
-        /// <summary>
-        /// event proccesser after StatWorker.GetExplanationUnfinalized()
-        /// (WARRING!!!: Don't invoke any method if thet will invoke StatWorker.GetExplanationUnfinalized)
-        /// </summary>
-        /// <param name="result">result of StatWorker.GetExplanationUnfinalized(), modifiable</param>
-        /// <param name="statWorker">StatWorker</param>
-        /// <param name="req">parm 'req' of StatWorker.GetExplanationUnfinalized()</param>
-        /// <param name="numberSense">parm 'numberSense' of StatWorker.GetExplanationUnfinalized()</param>
-        public void PostStatWorker_GetExplanationUnfinalized(ref string result, StatWorker statWorker, StatRequest req, ToStringNumberSense numberSense)
-        {
-            foreach (ThingComp_BasicNodeComp comp in AllNodeComp)
-            {
-                comp.PostStatWorker_GetExplanationUnfinalized(ref result, statWorker, req, numberSense);
-            }
-            result = result ?? "";
-        }
-
-        /// <summary>
-        /// event proccesser after StatWorker.GetExplanationFinalizePart()
-        /// (WARRING!!!: Don't invoke any method if thet will invoke StatWorker.GetExplanationFinalizePart)
-        /// </summary>
-        /// <param name="result">result of StatWorker.GetExplanationFinalizePart(), modifiable</param>
-        /// <param name="statWorker">StatWorker</param>
-        /// <param name="req">parm 'req' of StatWorker.GetExplanationFinalizePart()</param>
-        /// <param name="numberSense">parm 'numberSense' of StatWorker.GetExplanationFinalizePart()</param>
-        /// <param name="finalVal">parm 'finalVal' of StatWorker.GetExplanationFinalizePart()</param>
-        public void PostStatWorker_GetExplanationFinalizePart(ref string result, StatWorker statWorker, StatRequest req, ToStringNumberSense numberSense, float finalVal)
-        {
-            foreach (ThingComp_BasicNodeComp comp in AllNodeComp)
-            {
-                comp.PostStatWorker_GetExplanationFinalizePart(ref result, statWorker, req, numberSense, finalVal);
-            }
-            result = result ?? "";
-        }
-
-        /// <summary>
-        /// event proccesser after StatWorker.GetInfoCardHyperlinks()
-        /// (WARRING!!!: Don't invoke any method if thet will invoke StatWorker.GetInfoCardHyperlinks)
-        /// </summary>
-        /// <param name="result">result of StatWorker.GetInfoCardHyperlinks(), modifiable</param>
-        /// <param name="statWorker">StatWorker</param>
-        /// <param name="reqstatRequest">parm 'reqstatRequest' of StatWorker.GetInfoCardHyperlinks()</param>
-        public void PostStatWorker_GetInfoCardHyperlinks(ref IEnumerable<Dialog_InfoCard.Hyperlink> result, StatWorker statWorker, StatRequest reqstatRequest)
-        {
-            foreach (ThingComp_BasicNodeComp comp in AllNodeComp)
-            {
-                result = comp.PostStatWorker_GetInfoCardHyperlinks(result, statWorker, reqstatRequest);
-            }
-        }
-
-        /// <summary>
-        /// event proccesser after IVerbOwner.VerbProperties
-        /// (WARRING!!!: Don't invoke any method if thet will invoke IVerbOwner.VerbProperties)
-        /// </summary>
-        /// <param name="owner">IVerbOwner source</param>
-        /// <param name="verbProperties">result of IVerbOwner.VerbProperties</param>
-        public void PostIVerbOwner_GetVerbProperties(IVerbOwner owner, ref List<VerbProperties> verbProperties)
-        {
-            foreach (ThingComp_BasicNodeComp comp in AllNodeComp)
-            {
-                comp.PostIVerbOwner_GetVerbProperties(owner, ref verbProperties);
-            }
-            verbProperties = verbProperties ?? new List<VerbProperties>();
-        }
-
-        /// <summary>
-        /// event proccesser after IVerbOwner.VerbProperties
-        /// (WARRING!!!: Don't invoke any method if thet will invoke IVerbOwner.Tools)
-        /// </summary>
-        /// <param name="owner">IVerbOwner source</param>
-        /// <param name="verbProperties">result of IVerbOwner.Tools</param>
-        public void PostIVerbOwner_GetTools(IVerbOwner owner, ref List<Tool> tools)
-        {
-            foreach (ThingComp_BasicNodeComp comp in AllNodeComp)
-            {
-                comp.PostIVerbOwner_GetTools(owner, ref tools);
-            }
-            tools = tools ?? new List<Tool>();
-        }
         #endregion
 
-
         /// <summary>
-        /// 
+        /// Return the correct verb ownner and complemented before&after verb
         /// </summary>
-        /// <param name="verb"></param>
-        /// <returns></returns>
-        public Thing GetVerbCorrespondingThing(Verb verb)
+        /// <param name="verbTracker">Verb container</param>
+        /// <param name="verbBeforeConvert">Verb before convert</param>
+        /// <param name="verbAfterConvert">Verb after convert</param>
+        /// <returns>correct verb ownner</returns>
+        public Thing GetVerbCorrespondingThing(VerbTracker verbTracker, ref Verb verbBeforeConvert, ref Verb verbAfterConvert)
         {
             Thing result = null;
             foreach (ThingComp_BasicNodeComp comp in AllNodeComp)
             {
-                result = comp.GetVerbCorrespondingThing(verb);
-                if(result != null)
-                {
-                    break;
-                }
+                result = comp.GetVerbCorrespondingThing(verbTracker, result, ref verbBeforeConvert,ref verbAfterConvert) ?? result;
             }
             return result;
         }
 
+        /// <summary>
+        /// set all texture need regenerate
+        /// </summary>
         public void ResetRenderedTexture()
         {
             IsRandereds = 0;
@@ -257,46 +163,31 @@ namespace RW_NodeTree
         /// <returns></returns>
         public bool AppendChild(Thing node, string id = null)
         {
-            NodeContainer child = ChildNodes;
-            if (child != null)
+            if(node != null)
             {
-                ThingOwner owner = node.holdingOwner;
-                if(owner != null)
+                NodeContainer child = ChildNodes;
+                if (child != null)
                 {
-                    owner.Remove(node);
-                }
-                if (child.TryAdd(node))
-                {
-                    if (id != null) child[node] = id;
-                    return true;
-                }
-                else
-                {
-                    if (owner != null)
+                    ThingOwner owner = node.holdingOwner;
+                    if(owner != null)
                     {
-                        owner.TryAdd(node);
+                        owner.Remove(node);
+                    }
+                    if (child.TryAdd(node))
+                    {
+                        if (id != null) child[node] = id;
+                        return true;
+                    }
+                    else
+                    {
+                        if (owner != null)
+                        {
+                            owner.TryAdd(node);
+                        }
                     }
                 }
             }
             return false;
-        }
-
-        public Graphic CreateGraphic_ChildNode(Graphic OrgGraphic, GraphicData data)
-        {
-            Graphic_Linked graphic_Linked = OrgGraphic as Graphic_Linked;
-            if (graphic_Linked != null)
-            {
-                OrgGraphic = Graphic_Linked_SubGraphic(graphic_Linked);
-            }
-            Graphic_RandomRotated graphic_RandomRotated = OrgGraphic as Graphic_RandomRotated;
-            if (graphic_RandomRotated != null)
-            {
-                OrgGraphic = Graphic_RandomRotated_SubGraphic(graphic_RandomRotated);
-            }
-            OrgGraphic = new Graphic_ChildNode(this, OrgGraphic);
-            if (graphic_RandomRotated != null) OrgGraphic = new Graphic_RandomRotated(OrgGraphic, Graphic_RandomRotated_MaxAngle(graphic_RandomRotated));
-            if (data.Linked) OrgGraphic = GraphicUtility.WrapLinked(OrgGraphic, data.linkType);
-            return OrgGraphic;
         }
 
         /// <summary>
@@ -305,7 +196,7 @@ namespace RW_NodeTree
         /// <param name="rot">rotate</param>
         /// <param name="subGraphic">orging Graphic of this</param>
         /// <returns>result of rendering</returns>
-        public Material ChildCombinedTexture(Rot4 rot, Graphic subGraphic)
+        public Material ChildCombinedTexture(Rot4 rot, Graphic subGraphic = null)
         {
             int rot_int = rot.AsInt;
             Shader shader = ShaderDatabase.Transparent;
@@ -330,8 +221,6 @@ namespace RW_NodeTree
             //    Log.Message(parent + " graphic : " + parent.Graphic + ";\nstack : " + stackReport);
             //}
 
-
-
             foreach (Thing child in nodes)
             {
                 RenderingTools.StartOrEndDrawCatchingBlock = true;
@@ -355,6 +244,7 @@ namespace RW_NodeTree
             }
 
             //ORIGIN
+            if (subGraphic == null) subGraphic = (parent.Graphic?.GetGraphic_ChildNode() as Graphic_ChildNode)?.SubGraphic;
             if (subGraphic != null)
             {
                 RenderingTools.StartOrEndDrawCatchingBlock = true;
@@ -383,32 +273,10 @@ namespace RW_NodeTree
             {
                 final.AddRange(infos);
             }
-            RenderTexture render = RenderingTools.RenderToTarget(final);
+
+            RenderingTools.RenderToTarget(final, ref cachedRenderTextures[rot_int], ref textures[rot_int]);
 
 
-            if (render != null)
-            {
-                Texture2D tex = textures[rot_int];
-                if (tex == null || tex.width != render.width || tex.height != render.height)
-                {
-                    if(tex != null) GameObject.Destroy(tex);
-                    tex = new Texture2D(render.width, render.width, TextureFormat.ARGB32, false);
-                    textures[rot_int] = tex;
-                }
-                //else if (tex.width != render.width || tex.height != render.height)
-                //{
-                //    tex.Resize(render.width, render.height, TextureFormat.ARGB32, false);
-                //}
-                Graphics.CopyTexture(render, tex);
-                //RenderTexture cache = RenderTexture.active;
-                //RenderTexture.active = render;
-
-                //tex.ReadPixels(new Rect(0, 0, render.width, render.height), 0, 0);
-                //tex.Apply();
-
-                //RenderTexture.active = cache;
-                GameObject.Destroy(render);
-            }
             if (materials[rot_int] == null)
             {
                 materials[rot_int] = new Material(shader);
@@ -423,7 +291,7 @@ namespace RW_NodeTree
         {
             int rot_int = rot.AsInt;
             if (((IsRandereds >> rot_int) & 1) == 0 || textures[rot_int] == null) ChildCombinedTexture(rot, subGraphic);
-            Vector2 result = new Vector2(textures[rot_int].width, textures[rot_int].height) * 2 / RenderingTools.TexSizeFactor;
+            Vector2 result = new Vector2(textures[rot_int].width, textures[rot_int].height) / RenderingTools.TexSizeFactor;
             //if (Prefs.DevMode) Log.Message(" DrawSize: thing=" + parent + "; Rot4=" + rot + "; textureWidth=" + textures[rot_int].width + "; result=" + result + ";\n");
             return result;
         }
@@ -443,7 +311,7 @@ namespace RW_NodeTree
             return true;
         }
 
-        public void UpdateNode(Comp_ChildNodeProccesser actionNode = null)
+        public void UpdateNode(CompChildNodeProccesser actionNode = null)
         {
             ChildNodes.UpdateNode(actionNode);
         }
@@ -463,14 +331,14 @@ namespace RW_NodeTree
         }
 
         #region operator
-        public static implicit operator Thing(Comp_ChildNodeProccesser node)
+        public static implicit operator Thing(CompChildNodeProccesser node)
         {
             return node?.parent;
         }
 
-        public static implicit operator Comp_ChildNodeProccesser(Thing thing)
+        public static implicit operator CompChildNodeProccesser(Thing thing)
         {
-            return thing?.TryGetComp<Comp_ChildNodeProccesser>();
+            return thing?.TryGetComp<CompChildNodeProccesser>();
         }
         #endregion
 
@@ -478,13 +346,11 @@ namespace RW_NodeTree
 
         private Texture2D[] textures = new Texture2D[4];
 
+        private RenderTexture[] cachedRenderTextures = new RenderTexture[4];
+
         private Material[] materials = new Material[4];
 
         private byte IsRandereds = 0;
-
-        private static AccessTools.FieldRef<Graphic_Linked, Graphic> Graphic_Linked_SubGraphic = AccessTools.FieldRefAccess<Graphic>(typeof(Graphic_Linked), "subGraphic");
-        private static AccessTools.FieldRef<Graphic_RandomRotated, Graphic> Graphic_RandomRotated_SubGraphic = AccessTools.FieldRefAccess<Graphic>(typeof(Graphic_RandomRotated), "subGraphic");
-        private static AccessTools.FieldRef<Graphic_RandomRotated, float> Graphic_RandomRotated_MaxAngle = AccessTools.FieldRefAccess<float>(typeof(Graphic_RandomRotated), "maxAngle");
 
 
         /*

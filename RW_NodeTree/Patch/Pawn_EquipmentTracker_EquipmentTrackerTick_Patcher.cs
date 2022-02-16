@@ -10,7 +10,7 @@ namespace RW_NodeTree.Patch
 {
 
     [HarmonyPatch(typeof(Pawn_EquipmentTracker))]
-    internal static class Pawn_EquipmentTracker_EquipmentTrackerTick_Patcher
+    internal static partial class Pawn_EquipmentTracker_Patcher
     {
 
         [HarmonyPostfix]
@@ -20,7 +20,23 @@ namespace RW_NodeTree.Patch
         )]
         private static void PostPawn_EquipmentTracker_EquipmentTrackerTick(Pawn_EquipmentTracker __instance)
         {
-            Pawn_EquipmentTracker_equipment(__instance)?.ThingOwnerTick();
+            ThingOwner<ThingWithComps> list = Pawn_EquipmentTracker_equipment(__instance);
+            list?.ThingOwnerTick();
+            for (int i = list.Count - 1; i >= 0; i--)
+            {
+                Thing t = list[i];
+                if (t.def.tickerType == TickerType.Never)
+                {
+                    if ((t is IVerbOwner) || (t as ThingWithComps)?.AllComps.Find(x => x is IVerbOwner) != null || (CompChildNodeProccesser)t != null)
+                    {
+                        t.Tick();
+                        if (t.Destroyed)
+                        {
+                            list.Remove(t);
+                        }
+                    }
+                }
+            }
         }
         private static AccessTools.FieldRef<Pawn_EquipmentTracker, ThingOwner<ThingWithComps>> Pawn_EquipmentTracker_equipment = AccessTools.FieldRefAccess<ThingOwner<ThingWithComps>>(typeof(Pawn_EquipmentTracker), "equipment");
     }

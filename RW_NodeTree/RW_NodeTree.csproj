@@ -36,10 +36,17 @@
   <ItemGroup>
     <Compile Include="NodeComponent\NodeComp_Test.cs" />
     <Compile Include="Patch\Graphic_RandomRotated_Patcher.cs" />
+    <Compile Include="Patch\StatDrawEntry_Patcher.cs" />
+    <Compile Include="Patch\PawnRenderer_DrawEquipmentAiming_Patcher.cs" />
     <Compile Include="Patch\Pawn_EquipmentTracker_EquipmentTrackerTick_Patcher.cs" />
+    <Compile Include="Patch\Pawn_TryGetAttackVerb_Patcher.cs" />
     <Compile Include="Patch\StatWorker_GetInfoCardHyperlinks_Patcher.cs" />
+    <Compile Include="Patch\StatWorker_MeleeAverageDPS_GetCurrentWeaponUser_Patcher.cs" />
+    <Compile Include="Patch\ThingDef_SpecialDisplayStats_Patcher.cs" />
+    <Compile Include="Patch\VerbTracker_AllVerbs_Patcher.cs" />
     <Compile Include="Patch\VerbTracker_CreateVerbTargetCommand_Patcher.cs" />
     <Compile Include="Tools\GraphicHelper.cs" />
+    <Compile Include="Tools\MathHelper.cs" />
     <Compile Include="Tools\ObjectHelper.cs" />
     <Reference Include="0Harmony">
       <HintPath>I:\SteamLibrary\steamapps\workshop\content\294100\2009463077\Current\Assemblies\0Harmony.dll</HintPath>
@@ -267,7 +274,7 @@
     <Compile Include="Rendering\RenderInfo.cs" />
     <Compile Include="Test\Test.cs" />
     <Compile Include="ThingComp_BasicNodeComp.cs" />
-    <Compile Include="Comp_ChildNodeProccesser.cs" />
+    <Compile Include="CompChildNodeProccesser.cs" />
     <Compile Include="Rendering\RenderingTools.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

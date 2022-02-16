@@ -25,7 +25,7 @@ namespace RW_NodeTree.Patch
                 float maxAngle = Graphic_RandomRotated_MaxAngle(__instance);
                 extraRotation += -maxAngle + (float)(thing.thingIDNumber * 542) % (maxAngle * 2f);
             }
-            Graphic_RandomRotated_SubGraphic(__instance).DrawWorker(loc, rot, thingDef, thing, extraRotation);
+            Graphic_RandomRotated_SubGraphic(__instance)?.DrawWorker(loc, rot, thingDef, thing, extraRotation);
             return false;
         }
         private static AccessTools.FieldRef<Graphic_RandomRotated, Graphic> Graphic_RandomRotated_SubGraphic = AccessTools.FieldRefAccess<Graphic>(typeof(Graphic_RandomRotated), "subGraphic");
