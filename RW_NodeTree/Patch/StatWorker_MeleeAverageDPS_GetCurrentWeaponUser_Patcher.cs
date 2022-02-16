@@ -11,7 +11,7 @@ using RW_NodeTree;
 namespace RW_NodeTree.Patch
 {
     [HarmonyPatch(typeof(StatWorker_MeleeAverageDPS))]
-    internal static class StatWorker_MeleeAverageDPS_GetCurrentWeaponUser_Patcher
+    internal static class StatWorker_MeleeAverageDPS_Patcher
     {
         [HarmonyPrefix]
         [HarmonyPatch(

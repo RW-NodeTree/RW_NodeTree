@@ -42,6 +42,7 @@
     <Compile Include="Patch\Pawn_TryGetAttackVerb_Patcher.cs" />
     <Compile Include="Patch\StatWorker_GetInfoCardHyperlinks_Patcher.cs" />
     <Compile Include="Patch\StatWorker_MeleeAverageDPS_GetCurrentWeaponUser_Patcher.cs" />
+    <Compile Include="Patch\StatsReportUtility_StatsToDraw_Patcher.cs" />
     <Compile Include="Patch\ThingDef_SpecialDisplayStats_Patcher.cs" />
     <Compile Include="Patch\VerbTracker_AllVerbs_Patcher.cs" />
     <Compile Include="Patch\VerbTracker_CreateVerbTargetCommand_Patcher.cs" />
@@ -281,6 +282,9 @@
   <ItemGroup>
     <Content Include="PackUp\1.3\Defs\Tset.xml" />
     <Content Include="PackUp\About\About.xml" />
+    <Content Include="PackUp\About\Preview.png" />
+    <Content Include="PackUp\About\Preview.svg" />
+    <Content Include="PackUp\About\PublishedFileId.txt" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="PackUp\1.3\Assemblies\" />
