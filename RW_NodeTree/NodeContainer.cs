@@ -27,15 +27,15 @@ namespace RW_NodeTree
             }
             set
             {
-                int index = innerIdList.IndexOf(id);
-                Thing t = ((index >= 0) ? this[index] : null);
+                Thing t = this[id];
                 if (t != null)
                 {
                     Remove(t);
                 }
-                if (value != null && TryAdd(value))
+                innerIdList.Add(id);
+                if (value == null || !TryAdd(value))
                 {
-                    innerIdList[innerIdList.Count - 1] = id;
+                    innerIdList.RemoveAt(Count);
                 }
             }
         }
@@ -45,14 +45,17 @@ namespace RW_NodeTree
             get
             {
                 int index = base.IndexOf(item);
-                if(index == -1) return null;
+                if(index < 0) return null;
                 return innerIdList[index];
             }
             set
             {
-                int index = base.IndexOf(item);
-                innerIdList[index] = value;
-                NeedUpdate = true;
+                if(Comp != null && Comp.AllowNode(item,value))
+                {
+                    int index = base.IndexOf(item);
+                    innerIdList[index] = value;
+                    NeedUpdate = true;
+                }
             }
         }
 
@@ -107,8 +110,7 @@ namespace RW_NodeTree
 
         public override int GetCountCanAccept(Thing item, bool canMergeWithExistingStacks = true)
         {
-            CompChildNodeProccesser comp_ChildNodeProccesser = (CompChildNodeProccesser)Owner;
-            if(comp_ChildNodeProccesser != null && comp_ChildNodeProccesser.AllowNode(item))
+            if(Comp != null && innerIdList.Count > Count && Comp.AllowNode(item, innerIdList[Count]))
             {
                 return base.GetCountCanAccept(item, false);
             }
@@ -122,15 +124,11 @@ namespace RW_NodeTree
 
         public override bool TryAdd(Thing item, bool canMergeWithExistingStacks = true)
         {
-            if(Comp != null && Comp.AllowNode(item))
+            if (base.TryAdd(item, false))
             {
-                if (base.TryAdd(item, false))
-                {
-                    innerIdList.Add(null);
-                    NeedUpdate = true;
-                    if(item.Spawned) item.DeSpawn();
-                    return true;
-                }
+                NeedUpdate = true;
+                if (item.Spawned) item.DeSpawn();
+                return true;
             }
             return false;
         }

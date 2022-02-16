@@ -169,21 +169,17 @@ namespace RW_NodeTree
                 if (child != null)
                 {
                     ThingOwner owner = node.holdingOwner;
-                    if(owner != null)
+                    owner?.Remove(node);
+                    Thing nodeBefore = child[id];
+                    child[id] = node;
+                    if (child[id] == node)
                     {
-                        owner.Remove(node);
-                    }
-                    if (child.TryAdd(node))
-                    {
-                        if (id != null) child[node] = id;
                         return true;
                     }
                     else
                     {
-                        if (owner != null)
-                        {
-                            owner.TryAdd(node);
-                        }
+                        owner?.TryAdd(node);
+                        child[id] = nodeBefore;
                     }
                 }
             }

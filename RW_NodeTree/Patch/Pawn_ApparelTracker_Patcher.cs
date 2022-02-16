@@ -1,4 +1,5 @@
 ﻿using HarmonyLib;
+using RimWorld;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,19 +10,18 @@ using Verse;
 namespace RW_NodeTree.Patch
 {
 
-    [HarmonyPatch(typeof(Pawn_EquipmentTracker))]
-    internal static partial class Pawn_EquipmentTracker_Patcher
+    [HarmonyPatch(typeof(Pawn_ApparelTracker))]
+    internal static partial class Pawn_ApparelTracker_Patcher
     {
 
         [HarmonyPostfix]
         [HarmonyPatch(
-            typeof(Pawn_EquipmentTracker),
-            "EquipmentTrackerTick"
+            typeof(Pawn_ApparelTracker),
+            "ApparelTrackerTick"
         )]
-        private static void PostPawn_EquipmentTracker_EquipmentTrackerTick(Pawn_EquipmentTracker __instance)
+        private static void PostPawn_ApparelTracker_ApparelTrackerTick(Pawn_ApparelTracker __instance)
         {
-            ThingOwner<ThingWithComps> list = Pawn_EquipmentTracker_equipment(__instance);
-            list?.ThingOwnerTick();
+            ThingOwner<Apparel> list = Pawn_ApparelTracker_wornApparel(__instance);
             for (int i = list.Count - 1; i >= 0; i--)
             {
                 Thing t = list[i];
@@ -38,6 +38,7 @@ namespace RW_NodeTree.Patch
                 }
             }
         }
-        private static AccessTools.FieldRef<Pawn_EquipmentTracker, ThingOwner<ThingWithComps>> Pawn_EquipmentTracker_equipment = AccessTools.FieldRefAccess<ThingOwner<ThingWithComps>>(typeof(Pawn_EquipmentTracker), "equipment");
+
+        private static AccessTools.FieldRef<Pawn_ApparelTracker, ThingOwner<Apparel>> Pawn_ApparelTracker_wornApparel = AccessTools.FieldRefAccess<ThingOwner<Apparel>>(typeof(Pawn_ApparelTracker), "wornApparel");
     }
 }
