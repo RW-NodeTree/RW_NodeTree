@@ -59,13 +59,13 @@ namespace RW_NodeTree
         /// <summary>
         /// find all comp for node
         /// </summary>
-        public IEnumerable<ThingComp_BasicNodeComp> AllNodeComp
+        public IEnumerable<CompBasicNodeComp> AllNodeComp
         {
             get
             {
                 foreach (ThingComp comp in parent.AllComps)
                 {
-                    ThingComp_BasicNodeComp c = comp as ThingComp_BasicNodeComp;
+                    CompBasicNodeComp c = comp as CompBasicNodeComp;
                     if (c != null)
                     {
                         yield return c;
@@ -135,7 +135,7 @@ namespace RW_NodeTree
         public Thing GetVerbCorrespondingThing(VerbTracker verbTracker, ref Verb verbBeforeConvert, ref Verb verbAfterConvert)
         {
             Thing result = null;
-            foreach (ThingComp_BasicNodeComp comp in AllNodeComp)
+            foreach (CompBasicNodeComp comp in AllNodeComp)
             {
                 result = comp.GetVerbCorrespondingThing(verbTracker, result, ref verbBeforeConvert,ref verbAfterConvert) ?? result;
             }
@@ -263,7 +263,7 @@ namespace RW_NodeTree
                 RenderingTools.StartOrEndDrawCatchingBlock = false;
             }
 
-            foreach (ThingComp_BasicNodeComp comp in AllNodeComp)
+            foreach (CompBasicNodeComp comp in AllNodeComp)
             {
                 comp.AdapteDrawSteep(ref ids, ref nodes, ref RenderInfos);
             }
@@ -304,7 +304,7 @@ namespace RW_NodeTree
         /// <returns></returns>
         public bool AllowNode(Thing node, string id = null)
         {
-            foreach (ThingComp_BasicNodeComp comp in AllNodeComp)
+            foreach (CompBasicNodeComp comp in AllNodeComp)
             {
                 if (!comp.AllowNode(node, id)) return false;
             }

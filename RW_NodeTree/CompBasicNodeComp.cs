@@ -10,7 +10,7 @@ using Verse;
 
 namespace RW_NodeTree
 {
-    public abstract partial class ThingComp_BasicNodeComp : ThingComp
+    public abstract partial class CompBasicNodeComp : ThingComp
     {
         public bool Validity => NodeProccesser != null;
         public CompChildNodeProccesser NodeProccesser => parent;

@@ -60,14 +60,14 @@ namespace RW_NodeTree
         /// <param name="result">result of VerbTracker.AllVerbs</param>
         public List<Verb> PostVerbTracker_AllVerbs(VerbTracker verbTracker, List<Verb> result)
         {
-            foreach (ThingComp_BasicNodeComp comp in AllNodeComp)
+            foreach (CompBasicNodeComp comp in AllNodeComp)
             {
                 result = comp.PostVerbTracker_AllVerbs(verbTracker, result) ?? result;
             }
             return result;
         }
     }
-    public abstract partial class ThingComp_BasicNodeComp : ThingComp
+    public abstract partial class CompBasicNodeComp : ThingComp
     {
 
         public virtual List<Verb> PostVerbTracker_AllVerbs(VerbTracker verbTracker, List<Verb> result)

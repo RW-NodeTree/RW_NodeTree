@@ -91,7 +91,7 @@ namespace RW_NodeTree
                 {
                     ((CompChildNodeProccesser)node)?.UpdateNode(actionNode);
                 }
-                foreach (ThingComp_BasicNodeComp comp in proccess.AllNodeComp)
+                foreach (CompBasicNodeComp comp in proccess.AllNodeComp)
                 {
                     comp.UpdateNode(actionNode);
                 }

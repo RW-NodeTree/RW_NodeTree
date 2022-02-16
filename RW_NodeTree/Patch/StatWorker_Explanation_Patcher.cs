@@ -116,7 +116,7 @@ namespace RW_NodeTree
         /// <param name="numberSense">parm 'numberSense' of StatWorker.GetExplanationUnfinalized()</param>
         public void PreStatWorker_GetExplanationUnfinalized(StatWorker statWorker, StatRequest req, ToStringNumberSense numberSense, Dictionary<string, object> forPostRead)
         {
-            foreach (ThingComp_BasicNodeComp comp in AllNodeComp)
+            foreach (CompBasicNodeComp comp in AllNodeComp)
             {
                 comp.PreStatWorker_GetExplanationUnfinalized(statWorker, req, numberSense, forPostRead);
             }
@@ -132,7 +132,7 @@ namespace RW_NodeTree
         /// <param name="finalVal">parm 'finalVal' of StatWorker.GetExplanationFinalizePart()</param>
         public void PreStatWorker_GetExplanationFinalizePart(StatWorker statWorker, StatRequest req, ToStringNumberSense numberSense, float finalVal, Dictionary<string, object> forPostRead)
         {
-            foreach (ThingComp_BasicNodeComp comp in AllNodeComp)
+            foreach (CompBasicNodeComp comp in AllNodeComp)
             {
                 comp.PreStatWorker_GetExplanationFinalizePart(statWorker, req, numberSense, finalVal, forPostRead);
             }
@@ -147,7 +147,7 @@ namespace RW_NodeTree
         /// <param name="numberSense">parm 'numberSense' of StatWorker.GetExplanationUnfinalized()</param>
         public string PostStatWorker_GetExplanationUnfinalized(StatWorker statWorker, StatRequest req, ToStringNumberSense numberSense, string result, Dictionary<string, object> forPostRead)
         {
-            foreach (ThingComp_BasicNodeComp comp in AllNodeComp)
+            foreach (CompBasicNodeComp comp in AllNodeComp)
             {
                 result = comp.PostStatWorker_GetExplanationUnfinalized(statWorker, req, numberSense, result, forPostRead) ?? result;
             }
@@ -165,7 +165,7 @@ namespace RW_NodeTree
         /// <param name="finalVal">parm 'finalVal' of StatWorker.GetExplanationFinalizePart()</param>
         public string PostStatWorker_GetExplanationFinalizePart(StatWorker statWorker, StatRequest req, ToStringNumberSense numberSense, float finalVal, string result, Dictionary<string, object> forPostRead)
         {
-            foreach (ThingComp_BasicNodeComp comp in AllNodeComp)
+            foreach (CompBasicNodeComp comp in AllNodeComp)
             {
                 result = comp.PostStatWorker_GetExplanationFinalizePart(statWorker, req, numberSense, finalVal, result, forPostRead) ?? result;
             }
@@ -173,7 +173,7 @@ namespace RW_NodeTree
         }
 
     }
-    public abstract partial class ThingComp_BasicNodeComp : ThingComp
+    public abstract partial class CompBasicNodeComp : ThingComp
     {
         public virtual void PreStatWorker_GetExplanationUnfinalized(StatWorker statWorker, StatRequest req, ToStringNumberSense numberSense, Dictionary<string, object> forPostRead)
         {

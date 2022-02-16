@@ -125,7 +125,7 @@ namespace RW_NodeTree
         /// <param name="applyPostProcess">parm 'applyPostProcess' of StatWorker.GetValueUnfinalized()</param>
         public void PreStatWorker_GetValueUnfinalized(StatWorker statWorker, StatRequest req, bool applyPostProcess, Dictionary<string, object> forPostRead)
         {
-            foreach (ThingComp_BasicNodeComp comp in AllNodeComp)
+            foreach (CompBasicNodeComp comp in AllNodeComp)
             {
                 comp.PreStatWorker_GetValueUnfinalized(statWorker, req, applyPostProcess, forPostRead);
             }
@@ -141,7 +141,7 @@ namespace RW_NodeTree
         /// <param name="applyPostProcess">parm 'applyPostProcess' of StatWorker.FinalizeValue()</param>
         public float PreStatWorker_FinalizeValue(StatWorker statWorker, StatRequest req, bool applyPostProcess, float result, Dictionary<string, object> forPostRead)
         {
-            foreach (ThingComp_BasicNodeComp comp in AllNodeComp)
+            foreach (CompBasicNodeComp comp in AllNodeComp)
             {
                 result = comp.PreStatWorker_FinalizeValue(statWorker, req, applyPostProcess, result, forPostRead);
             }
@@ -158,7 +158,7 @@ namespace RW_NodeTree
         /// <param name="applyPostProcess">parm 'applyPostProcess' of StatWorker.GetValueUnfinalized()</param>
         public float PostStatWorker_GetValueUnfinalized(StatWorker statWorker, StatRequest req, bool applyPostProcess, float result, Dictionary<string, object> forPostRead)
         {
-            foreach (ThingComp_BasicNodeComp comp in AllNodeComp)
+            foreach (CompBasicNodeComp comp in AllNodeComp)
             {
                 result = comp.PostStatWorker_GetValueUnfinalized(statWorker, req, applyPostProcess, result, forPostRead);
             }
@@ -175,14 +175,14 @@ namespace RW_NodeTree
         /// <param name="applyPostProcess">parm 'applyPostProcess' of StatWorker.FinalizeValue()</param>
         public float PostStatWorker_FinalizeValue(StatWorker statWorker, StatRequest req, bool applyPostProcess, float result, Dictionary<string, object> forPostRead)
         {
-            foreach (ThingComp_BasicNodeComp comp in AllNodeComp)
+            foreach (CompBasicNodeComp comp in AllNodeComp)
             {
                 result = comp.PostStatWorker_FinalizeValue(statWorker, req, applyPostProcess, result, forPostRead);
             }
             return result;
         }
     }
-    public abstract partial class ThingComp_BasicNodeComp : ThingComp
+    public abstract partial class CompBasicNodeComp : ThingComp
     {
         public virtual void PreStatWorker_GetValueUnfinalized(StatWorker statWorker, StatRequest req, bool applyPostProcess, Dictionary<string, object> forPostRead)
         {

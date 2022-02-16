@@ -110,7 +110,7 @@ namespace RW_NodeTree
         /// <param name="verbProperties">result of IVerbOwner.VerbProperties</param>
         public void PreIVerbOwner_GetVerbProperties(IVerbOwner owner, Dictionary<string, object> forPostRead)
         {
-            foreach (ThingComp_BasicNodeComp comp in AllNodeComp)
+            foreach (CompBasicNodeComp comp in AllNodeComp)
             {
                 comp.PreIVerbOwner_GetVerbProperties(owner, forPostRead);
             }
@@ -125,7 +125,7 @@ namespace RW_NodeTree
         /// <param name="verbProperties">result of IVerbOwner.Tools</param>
         public void PreIVerbOwner_GetTools(IVerbOwner owner, Dictionary<string, object> forPostRead)
         {
-            foreach (ThingComp_BasicNodeComp comp in AllNodeComp)
+            foreach (CompBasicNodeComp comp in AllNodeComp)
             {
                 comp.PreIVerbOwner_GetTools(owner, forPostRead);
             }
@@ -138,7 +138,7 @@ namespace RW_NodeTree
         /// <param name="verbProperties">result of IVerbOwner.VerbProperties</param>
         public List<VerbProperties> PostIVerbOwner_GetVerbProperties(IVerbOwner owner, List<VerbProperties> verbProperties, Dictionary<string, object> forPostRead)
         {
-            foreach (ThingComp_BasicNodeComp comp in AllNodeComp)
+            foreach (CompBasicNodeComp comp in AllNodeComp)
             {
                 verbProperties = comp.PostIVerbOwner_GetVerbProperties(owner, verbProperties, forPostRead) ?? verbProperties;
             }
@@ -153,14 +153,14 @@ namespace RW_NodeTree
         /// <param name="verbProperties">result of IVerbOwner.Tools</param>
         public List<Tool> PostIVerbOwner_GetTools(IVerbOwner owner, List<Tool> tools, Dictionary<string, object> forPostRead)
         {
-            foreach (ThingComp_BasicNodeComp comp in AllNodeComp)
+            foreach (CompBasicNodeComp comp in AllNodeComp)
             {
                 tools = comp.PostIVerbOwner_GetTools(owner, tools, forPostRead) ?? tools;
             }
             return tools;
         }
     }
-    public abstract partial class ThingComp_BasicNodeComp : ThingComp
+    public abstract partial class CompBasicNodeComp : ThingComp
     {
         public virtual void PreIVerbOwner_GetVerbProperties(IVerbOwner owner, Dictionary<string, object> forPostRead)
         {
