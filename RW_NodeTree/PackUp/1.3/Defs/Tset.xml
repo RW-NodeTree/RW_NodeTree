@@ -60,7 +60,7 @@
     </tools>
     <comps>
       <li>
-        <compClass>RW_NodeTree.Comp_ChildNodeProccesser</compClass>
+        <compClass>RW_NodeTree.CompChildNodeProccesser</compClass>
       </li>
       <li Class="RW_ModularizationWeapon.NodeComponent.CompProperties_Test">
         <thingDefs>

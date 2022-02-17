@@ -35,6 +35,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="NodeComponent\NodeComp_Test.cs" />
+    <Compile Include="Patch\GenRecipe_Patcher.cs" />
     <Compile Include="Patch\Graphic_RandomRotated_Patcher.cs" />
     <Compile Include="Patch\Pawn_ApparelTracker_Patcher.cs" />
     <Compile Include="Patch\StatDrawEntry_Patcher.cs" />
