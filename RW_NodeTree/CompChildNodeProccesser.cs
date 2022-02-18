@@ -145,6 +145,23 @@ namespace RW_NodeTree
         /// Return the correct verb ownner and complemented before&after verb info
         /// </summary>
         /// <param name="verbOwner">Verb container</param>
+        /// <param name="verbPropertiesBeforeConvert">verbProperties of verbBeforeConvert</param>
+        /// <param name="toolBeforeConvert">tool of verbBeforeConvert</param>
+        /// <param name="verbPropertiesAfterConvert">verbProperties of verbAfterConvert</param>
+        /// <param name="toolAfterConvert">tool of verbAfterConvert</param>
+        /// <returns>correct verb ownner</returns>
+        public Thing GetVerbCorrespondingThing(IVerbOwner verbOwner, ref VerbProperties verbPropertiesBeforeConvert, ref Tool toolBeforeConvert, ref VerbProperties verbPropertiesAfterConvert, ref Tool toolAfterConvert)
+        {
+            Verb verbBeforeConvert = null;
+            Verb verbAfterConvert = null;
+            return GetVerbCorrespondingThing(verbOwner, ref verbBeforeConvert, ref verbPropertiesBeforeConvert, ref toolBeforeConvert, ref verbAfterConvert, ref verbPropertiesAfterConvert, ref toolAfterConvert);
+        }
+
+
+        /// <summary>
+        /// Return the correct verb ownner and complemented before&after verb info
+        /// </summary>
+        /// <param name="verbOwner">Verb container</param>
         /// <param name="verbBeforeConvert">Verb before convert</param>
         /// <param name="verbPropertiesBeforeConvert">verbProperties of verbBeforeConvert</param>
         /// <param name="toolBeforeConvert">tool of verbBeforeConvert</param>

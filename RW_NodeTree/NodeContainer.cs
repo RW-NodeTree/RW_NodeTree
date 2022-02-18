@@ -11,7 +11,7 @@ namespace RW_NodeTree
     /// <summary>
     /// Node storge proccesser
     /// </summary>
-    public class NodeContainer : ThingOwner<Thing>,IList<Thing>
+    public class NodeContainer : ThingOwner<Thing>, IList<Thing>
     {
 
         public NodeContainer(CompChildNodeProccesser proccesser) : base(proccesser)
