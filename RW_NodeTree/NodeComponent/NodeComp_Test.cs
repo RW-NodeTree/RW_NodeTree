@@ -82,20 +82,20 @@ namespace RW_ModularizationWeapon.NodeComponent
             return;
         }
 
-        public override Thing GetVerbCorrespondingThing(VerbTracker verbTracker, Thing result, ref Verb verbBeforeConvert, ref Verb verbAfterConvert)
+        public override Thing GetVerbCorrespondingThing(IVerbOwner verbOwner, Thing result, ref Verb verbBeforeConvert, ref VerbProperties verbPropertiesBeforeConvert, ref Tool toolBeforeConvert, ref Verb verbAfterConvert, ref VerbProperties verbPropertiesAfterConvert, ref Tool toolAfterConvert)
         {
-            Type type = verbTracker.directOwner.GetType();
+            Type type = verbOwner.GetType();
             if(verbBeforeConvert != null && verbAfterConvert == null)
             {
                 CompChildNodeProccesser proccess = NodeProccesser.ParentProccesser;
                 ThingWithComps thing = proccess?.parent;
                 if(thing != null)
                 {
-                    VerbTracker tracker = null;
+                    IVerbOwner tracker = null;
                     Verb cache = verbBeforeConvert;
                     if (type.IsAssignableFrom(thing.GetType()))
                     {
-                        tracker = (thing as IVerbOwner).VerbTracker;
+                        tracker = (thing as IVerbOwner);
                     }
                     else
                     {
@@ -103,14 +103,14 @@ namespace RW_ModularizationWeapon.NodeComponent
                         {
                             if (type.IsAssignableFrom(comp.GetType()))
                             {
-                                tracker = (comp as IVerbOwner).VerbTracker;
+                                tracker = (comp as IVerbOwner);
                                 break;
                             }
                         }
                     }
-                    cache = tracker?.AllVerbs.Find(x => x.verbProps == cache.verbProps);
+                    cache = tracker?.VerbTracker?.AllVerbs.Find(x => x.verbProps == cache.verbProps);
                     if (cache != null) result = proccess.GetVerbCorrespondingThing(tracker, ref cache, ref verbAfterConvert) ?? result;
-                    else if (tracker == null) result = proccess.GetVerbCorrespondingThing(verbTracker, ref verbBeforeConvert, ref verbAfterConvert) ?? result;
+                    else if (tracker == null) result = proccess.GetVerbCorrespondingThing(verbOwner, ref verbBeforeConvert, ref verbAfterConvert) ?? result;
                 }
                 if (verbAfterConvert == null) verbAfterConvert = verbBeforeConvert;
             }
@@ -120,11 +120,11 @@ namespace RW_ModularizationWeapon.NodeComponent
                 {
                     ThingWithComps thing = t as ThingWithComps;
                     CompChildNodeProccesser proccess = thing;
-                    VerbTracker tracker = null;
+                    IVerbOwner tracker = null;
                     Verb cache = verbAfterConvert;
                     if (type.IsAssignableFrom(t.GetType()))
                     {
-                        tracker = (t as IVerbOwner).VerbTracker;
+                        tracker = (t as IVerbOwner);
                     }
                     else if(thing != null)
                     {
@@ -132,16 +132,16 @@ namespace RW_ModularizationWeapon.NodeComponent
                         {
                             if (type.IsAssignableFrom(comp.GetType()))
                             {
-                                tracker = (comp as IVerbOwner).VerbTracker;
+                                tracker = (comp as IVerbOwner);
                                 break;
                             }
                         }
                     }
-                    cache = tracker?.AllVerbs.Find(x => x.verbProps == cache.verbProps);
+                    cache = tracker?.VerbTracker?.AllVerbs.Find(x => x.verbProps == cache.verbProps);
                     if(proccess != null)
                     {
                         if(cache != null) result = proccess.GetVerbCorrespondingThing(tracker, ref verbBeforeConvert, ref cache) ?? result;
-                        else if (tracker == null) result = proccess.GetVerbCorrespondingThing(verbTracker, ref verbBeforeConvert, ref verbAfterConvert) ?? result;
+                        else if (tracker == null) result = proccess.GetVerbCorrespondingThing(verbOwner, ref verbBeforeConvert, ref verbAfterConvert) ?? result;
                     }
                     else if(cache != null)
                     {

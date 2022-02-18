@@ -128,16 +128,69 @@ namespace RW_NodeTree
         /// <summary>
         /// Return the correct verb ownner and complemented before&after verb
         /// </summary>
-        /// <param name="verbTracker">Verb container</param>
+        /// <param name="verbOwner">Verb container</param>
         /// <param name="verbBeforeConvert">Verb before convert</param>
         /// <param name="verbAfterConvert">Verb after convert</param>
         /// <returns>correct verb ownner</returns>
-        public Thing GetVerbCorrespondingThing(VerbTracker verbTracker, ref Verb verbBeforeConvert, ref Verb verbAfterConvert)
+        public Thing GetVerbCorrespondingThing(IVerbOwner verbOwner, ref Verb verbBeforeConvert, ref Verb verbAfterConvert)
+        {
+            VerbProperties verbPropertiesBeforeConvert = verbBeforeConvert?.verbProps;
+            Tool toolBeforeConvert = verbBeforeConvert?.tool;
+            VerbProperties verbPropertiesAfterConvert = verbAfterConvert?.verbProps;
+            Tool toolAfterConvert = verbAfterConvert?.tool;
+            return GetVerbCorrespondingThing(verbOwner, ref verbBeforeConvert, ref verbPropertiesBeforeConvert, ref toolBeforeConvert, ref verbAfterConvert, ref verbPropertiesAfterConvert, ref toolAfterConvert);
+        }
+
+        /// <summary>
+        /// Return the correct verb ownner and complemented before&after verb info
+        /// </summary>
+        /// <param name="verbOwner">Verb container</param>
+        /// <param name="verbBeforeConvert">Verb before convert</param>
+        /// <param name="verbPropertiesBeforeConvert">verbProperties of verbBeforeConvert</param>
+        /// <param name="toolBeforeConvert">tool of verbBeforeConvert</param>
+        /// <param name="verbAfterConvert">Verb after convert</param>
+        /// <param name="verbPropertiesAfterConvert">verbProperties of verbAfterConvert</param>
+        /// <param name="toolAfterConvert">tool of verbAfterConvert</param>
+        /// <returns>correct verb ownner</returns>
+        public Thing GetVerbCorrespondingThing(IVerbOwner verbOwner, ref Verb verbBeforeConvert, ref VerbProperties verbPropertiesBeforeConvert, ref Tool toolBeforeConvert, ref Verb verbAfterConvert, ref VerbProperties verbPropertiesAfterConvert, ref Tool toolAfterConvert)
         {
             Thing result = null;
             foreach (CompBasicNodeComp comp in AllNodeComp)
             {
-                result = comp.GetVerbCorrespondingThing(verbTracker, result, ref verbBeforeConvert,ref verbAfterConvert) ?? result;
+                Verb verbBeforeConvertCache = verbBeforeConvert;
+                VerbProperties verbPropertiesBeforeConvertCache = verbPropertiesBeforeConvert;
+                Tool toolBeforeConvertCache = toolBeforeConvert;
+                Verb verbAfterConvertCache = verbAfterConvert;
+                VerbProperties verbPropertiesAfterConvertCache = verbPropertiesAfterConvert;
+                Tool toolAfterConvertCache = toolAfterConvert;
+
+                result = comp.GetVerbCorrespondingThing(verbOwner, result, ref verbBeforeConvert, ref verbPropertiesBeforeConvert, ref toolBeforeConvert, ref verbAfterConvert, ref verbPropertiesAfterConvert, ref toolAfterConvert) ?? result;
+
+                if(verbBeforeConvert != null)
+                {
+                    if(verbBeforeConvertCache != verbBeforeConvert)
+                    {
+                        verbPropertiesBeforeConvert = verbBeforeConvert.verbProps;
+                        toolBeforeConvert = verbBeforeConvert.tool;
+                    }
+                    else if(verbPropertiesBeforeConvert != verbPropertiesBeforeConvertCache || toolBeforeConvert != toolBeforeConvertCache)
+                    {
+                        verbBeforeConvert = null;
+                    }
+                }
+
+                if(verbAfterConvert != null)
+                {
+                    if(verbAfterConvertCache != verbAfterConvert)
+                    {
+                        verbPropertiesAfterConvert = verbAfterConvert.verbProps;
+                        toolAfterConvert = verbAfterConvert.tool;
+                    }
+                    else if (verbPropertiesAfterConvert != verbPropertiesAfterConvertCache || toolAfterConvert != toolAfterConvertCache)
+                    {
+                        verbAfterConvert = null;
+                    }
+                }
             }
             return result;
         }
@@ -249,7 +302,7 @@ namespace RW_NodeTree
                     subGraphic.Draw(Vector3.zero, rot, parent);
                     RenderInfos.Insert(0, RenderingTools.RenderInfos);
                     nodes.Insert(0, this);
-                    ids.Insert(0, "_THIS");
+                    ids.Insert(0, null);
                 }
                 catch (Exception ex)
                 {

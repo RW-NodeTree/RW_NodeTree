@@ -18,6 +18,9 @@ namespace RW_NodeTree
         {
         }
 
+        public string this[uint index] => innerIdList[(int)index];
+
+
         public Thing this[string id]
         {
             get
@@ -27,15 +30,18 @@ namespace RW_NodeTree
             }
             set
             {
-                Thing t = this[id];
-                if (t != null)
+                if (!id.NullOrEmpty())
                 {
-                    Remove(t);
-                }
-                innerIdList.Add(id);
-                if (value == null || !TryAdd(value))
-                {
-                    innerIdList.RemoveAt(Count);
+                    Thing t = this[id];
+                    if (t != null)
+                    {
+                        Remove(t);
+                    }
+                    innerIdList.Add(id);
+                    if (value == null || !TryAdd(value))
+                    {
+                        innerIdList.RemoveAt(Count);
+                    }
                 }
             }
         }
@@ -50,7 +56,7 @@ namespace RW_NodeTree
             }
             set
             {
-                if(Comp != null && Comp.AllowNode(item,value))
+                if(Comp != null && !value.NullOrEmpty() && Comp.AllowNode(item,value))
                 {
                     int index = base.IndexOf(item);
                     innerIdList[index] = value;
@@ -110,7 +116,7 @@ namespace RW_NodeTree
 
         public override int GetCountCanAccept(Thing item, bool canMergeWithExistingStacks = true)
         {
-            if(Comp != null && innerIdList.Count > Count && Comp.AllowNode(item, innerIdList[Count]))
+            if(Comp != null && innerIdList.Count > Count && !innerIdList[Count].NullOrEmpty() && Comp.AllowNode(item, innerIdList[Count]))
             {
                 return base.GetCountCanAccept(item, false);
             }
@@ -142,11 +148,6 @@ namespace RW_NodeTree
                 return true;
             }
             return false;
-        }
-
-        protected override Thing GetAt(int index)
-        {
-            return base.GetAt(index);
         }
 
         private bool needUpdate = true;

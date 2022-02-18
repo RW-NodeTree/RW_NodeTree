@@ -14,7 +14,7 @@ namespace RW_NodeTree
     {
         public bool Validity => NodeProccesser != null;
         public CompChildNodeProccesser NodeProccesser => parent;
-        public virtual Thing GetVerbCorrespondingThing(VerbTracker verbTracker, Thing result, ref Verb verbBeforeConvert, ref Verb verbAfterConvert)
+        public virtual Thing GetVerbCorrespondingThing(IVerbOwner verbOwner, Thing result, ref Verb verbBeforeConvert, ref VerbProperties verbPropertiesBeforeConvert, ref Tool toolBeforeConvert, ref Verb verbAfterConvert, ref VerbProperties verbPropertiesAfterConvert, ref Tool toolAfterConvert)
         {
             return result;
         }
@@ -22,7 +22,7 @@ namespace RW_NodeTree
         {
             return;
         }
-        public virtual bool AllowNode(CompChildNodeProccesser node, string id = null)
+        public virtual bool AllowNode(Thing node, string id = null)
         {
             return true;
         }
