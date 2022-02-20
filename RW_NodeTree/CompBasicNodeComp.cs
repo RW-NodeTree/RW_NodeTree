@@ -14,7 +14,42 @@ namespace RW_NodeTree
     {
         public bool Validity => NodeProccesser != null;
         public CompChildNodeProccesser NodeProccesser => parent;
-        public virtual Thing GetVerbCorrespondingThing(IVerbOwner verbOwner, Thing result, ref Verb verbBeforeConvert, ref VerbProperties verbPropertiesBeforeConvert, ref Tool toolBeforeConvert, ref Verb verbAfterConvert, ref VerbProperties verbPropertiesAfterConvert, ref Tool toolAfterConvert)
+        /// <summary>
+        /// node container
+        /// </summary>
+        public NodeContainer ChildNodes => NodeProccesser?.ChildNodes;
+
+
+        /// <summary>
+        /// get parent node if it is a node
+        /// </summary>
+        public CompChildNodeProccesser ParentProccesser => this.ParentHolder as CompChildNodeProccesser;
+
+        /// <summary>
+        /// root of this node tree
+        /// </summary>
+        public Thing RootNode => NodeProccesser.RootNode;
+
+
+        /// <summary>
+        /// find all comp for node
+        /// </summary>
+        public IEnumerable<CompBasicNodeComp> AllNodeComp
+        {
+            get
+            {
+                foreach (ThingComp comp in parent.AllComps)
+                {
+                    CompBasicNodeComp c = comp as CompBasicNodeComp;
+                    if (c != null)
+                    {
+                        yield return c;
+                    }
+                }
+                yield break;
+            }
+        }
+        public virtual Thing GetVerbCorrespondingThing(IVerbOwner verbOwner, Thing result, ref VerbProperties verbPropertiesBeforeConvert, ref Tool toolBeforeConvert, ref VerbProperties verbPropertiesAfterConvert, ref Tool toolAfterConvert)
         {
             return result;
         }
