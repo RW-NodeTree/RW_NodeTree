@@ -25,6 +25,13 @@ namespace RW_NodeTree
             childNodes = new NodeContainer(this);
         }
 
+
+        public bool NeedUpdate
+        {
+            get => ChildNodes.NeedUpdate;
+            set => ChildNodes.NeedUpdate = value;
+        }
+
         /// <summary>
         /// node container
         /// </summary>

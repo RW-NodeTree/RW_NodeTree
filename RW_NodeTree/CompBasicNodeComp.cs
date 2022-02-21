@@ -13,6 +13,23 @@ namespace RW_NodeTree
     public abstract partial class CompBasicNodeComp : ThingComp
     {
         public bool Validity => NodeProccesser != null;
+
+
+        public bool NeedUpdate
+        {
+            get
+            {
+                NodeContainer ChildNodes = this.ChildNodes;
+                return (ChildNodes != null) ? ChildNodes.NeedUpdate: false;
+            }
+            set
+            {
+                NodeContainer ChildNodes = this.ChildNodes;
+                if (ChildNodes != null) ChildNodes.NeedUpdate = value;
+            }
+        }
+
+
         public CompChildNodeProccesser NodeProccesser => parent;
         /// <summary>
         /// node container
@@ -28,20 +45,20 @@ namespace RW_NodeTree
         /// <summary>
         /// root of this node tree
         /// </summary>
-        public Thing RootNode => NodeProccesser.RootNode;
+        public Thing RootNode => NodeProccesser?.RootNode;
 
 
         /// <summary>
         /// find all comp for node
         /// </summary>
-        public IEnumerable<CompBasicNodeComp> AllNodeComp
+        public IEnumerable<CompBasicNodeComp> OtherNodeComp
         {
             get
             {
                 foreach (ThingComp comp in parent.AllComps)
                 {
                     CompBasicNodeComp c = comp as CompBasicNodeComp;
-                    if (c != null)
+                    if (c != null && c != this)
                     {
                         yield return c;
                     }
