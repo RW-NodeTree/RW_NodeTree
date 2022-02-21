@@ -66,7 +66,7 @@ namespace RW_NodeTree
                 yield break;
             }
         }
-        public virtual Thing GetVerbCorrespondingThing(IVerbOwner verbOwner, Thing result, ref VerbProperties verbPropertiesBeforeConvert, ref Tool toolBeforeConvert, ref VerbProperties verbPropertiesAfterConvert, ref Tool toolAfterConvert)
+        public virtual Thing GetVerbCorrespondingThing(IVerbOwner verbOwner, Thing result, ref Verb verbBeforeConvert, ref Tool toolBeforeConvert, ref VerbProperties verbPropertiesBeforeConvert, ref Verb verbAfterConvert, ref Tool toolAfterConvert, ref VerbProperties verbPropertiesAfterConvert)
         {
             return result;
         }

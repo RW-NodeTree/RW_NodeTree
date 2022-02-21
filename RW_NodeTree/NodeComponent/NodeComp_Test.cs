@@ -82,30 +82,21 @@ namespace RW_ModularizationWeapon.NodeComponent
             return;
         }
 
-        public override Thing GetVerbCorrespondingThing(IVerbOwner verbOwner, Thing result, ref VerbProperties verbPropertiesBeforeConvert, ref Tool toolBeforeConvert, ref VerbProperties verbPropertiesAfterConvert, ref Tool toolAfterConvert)
+        public override Thing GetVerbCorrespondingThing(IVerbOwner verbOwner, Thing result, ref Verb verbBeforeConvert, ref Tool toolBeforeConvert, ref VerbProperties verbPropertiesBeforeConvert, ref Verb verbAfterConvert, ref Tool toolAfterConvert, ref VerbProperties verbPropertiesAfterConvert)
         {
-            Type type = verbOwner.GetType();
             if(verbPropertiesBeforeConvert != null && verbPropertiesAfterConvert == null)
             {
-                verbPropertiesAfterConvert = verbPropertiesBeforeConvert;
+                verbAfterConvert = verbBeforeConvert;
                 toolAfterConvert = toolBeforeConvert;
+                verbPropertiesAfterConvert = verbPropertiesBeforeConvert;
                 result = ParentProccesser;
             }
             else if(verbPropertiesAfterConvert != null && verbPropertiesBeforeConvert == null)
             {
-                VerbProperties verbPropertiesCache = verbPropertiesAfterConvert;
-                Tool toolCache = toolAfterConvert;
-                foreach (Thing t in NodeProccesser.ChildNodes)
-                {
-                    IVerbOwner cache = CompChildNodeProccesser.GetSameTypeVerbOwner(verbOwner, t);
-                    if(cache != null && cache.VerbTracker != null && cache.VerbTracker?.AllVerbs.Find(x => x.verbProps == verbPropertiesCache && x.tool == toolCache) != null)
-                    {
-                        verbPropertiesBeforeConvert= verbPropertiesAfterConvert;
-                        toolBeforeConvert = toolAfterConvert;
-                        result = t;
-                        break;
-                    }
-                }
+                verbBeforeConvert = verbAfterConvert;
+                toolBeforeConvert = toolAfterConvert;
+                verbPropertiesBeforeConvert= verbPropertiesAfterConvert;
+                result = (verbBeforeConvert.DirectOwner as ThingComp)?.parent ?? (verbBeforeConvert.DirectOwner as Thing);
             }
             return result;
         }

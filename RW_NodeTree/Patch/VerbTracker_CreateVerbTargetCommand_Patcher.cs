@@ -22,7 +22,7 @@ namespace RW_NodeTree.Patch
         private static void PreVerbTracker_CreateVerbTargetCommand(ref Thing ownerThing, VerbTracker __instance, Verb verb)
         {
             Verb _ = null;
-            ownerThing = verb.EquipmentSource ?? ((CompChildNodeProccesser)ownerThing)?.GetVerbCorrespondingThing(__instance.directOwner, ref _, ref verb) ?? ownerThing;
+            ownerThing = ((CompChildNodeProccesser)ownerThing)?.GetVerbCorrespondingThing(__instance.directOwner, ref _, ref verb) ?? ownerThing;
         }
 
         [HarmonyPostfix]
