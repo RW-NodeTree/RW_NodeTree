@@ -179,15 +179,17 @@ namespace RW_NodeTree
         public Thing GetVerbCorrespondingThing(IVerbOwner verbOwner, ref Verb verbBeforeConvert, ref Tool toolBeforeConvert, ref VerbProperties verbPropertiesBeforeConvert, ref Verb verbAfterConvert, ref Tool toolAfterConvert, ref VerbProperties verbPropertiesAfterConvert)
         {
             Thing result = null;
+            List<VerbProperties> toolBeforeConvertVerbsProperties = toolBeforeConvert?.VerbsProperties.ToList();
+            List<VerbProperties> toolAfterConvertVerbsProperties = toolAfterConvert?.VerbsProperties.ToList();
 
             if (verbBeforeConvert != null)
             {
                 verbPropertiesBeforeConvert = verbBeforeConvert.verbProps;
                 toolBeforeConvert = verbBeforeConvert.tool;
             }
-            else if (toolBeforeConvert != null)
+            else if (toolBeforeConvertVerbsProperties != null && (verbPropertiesBeforeConvert == null || !toolBeforeConvertVerbsProperties.Contains(verbPropertiesBeforeConvert)))
             {
-                verbPropertiesBeforeConvert = toolBeforeConvert.VerbsProperties.FirstOrDefault();
+                verbPropertiesBeforeConvert = toolBeforeConvertVerbsProperties.FirstOrDefault();
             }
 
             if (verbAfterConvert != null)
@@ -195,10 +197,11 @@ namespace RW_NodeTree
                 verbPropertiesAfterConvert = verbAfterConvert.verbProps;
                 toolAfterConvert = verbAfterConvert.tool;
             }
-            else if (toolAfterConvert != null)
+            else if (toolAfterConvertVerbsProperties != null && (verbPropertiesAfterConvert != null || !toolAfterConvertVerbsProperties.Contains(verbPropertiesAfterConvert)))
             {
-                verbPropertiesAfterConvert = toolAfterConvert.VerbsProperties.FirstOrDefault();
+                verbPropertiesAfterConvert = toolAfterConvertVerbsProperties.FirstOrDefault();
             }
+
             if ((verbPropertiesBeforeConvert != null && verbPropertiesAfterConvert != null)
                 || (toolBeforeConvert != null && toolAfterConvert != null) 
                 || (verbOwner != null && (verbOwner as ThingComp)?.parent != parent && (verbOwner as Thing) != parent)
@@ -213,21 +216,18 @@ namespace RW_NodeTree
             {
                 foreach (CompBasicNodeComp comp in AllNodeComp)
                 {
-                    verbCache = verbAfterConvert;
-                    toolCache = toolAfterConvert;
-                    verbPropertiesCache = verbPropertiesAfterConvert;
-                    result = comp.GetVerbCorrespondingThing(verbOwner, result, ref verbBeforeConvert, ref toolBeforeConvert, ref verbPropertiesBeforeConvert, ref verbCache, ref toolCache, ref verbPropertiesCache) ?? result;
+                    result = comp.GetVerbCorrespondingThingBeforeConvert(verbOwner, result, verbAfterConvert, toolAfterConvert, verbPropertiesAfterConvert, ref verbBeforeConvert, ref toolBeforeConvert, ref verbPropertiesBeforeConvert) ?? result;
                     if (verbBeforeConvert != null)
                     {
                         verbPropertiesBeforeConvert = verbBeforeConvert.verbProps;
                         toolBeforeConvert = verbBeforeConvert.tool;
                     }
-                    else if (toolBeforeConvert != null)
+                    else if (toolBeforeConvertVerbsProperties != null && (verbPropertiesBeforeConvert == null || !toolBeforeConvertVerbsProperties.Contains(verbPropertiesBeforeConvert)))
                     {
-                        verbPropertiesBeforeConvert = toolBeforeConvert.VerbsProperties.FirstOrDefault();
+                        verbPropertiesBeforeConvert = toolBeforeConvertVerbsProperties.FirstOrDefault();
                     }
                 }
-                verbOwner = GetSameTypeVerbOwner(verbOwner, result) ?? verbOwner;
+                verbOwner = GetSameTypeVerbOwner(verbOwner, result);
                 verbCache = verbBeforeConvert;
                 toolCache = toolBeforeConvert;
                 verbPropertiesCache = verbPropertiesBeforeConvert;
@@ -235,6 +235,7 @@ namespace RW_NodeTree
                 if(verbCache != null) verbBeforeConvert = verbOwner?.VerbTracker?.AllVerbs.Find(x => x == verbCache);
                 else if(toolCache != null) verbBeforeConvert = verbOwner?.VerbTracker?.AllVerbs.Find(x => x.tool == toolCache);
                 else verbBeforeConvert = verbOwner?.VerbTracker?.AllVerbs.Find(x => x.verbProps == verbPropertiesCache);
+
                 if (verbBeforeConvert != null)
                 {
                     verbPropertiesBeforeConvert = verbBeforeConvert.verbProps;
@@ -255,21 +256,18 @@ namespace RW_NodeTree
             {
                 foreach (CompBasicNodeComp comp in AllNodeComp)
                 {
-                    verbCache = verbBeforeConvert;
-                    toolCache = toolBeforeConvert;
-                    verbPropertiesCache = verbPropertiesBeforeConvert;
-                    result = comp.GetVerbCorrespondingThing(verbOwner, result, ref verbCache, ref toolCache, ref verbPropertiesCache, ref verbAfterConvert, ref toolAfterConvert, ref verbPropertiesAfterConvert) ?? result;
+                    result = comp.GetVerbCorrespondingThingAfterConvert(verbOwner, result, verbBeforeConvert, toolBeforeConvert, verbPropertiesBeforeConvert, ref verbAfterConvert, ref toolAfterConvert, ref verbPropertiesAfterConvert) ?? result;
                     if (verbAfterConvert != null)
                     {
                         verbPropertiesAfterConvert = verbAfterConvert.verbProps;
                         toolAfterConvert = verbAfterConvert.tool;
                     }
-                    else if (toolAfterConvert != null)
+                    else if (toolAfterConvertVerbsProperties != null && (verbPropertiesAfterConvert != null || !toolAfterConvertVerbsProperties.Contains(verbPropertiesAfterConvert)))
                     {
-                        verbPropertiesAfterConvert = toolAfterConvert.VerbsProperties.FirstOrDefault();
+                        verbPropertiesAfterConvert = toolAfterConvertVerbsProperties.FirstOrDefault();
                     }
                 }
-                verbOwner = GetSameTypeVerbOwner(verbOwner, result) ?? verbOwner;
+                verbOwner = GetSameTypeVerbOwner(verbOwner, result);
                 verbCache = verbAfterConvert;
                 toolCache = toolAfterConvert;
                 verbPropertiesCache = verbPropertiesAfterConvert;
@@ -277,6 +275,7 @@ namespace RW_NodeTree
                 if(verbCache != null) verbAfterConvert = verbOwner?.VerbTracker?.AllVerbs.Find(x => x == verbCache);
                 else if (toolCache != null) verbAfterConvert = verbOwner?.VerbTracker?.AllVerbs.Find(x => x.tool == toolCache);
                 else verbAfterConvert = verbOwner?.VerbTracker?.AllVerbs.Find(x => x.verbProps == verbPropertiesCache);
+
                 if(verbAfterConvert != null)
                 {
                     verbPropertiesAfterConvert = verbAfterConvert.verbProps;
