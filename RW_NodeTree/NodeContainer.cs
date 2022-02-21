@@ -56,7 +56,7 @@ namespace RW_NodeTree
             }
             set
             {
-                if(Comp != null && !value.NullOrEmpty() && Comp.AllowNode(item,value))
+                if(Comp != null && !value.NullOrEmpty() && !innerIdList.Contains(value) && Comp.AllowNode(item,value))
                 {
                     int index = base.IndexOf(item);
                     innerIdList[index] = value;

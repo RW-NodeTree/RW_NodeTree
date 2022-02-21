@@ -180,6 +180,14 @@ namespace RW_NodeTree
         {
             Thing result = null;
 
+            if (toolAfterConvert != null && verbPropertiesBeforeConvert == null)
+            {
+                verbPropertiesBeforeConvert = toolAfterConvert.VerbsProperties.FirstOrDefault();
+            }
+            if (toolBeforeConvert != null && verbPropertiesAfterConvert == null)
+            {
+                verbPropertiesAfterConvert = toolBeforeConvert.VerbsProperties.FirstOrDefault();
+            }
             if ((verbPropertiesBeforeConvert != null && verbPropertiesAfterConvert != null)
                 || (toolBeforeConvert != null && toolAfterConvert != null) 
                 || (verbOwner != null && (verbOwner as ThingComp)?.parent != parent && (verbOwner as Thing) != parent)
@@ -197,10 +205,14 @@ namespace RW_NodeTree
                     verbPropertiesCache = verbPropertiesAfterConvert;
                     toolCache = toolAfterConvert;
                     result = comp.GetVerbCorrespondingThing(verbOwner, result, ref verbPropertiesBeforeConvert, ref toolBeforeConvert, ref verbPropertiesCache, ref toolCache) ?? result;
+                    if (toolBeforeConvert != null && verbPropertiesBeforeConvert == null)
+                    {
+                        verbPropertiesBeforeConvert = toolBeforeConvert.VerbsProperties.FirstOrDefault();
+                    }
                 }
                 verbOwner = GetSameTypeVerbOwner(verbOwner, result) ?? verbOwner;
-                verbPropertiesCache = verbPropertiesAfterConvert;
-                toolCache = toolAfterConvert;
+                verbPropertiesCache = verbPropertiesBeforeConvert;
+                toolCache = toolBeforeConvert;
                 if(toolCache != null) verbBeforeConvert = verbOwner?.VerbTracker?.AllVerbs.Find(x => x.tool == toolCache);
                 else verbBeforeConvert = verbOwner?.VerbTracker?.AllVerbs.Find(x => x.verbProps == verbPropertiesCache);
                 if (verbBeforeConvert != null)
@@ -208,7 +220,7 @@ namespace RW_NodeTree
                     verbPropertiesBeforeConvert = verbBeforeConvert.verbProps;
                     toolBeforeConvert = verbBeforeConvert.tool;
                 }
-                if (result != null)
+                if (result != null && result != parent)
                 {
                     CompChildNodeProccesser proccess = result;
                     verbPropertiesCache = null;
@@ -226,10 +238,14 @@ namespace RW_NodeTree
                     verbPropertiesCache = verbPropertiesBeforeConvert;
                     toolCache = toolBeforeConvert;
                     result = comp.GetVerbCorrespondingThing(verbOwner, result, ref verbPropertiesCache, ref toolCache, ref verbPropertiesAfterConvert, ref toolAfterConvert) ?? result;
+                    if (toolAfterConvert != null && verbPropertiesAfterConvert == null)
+                    {
+                        verbPropertiesAfterConvert = toolAfterConvert.VerbsProperties.FirstOrDefault();
+                    }
                 }
                 verbOwner = GetSameTypeVerbOwner(verbOwner, result) ?? verbOwner;
-                verbPropertiesCache = verbPropertiesBeforeConvert;
-                toolCache = toolBeforeConvert;
+                verbPropertiesCache = verbPropertiesAfterConvert;
+                toolCache = toolAfterConvert;
                 if (toolCache != null) verbAfterConvert = verbOwner?.VerbTracker?.AllVerbs.Find(x => x.tool == toolCache);
                 else verbAfterConvert = verbOwner?.VerbTracker?.AllVerbs.Find(x => x.verbProps == verbPropertiesCache);
                 if(verbAfterConvert != null)
@@ -237,7 +253,7 @@ namespace RW_NodeTree
                     verbPropertiesAfterConvert = verbAfterConvert.verbProps;
                     toolAfterConvert = verbAfterConvert.tool;
                 }
-                if (result != null)
+                if (result != null && result != parent)
                 {
                     CompChildNodeProccesser proccess = result;
                     verbPropertiesCache = null;
