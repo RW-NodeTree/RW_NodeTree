@@ -89,7 +89,7 @@ namespace RW_ModularizationWeapon.NodeComponent
                 verbBeforeConvert = verbAfterConvert;
                 toolBeforeConvert = toolAfterConvert;
                 verbPropertiesBeforeConvert= verbPropertiesAfterConvert;
-                result = (verbBeforeConvert.DirectOwner as ThingComp)?.parent ?? (verbBeforeConvert.DirectOwner as Thing);
+                result = (verbBeforeConvert?.DirectOwner as ThingComp)?.parent ?? (verbBeforeConvert?.DirectOwner as Thing);
             }
             return result;
         }

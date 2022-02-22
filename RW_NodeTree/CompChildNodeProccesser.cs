@@ -267,7 +267,6 @@ namespace RW_NodeTree
                         verbPropertiesAfterConvert = toolAfterConvertVerbsProperties.FirstOrDefault();
                     }
                 }
-                verbOwner = GetSameTypeVerbOwner(verbOwner, result);
                 verbCache = verbAfterConvert;
                 toolCache = toolAfterConvert;
                 verbPropertiesCache = verbPropertiesAfterConvert;
@@ -281,6 +280,8 @@ namespace RW_NodeTree
                     verbPropertiesAfterConvert = verbAfterConvert.verbProps;
                     toolAfterConvert = verbAfterConvert.tool;
                 }
+
+                verbOwner = GetSameTypeVerbOwner(verbOwner, result);
                 if (result != null && result != parent)
                 {
                     verbCache = null;
