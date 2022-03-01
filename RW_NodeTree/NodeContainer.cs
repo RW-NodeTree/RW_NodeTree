@@ -116,7 +116,7 @@ namespace RW_NodeTree
 
         public override int GetCountCanAccept(Thing item, bool canMergeWithExistingStacks = true)
         {
-            if(Comp != null && innerIdList.Count > Count && !innerIdList[Count].NullOrEmpty() && Comp.AllowNode(item, innerIdList[Count]) && !IsParentOfThisNode(item))
+            if(Comp != null && innerIdList.Count > Count && !innerIdList[Count].NullOrEmpty() && !IsChildOf(item) && Comp.AllowNode(item, innerIdList[Count]))
             {
                 return base.GetCountCanAccept(item, false);
             }
@@ -130,15 +130,14 @@ namespace RW_NodeTree
 
         public override bool TryAdd(Thing item, bool canMergeWithExistingStacks = true)
         {
-            bool Spawned = item?.Spawned ?? false;
             Map map = item?.Map;
-            if (Spawned) item.DeSpawn();
+            if (map != null) item.DeSpawn();
             if (base.TryAdd(item, false))
             {
                 NeedUpdate = true;
                 return true;
             }
-            if (Spawned) item.SpawnSetup(map, false);
+            if (map != null) item.SpawnSetup(map, false);
             return false;
         }
 
@@ -154,7 +153,7 @@ namespace RW_NodeTree
         }
 
 
-        public bool IsParentOfThisNode(Thing node)
+        public bool IsChildOf(Thing node)
         {
             if(node == null) return false;
             IThingHolder thingHolder = Owner;
