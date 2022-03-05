@@ -95,7 +95,7 @@ namespace RW_NodeTree
                     {
                         Verb verb = result[i];
                         IVerbOwner verbOwner = verb.DirectOwner;
-                        if (verbOwner != null && (verbOwner == parent || (verbOwner as ThingComp).parent == parent))
+                        if (verbOwner != null && (verbOwner == parent || (verbOwner as ThingComp)?.parent == parent))
                         {
                             Verb _ = null;
                             NotSetVerbDirectOwner = true;
