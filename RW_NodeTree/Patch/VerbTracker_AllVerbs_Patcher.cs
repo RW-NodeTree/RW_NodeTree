@@ -1,6 +1,7 @@
 ﻿using HarmonyLib;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -39,7 +40,7 @@ namespace RW_NodeTree.Patch
         {
             __result = new List<Verb>(__result);
             CompChildNodeProccesser proccess = (((__instance.directOwner) as ThingComp)?.parent) ?? ((__instance.directOwner) as Thing);
-            __result = proccess?.PostVerbTracker_AllVerbs(__instance, __result) ?? __result;
+            __result = proccess?.PostVerbTracker_AllVerbs(__instance.directOwner?.GetType(), __result) ?? __result;
         }
     }
 }
@@ -58,11 +59,32 @@ namespace RW_NodeTree
         /// </summary>
         /// <param name="verbTracker">VerbTracker instance</param>
         /// <param name="result">result of VerbTracker.AllVerbs</param>
-        public List<Verb> PostVerbTracker_AllVerbs(VerbTracker verbTracker, List<Verb> result)
+        public List<Verb> PostVerbTracker_AllVerbs(Type ownerType, List<Verb> result)
         {
-            foreach (CompBasicNodeComp comp in AllNodeComp)
+            //StackTrace stackTrace = new StackTrace();
+            //StackFrame[] stackFrame = stackTrace.GetFrames();
+            //if (Prefs.DevMode) Log.Message($"{stackFrame[0].GetMethod()}\n{stackFrame[1].GetMethod()}\n{stackFrame[2].GetMethod()}\n{stackFrame[3].GetMethod()}\n{stackFrame[4].GetMethod()}\n{stackFrame[5].GetMethod()}\n{stackFrame[6].GetMethod()}\n");
+            if (ownerType != null && typeof(IVerbOwner).IsAssignableFrom(ownerType))
             {
-                result = comp.PostVerbTracker_AllVerbs(verbTracker, result) ?? result;
+                foreach (CompBasicNodeComp comp in AllNodeComp)
+                {
+                    result = comp.PostVerbTracker_AllVerbs(ownerType, result) ?? result;
+                }
+                for (int i = 0; i < result.Count; i++)
+                {
+                    Verb verb = result[i];
+                    IVerbOwner verbOwner = verb.DirectOwner;
+                    if (verbOwner != null && (verbOwner == parent || (verbOwner as ThingComp).parent == parent))
+                    {
+                        Verb _ = null;
+                        Thing thing = this.GetVerbCorrespondingThing(ownerType, ref _, ref verb);
+                        verbOwner = GetSameTypeVerbOwner(ownerType, thing);
+                        if(verbOwner != null)
+                        {
+                            result[i].verbTracker = verbOwner.VerbTracker;
+                        }
+                    }
+                }
             }
             return result;
         }
@@ -70,7 +92,7 @@ namespace RW_NodeTree
     public abstract partial class CompBasicNodeComp : ThingComp
     {
 
-        public virtual List<Verb> PostVerbTracker_AllVerbs(VerbTracker verbTracker, List<Verb> result)
+        public virtual List<Verb> PostVerbTracker_AllVerbs(Type ownerType, List<Verb> result)
         {
             return result;
         }

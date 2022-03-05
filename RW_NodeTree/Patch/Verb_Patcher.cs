@@ -12,26 +12,29 @@ namespace RW_NodeTree.Patch
     [HarmonyPatch(typeof(Verb))]
     internal static class Verb_Patcher
     {
-        [HarmonyPostfix]
+
+        [HarmonyPrefix]
         [HarmonyPatch(
             typeof(Verb),
-            "get_EquipmentSource"
+            "get_UIIcon"
         )]
-        private static void PostVerb_EquipmentSource(Verb __instance,ref Thing __result)
+        private static void PreVerb_UIIcon(Verb __instance, ref Texture2D __state)
         {
-            Verb _ = null;
-            __result = ((CompChildNodeProccesser)__result)?.GetVerbCorrespondingThing(__instance.DirectOwner, ref _, ref __instance) ?? __result;
+
+            Thing eq = __instance.EquipmentSource;
+            __state = eq.def.uiIcon;
+            eq.def.uiIcon = (eq?.Graphic?.MatSingleFor(eq)?.mainTexture as Texture2D) ?? __state;
         }
+
 
         [HarmonyPostfix]
         [HarmonyPatch(
             typeof(Verb),
             "get_UIIcon"
         )]
-        private static void PostVerb_UIIcon(Verb __instance,ref Texture2D __result)
+        private static void PostVerb_UIIcon(Verb __instance, ref Texture2D __state)
         {
-            Thing eq = __instance.EquipmentSource;
-            __result = (eq?.Graphic?.MatSingleFor(eq)?.mainTexture as Texture2D) ?? __result;
+            __instance.EquipmentSource.def.uiIcon = __state;
         }
     }
 }

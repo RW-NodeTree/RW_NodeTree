@@ -21,7 +21,7 @@ namespace RW_NodeTree.Patch
         )]
         private static void PreStatWorker_MeleeAverageDPS_GetCurrentWeaponUser(ref Thing weapon)
         {
-            weapon = ((CompChildNodeProccesser)weapon)?.RootNode ?? weapon;
+            weapon = ((CompChildNodeProccesser)weapon)?.RootNode ?? (weapon?.ParentHolder as CompChildNodeProccesser)?.RootNode ?? weapon;
         }
     }
 }
