@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
 using Verse;
@@ -53,6 +54,25 @@ namespace RW_NodeTree
     public partial class CompChildNodeProccesser : ThingComp, IThingHolder
     {
 
+        private bool NotSetVerbDirectOwner
+        {
+            get
+            {
+                int current = Thread.CurrentThread.ManagedThreadId;
+
+                bool result;
+                if (!notSetVerbDirectOwner.TryGetValue(current, out result))
+                {
+                    notSetVerbDirectOwner.Add(current, false);
+                }
+                return result;
+            }
+            set
+            {
+                notSetVerbDirectOwner.SetOrAdd(Thread.CurrentThread.ManagedThreadId, value);
+            }
+        }
+
         /// <summary>
         /// event proccesser after VerbTracker.AllVerbs
         /// (WARRING!!!: Don't invoke any method if thet will invoke VerbTracker.AllVerbs)
@@ -70,24 +90,31 @@ namespace RW_NodeTree
                 {
                     result = comp.PostVerbTracker_AllVerbs(ownerType, result) ?? result;
                 }
-                for (int i = 0; i < result.Count; i++)
+                if(!NotSetVerbDirectOwner)
                 {
-                    Verb verb = result[i];
-                    IVerbOwner verbOwner = verb.DirectOwner;
-                    if (verbOwner != null && (verbOwner == parent || (verbOwner as ThingComp).parent == parent))
+                    for (int i = 0; i < result.Count; i++)
                     {
-                        Verb _ = null;
-                        Thing thing = this.GetVerbCorrespondingThing(ownerType, ref _, ref verb);
-                        verbOwner = GetSameTypeVerbOwner(ownerType, thing);
-                        if(verbOwner != null)
+                        Verb verb = result[i];
+                        IVerbOwner verbOwner = verb.DirectOwner;
+                        if (verbOwner != null && (verbOwner == parent || (verbOwner as ThingComp).parent == parent))
                         {
-                            result[i].verbTracker = verbOwner.VerbTracker;
+                            Verb _ = null;
+                            NotSetVerbDirectOwner = true;
+                            Thing thing = this.GetVerbCorrespondingThing(ownerType, ref _, ref verb);
+                            NotSetVerbDirectOwner = false;
+                            verbOwner = GetSameTypeVerbOwner(ownerType, thing);
+                            if (verbOwner != null)
+                            {
+                                result[i].verbTracker = verbOwner.VerbTracker;
+                            }
                         }
                     }
                 }
             }
             return result;
         }
+
+        private Dictionary<int, bool> notSetVerbDirectOwner = new Dictionary<int, bool>();
     }
     public abstract partial class CompBasicNodeComp : ThingComp
     {
