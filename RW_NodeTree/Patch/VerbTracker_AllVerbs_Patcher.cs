@@ -58,9 +58,8 @@ namespace RW_NodeTree
         {
             get
             {
-                int current = Thread.CurrentThread.ManagedThreadId;
-
                 bool result;
+                int current = Thread.CurrentThread.ManagedThreadId;
                 if (!notSetVerbDirectOwner.TryGetValue(current, out result))
                 {
                     notSetVerbDirectOwner.Add(current, false);
