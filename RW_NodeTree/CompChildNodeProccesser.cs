@@ -217,7 +217,7 @@ namespace RW_NodeTree
                 {
                     foreach (CompBasicNodeComp comp in AllNodeComp)
                     {
-                        result = comp.GetVerbCorrespondingThingBeforeConvert(ownerType, result, verbAfterConvert, toolAfterConvert, verbPropertiesAfterConvert, ref verbBeforeConvert, ref toolBeforeConvert, ref verbPropertiesBeforeConvert) ?? result;
+                        result = comp.GetBeforeConvertVerbCorrespondingThing(ownerType, result, verbAfterConvert, toolAfterConvert, verbPropertiesAfterConvert, ref verbBeforeConvert, ref toolBeforeConvert, ref verbPropertiesBeforeConvert) ?? result;
                         if (verbBeforeConvert != null)
                         {
                             verbPropertiesBeforeConvert = verbBeforeConvert.verbProps;
@@ -259,7 +259,7 @@ namespace RW_NodeTree
                 {
                     foreach (CompBasicNodeComp comp in AllNodeComp)
                     {
-                        result = comp.GetVerbCorrespondingThingAfterConvert(ownerType, result, verbBeforeConvert, toolBeforeConvert, verbPropertiesBeforeConvert, ref verbAfterConvert, ref toolAfterConvert, ref verbPropertiesAfterConvert) ?? result;
+                        result = comp.GetAfterConvertVerbCorrespondingThing(ownerType, result, verbBeforeConvert, toolBeforeConvert, verbPropertiesBeforeConvert, ref verbAfterConvert, ref toolAfterConvert, ref verbPropertiesAfterConvert) ?? result;
                         if (verbAfterConvert != null)
                         {
                             verbPropertiesAfterConvert = verbAfterConvert.verbProps;

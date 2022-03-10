@@ -82,7 +82,7 @@ namespace RW_ModularizationWeapon.NodeComponent
             return;
         }
 
-        public override Thing GetVerbCorrespondingThingBeforeConvert(Type verbOwner, Thing result, Verb verbAfterConvert, Tool toolAfterConvert, VerbProperties verbPropertiesAfterConvert, ref Verb verbBeforeConvert, ref Tool toolBeforeConvert, ref VerbProperties verbPropertiesBeforeConvert)
+        public override Thing GetBeforeConvertVerbCorrespondingThing(Type verbOwner, Thing result, Verb verbAfterConvert, Tool toolAfterConvert, VerbProperties verbPropertiesAfterConvert, ref Verb verbBeforeConvert, ref Tool toolBeforeConvert, ref VerbProperties verbPropertiesBeforeConvert)
         {
             if(verbPropertiesAfterConvert != null && verbPropertiesBeforeConvert == null)
             {
@@ -93,7 +93,7 @@ namespace RW_ModularizationWeapon.NodeComponent
             }
             return result;
         }
-        public override Thing GetVerbCorrespondingThingAfterConvert(Type verbOwner, Thing result, Verb verbBeforeConvert, Tool toolBeforeConvert, VerbProperties verbPropertiesBeforeConvert, ref Verb verbAfterConvert, ref Tool toolAfterConvert, ref VerbProperties verbPropertiesAfterConvert)
+        public override Thing GetAfterConvertVerbCorrespondingThing(Type verbOwner, Thing result, Verb verbBeforeConvert, Tool toolBeforeConvert, VerbProperties verbPropertiesBeforeConvert, ref Verb verbAfterConvert, ref Tool toolAfterConvert, ref VerbProperties verbPropertiesAfterConvert)
         {
             if(verbPropertiesBeforeConvert != null && verbPropertiesAfterConvert == null)
             {

@@ -14,7 +14,9 @@ namespace RW_NodeTree
     {
         public bool Validity => NodeProccesser != null;
 
-
+        /// <summary>
+        /// as name, get or set needUpdate prop of this node
+        /// </summary>
         public bool NeedUpdate
         {
             get
@@ -29,7 +31,9 @@ namespace RW_NodeTree
             }
         }
 
-
+        /// <summary>
+        /// parent node
+        /// </summary>
         public CompChildNodeProccesser NodeProccesser => parent;
         /// <summary>
         /// node container
@@ -66,22 +70,69 @@ namespace RW_NodeTree
                 yield break;
             }
         }
-        public virtual Thing GetVerbCorrespondingThingBeforeConvert(Type verbOwner, Thing result, Verb verbAfterConvert, Tool toolAfterConvert, VerbProperties verbPropertiesAfterConvert, ref Verb verbBeforeConvert, ref Tool toolBeforeConvert, ref VerbProperties verbPropertiesBeforeConvert)
+
+        /// <summary>
+        /// invoke by node proccesser,use to get verb corresponding thing before convert 
+        /// </summary>
+        /// <param name="ownerType">the type of verbowner</param>
+        /// <param name="result">result of other node comp</param>
+        /// <param name="verbAfterConvert">verb after convert</param>
+        /// <param name="toolAfterConvert">tool after convert</param>
+        /// <param name="verbPropertiesAfterConvert">verbProperties after convert</param>
+        /// <param name="verbBeforeConvert">verb before convert</param>
+        /// <param name="toolBeforeConvert">tool before convert</param>
+        /// <param name="verbPropertiesBeforeConvert">verbProperties before convert</param>
+        /// <returns>Corresponding thing before verb convert</returns>
+        public virtual Thing GetBeforeConvertVerbCorrespondingThing(Type ownerType, Thing result, Verb verbAfterConvert, Tool toolAfterConvert, VerbProperties verbPropertiesAfterConvert, ref Verb verbBeforeConvert, ref Tool toolBeforeConvert, ref VerbProperties verbPropertiesBeforeConvert)
         {
             return result;
         }
-        public virtual Thing GetVerbCorrespondingThingAfterConvert(Type verbOwner, Thing result, Verb verbBeforeConvert, Tool toolBeforeConvert, VerbProperties verbPropertiesBeforeConvert, ref Verb verbAfterConvert, ref Tool toolAfterConvert, ref VerbProperties verbPropertiesAfterConvert)
+
+
+        /// <summary>
+        /// invoke by node proccesser,use to get verb corresponding thing after convert 
+        /// </summary>
+        /// <param name="ownerType">the type of verbowner</param>
+        /// <param name="result">result of other node comp</param>
+        /// <param name="verbAfterConvert">verb after convert</param>
+        /// <param name="toolAfterConvert">tool after convert</param>
+        /// <param name="verbPropertiesAfterConvert">verbProperties after convert</param>
+        /// <param name="verbBeforeConvert">verb before convert</param>
+        /// <param name="toolBeforeConvert">tool before convert</param>
+        /// <param name="verbPropertiesBeforeConvert">verbProperties before convert</param>
+        /// <returns>Corresponding thing before verb convert</returns>
+        public virtual Thing GetAfterConvertVerbCorrespondingThing(Type ownerType, Thing result, Verb verbBeforeConvert, Tool toolBeforeConvert, VerbProperties verbPropertiesBeforeConvert, ref Verb verbAfterConvert, ref Tool toolAfterConvert, ref VerbProperties verbPropertiesAfterConvert)
         {
             return result;
         }
+
+        /// <summary>
+        /// update event
+        /// </summary>
+        /// <param name="actionNode">update event action node</param>
+        /// <returns>stope bubble</returns>
         public virtual bool UpdateNode(CompChildNodeProccesser actionNode)
         {
             return false;
         }
+
+        /// <summary>
+        /// allow node to append into container
+        /// </summary>
+        /// <param name="node">node for add</param>
+        /// <param name="id">id</param>
+        /// <returns>able to add into container</returns>
         public virtual bool AllowNode(Thing node, string id = null)
         {
             return true;
         }
+
+        /// <summary>
+        /// Adapte draw steep of this node
+        /// </summary>
+        /// <param name="ids">Corresponding is</param>
+        /// <param name="nodes">Corresponding node</param>
+        /// <param name="renderInfos">Corresponding render infos</param>
         public virtual void AdapteDrawSteep(ref List<string> ids, ref List<Thing> nodes, ref List<List<RenderInfo>> renderInfos)
         {
             return;
