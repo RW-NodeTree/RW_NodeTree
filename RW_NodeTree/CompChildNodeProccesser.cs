@@ -466,9 +466,9 @@ namespace RW_NodeTree
             return true;
         }
 
-        public void UpdateNode(CompChildNodeProccesser actionNode = null)
+        public bool UpdateNode(CompChildNodeProccesser actionNode = null)
         {
-            ChildNodes.UpdateNode(actionNode);
+            return ChildNodes.UpdateNode(actionNode);
         }
 
         public void GetChildHolders(List<IThingHolder> outChildren)

@@ -90,19 +90,23 @@ namespace RW_NodeTree
             Scribe_Collections.Look<string>(ref this.innerIdList, "innerIdList", LookMode.Value);
         }
 
-        public void UpdateNode(CompChildNodeProccesser actionNode = null)
+        public bool UpdateNode(CompChildNodeProccesser actionNode = null)
         {
+            bool StopEventBubble = false;
             if (NeedUpdate)
             {
                 CompChildNodeProccesser proccess = this.Comp;
                 if (actionNode == null) actionNode = proccess;
                 foreach (Thing node in this)
                 {
-                    ((CompChildNodeProccesser)node)?.UpdateNode(actionNode);
+                    StopEventBubble = (((CompChildNodeProccesser)node)?.UpdateNode(actionNode) ?? false) || StopEventBubble;
                 }
-                foreach (CompBasicNodeComp comp in proccess.AllNodeComp)
+                if(!StopEventBubble)
                 {
-                    comp.UpdateNode(actionNode);
+                    foreach (CompBasicNodeComp comp in proccess.AllNodeComp)
+                    {
+                        StopEventBubble = comp.UpdateNode(actionNode) || StopEventBubble;
+                    }
                 }
                 foreach(ThingComp comp in proccess.parent.AllComps)
                 {
@@ -112,6 +116,7 @@ namespace RW_NodeTree
                 proccess.ResetRenderedTexture();
                 NeedUpdate = false;
             }
+            return StopEventBubble;
         }
 
         public override int GetCountCanAccept(Thing item, bool canMergeWithExistingStacks = true)

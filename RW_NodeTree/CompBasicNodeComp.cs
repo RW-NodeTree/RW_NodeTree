@@ -74,9 +74,9 @@ namespace RW_NodeTree
         {
             return result;
         }
-        public virtual void UpdateNode(CompChildNodeProccesser actionNode)
+        public virtual bool UpdateNode(CompChildNodeProccesser actionNode)
         {
-            return;
+            return false;
         }
         public virtual bool AllowNode(Thing node, string id = null)
         {

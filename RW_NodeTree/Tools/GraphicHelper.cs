@@ -14,7 +14,7 @@ namespace RW_NodeTree.Tools
 
         public static Graphic subGraphic(this Graphic parent)
         {
-            FieldInfo fieldInfo = parent.GetType().GetField("subGraphic", AccessTools.all);
+            FieldInfo fieldInfo = parent?.GetType().GetField("subGraphic", AccessTools.all);
             if(fieldInfo != null)
             {
                 return fieldInfo.GetValue(parent) as Graphic;
