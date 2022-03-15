@@ -43,12 +43,17 @@ namespace RW_NodeTree.Patch
             }
         }
 
+        private static Vector3 internalConvert (Vector2 vector)
+        {
+            return new Vector3(vector.x, 0, vector.y);
+        }
+
         private static MethodInfo MathHelper_DrawMeshOrg = typeof(Graphics).GetMethod("DrawMesh", new Type[] { typeof(Mesh), typeof(Vector3), typeof(Quaternion), typeof(Material), typeof(int)});
         private static MethodInfo MathHelper_DrawMeshTar = typeof(Graphics).GetMethod("DrawMesh", new Type[] { typeof(Mesh), typeof(Matrix4x4), typeof(Material), typeof(int) });
         private static MethodInfo Quaternion_AngleAxis = typeof(Quaternion).GetMethod("AngleAxis", AccessTools.all);
         private static MethodInfo Thing_get_Graphic = typeof(Thing).GetMethod("get_Graphic", AccessTools.all);
         private static MethodInfo GraphicHelper_GetGraphic_ChildNode = typeof(GraphicHelper).GetMethod("GetGraphic_ChildNode", AccessTools.all);
-        private static MethodInfo MathHelper_toVector3OnMap = typeof(MathHelper).GetMethod("toVector3OnMap", AccessTools.all);
+        private static MethodInfo MathHelper_toVector3OnMap = typeof(PawnRenderer_Patcher).GetMethod("internalConvert", AccessTools.all);
         private static MethodInfo Matrix4x4_TRS = typeof(Matrix4x4).GetMethod("TRS", AccessTools.all);
         private static FieldInfo Graphic_drawSize = typeof(Graphic).GetField("drawSize", AccessTools.all);
     }

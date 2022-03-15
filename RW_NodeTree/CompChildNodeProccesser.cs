@@ -429,8 +429,12 @@ namespace RW_NodeTree
                 final.AddRange(infos);
             }
 
-            RenderingTools.RenderToTarget(final, ref cachedRenderTextures[rot_int], ref textures[rot_int]);
+            RenderTexture cachedRenderTarget = null;
+            RenderingTools.RenderToTarget(final, ref cachedRenderTarget, ref textures[rot_int]);
+            GameObject.Destroy(cachedRenderTarget);
 
+            textures[rot_int].wrapMode = TextureWrapMode.Clamp;
+            //textures[rot_int].filterMode = FilterMode.Point;
 
             if (materials[rot_int] == null)
             {
@@ -526,8 +530,6 @@ namespace RW_NodeTree
         private NodeContainer childNodes;
 
         private Texture2D[] textures = new Texture2D[4];
-
-        private RenderTexture[] cachedRenderTextures = new RenderTexture[4];
 
         private Material[] materials = new Material[4];
 

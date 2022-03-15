@@ -50,7 +50,6 @@
     <Compile Include="Patch\VerbTracker_CreateVerbTargetCommand_Patcher.cs" />
     <Compile Include="Patch\Verb_Patcher.cs" />
     <Compile Include="Tools\GraphicHelper.cs" />
-    <Compile Include="Tools\MathHelper.cs" />
     <Compile Include="Tools\ObjectHelper.cs" />
     <Reference Include="0Harmony">
       <HintPath>I:\SteamLibrary\steamapps\workshop\content\294100\2009463077\Current\Assemblies\0Harmony.dll</HintPath>
