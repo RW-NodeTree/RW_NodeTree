@@ -11,7 +11,7 @@ using Verse;
 
 namespace RW_ModularizationWeapon.NodeComponent
 {
-    internal class NodeComp_Test : CompBasicNodeComp
+    public class NodeComp_Test : CompBasicNodeComp
     {
 
         public CompProperties_Test Props => (CompProperties_Test)props;
