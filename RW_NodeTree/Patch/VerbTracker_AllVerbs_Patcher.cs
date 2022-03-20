@@ -97,9 +97,8 @@ namespace RW_NodeTree
                         IVerbOwner verbOwner = verb.DirectOwner;
                         if (verbOwner != null && (verbOwner == parent || (verbOwner as ThingComp)?.parent == parent))
                         {
-                            Verb _ = null;
                             NotSetVerbDirectOwner = true;
-                            Thing thing = this.GetVerbCorrespondingThing(ownerType, ref _, ref verb);
+                            Thing thing = this.GetBeforeConvertVerbCorrespondingThing(ownerType, verb, out _);
                             NotSetVerbDirectOwner = false;
                             verbOwner = GetSameTypeVerbOwner(ownerType, thing);
                             if (verbOwner != null)
