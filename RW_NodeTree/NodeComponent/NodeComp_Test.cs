@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 using UnityEngine;
 using Verse;
 
-namespace RW_ModularizationWeapon.NodeComponent
+namespace RW_NodeTree.NodeComponent
 {
     public class NodeComp_Test : CompBasicNodeComp
     {

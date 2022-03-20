@@ -112,27 +112,35 @@ namespace RW_NodeTree.Rendering
         /// <param name="infos">all arranged render infos</param>
         /// <param name="size">force render texture size</param>
         /// <returns></returns>
-        public static void RenderToTarget(List<RenderInfo> infos, ref RenderTexture cachedRenderTarget, ref Texture2D target, int size = 0)
+        public static void RenderToTarget(List<RenderInfo> infos, ref RenderTexture cachedRenderTarget, ref Texture2D target, Vector2Int size = default(Vector2Int), int TextureSizeFactor = (int)DefaultTextureSizeFactor)
         {
-            if (size <= 0)
+            if (size.x <= 0 || size.y <= 0)
             {
-                size = DrawSize(infos);
+                size = DrawSize(infos, TextureSizeFactor);
             }
-            else if(size > MaxTexSize)
+            else
             {
-                size = MaxTexSize;
+                size.x = Mathf.Clamp(size.x, 1, MaxTexSize);
+                size.y = Mathf.Clamp(size.y, 1, MaxTexSize);
             }
 
             Camera.Render();
             //if (Prefs.DevMode) Log.Message("RenderToTarget size:" + size);
-            if (cachedRenderTarget == null || cachedRenderTarget.height != cachedRenderTarget.width || cachedRenderTarget.width > MaxTexSize || cachedRenderTarget.width > size + DefultTextureSizeFactor || target.width < size)
+            if (cachedRenderTarget == null ||
+                cachedRenderTarget.width > MaxTexSize ||
+                cachedRenderTarget.width > size.x + DefaultTextureSizeFactor ||
+                target.width < size.x ||
+                cachedRenderTarget.height > MaxTexSize ||
+                cachedRenderTarget.height > size.y + DefaultTextureSizeFactor ||
+                target.height < size.y
+                )
             {
                 if (cachedRenderTarget != null) GameObject.Destroy(cachedRenderTarget);
-                cachedRenderTarget = new RenderTexture(size, size, 16, RenderTextureFormat.ARGB32);
+                cachedRenderTarget = new RenderTexture(size.x, size.y, 16, RenderTextureFormat.ARGB32);
             }
-            size = cachedRenderTarget.width;
+            size = new Vector2Int(cachedRenderTarget.width, cachedRenderTarget.height);
             Camera.targetTexture = cachedRenderTarget;
-            Camera.orthographicSize = size / TowTimesDefultTextureSizeFactor;
+            Camera.orthographicSize = size.y / (float)(TextureSizeFactor << 1);
             for (int i = 0; i < infos.Count; i++)
             {
                 RenderInfo info = infos[i];
@@ -153,10 +161,15 @@ namespace RW_NodeTree.Rendering
             Camera.Render();
             Camera.targetTexture = empty;
             //Camera.targetTexture = null;
-            if (target == null || target.height != target.width || target.width > MaxTexSize || target.width != size)
+            if (target == null ||
+                target.width > MaxTexSize ||
+                target.width != size.x ||
+                target.height > MaxTexSize ||
+                target.height != size.y
+                )
             {
                 if (target != null) GameObject.Destroy(target);
-                target = new Texture2D(size, size, TextureFormat.ARGB32, false);
+                target = new Texture2D(size.x, size.y, TextureFormat.ARGB32, false);
             }
             Graphics.CopyTexture(cachedRenderTarget, target);
             //RenderTexture cache = RenderTexture.active;
@@ -173,10 +186,11 @@ namespace RW_NodeTree.Rendering
         /// </summary>
         /// <param name="infos">all arranged render infos</param>
         /// <returns>standard size of texture</returns>
-        public static int DrawSize(List<RenderInfo> infos)
+        public static Vector2Int DrawSize(List<RenderInfo> infos, int TextureSizeFactor = (int)DefaultTextureSizeFactor)
         {
-            int result = 1;
-            foreach(RenderInfo info in infos)
+            Vector2Int result = default(Vector2Int);
+            float TowTimesTextureSizeFactor = TextureSizeFactor << 1;
+            foreach (RenderInfo info in infos)
             {
                 Bounds bounds = info.mesh.bounds;
 
@@ -191,62 +205,61 @@ namespace RW_NodeTree.Rendering
                     Vector3 extents = bounds.extents;
                     Vector3 vert3d = center + extents;
                     Vector4 vert4d = matrix * new Vector4(vert3d.x, vert3d.y, vert3d.z, 1);
-                    result = (int)Math.Ceiling(Math.Max(result, Math.Abs(vert4d.x) * TowTimesDefultTextureSizeFactor));
-                    result = (int)Math.Ceiling(Math.Max(result, Math.Abs(vert4d.z) * TowTimesDefultTextureSizeFactor));
+                    result.x = (int)Math.Ceiling(Math.Max(result.x, Math.Abs(vert4d.x) * TowTimesTextureSizeFactor));
+                    result.y = (int)Math.Ceiling(Math.Max(result.y, Math.Abs(vert4d.z) * TowTimesTextureSizeFactor));
 
                     //(-1, 1, 1)
                     extents.x *= -1;
                     vert3d = center + extents;
                     vert4d = matrix * new Vector4(vert3d.x, vert3d.y, vert3d.z, 1);
-                    result = (int)Math.Ceiling(Math.Max(result, Math.Abs(vert4d.x) * TowTimesDefultTextureSizeFactor));
-                    result = (int)Math.Ceiling(Math.Max(result, Math.Abs(vert4d.z) * TowTimesDefultTextureSizeFactor));
+                    result.x = (int)Math.Ceiling(Math.Max(result.x, Math.Abs(vert4d.x) * TowTimesTextureSizeFactor));
+                    result.y = (int)Math.Ceiling(Math.Max(result.y, Math.Abs(vert4d.z) * TowTimesTextureSizeFactor));
 
                     //(-1,-1, 1)
                     extents.y *= -1;
                     vert3d = center + extents;
                     vert4d = matrix * new Vector4(vert3d.x, vert3d.y, vert3d.z, 1);
-                    result = (int)Math.Ceiling(Math.Max(result, Math.Abs(vert4d.x) * TowTimesDefultTextureSizeFactor));
-                    result = (int)Math.Ceiling(Math.Max(result, Math.Abs(vert4d.z) * TowTimesDefultTextureSizeFactor));
+                    result.x = (int)Math.Ceiling(Math.Max(result.x, Math.Abs(vert4d.x) * TowTimesTextureSizeFactor));
+                    result.y = (int)Math.Ceiling(Math.Max(result.y, Math.Abs(vert4d.z) * TowTimesTextureSizeFactor));
 
                     //( 1,-1, 1)
                     extents.x *= -1;
                     vert3d = center + extents;
                     vert4d = matrix * new Vector4(vert3d.x, vert3d.y, vert3d.z, 1);
-                    result = (int)Math.Ceiling(Math.Max(result, Math.Abs(vert4d.x) * TowTimesDefultTextureSizeFactor));
-                    result = (int)Math.Ceiling(Math.Max(result, Math.Abs(vert4d.z) * TowTimesDefultTextureSizeFactor));
+                    result.x = (int)Math.Ceiling(Math.Max(result.x, Math.Abs(vert4d.x) * TowTimesTextureSizeFactor));
+                    result.y = (int)Math.Ceiling(Math.Max(result.y, Math.Abs(vert4d.z) * TowTimesTextureSizeFactor));
 
                     //( 1,-1,-1)
                     extents.z *= -1;
                     vert3d = center + extents;
                     vert4d = matrix * new Vector4(vert3d.x, vert3d.y, vert3d.z, 1);
-                    result = (int)Math.Ceiling(Math.Max(result, Math.Abs(vert4d.x) * TowTimesDefultTextureSizeFactor));
-                    result = (int)Math.Ceiling(Math.Max(result, Math.Abs(vert4d.z) * TowTimesDefultTextureSizeFactor));
+                    result.x = (int)Math.Ceiling(Math.Max(result.x, Math.Abs(vert4d.x) * TowTimesTextureSizeFactor));
+                    result.y = (int)Math.Ceiling(Math.Max(result.y, Math.Abs(vert4d.z) * TowTimesTextureSizeFactor));
 
                     //(-1,-1,-1)
                     extents.x *= -1;
                     vert3d = center + extents;
                     vert4d = matrix * new Vector4(vert3d.x, vert3d.y, vert3d.z, 1);
-                    result = (int)Math.Ceiling(Math.Max(result, Math.Abs(vert4d.x) * TowTimesDefultTextureSizeFactor));
-                    result = (int)Math.Ceiling(Math.Max(result, Math.Abs(vert4d.z) * TowTimesDefultTextureSizeFactor));
+                    result.x = (int)Math.Ceiling(Math.Max(result.x, Math.Abs(vert4d.x) * TowTimesTextureSizeFactor));
+                    result.y = (int)Math.Ceiling(Math.Max(result.y, Math.Abs(vert4d.z) * TowTimesTextureSizeFactor));
 
                     //(-1, 1,-1)
                     extents.y *= -1;
                     vert3d = center + extents;
                     vert4d = matrix * new Vector4(vert3d.x, vert3d.y, vert3d.z, 1);
-                    result = (int)Math.Ceiling(Math.Max(result, Math.Abs(vert4d.x) * TowTimesDefultTextureSizeFactor));
-                    result = (int)Math.Ceiling(Math.Max(result, Math.Abs(vert4d.z) * TowTimesDefultTextureSizeFactor));
+                    result.x = (int)Math.Ceiling(Math.Max(result.x, Math.Abs(vert4d.x) * TowTimesTextureSizeFactor));
+                    result.y = (int)Math.Ceiling(Math.Max(result.y, Math.Abs(vert4d.z) * TowTimesTextureSizeFactor));
 
                     //( 1, 1,-1)
                     extents.x *= -1;
                     vert3d = center + extents;
                     vert4d = matrix * new Vector4(vert3d.x, vert3d.y, vert3d.z, 1);
-                    result = (int)Math.Ceiling(Math.Max(result, Math.Abs(vert4d.x) * TowTimesDefultTextureSizeFactor));
-                    result = (int)Math.Ceiling(Math.Max(result, Math.Abs(vert4d.z) * TowTimesDefultTextureSizeFactor));
+                    result.x = (int)Math.Ceiling(Math.Max(result.x, Math.Abs(vert4d.x) * TowTimesTextureSizeFactor));
+                    result.y = (int)Math.Ceiling(Math.Max(result.y, Math.Abs(vert4d.z) * TowTimesTextureSizeFactor));
 
-                    if (result > MaxTexSize)
-                    {
-                        return MaxTexSize;
-                    }
+
+                    result.x = Mathf.Clamp(result.x, 1, MaxTexSize);
+                    result.y = Mathf.Clamp(result.y, 1, MaxTexSize);
                 }
             }
             return result;
@@ -255,9 +268,8 @@ namespace RW_NodeTree.Rendering
         private static Dictionary<int, Stack<List<RenderInfo>>> renderInfos = new Dictionary<int, Stack<List<RenderInfo>>>();
         private static Camera camera = null;
         internal static RenderTexture empty = new RenderTexture(1, 1, 0, RenderTextureFormat.ARGB32);
-        public const float CanvasHeight = 4096;
-        public const int MaxTexSize = 2048;
-        public const float DefultTextureSizeFactor = 128;
-        public const float TowTimesDefultTextureSizeFactor = 256;
+        public const int CanvasHeight = 4096;
+        public const int MaxTexSize = 4096;
+        public const int DefaultTextureSizeFactor = 128;
     }
 }

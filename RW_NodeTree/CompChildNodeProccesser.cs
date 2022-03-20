@@ -25,6 +25,8 @@ namespace RW_NodeTree
             childNodes = new NodeContainer(this);
         }
 
+        public CompProperties_ChildNodeProccesser Props => (CompProperties_ChildNodeProccesser)props;
+
 
         public bool NeedUpdate
         {
@@ -430,11 +432,11 @@ namespace RW_NodeTree
             }
 
             RenderTexture cachedRenderTarget = null;
-            RenderingTools.RenderToTarget(final, ref cachedRenderTarget, ref textures[rot_int]);
+            RenderingTools.RenderToTarget(final, ref cachedRenderTarget, ref textures[rot_int], TextureSizeFactor: Props.TextureSizeFactor);
             GameObject.Destroy(cachedRenderTarget);
 
             textures[rot_int].wrapMode = TextureWrapMode.Clamp;
-            //textures[rot_int].filterMode = FilterMode.Point;
+            textures[rot_int].filterMode = Props.TextureFilterMode;
 
             if (materials[rot_int] == null)
             {
@@ -450,7 +452,7 @@ namespace RW_NodeTree
         {
             int rot_int = rot.AsInt;
             if (((IsRandereds >> rot_int) & 1) == 0 || textures[rot_int] == null) ChildCombinedTexture(rot, subGraphic);
-            Vector2 result = new Vector2(textures[rot_int].width, textures[rot_int].height) / RenderingTools.DefultTextureSizeFactor;
+            Vector2 result = new Vector2(textures[rot_int].width, textures[rot_int].height) / Props.TextureSizeFactor;
             //if (Prefs.DevMode) Log.Message(" DrawSize: thing=" + parent + "; Rot4=" + rot + "; textureWidth=" + textures[rot_int].width + "; result=" + result + ";\n");
             return result;
         }
@@ -546,5 +548,16 @@ namespace RW_NodeTree
                             );
         */
 
+    }
+
+    public class CompProperties_ChildNodeProccesser : CompProperties
+    {
+        public CompProperties_ChildNodeProccesser()
+        {
+            base.compClass = typeof(CompChildNodeProccesser);
+        }
+
+        public int TextureSizeFactor = (int)RenderingTools.DefaultTextureSizeFactor;
+        public FilterMode TextureFilterMode = FilterMode.Bilinear;
     }
 }
