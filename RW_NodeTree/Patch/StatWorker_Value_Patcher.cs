@@ -34,12 +34,13 @@ namespace RW_NodeTree.Patch
 
         private static void PreStatWorker_GetValueUnfinalized(StatWorker __instance, MethodInfo __originalMethod, StatRequest req, bool applyPostProcess, ref Dictionary<string, object> __state)
         {
-            if (__originalMethod
+            if (__originalMethod.DeclaringType
                 ==
                 __instance.GetType().GetMethod(
-                "GetValueUnfinalized",
-                StatWorker_GetValueUnfinalized_ParmsType
-            ))
+                    "GetValueUnfinalized",
+                    StatWorker_GetValueUnfinalized_ParmsType
+                ).DeclaringType
+            )
             {
                 __state = new Dictionary<string, object>();
                 ((CompChildNodeProccesser)req.Thing)?.PreStatWorker_GetValueUnfinalized(__instance, req, applyPostProcess, __state);
@@ -48,12 +49,13 @@ namespace RW_NodeTree.Patch
         private static void PreStatWorker_FinalizeValue(StatWorker __instance, MethodInfo __originalMethod, StatRequest req, bool applyPostProcess, ref float val, ref Dictionary<string, object> __state)
         {
             if (
-                __originalMethod
+                __originalMethod.DeclaringType
                 ==
                 __instance.GetType().GetMethod(
-                "FinalizeValue",
-                StatWorker_FinalizeValue_ParmsType
-            ))
+                    "FinalizeValue",
+                    StatWorker_FinalizeValue_ParmsType
+                ).DeclaringType
+            )
             {
                 __state = new Dictionary<string, object>();
                 val = ((CompChildNodeProccesser)req.Thing)?.PreStatWorker_FinalizeValue(__instance, req, applyPostProcess, val, __state) ?? val;
@@ -61,23 +63,25 @@ namespace RW_NodeTree.Patch
         }
         private static void PostStatWorker_GetValueUnfinalized(StatWorker __instance, MethodInfo __originalMethod, StatRequest req, bool applyPostProcess, ref float __result, ref Dictionary<string, object> __state)
         {
-            if (__originalMethod
+            if (__originalMethod.DeclaringType
                 ==
                 __instance.GetType().GetMethod(
-                "GetValueUnfinalized",
-                StatWorker_GetValueUnfinalized_ParmsType
-            ))
+                    "GetValueUnfinalized",
+                    StatWorker_GetValueUnfinalized_ParmsType
+                ).DeclaringType
+            )
                 __result = ((CompChildNodeProccesser)req.Thing)?.PostStatWorker_GetValueUnfinalized(__instance, req, applyPostProcess, __result, __state) ?? __result;
         }
         private static void PostStatWorker_FinalizeValue(StatWorker __instance, MethodInfo __originalMethod, StatRequest req, bool applyPostProcess, ref float val, ref Dictionary<string, object> __state)
         {
             if (
-                __originalMethod 
+                __originalMethod.DeclaringType
                 ==
                 __instance.GetType().GetMethod(
-                "FinalizeValue",
-                StatWorker_FinalizeValue_ParmsType
-            ))
+                    "FinalizeValue",
+                    StatWorker_FinalizeValue_ParmsType
+                ).DeclaringType
+            )
                 val = ((CompChildNodeProccesser)req.Thing)?.PostStatWorker_FinalizeValue(__instance, req, applyPostProcess, val, __state) ?? val;
         }
 

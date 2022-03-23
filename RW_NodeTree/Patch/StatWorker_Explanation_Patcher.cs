@@ -23,12 +23,13 @@ namespace RW_NodeTree.Patch
 
         private static void PreStatWorker_GetExplanationUnfinalized(StatWorker __instance, MethodInfo __originalMethod, StatRequest req, ToStringNumberSense numberSense, ref Dictionary<string, object> __state)
         {
-            if (__originalMethod
+            if (__originalMethod.DeclaringType
                 ==
                 __instance.GetType().GetMethod(
-                "GetExplanationUnfinalized",
-                StatWorker_GetExplanationUnfinalized_ParmsType
-            ))
+                    "GetExplanationUnfinalized",
+                    StatWorker_GetExplanationUnfinalized_ParmsType
+                ).DeclaringType
+            )
             {
                 __state = new Dictionary<string, object>();
                 ((CompChildNodeProccesser)req.Thing)?.PreStatWorker_GetExplanationUnfinalized(__instance, req, numberSense, __state);
@@ -36,12 +37,13 @@ namespace RW_NodeTree.Patch
         }
         private static void PreStatWorker_GetExplanationFinalizePart(StatWorker __instance, MethodBase __originalMethod, StatRequest req, ToStringNumberSense numberSense, float finalVal, ref Dictionary<string, object> __state)
         {
-            if (__originalMethod
+            if (__originalMethod.DeclaringType
                 ==
                 __instance.GetType().GetMethod(
-                "GetExplanationFinalizePart",
-                StatWorker_GetExplanationFinalizePart_ParmsType
-            ))
+                    "GetExplanationFinalizePart",
+                    StatWorker_GetExplanationFinalizePart_ParmsType
+                ).DeclaringType
+            )
             {
                 __state = new Dictionary<string, object>();
                 ((CompChildNodeProccesser)req.Thing)?.PreStatWorker_GetExplanationFinalizePart(__instance, req, numberSense, finalVal, __state);
@@ -49,24 +51,26 @@ namespace RW_NodeTree.Patch
         }
         private static void PostStatWorker_GetExplanationUnfinalized(StatWorker __instance, MethodInfo __originalMethod, StatRequest req, ToStringNumberSense numberSense, ref string __result, ref Dictionary<string, object> __state)
         {
-            if (__originalMethod
+            if (__originalMethod.DeclaringType
                 ==
                 __instance.GetType().GetMethod(
-                "GetExplanationUnfinalized",
-                StatWorker_GetExplanationUnfinalized_ParmsType
-            ))
+                    "GetExplanationUnfinalized",
+                    StatWorker_GetExplanationUnfinalized_ParmsType
+                ).DeclaringType
+            )
             {
                 __result = ((CompChildNodeProccesser)req.Thing)?.PostStatWorker_GetExplanationUnfinalized(__instance, req, numberSense, __result, __state) ?? __result;
             }
         }
         private static void PostStatWorker_GetExplanationFinalizePart(StatWorker __instance, MethodBase __originalMethod, StatRequest req, ToStringNumberSense numberSense, float finalVal, ref string __result, ref Dictionary<string, object> __state)
         {
-            if (__originalMethod
+            if (__originalMethod.DeclaringType
                 ==
                 __instance.GetType().GetMethod(
-                "GetExplanationFinalizePart",
-                StatWorker_GetExplanationFinalizePart_ParmsType
-            ))
+                    "GetExplanationFinalizePart",
+                    StatWorker_GetExplanationFinalizePart_ParmsType
+                ).DeclaringType
+            )
             {
                 __result = ((CompChildNodeProccesser)req.Thing)?.PostStatWorker_GetExplanationFinalizePart(__instance, req, numberSense, finalVal, __result, __state) ?? __result;
             }

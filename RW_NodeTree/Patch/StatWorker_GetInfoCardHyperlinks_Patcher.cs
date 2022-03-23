@@ -18,13 +18,17 @@ namespace RW_NodeTree.Patch
 
         private static void PostStatWorker_GetInfoCardHyperlinks(StatWorker __instance, MethodInfo __originalMethod, StatRequest statRequest, ref IEnumerable<Dialog_InfoCard.Hyperlink> __result)
         {
-            if (__originalMethod
-                ==
-                __instance.GetType().GetMethod(
+
+            MethodInfo _GetInfoCardHyperlinks = __instance.GetType().GetMethod(
                 "GetInfoCardHyperlinks",
                 StatWorker_GetInfoCardHyperlinks_ParmsType
-            ))
-                __result = ((CompChildNodeProccesser)statRequest.Thing)?.PostStatWorker_GetInfoCardHyperlinks(__instance, statRequest, __result) ?? __result;
+            );
+            //if (Prefs.DevMode) Log.Message(_GetInfoCardHyperlinks.DeclaringType + "::" + _GetInfoCardHyperlinks + " def " + __instance);
+            if (__originalMethod.DeclaringType
+                ==
+                _GetInfoCardHyperlinks.DeclaringType
+            )
+            __result = ((CompChildNodeProccesser)statRequest.Thing)?.PostStatWorker_GetInfoCardHyperlinks(__instance, statRequest, __result) ?? __result;
         }
 
         public static void PatchGetInfoCardHyperlinks(Type type, Harmony patcher)
@@ -38,7 +42,7 @@ namespace RW_NodeTree.Patch
                 if (_GetInfoCardHyperlinks?.DeclaringType == type && _GetInfoCardHyperlinks.HasMethodBody())
                 {
                     patcher.Patch(_GetInfoCardHyperlinks, null, new HarmonyMethod(_PostStatWorker_GetInfoCardHyperlinks));
-                    //if(Prefs.DevMode) Log.Message(type + "::" + _GetValueUnfinalized + " PatchSuccess\n");
+                    //if(Prefs.DevMode) Log.Message(type + "::" + _GetInfoCardHyperlinks + " PatchSuccess\n");
                 }
             }
         }

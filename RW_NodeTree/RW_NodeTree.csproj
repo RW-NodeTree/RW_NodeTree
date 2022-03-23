@@ -46,6 +46,7 @@
     <Compile Include="Patch\StatWorker_MeleeAverageDPS_GetCurrentWeaponUser_Patcher.cs" />
     <Compile Include="Patch\StatsReportUtility_StatsToDraw_Patcher.cs" />
     <Compile Include="Patch\ThingDef_SpecialDisplayStats_Patcher.cs" />
+    <Compile Include="Patch\ThingWithComps_PreApplyDamage_Patcher.cs" />
     <Compile Include="Patch\VerbTracker_AllVerbs_Patcher.cs" />
     <Compile Include="Patch\VerbTracker_CreateVerbTargetCommand_Patcher.cs" />
     <Compile Include="Patch\Verb_Patcher.cs" />

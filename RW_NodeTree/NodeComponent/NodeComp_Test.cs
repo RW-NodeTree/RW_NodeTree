@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using UnityEngine;
 using Verse;
@@ -172,11 +173,37 @@ namespace RW_NodeTree.NodeComponent
             {
                 foreach (Thing thing in NodeProccesser.ChildNodes)
                 {
-                    stringBuilder.AppendLine(thing.Label + ":\n");
-                    stringBuilder.AppendLine(statWorker.GetExplanationUnfinalized(StatRequest.For(thing), numberSense));
+                    stringBuilder.AppendLine("  " + thing.Label + ":");
+                    string exp = "\n" + statWorker.GetExplanationUnfinalized(StatRequest.For(thing), numberSense);
+                    exp = Regex.Replace(exp, "\n", "\n  ");
+                    stringBuilder.AppendLine(exp);
                 }
             }
             return result + "\n" + stringBuilder.ToString();
+        }
+
+
+        public override void PostPreApplyDamageWithRef(ref DamageInfo dinfo, out bool absorbed)
+        {
+            absorbed = false;
+            int count = NodeProccesser.ChildNodes.Count + 1;
+            dinfo.SetAmount(dinfo.Amount / count);
+            foreach (Thing thing in NodeProccesser.ChildNodes)
+            {
+                thing.TakeDamage(dinfo);
+            }
+        }
+
+        public override IEnumerable<Dialog_InfoCard.Hyperlink> PostStatWorker_GetInfoCardHyperlinks(StatWorker statWorker, StatRequest reqstatRequest, IEnumerable<Dialog_InfoCard.Hyperlink> result)
+        {
+            foreach(Dialog_InfoCard.Hyperlink hyperlink in result)
+            {
+                yield return hyperlink;
+            }
+            foreach(Thing thing in NodeProccesser.ChildNodes)
+            {
+                yield return new Dialog_InfoCard.Hyperlink(thing);
+            }
         }
 
         private int frame = 0;

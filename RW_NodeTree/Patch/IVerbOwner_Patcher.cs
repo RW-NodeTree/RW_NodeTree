@@ -23,9 +23,9 @@ namespace RW_NodeTree.Patch
         private static void PreIVerbOwner_GetVerbProperties(IVerbOwner __instance, MethodInfo __originalMethod, ref Dictionary<string ,object> __state)
         {
             Type type = __instance.GetType();
-            if (__originalMethod
+            if (__originalMethod.DeclaringType
                 ==
-                type.GetMethod("get_VerbProperties", BindingFlags.Public | BindingFlags.Instance)
+                type.GetMethod("get_VerbProperties", BindingFlags.Public | BindingFlags.Instance).DeclaringType
             )
             {
                 __state = new Dictionary<string ,object>();
@@ -37,9 +37,9 @@ namespace RW_NodeTree.Patch
         private static void PreIVerbOwner_GetTools(IVerbOwner __instance, MethodInfo __originalMethod, ref Dictionary<string, object> __state)
         {
             Type type = __instance.GetType();
-            if (__originalMethod
+            if (__originalMethod.DeclaringType
                 ==
-                type.GetMethod("get_Tools", BindingFlags.Public | BindingFlags.Instance)
+                type.GetMethod("get_Tools", BindingFlags.Public | BindingFlags.Instance).DeclaringType
             )
             {
                 __state = new Dictionary<string, object>();
@@ -50,9 +50,9 @@ namespace RW_NodeTree.Patch
         private static void PostIVerbOwner_GetVerbProperties(IVerbOwner __instance, MethodInfo __originalMethod, ref List<VerbProperties> __result, ref Dictionary<string, object> __state)
         {
             Type type = __instance.GetType();
-            if (__originalMethod
+            if (__originalMethod.DeclaringType
                 ==
-                type.GetMethod("get_VerbProperties", BindingFlags.Public | BindingFlags.Instance)
+                type.GetMethod("get_VerbProperties", BindingFlags.Public | BindingFlags.Instance).DeclaringType
             )
             {
                 __result = (__result != null) ? new List<VerbProperties>(__result) : new List<VerbProperties>();
@@ -64,9 +64,9 @@ namespace RW_NodeTree.Patch
         private static void PostIVerbOwner_GetTools(IVerbOwner __instance, MethodInfo __originalMethod, ref List<Tool> __result, ref Dictionary<string, object> __state)
         {
             Type type = __instance.GetType();
-            if (__originalMethod
+            if (__originalMethod.DeclaringType
                 ==
-                type.GetMethod("get_Tools", BindingFlags.Public | BindingFlags.Instance)
+                type.GetMethod("get_Tools", BindingFlags.Public | BindingFlags.Instance).DeclaringType
             )
             {
                 __result = (__result != null) ? new List<Tool>(__result) : new List<Tool>();
