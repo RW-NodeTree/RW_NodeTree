@@ -4,7 +4,7 @@ using RimWorld;
 using UnityEngine;
 using Verse;
 
-namespace AssembleWeapon
+namespace RW_NodeTree.Patch
 {
 	[HarmonyPatch(typeof(StatDrawEntry))]
 	public static class StatDrawEntry_Patcher
