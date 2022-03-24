@@ -23,7 +23,7 @@ namespace RW_NodeTree.Patch
                 "GetInfoCardHyperlinks",
                 StatWorker_GetInfoCardHyperlinks_ParmsType
             );
-            //if (Prefs.DevMode) Log.Message(_GetInfoCardHyperlinks.DeclaringType + "::" + _GetInfoCardHyperlinks + " def " + __instance);
+            //if (Prefs.DevMode) Log.Message("__originalMethod.GetType() : " + __originalMethod.GetType() + "; _GetInfoCardHyperlinks.GetType() : " + _GetInfoCardHyperlinks.GetType() + "; same : " + (_GetInfoCardHyperlinks == __originalMethod));
             if (__originalMethod.DeclaringType
                 ==
                 _GetInfoCardHyperlinks.DeclaringType

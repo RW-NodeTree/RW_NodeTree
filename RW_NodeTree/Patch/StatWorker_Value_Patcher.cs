@@ -18,19 +18,7 @@ namespace RW_NodeTree.Patch
         private readonly static MethodInfo _PostStatWorker_GetValueUnfinalized = typeof(StatWorker_Patcher).GetMethod("PostStatWorker_GetValueUnfinalized", BindingFlags.NonPublic | BindingFlags.Static);
         private readonly static MethodInfo _PostStatWorker_FinalizeValue = typeof(StatWorker_Patcher).GetMethod("PostStatWorker_FinalizeValue", BindingFlags.NonPublic | BindingFlags.Static);
         private readonly static Type[] StatWorker_GetValueUnfinalized_ParmsType = new Type[] { typeof(StatRequest), typeof(bool) };
-        private readonly static Type[] StatWorker_FinalizeValue_ParmsType;
-        static StatWorker_Patcher()
-        {
-            MethodInfo _FinalizeValue = typeof(StatWorker).GetMethod(
-                "FinalizeValue"
-            );
-            ParameterInfo[] array = _FinalizeValue.GetParameters();
-            StatWorker_FinalizeValue_ParmsType = new Type[array.Length];
-            for (int i = 0; i < array.Length; i++)
-            {
-                StatWorker_FinalizeValue_ParmsType[i] = array[i].ParameterType;
-            }
-        }
+        private readonly static Type[] StatWorker_FinalizeValue_ParmsType = new Type[] { typeof(StatRequest), typeof(float).MakeByRefType(), typeof(bool) };
 
         private static void PreStatWorker_GetValueUnfinalized(StatWorker __instance, MethodInfo __originalMethod, StatRequest req, bool applyPostProcess, ref Dictionary<string, object> __state)
         {
@@ -105,7 +93,7 @@ namespace RW_NodeTree.Patch
                 if (_FinalizeValue?.DeclaringType == type && _FinalizeValue.HasMethodBody())
                 {
                     patcher.Patch(_FinalizeValue, new HarmonyMethod(_PreStatWorker_FinalizeValue), new HarmonyMethod(_PostStatWorker_FinalizeValue));
-                    //if (Prefs.DevMode) Log.Message(type + "::" + _FinalizeValue + " PatchSuccess\n");
+                    if (Prefs.DevMode) Log.Message(type + "::" + _FinalizeValue + " PatchSuccess\n");
                 }
             }
         }
