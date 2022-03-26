@@ -61,7 +61,7 @@
     <comps>
       <li Class="RW_NodeTree.CompProperties_ChildNodeProccesser">
         <TextureSizeFactor>256</TextureSizeFactor>
-        <TextureFilterMode>Point</TextureFilterMode>
+        <TextureFilterMode>Bilinear</TextureFilterMode>
       </li>
       <li Class="RW_NodeTree.NodeComponent.CompProperties_Test">
         <thingDefs>

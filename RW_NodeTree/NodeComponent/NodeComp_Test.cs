@@ -41,14 +41,13 @@ namespace RW_NodeTree.NodeComponent
             //if (Prefs.DevMode) Log.Message("\"" + ((parent.def.uiIconPath == null) ? "null" : parent.def.uiIconPath) + "\"");
         }
 
-        public override void AdapteDrawSteep(ref List<string> ids, ref List<Thing> nodes, ref List<List<RenderInfo>> renderInfos)
+        public override void AdapteDrawSteep(ref List<NodeRenderingInfos> nodeRenderingInfos)
         {
-            for (int i = 0; i < ids.Count; i++)
+            for (int i = 0; i < nodeRenderingInfos.Count; i++)
             {
-                Thing thing = nodes[i];
-                if(thing != parent)
+                if(nodeRenderingInfos[i].node != parent)
                 {
-                    List<RenderInfo> infos = renderInfos[i];
+                    List<RenderInfo> infos = nodeRenderingInfos[i].renderInfos;
                     //infos.Add(new RenderInfo(thing.Graphic.MeshAt(Rot4.South), 0, Matrix4x4.identity, thing.Graphic.MatSingleFor(thing), 0));
                     for (int j = 0; j < infos.Count; j++)
                     {
@@ -64,7 +63,7 @@ namespace RW_NodeTree.NodeComponent
                             cache = info.matrices[k].GetRow(2);
                             info.matrices[k].SetRow(2, new Vector4(0, 0, new Vector3(cache.x, cache.y, cache.z).magnitude, 1));
 
-                            info.matrices[k] = Matrix4x4.Rotate(Quaternion.Euler(0, i * 360 / NodeProccesser.ChildNodes.Count + frame, 0)) * info.matrices[k];
+                            info.matrices[k] = Matrix4x4.Rotate(Quaternion.Euler(0, i * 360 / ChildNodes.Count + frame, 0)) * info.matrices[k];
 
                             cache = info.matrices[k].GetRow(0);
                             info.matrices[k].SetRow(0, new Vector4(new Vector3(cache.x, cache.y, cache.z).magnitude, 0, 0, cache.w));

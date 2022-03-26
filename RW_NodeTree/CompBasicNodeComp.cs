@@ -133,7 +133,7 @@ namespace RW_NodeTree
         /// <param name="ids">Corresponding is</param>
         /// <param name="nodes">Corresponding node</param>
         /// <param name="renderInfos">Corresponding render infos</param>
-        public virtual void AdapteDrawSteep(ref List<string> ids, ref List<Thing> nodes, ref List<List<RenderInfo>> renderInfos)
+        public virtual void AdapteDrawSteep(ref List<NodeRenderingInfos> nodeRenderingInfos)
         {
             return;
         }

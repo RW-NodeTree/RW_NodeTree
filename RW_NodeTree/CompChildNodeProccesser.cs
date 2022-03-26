@@ -382,14 +382,11 @@ namespace RW_NodeTree
         public Material ChildCombinedTexture(Rot4 rot, Graphic subGraphic = null)
         {
             int rot_int = rot.AsInt;
-            Shader shader = ShaderDatabase.Transparent;
             if (((IsRandereds >> rot_int) & 1) == 1 && materials[rot_int] != null)
             {
                 return materials[rot_int]; 
             }
-            List<Thing> nodes = new List<Thing>(childNodes.InnerListForReading);
-            List<string> ids = new List<string>(childNodes.InnerIdListForReading);
-            List<List<RenderInfo>> RenderInfos = new List<List<RenderInfo>>(nodes.Count);
+            List<NodeRenderingInfos> nodeRenderingInfos = new List<NodeRenderingInfos>(childNodes.Count + 1);
 
             //if (Prefs.DevMode)
             //{
@@ -404,27 +401,6 @@ namespace RW_NodeTree
             //    Log.Message(parent + " graphic : " + parent.Graphic + ";\nstack : " + stackReport);
             //}
 
-            foreach (Thing child in nodes)
-            {
-                RenderingTools.StartOrEndDrawCatchingBlock = true;
-                try
-                {
-                    if (child != null)
-                    {
-                        Rot4 rotCache = child.Rotation;
-                        child.Rotation = new Rot4((rot.AsInt + rotCache.AsInt) & 3);
-                        child.DrawAt(Vector3.zero);
-                        child.Rotation = rotCache;
-                        RenderInfos.Add(RenderingTools.RenderInfos);
-                    }
-                }
-                catch (Exception ex)
-                {
-                    RenderingTools.StartOrEndDrawCatchingBlock = false;
-                    Log.Error(ex.ToString());
-                }
-                RenderingTools.StartOrEndDrawCatchingBlock = false;
-            }
 
             //ORIGIN
             if (subGraphic == null) subGraphic = (parent.Graphic?.GetGraphic_ChildNode() as Graphic_ChildNode)?.SubGraphic;
@@ -434,9 +410,31 @@ namespace RW_NodeTree
                 try
                 {
                     subGraphic.Draw(Vector3.zero, rot, parent);
-                    RenderInfos.Insert(0, RenderingTools.RenderInfos);
-                    nodes.Insert(0, this);
-                    ids.Insert(0, null);
+                    nodeRenderingInfos.Add(new NodeRenderingInfos(this, null, RenderingTools.RenderInfos));
+                }
+                catch (Exception ex)
+                {
+                    RenderingTools.StartOrEndDrawCatchingBlock = false;
+                    Log.Error(ex.ToString());
+                }
+                RenderingTools.StartOrEndDrawCatchingBlock = false;
+            }
+
+            NodeContainer container = ChildNodes;
+            for (int i = 0; i < container.Count; i++)
+            {
+                Thing child = container[i];
+                RenderingTools.StartOrEndDrawCatchingBlock = true;
+                try
+                {
+                    if (child != null)
+                    {
+                        Rot4 rotCache = child.Rotation;
+                        child.Rotation = new Rot4((rot.AsInt + rotCache.AsInt) & 3);
+                        child.DrawAt(Vector3.zero);
+                        child.Rotation = rotCache;
+                        nodeRenderingInfos.Add(new NodeRenderingInfos(child, container[(uint)i], RenderingTools.RenderInfos));
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -448,18 +446,21 @@ namespace RW_NodeTree
 
             foreach (CompBasicNodeComp comp in AllNodeComp)
             {
-                comp.AdapteDrawSteep(ref ids, ref nodes, ref RenderInfos);
+                comp.AdapteDrawSteep(ref nodeRenderingInfos);
             }
 
             List<RenderInfo> final = new List<RenderInfo>();
-            foreach(List<RenderInfo> infos in RenderInfos)
+            foreach(NodeRenderingInfos infos in nodeRenderingInfos)
             {
-                final.AddRange(infos);
+                final.AddRange(infos.renderInfos);
             }
 
             RenderTexture cachedRenderTarget = null;
             RenderingTools.RenderToTarget(final, ref cachedRenderTarget, ref textures[rot_int], TextureSizeFactor: Props.TextureSizeFactor);
             GameObject.Destroy(cachedRenderTarget);
+
+
+            Shader shader = subGraphic.Shader;
 
             textures[rot_int].wrapMode = TextureWrapMode.Clamp;
             textures[rot_int].filterMode = Props.TextureFilterMode;
@@ -467,6 +468,10 @@ namespace RW_NodeTree
             if (materials[rot_int] == null)
             {
                 materials[rot_int] = new Material(shader);
+            }
+            else if(shader != null)
+            {
+                materials[rot_int].shader = shader;
             }
             materials[rot_int].mainTexture = textures[rot_int];
             IsRandereds |= (byte)(1 << rot_int);
