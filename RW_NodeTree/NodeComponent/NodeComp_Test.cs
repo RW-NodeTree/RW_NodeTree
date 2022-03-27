@@ -82,36 +82,47 @@ namespace RW_NodeTree.NodeComponent
             return;
         }
 
-        public override Thing GetBeforeConvertVerbCorrespondingThing(Type verbOwner, Thing result, Verb verbAfterConvert, Tool toolAfterConvert, VerbProperties verbPropertiesAfterConvert, ref Verb verbBeforeConvert, ref Tool toolBeforeConvert, ref VerbProperties verbPropertiesBeforeConvert)
+        public override Thing GetBeforeConvertVerbCorrespondingThing(Type ownerType, Thing result, Verb verbAfterConvert, Tool toolAfterConvert, VerbProperties verbPropertiesAfterConvert, ref Verb verbBeforeConvert, ref Tool toolBeforeConvert, ref VerbProperties verbPropertiesBeforeConvert)
         {
-            if(verbPropertiesAfterConvert != null && verbPropertiesBeforeConvert == null)
+            if(verbPropertiesAfterConvert != null)
             {
-                verbBeforeConvert = verbAfterConvert;
-                toolBeforeConvert = toolAfterConvert;
-                verbPropertiesBeforeConvert= verbPropertiesAfterConvert;
-                result = (verbBeforeConvert?.DirectOwner as ThingComp)?.parent ?? (verbBeforeConvert?.DirectOwner as Thing);
-            }
-            return result;
-        }
-        public override Thing GetAfterConvertVerbCorrespondingThing(Type verbOwner, Thing result, Verb verbBeforeConvert, Tool toolBeforeConvert, VerbProperties verbPropertiesBeforeConvert, ref Verb verbAfterConvert, ref Tool toolAfterConvert, ref VerbProperties verbPropertiesAfterConvert)
-        {
-            if(verbPropertiesBeforeConvert != null && verbPropertiesAfterConvert == null)
-            {
-                verbAfterConvert = verbBeforeConvert;
-                toolAfterConvert = toolBeforeConvert;
-                verbPropertiesAfterConvert = verbPropertiesBeforeConvert;
-                result = ParentProccesser;
+                NodeContainer conatiner = ChildNodes;
+                for(int i = 0; i < conatiner.Count; i++)
+                {
+                    IVerbOwner verbOwner = CompChildNodeProccesser.GetSameTypeVerbOwner(ownerType, conatiner[i]);
+                    List<Verb> allVerb = CompChildNodeProccesser.GetAllOriginalVerbs(verbOwner?.VerbTracker);
+                    if(allVerb?.Find(x => x.verbProps == verbPropertiesAfterConvert && x.tool == toolAfterConvert) != null)
+                    {
+                        return conatiner[i];
+                    }
+                }
             }
             return result;
         }
 
-        public override List<Verb> PostVerbTracker_AllVerbs(Type verbOwner, List<Verb> result)
+        public override Thing GetAfterConvertVerbCorrespondingThing(Type verbOwner, Thing result, Verb verbBeforeConvert, Tool toolBeforeConvert, VerbProperties verbPropertiesBeforeConvert, ref Verb verbAfterConvert, ref Tool toolAfterConvert, ref VerbProperties verbPropertiesAfterConvert)
         {
-            //if (Prefs.DevMode) Log.Message(" VerbTracker=" + verbTracker + "; result.Count=" + result.Count + ";\n");
-            foreach (Thing t in NodeProccesser.ChildNodes)
+            return (verbPropertiesBeforeConvert != null) ?(Thing) ParentProccesser : result;
+        }
+
+        public override List<VerbProperties> PostIVerbOwner_GetVerbProperties(Type ownerType, List<VerbProperties> result, Dictionary<string, object> forPostRead)
+        {
+            NodeContainer conatiner = ChildNodes;
+            for (int i = 0; i < conatiner.Count; i++)
             {
-                List<Verb> cache = CompChildNodeProccesser.GetSameTypeVerbOwner(verbOwner, t)?.VerbTracker?.AllVerbs;
-                if(cache != null) result.AddRange(cache);
+                IVerbOwner verbOwner = CompChildNodeProccesser.GetSameTypeVerbOwner(ownerType, conatiner[i]);
+                if(verbOwner != null) result.AddRange(verbOwner.VerbProperties);
+            }
+            return result;
+        }
+
+        public override List<Tool> PostIVerbOwner_GetTools(Type ownerType, List<Tool> result, Dictionary<string, object> forPostRead)
+        {
+            NodeContainer conatiner = ChildNodes;
+            for (int i = 0; i < conatiner.Count; i++)
+            {
+                IVerbOwner verbOwner = CompChildNodeProccesser.GetSameTypeVerbOwner(ownerType, conatiner[i]);
+                if (verbOwner != null) result.AddRange(verbOwner.Tools);
             }
             return result;
         }

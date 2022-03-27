@@ -20,7 +20,8 @@ namespace RW_NodeTree.Patch
         )]
         public static bool PrePawn_TryGetAttackVerb(Pawn __instance, ref Verb __result)
         {
-            if(__instance.CurJob != null && __instance.CurJob.GetCachedDriverDirect != null && typeof(JobDriver_AttackStatic).IsAssignableFrom(__instance.CurJob.GetCachedDriverDirect.GetType()) && __instance.CurJob.verbToUse != null && __instance.CurJob.verbToUse.Caster == __instance && __instance.CurJob.verbToUse.Available())
+            JobDriver driver = __instance.CurJob?.GetCachedDriverDirect;
+            if (driver != null && typeof(JobDriver_AttackStatic).IsAssignableFrom(driver.GetType()) && __instance.CurJob.verbToUse != null && __instance.CurJob.verbToUse.Caster == __instance && __instance.CurJob.verbToUse.Available())
             {
                 __result = __instance.CurJob.verbToUse;
                 //if (Prefs.DevMode) Log.Message("ticksToNextBurstShot : " + ticksToNextBurstShot(__result) + " state : " + __result.state + " caster : " + __result.caster);
