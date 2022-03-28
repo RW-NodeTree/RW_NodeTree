@@ -230,7 +230,7 @@ namespace RW_NodeTree
                 {
                     if (allVerbs != null && !allVerbs.Contains(verbCache))
                     {
-                        return result;
+                        return parent;
                     }
                     else
                     {
@@ -248,7 +248,7 @@ namespace RW_NodeTree
                     verbCache = allVerbs.Find(x => x.tool == toolCache && x.verbProps == verbPropertiesCache);
                     if (verbCache == null)
                     {
-                        return result;
+                        return parent;
                     }
                 }
 
@@ -260,8 +260,9 @@ namespace RW_NodeTree
                 {
                     result = ((CompChildNodeProccesser)result)?.GetBeforeConvertVerbCorrespondingThing(ownerType, verbBeforeConvert, toolBeforeConvert, verbPropertiesBeforeConvert, out verbBeforeConvert, out toolBeforeConvert, out verbPropertiesBeforeConvert) ?? result;
                 }
+                return result;
             }
-            return result;
+            return parent;
         }
 
 
@@ -360,7 +361,7 @@ namespace RW_NodeTree
                 {
                     if (allVerbs != null && !allVerbs.Contains(verbCache))
                     {
-                        return result;
+                        return parent;
                     }
                     else
                     {
@@ -378,7 +379,7 @@ namespace RW_NodeTree
                     verbCache = allVerbs.Find(x => x.tool == toolCache && x.verbProps == verbPropertiesCache);
                     if (verbCache == null)
                     {
-                        return result;
+                        return parent;
                     }
                 }
 
@@ -390,8 +391,9 @@ namespace RW_NodeTree
                 {
                     result = ((CompChildNodeProccesser)result)?.GetAfterConvertVerbCorrespondingThing(ownerType, verbAfterConvert, toolAfterConvert, verbPropertiesAfterConvert, out verbAfterConvert, out toolAfterConvert, out verbPropertiesAfterConvert) ?? result;
                 }
+                return result;
             }
-            return result;
+            return parent;
         }
 
         /// <summary>
