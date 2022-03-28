@@ -91,7 +91,8 @@ namespace RW_NodeTree.NodeComponent
                 {
                     IVerbOwner verbOwner = CompChildNodeProccesser.GetSameTypeVerbOwner(ownerType, conatiner[i]);
                     List<Verb> allVerb = CompChildNodeProccesser.GetAllOriginalVerbs(verbOwner?.VerbTracker);
-                    if(allVerb?.Find(x => x.verbProps == verbPropertiesAfterConvert && x.tool == toolAfterConvert) != null)
+                    verbBeforeConvert = allVerb?.Find(x => x.verbProps == verbPropertiesAfterConvert && x.tool == toolAfterConvert);
+                    if (verbBeforeConvert != null)
                     {
                         return conatiner[i];
                     }
@@ -102,6 +103,8 @@ namespace RW_NodeTree.NodeComponent
 
         public override Thing GetAfterConvertVerbCorrespondingThing(Type verbOwner, Thing result, Verb verbBeforeConvert, Tool toolBeforeConvert, VerbProperties verbPropertiesBeforeConvert, ref Verb verbAfterConvert, ref Tool toolAfterConvert, ref VerbProperties verbPropertiesAfterConvert)
         {
+            toolAfterConvert = toolBeforeConvert;
+            verbPropertiesAfterConvert = verbPropertiesBeforeConvert;
             return (verbPropertiesBeforeConvert != null) ?(Thing) ParentProccesser : result;
         }
 

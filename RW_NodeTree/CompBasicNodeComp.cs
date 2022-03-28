@@ -35,6 +35,7 @@ namespace RW_NodeTree
         /// parent node
         /// </summary>
         public CompChildNodeProccesser NodeProccesser => parent;
+
         /// <summary>
         /// node container
         /// </summary>
