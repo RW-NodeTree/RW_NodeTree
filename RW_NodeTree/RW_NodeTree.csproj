@@ -277,7 +277,6 @@
     <Compile Include="Patch\IVerbOwner_Patcher.cs" />
     <Compile Include="Patch\StatWorker_Value_Patcher.cs" />
     <Compile Include="Rendering\RenderInfo.cs" />
-    <Compile Include="Test\Test.cs" />
     <Compile Include="CompBasicNodeComp.cs" />
     <Compile Include="CompChildNodeProccesser.cs" />
     <Compile Include="Rendering\RenderingTools.cs" />
