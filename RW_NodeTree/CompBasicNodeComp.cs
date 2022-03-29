@@ -84,7 +84,7 @@ namespace RW_NodeTree
         /// <param name="toolBeforeConvert">tool before convert</param>
         /// <param name="verbPropertiesBeforeConvert">verbProperties before convert</param>
         /// <returns>Corresponding thing before verb convert</returns>
-        public virtual Thing GetBeforeConvertVerbCorrespondingThing(Type ownerType, Thing result, Verb verbAfterConvert, Tool toolAfterConvert, VerbProperties verbPropertiesAfterConvert, ref Verb verbBeforeConvert, ref Tool toolBeforeConvert, ref VerbProperties verbPropertiesBeforeConvert)
+        protected virtual Thing GetBeforeConvertVerbCorrespondingThing(Type ownerType, Thing result, Verb verbAfterConvert, Tool toolAfterConvert, VerbProperties verbPropertiesAfterConvert, ref Verb verbBeforeConvert, ref Tool toolBeforeConvert, ref VerbProperties verbPropertiesBeforeConvert)
         {
             return result;
         }
@@ -102,7 +102,7 @@ namespace RW_NodeTree
         /// <param name="toolBeforeConvert">tool before convert</param>
         /// <param name="verbPropertiesBeforeConvert">verbProperties before convert</param>
         /// <returns>Corresponding thing before verb convert</returns>
-        public virtual Thing GetAfterConvertVerbCorrespondingThing(Type ownerType, Thing result, Verb verbBeforeConvert, Tool toolBeforeConvert, VerbProperties verbPropertiesBeforeConvert, ref Verb verbAfterConvert, ref Tool toolAfterConvert, ref VerbProperties verbPropertiesAfterConvert)
+        protected virtual Thing GetAfterConvertVerbCorrespondingThing(Type ownerType, Thing result, Verb verbBeforeConvert, Tool toolBeforeConvert, VerbProperties verbPropertiesBeforeConvert, ref Verb verbAfterConvert, ref Tool toolAfterConvert, ref VerbProperties verbPropertiesAfterConvert)
         {
             return result;
         }
@@ -112,7 +112,7 @@ namespace RW_NodeTree
         /// </summary>
         /// <param name="actionNode">update event action node</param>
         /// <returns>stope bubble</returns>
-        public virtual bool UpdateNode(CompChildNodeProccesser actionNode)
+        protected virtual bool UpdateNode(CompChildNodeProccesser actionNode)
         {
             return false;
         }
@@ -123,7 +123,7 @@ namespace RW_NodeTree
         /// <param name="node">node for add</param>
         /// <param name="id">id</param>
         /// <returns>able to add into container</returns>
-        public virtual bool AllowNode(Thing node, string id = null)
+        protected virtual bool AllowNode(Thing node, string id)
         {
             return true;
         }
@@ -134,9 +134,16 @@ namespace RW_NodeTree
         /// <param name="ids">Corresponding is</param>
         /// <param name="nodes">Corresponding node</param>
         /// <param name="renderInfos">Corresponding render infos</param>
-        public virtual void AdapteDrawSteep(ref List<NodeRenderingInfos> nodeRenderingInfos)
+        protected virtual void AdapteDrawSteep(ref List<NodeRenderingInfos> nodeRenderingInfos)
         {
             return;
         }
+        internal Thing internal_GetBeforeConvertVerbCorrespondingThing(Type ownerType, Thing result, Verb verbAfterConvert, Tool toolAfterConvert, VerbProperties verbPropertiesAfterConvert, ref Verb verbBeforeConvert, ref Tool toolBeforeConvert, ref VerbProperties verbPropertiesBeforeConvert)
+            => GetBeforeConvertVerbCorrespondingThing(ownerType, result, verbAfterConvert, toolAfterConvert, verbPropertiesAfterConvert, ref verbBeforeConvert, ref toolBeforeConvert, ref verbPropertiesBeforeConvert);
+        internal Thing internal_GetAfterConvertVerbCorrespondingThing(Type ownerType, Thing result, Verb verbAfterConvert, Tool toolAfterConvert, VerbProperties verbPropertiesAfterConvert, ref Verb verbBeforeConvert, ref Tool toolBeforeConvert, ref VerbProperties verbPropertiesBeforeConvert)
+            => GetAfterConvertVerbCorrespondingThing(ownerType, result, verbBeforeConvert, toolBeforeConvert, verbPropertiesBeforeConvert, ref verbAfterConvert, ref toolAfterConvert, ref verbPropertiesAfterConvert);
+        internal bool internal_UpdateNode(CompChildNodeProccesser actionNode) => UpdateNode(actionNode);
+        internal bool internal_AllowNode(Thing node, string id = null) => AllowNode(node, id);
+        internal void internal_AdapteDrawSteep(ref List<NodeRenderingInfos> nodeRenderingInfos) => AdapteDrawSteep(ref nodeRenderingInfos);
     }
 }

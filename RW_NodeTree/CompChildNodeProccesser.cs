@@ -219,7 +219,7 @@ namespace RW_NodeTree
                 VerbProperties verbPropertiesCache = null;
                 foreach (CompBasicNodeComp comp in AllNodeComp)
                 {
-                    result = comp.GetBeforeConvertVerbCorrespondingThing(ownerType, result, verbAfterConvert, toolAfterConvert, verbPropertiesAfterConvert, ref verbCache, ref toolCache, ref verbPropertiesCache) ?? result;
+                    result = comp.internal_GetBeforeConvertVerbCorrespondingThing(ownerType, result, verbAfterConvert, toolAfterConvert, verbPropertiesAfterConvert, ref verbCache, ref toolCache, ref verbPropertiesCache) ?? result;
                 }
 
 
@@ -350,7 +350,7 @@ namespace RW_NodeTree
                 VerbProperties verbPropertiesCache = null;
                 foreach (CompBasicNodeComp comp in AllNodeComp)
                 {
-                    result = comp.GetAfterConvertVerbCorrespondingThing(ownerType, result, verbBeforeConvert, toolBeforeConvert, verbPropertiesBeforeConvert, ref verbCache, ref toolCache, ref verbPropertiesCache) ?? result;
+                    result = comp.internal_GetAfterConvertVerbCorrespondingThing(ownerType, result, verbBeforeConvert, toolBeforeConvert, verbPropertiesBeforeConvert, ref verbCache, ref toolCache, ref verbPropertiesCache) ?? result;
                 }
 
 
@@ -513,7 +513,7 @@ namespace RW_NodeTree
 
             foreach (CompBasicNodeComp comp in AllNodeComp)
             {
-                comp.AdapteDrawSteep(ref nodeRenderingInfos);
+                comp.internal_AdapteDrawSteep(ref nodeRenderingInfos);
             }
 
             List<RenderInfo> final = new List<RenderInfo>();
@@ -565,7 +565,7 @@ namespace RW_NodeTree
         {
             foreach (CompBasicNodeComp comp in AllNodeComp)
             {
-                if (!comp.AllowNode(node, id)) return false;
+                if (!comp.internal_AllowNode(node, id)) return false;
             }
             return true;
         }

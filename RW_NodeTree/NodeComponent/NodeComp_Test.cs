@@ -41,7 +41,7 @@ namespace RW_NodeTree.NodeComponent
             //if (Prefs.DevMode) Log.Message("\"" + ((parent.def.uiIconPath == null) ? "null" : parent.def.uiIconPath) + "\"");
         }
 
-        public override void AdapteDrawSteep(ref List<NodeRenderingInfos> nodeRenderingInfos)
+        protected override void AdapteDrawSteep(ref List<NodeRenderingInfos> nodeRenderingInfos)
         {
             for (int i = 0; i < nodeRenderingInfos.Count; i++)
             {
@@ -82,7 +82,7 @@ namespace RW_NodeTree.NodeComponent
             return;
         }
 
-        public override Thing GetBeforeConvertVerbCorrespondingThing(Type ownerType, Thing result, Verb verbAfterConvert, Tool toolAfterConvert, VerbProperties verbPropertiesAfterConvert, ref Verb verbBeforeConvert, ref Tool toolBeforeConvert, ref VerbProperties verbPropertiesBeforeConvert)
+        protected override Thing GetBeforeConvertVerbCorrespondingThing(Type ownerType, Thing result, Verb verbAfterConvert, Tool toolAfterConvert, VerbProperties verbPropertiesAfterConvert, ref Verb verbBeforeConvert, ref Tool toolBeforeConvert, ref VerbProperties verbPropertiesBeforeConvert)
         {
             if(verbPropertiesAfterConvert != null)
             {
@@ -101,14 +101,14 @@ namespace RW_NodeTree.NodeComponent
             return result;
         }
 
-        public override Thing GetAfterConvertVerbCorrespondingThing(Type verbOwner, Thing result, Verb verbBeforeConvert, Tool toolBeforeConvert, VerbProperties verbPropertiesBeforeConvert, ref Verb verbAfterConvert, ref Tool toolAfterConvert, ref VerbProperties verbPropertiesAfterConvert)
+        protected override Thing GetAfterConvertVerbCorrespondingThing(Type verbOwner, Thing result, Verb verbBeforeConvert, Tool toolBeforeConvert, VerbProperties verbPropertiesBeforeConvert, ref Verb verbAfterConvert, ref Tool toolAfterConvert, ref VerbProperties verbPropertiesAfterConvert)
         {
             toolAfterConvert = toolBeforeConvert;
             verbPropertiesAfterConvert = verbPropertiesBeforeConvert;
             return (verbPropertiesBeforeConvert != null) ?(Thing) ParentProccesser : result;
         }
 
-        public override List<VerbProperties> PostIVerbOwner_GetVerbProperties(Type ownerType, List<VerbProperties> result, Dictionary<string, object> forPostRead)
+        protected override List<VerbProperties> PostIVerbOwner_GetVerbProperties(Type ownerType, List<VerbProperties> result, Dictionary<string, object> forPostRead)
         {
             NodeContainer conatiner = ChildNodes;
             for (int i = 0; i < conatiner.Count; i++)
@@ -119,7 +119,7 @@ namespace RW_NodeTree.NodeComponent
             return result;
         }
 
-        public override List<Tool> PostIVerbOwner_GetTools(Type ownerType, List<Tool> result, Dictionary<string, object> forPostRead)
+        protected override List<Tool> PostIVerbOwner_GetTools(Type ownerType, List<Tool> result, Dictionary<string, object> forPostRead)
         {
             NodeContainer conatiner = ChildNodes;
             for (int i = 0; i < conatiner.Count; i++)
@@ -130,7 +130,7 @@ namespace RW_NodeTree.NodeComponent
             return result;
         }
 
-        public override void PreStatWorker_GetValueUnfinalized(StatWorker statWorker, StatRequest req, bool applyPostProcess, Dictionary<string, object> forPostRead)
+        protected override void PreStatWorker_GetValueUnfinalized(StatWorker statWorker, StatRequest req, bool applyPostProcess, Dictionary<string, object> forPostRead)
         {
             if(statWorker is StatWorker_MeleeAverageArmorPenetration || statWorker is StatWorker_MeleeAverageDPS)
             {
@@ -160,7 +160,7 @@ namespace RW_NodeTree.NodeComponent
             }
         }
 
-        public override float PostStatWorker_GetValueUnfinalized(StatWorker statWorker, StatRequest req, bool applyPostProcess, float result, Dictionary<string, object> forPostRead)
+        protected override float PostStatWorker_GetValueUnfinalized(StatWorker statWorker, StatRequest req, bool applyPostProcess, float result, Dictionary<string, object> forPostRead)
         {
             if (statWorker is StatWorker_MeleeAverageArmorPenetration || statWorker is StatWorker_MeleeAverageDPS)
             {
@@ -179,7 +179,7 @@ namespace RW_NodeTree.NodeComponent
             return result;
         }
 
-        public override string PostStatWorker_GetExplanationUnfinalized(StatWorker statWorker, StatRequest req, ToStringNumberSense numberSense, string result, Dictionary<string, object> forPostRead)
+        protected override string PostStatWorker_GetExplanationUnfinalized(StatWorker statWorker, StatRequest req, ToStringNumberSense numberSense, string result, Dictionary<string, object> forPostRead)
         {
             StringBuilder stringBuilder = new StringBuilder();
             if (statWorker is StatWorker_MeleeAverageDPS || statWorker is StatWorker_MeleeAverageArmorPenetration)
@@ -196,7 +196,7 @@ namespace RW_NodeTree.NodeComponent
         }
 
 
-        public override void PostPreApplyDamageWithRef(ref DamageInfo dinfo, out bool absorbed)
+        protected override void PostPreApplyDamageWithRef(ref DamageInfo dinfo, out bool absorbed)
         {
             absorbed = false;
             int count = NodeProccesser.ChildNodes.Count + 1;
@@ -207,7 +207,7 @@ namespace RW_NodeTree.NodeComponent
             }
         }
 
-        public override IEnumerable<Dialog_InfoCard.Hyperlink> PostStatWorker_GetInfoCardHyperlinks(StatWorker statWorker, StatRequest reqstatRequest, IEnumerable<Dialog_InfoCard.Hyperlink> result)
+        protected override IEnumerable<Dialog_InfoCard.Hyperlink> PostStatWorker_GetInfoCardHyperlinks(StatWorker statWorker, StatRequest reqstatRequest, IEnumerable<Dialog_InfoCard.Hyperlink> result)
         {
             foreach(Dialog_InfoCard.Hyperlink hyperlink in result)
             {

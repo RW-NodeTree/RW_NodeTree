@@ -42,17 +42,19 @@ namespace RW_NodeTree
         {
             foreach (CompBasicNodeComp comp in AllNodeComp)
             {
-                result = comp.PostGenRecipe_MakeRecipeProducts(recipeDef, worker, ingredients, dominantIngredient1, billGiver, precept, InvokeSource, result) ?? result;
+                result = comp.internal_PostGenRecipe_MakeRecipeProducts(recipeDef, worker, ingredients, dominantIngredient1, billGiver, precept, InvokeSource, result) ?? result;
             }
             return result;
         }
     }
     public abstract partial class CompBasicNodeComp : ThingComp
     {
-        public virtual IEnumerable<Thing> PostGenRecipe_MakeRecipeProducts(RecipeDef recipeDef, Pawn worker, List<Thing> ingredients, Thing dominantIngredient1, IBillGiver billGiver, Precept_ThingStyle precept, RecipeInvokeSource invokeSource, IEnumerable<Thing> result)
+        protected virtual IEnumerable<Thing> PostGenRecipe_MakeRecipeProducts(RecipeDef recipeDef, Pawn worker, List<Thing> ingredients, Thing dominantIngredient1, IBillGiver billGiver, Precept_ThingStyle precept, RecipeInvokeSource invokeSource, IEnumerable<Thing> result)
         {
             return result;
         }
+        internal IEnumerable<Thing> internal_PostGenRecipe_MakeRecipeProducts(RecipeDef recipeDef, Pawn worker, List<Thing> ingredients, Thing dominantIngredient1, IBillGiver billGiver, Precept_ThingStyle precept, RecipeInvokeSource invokeSource, IEnumerable<Thing> result)
+            => PostGenRecipe_MakeRecipeProducts(recipeDef, worker, ingredients, dominantIngredient1, billGiver, precept, invokeSource, result);
     }
 
     public enum RecipeInvokeSource

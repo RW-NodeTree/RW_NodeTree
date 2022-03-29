@@ -45,16 +45,18 @@ namespace RW_NodeTree
         {
             foreach (CompBasicNodeComp comp in AllNodeComp)
             {
-                result = comp.PostThingDef_SpecialDisplayStats(thing, result) ?? result;
+                result = comp.internal_PostThingDef_SpecialDisplayStats(thing, result) ?? result;
             }
             return result;
         }
     }
     public abstract partial class CompBasicNodeComp : ThingComp
     {
-        public virtual IEnumerable<StatDrawEntry> PostThingDef_SpecialDisplayStats(Thing thing, IEnumerable<StatDrawEntry> result)
+        protected virtual IEnumerable<StatDrawEntry> PostThingDef_SpecialDisplayStats(Thing thing, IEnumerable<StatDrawEntry> result)
         {
             return result;
         }
+        internal IEnumerable<StatDrawEntry> internal_PostThingDef_SpecialDisplayStats(Thing thing, IEnumerable<StatDrawEntry> result)
+            => PostThingDef_SpecialDisplayStats(thing, result);
     }
 }

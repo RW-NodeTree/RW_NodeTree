@@ -118,7 +118,7 @@ namespace RW_NodeTree
             {
                 foreach (CompBasicNodeComp comp in AllNodeComp)
                 {
-                    comp.PreIVerbOwner_GetVerbProperties(ownerType, forPostRead);
+                    comp.internal_PreIVerbOwner_GetVerbProperties(ownerType, forPostRead);
                 }
             }
             return;
@@ -136,7 +136,7 @@ namespace RW_NodeTree
             {
                 foreach (CompBasicNodeComp comp in AllNodeComp)
                 {
-                    comp.PreIVerbOwner_GetTools(ownerType, forPostRead);
+                    comp.internal_PreIVerbOwner_GetTools(ownerType, forPostRead);
                 }
             }
             return;
@@ -152,7 +152,7 @@ namespace RW_NodeTree
             {
                 foreach (CompBasicNodeComp comp in AllNodeComp)
                 {
-                    verbProperties = comp.PostIVerbOwner_GetVerbProperties(ownerType, verbProperties, forPostRead) ?? verbProperties;
+                    verbProperties = comp.internal_PostIVerbOwner_GetVerbProperties(ownerType, verbProperties, forPostRead) ?? verbProperties;
                 }
             }
             return verbProperties;
@@ -170,7 +170,7 @@ namespace RW_NodeTree
             {
                 foreach (CompBasicNodeComp comp in AllNodeComp)
                 {
-                    tools = comp.PostIVerbOwner_GetTools(ownerType, tools, forPostRead) ?? tools;
+                    tools = comp.internal_PostIVerbOwner_GetTools(ownerType, tools, forPostRead) ?? tools;
                 }
             }
             return tools;
@@ -178,21 +178,29 @@ namespace RW_NodeTree
     }
     public abstract partial class CompBasicNodeComp : ThingComp
     {
-        public virtual void PreIVerbOwner_GetVerbProperties(Type ownerType, Dictionary<string, object> forPostRead)
+        protected virtual void PreIVerbOwner_GetVerbProperties(Type ownerType, Dictionary<string, object> forPostRead)
         {
             return;
         }
-        public virtual void PreIVerbOwner_GetTools(Type ownerType, Dictionary<string, object> forPostRead)
+        protected virtual void PreIVerbOwner_GetTools(Type ownerType, Dictionary<string, object> forPostRead)
         {
             return;
         }
-        public virtual List<VerbProperties> PostIVerbOwner_GetVerbProperties(Type ownerType, List<VerbProperties> result, Dictionary<string, object> forPostRead)
+        protected virtual List<VerbProperties> PostIVerbOwner_GetVerbProperties(Type ownerType, List<VerbProperties> result, Dictionary<string, object> forPostRead)
         {
             return result;
         }
-        public virtual List<Tool> PostIVerbOwner_GetTools(Type ownerType, List<Tool> result, Dictionary<string, object> forPostRead)
+        protected virtual List<Tool> PostIVerbOwner_GetTools(Type ownerType, List<Tool> result, Dictionary<string, object> forPostRead)
         {
             return result;
         }
+        internal void internal_PreIVerbOwner_GetVerbProperties(Type ownerType, Dictionary<string, object> forPostRead)
+            => PreIVerbOwner_GetVerbProperties(ownerType, forPostRead);
+        internal void internal_PreIVerbOwner_GetTools(Type ownerType, Dictionary<string, object> forPostRead)
+            => PreIVerbOwner_GetTools(ownerType, forPostRead);
+        internal List<VerbProperties> internal_PostIVerbOwner_GetVerbProperties(Type ownerType, List<VerbProperties> result, Dictionary<string, object> forPostRead)
+            => PostIVerbOwner_GetVerbProperties(ownerType, result, forPostRead);
+        internal List<Tool> internal_PostIVerbOwner_GetTools(Type ownerType, List<Tool> result, Dictionary<string, object> forPostRead)
+            => PostIVerbOwner_GetTools(ownerType, result, forPostRead);
     }
 }

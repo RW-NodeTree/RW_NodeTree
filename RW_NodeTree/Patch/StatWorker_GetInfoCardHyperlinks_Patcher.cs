@@ -69,7 +69,7 @@ namespace RW_NodeTree
         {
             foreach (CompBasicNodeComp comp in AllNodeComp)
             {
-                result = comp.PostStatWorker_GetInfoCardHyperlinks(statWorker, reqstatRequest, result) ?? result;
+                result = comp.internal_PostStatWorker_GetInfoCardHyperlinks(statWorker, reqstatRequest, result) ?? result;
             }
             return result;
         }
@@ -77,9 +77,11 @@ namespace RW_NodeTree
     public abstract partial class CompBasicNodeComp : ThingComp
     {
 
-        public virtual IEnumerable<Dialog_InfoCard.Hyperlink> PostStatWorker_GetInfoCardHyperlinks(StatWorker statWorker, StatRequest reqstatRequest, IEnumerable<Dialog_InfoCard.Hyperlink> result)
+        protected virtual IEnumerable<Dialog_InfoCard.Hyperlink> PostStatWorker_GetInfoCardHyperlinks(StatWorker statWorker, StatRequest reqstatRequest, IEnumerable<Dialog_InfoCard.Hyperlink> result)
         {
             return result;
         }
+        internal IEnumerable<Dialog_InfoCard.Hyperlink> internal_PostStatWorker_GetInfoCardHyperlinks(StatWorker statWorker, StatRequest reqstatRequest, IEnumerable<Dialog_InfoCard.Hyperlink> result)
+            => PostStatWorker_GetInfoCardHyperlinks(statWorker, reqstatRequest, result);
     }
 }

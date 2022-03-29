@@ -26,7 +26,7 @@ namespace RW_NodeTree.Patch
             {
                 for (int i = 0; i < __instance.AllComps.Count; i++)
                 {
-                    (__instance.AllComps[i] as CompBasicNodeComp)?.PostPreApplyDamageWithRef(ref dinfo, out absorbed);
+                    (__instance.AllComps[i] as CompBasicNodeComp)?.internal_PostPreApplyDamageWithRef(ref dinfo, out absorbed);
                     if (absorbed)
                     {
                         return;
@@ -41,9 +41,11 @@ namespace RW_NodeTree
 {
     public abstract partial class CompBasicNodeComp : ThingComp
     {
-        public virtual void PostPreApplyDamageWithRef(ref DamageInfo dinfo, out bool absorbed)
+        protected virtual void PostPreApplyDamageWithRef(ref DamageInfo dinfo, out bool absorbed)
         {
             absorbed = false;
         }
+        internal void internal_PostPreApplyDamageWithRef(ref DamageInfo dinfo, out bool absorbed) => PostPreApplyDamageWithRef(ref dinfo, out absorbed);
+
     }
 }

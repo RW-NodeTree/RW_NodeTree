@@ -119,7 +119,7 @@ namespace RW_NodeTree
         {
             foreach (CompBasicNodeComp comp in AllNodeComp)
             {
-                comp.PreStatWorker_GetValueUnfinalized(statWorker, req, applyPostProcess, forPostRead);
+                comp.internal_PreStatWorker_GetValueUnfinalized(statWorker, req, applyPostProcess, forPostRead);
             }
         }
 
@@ -135,7 +135,7 @@ namespace RW_NodeTree
         {
             foreach (CompBasicNodeComp comp in AllNodeComp)
             {
-                result = comp.PreStatWorker_FinalizeValue(statWorker, req, applyPostProcess, result, forPostRead);
+                result = comp.internal_PreStatWorker_FinalizeValue(statWorker, req, applyPostProcess, result, forPostRead);
             }
             return result;
         }
@@ -152,7 +152,7 @@ namespace RW_NodeTree
         {
             foreach (CompBasicNodeComp comp in AllNodeComp)
             {
-                result = comp.PostStatWorker_GetValueUnfinalized(statWorker, req, applyPostProcess, result, forPostRead);
+                result = comp.internal_PostStatWorker_GetValueUnfinalized(statWorker, req, applyPostProcess, result, forPostRead);
             }
             return result;
         }
@@ -169,29 +169,37 @@ namespace RW_NodeTree
         {
             foreach (CompBasicNodeComp comp in AllNodeComp)
             {
-                result = comp.PostStatWorker_FinalizeValue(statWorker, req, applyPostProcess, result, forPostRead);
+                result = comp.internal_PostStatWorker_FinalizeValue(statWorker, req, applyPostProcess, result, forPostRead);
             }
             return result;
         }
     }
     public abstract partial class CompBasicNodeComp : ThingComp
     {
-        public virtual void PreStatWorker_GetValueUnfinalized(StatWorker statWorker, StatRequest req, bool applyPostProcess, Dictionary<string, object> forPostRead)
+        protected virtual void PreStatWorker_GetValueUnfinalized(StatWorker statWorker, StatRequest req, bool applyPostProcess, Dictionary<string, object> forPostRead)
         {
             return;
         }
-        public virtual float PreStatWorker_FinalizeValue(StatWorker statWorker, StatRequest req, bool applyPostProcess, float result, Dictionary<string, object> forPostRead)
+        protected virtual float PreStatWorker_FinalizeValue(StatWorker statWorker, StatRequest req, bool applyPostProcess, float result, Dictionary<string, object> forPostRead)
         {
             return result;
         }
-        public virtual float PostStatWorker_GetValueUnfinalized(StatWorker statWorker, StatRequest req, bool applyPostProcess, float result, Dictionary<string, object> forPostRead)
+        protected virtual float PostStatWorker_GetValueUnfinalized(StatWorker statWorker, StatRequest req, bool applyPostProcess, float result, Dictionary<string, object> forPostRead)
         {
             return result;
         }
-        public virtual float PostStatWorker_FinalizeValue(StatWorker statWorker, StatRequest req, bool applyPostProcess, float result, Dictionary<string, object> forPostRead)
+        protected virtual float PostStatWorker_FinalizeValue(StatWorker statWorker, StatRequest req, bool applyPostProcess, float result, Dictionary<string, object> forPostRead)
         {
             return result;
         }
+        internal void internal_PreStatWorker_GetValueUnfinalized(StatWorker statWorker, StatRequest req, bool applyPostProcess, Dictionary<string, object> forPostRead)
+            => PreStatWorker_GetValueUnfinalized(statWorker, req, applyPostProcess, forPostRead);
+        internal float internal_PreStatWorker_FinalizeValue(StatWorker statWorker, StatRequest req, bool applyPostProcess, float result, Dictionary<string, object> forPostRead)
+            => PreStatWorker_FinalizeValue(statWorker, req, applyPostProcess, result, forPostRead);
+        internal float internal_PostStatWorker_GetValueUnfinalized(StatWorker statWorker, StatRequest req, bool applyPostProcess, float result, Dictionary<string, object> forPostRead)
+            => PostStatWorker_GetValueUnfinalized(statWorker, req, applyPostProcess, result, forPostRead);
+        internal float internal_PostStatWorker_FinalizeValue(StatWorker statWorker, StatRequest req, bool applyPostProcess, float result, Dictionary<string, object> forPostRead)
+            => PostStatWorker_FinalizeValue(statWorker, req, applyPostProcess, result, forPostRead);
 
     }
 }

@@ -105,7 +105,7 @@ namespace RW_NodeTree
                 {
                     foreach (CompBasicNodeComp comp in proccess.AllNodeComp)
                     {
-                        StopEventBubble = comp.UpdateNode(actionNode) || StopEventBubble;
+                        StopEventBubble = comp.internal_UpdateNode(actionNode) || StopEventBubble;
                     }
                 }
                 foreach(ThingComp comp in proccess.parent.AllComps)
