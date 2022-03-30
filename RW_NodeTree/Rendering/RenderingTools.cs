@@ -10,6 +10,7 @@ using Verse;
 using UnityEngine;
 using System.Runtime.CompilerServices;
 using UnityEngine.Rendering;
+using DataStructor;
 
 namespace RW_NodeTree.Rendering
 {
@@ -56,10 +57,10 @@ namespace RW_NodeTree.Rendering
             {
                 int current = Thread.CurrentThread.ManagedThreadId;
 
-                Stack<List<RenderInfo>> list;
+                LinkStack<List<RenderInfo>> list;
                 if (!renderInfos.TryGetValue(current, out list))
                 {
-                    list = new Stack<List<RenderInfo>>();
+                    list = new LinkStack<List<RenderInfo>>();
                     renderInfos.Add(current, list);
                 }
                 if(list.Count > 0) return true;
@@ -70,10 +71,10 @@ namespace RW_NodeTree.Rendering
             {
                 int current = Thread.CurrentThread.ManagedThreadId;
 
-                Stack<List<RenderInfo>> list;
+                LinkStack<List<RenderInfo>> list;
                 if (!renderInfos.TryGetValue(current, out list))
                 {
-                    list = new Stack<List<RenderInfo>>();
+                    list = new LinkStack<List<RenderInfo>>();
                     renderInfos.Add(current, list);
                 }
 
@@ -95,11 +96,11 @@ namespace RW_NodeTree.Rendering
         {
             get
             {
-                Stack<List<RenderInfo>> result;
+                LinkStack<List<RenderInfo>> result;
                 int current = Thread.CurrentThread.ManagedThreadId;
                 if (!renderInfos.TryGetValue(current, out result))
                 {
-                    result = new Stack<List<RenderInfo>>();
+                    result = new LinkStack<List<RenderInfo>>();
                     renderInfos.Add(current, result);
                 }
                 return result.Peek();
@@ -265,7 +266,7 @@ namespace RW_NodeTree.Rendering
             return result;
         }
 
-        private static Dictionary<int, Stack<List<RenderInfo>>> renderInfos = new Dictionary<int, Stack<List<RenderInfo>>>();
+        private static Dictionary<int, LinkStack<List<RenderInfo>>> renderInfos = new Dictionary<int, LinkStack<List<RenderInfo>>>();
         private static Camera camera = null;
         internal static RenderTexture empty = new RenderTexture(1, 1, 0, RenderTextureFormat.ARGB32);
         public const int CanvasHeight = 4096;

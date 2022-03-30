@@ -8,7 +8,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>RW_NodeTree</RootNamespace>
     <AssemblyName>RW_NodeTree</AssemblyName>
-    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
     <TargetFrameworkProfile />
@@ -52,6 +52,8 @@
     <Compile Include="Patch\VerbTracker_CreateVerbTargetCommand_Patcher.cs" />
     <Compile Include="Patch\Verb_Patcher.cs" />
     <Compile Include="Tools\GraphicHelper.cs" />
+    <Compile Include="Tools\LinkStack.cs" />
+    <Compile Include="Tools\LinkNode.cs" />
     <Compile Include="Tools\ObjectHelper.cs" />
     <Reference Include="0Harmony">
       <HintPath>I:\SteamLibrary\steamapps\workshop\content\294100\2009463077\Current\Assemblies\0Harmony.dll</HintPath>
