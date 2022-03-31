@@ -25,9 +25,10 @@ namespace RW_NodeTree.Tools
         public static Graphic GetGraphic_ChildNode(this Graphic parent)
         {
             Graphic graphic = parent;
-            while (graphic != null && !(graphic is Graphic_ChildNode))
+            while (graphic != null)
             {
                 graphic = graphic.subGraphic();
+                if (graphic is Graphic_ChildNode) break;
             }
             return graphic ?? parent;
         }
