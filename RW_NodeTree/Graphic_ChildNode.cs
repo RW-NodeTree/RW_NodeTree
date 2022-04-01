@@ -26,9 +26,9 @@ namespace RW_NodeTree
         {
             get
             {
-                if (currentProccess == null) return subGraphic?.MatSingle;
-                base.drawSize = currentProccess.DrawSize(currentProccess.parent.Rotation, subGraphic);
-                return currentProccess.ChildCombinedTexture(currentProccess.parent.Rotation, subGraphic);
+                if (currentProccess == null) return SubGraphic?.MatSingle;
+                base.drawSize = currentProccess.DrawSize(currentProccess.parent.Rotation, this);
+                return currentProccess.ChildCombinedTexture(currentProccess.parent.Rotation, this);
             }
         }
 
@@ -36,9 +36,9 @@ namespace RW_NodeTree
         {
             get
             {
-                if (currentProccess == null) return subGraphic?.MatNorth;
-                base.drawSize = currentProccess.DrawSize(Rot4.North, subGraphic);
-                return currentProccess.ChildCombinedTexture(Rot4.North, subGraphic);
+                if (currentProccess == null) return SubGraphic?.MatNorth;
+                base.drawSize = currentProccess.DrawSize(Rot4.North, this);
+                return currentProccess.ChildCombinedTexture(Rot4.North, this);
             }
         }
 
@@ -46,9 +46,9 @@ namespace RW_NodeTree
         {
             get
             {
-                if (currentProccess == null) return subGraphic?.MatEast;
-                base.drawSize = currentProccess.DrawSize(Rot4.East, subGraphic);
-                return currentProccess.ChildCombinedTexture(Rot4.East, subGraphic);
+                if (currentProccess == null) return SubGraphic?.MatEast;
+                base.drawSize = currentProccess.DrawSize(Rot4.East, this);
+                return currentProccess.ChildCombinedTexture(Rot4.East, this);
             }
         }
 
@@ -56,9 +56,9 @@ namespace RW_NodeTree
         {
             get
             {
-                if (currentProccess == null) return subGraphic?.MatSouth;
-                base.drawSize = currentProccess.DrawSize(Rot4.South, subGraphic);
-                return currentProccess.ChildCombinedTexture(Rot4.South, subGraphic);
+                if (currentProccess == null) return SubGraphic?.MatSouth;
+                base.drawSize = currentProccess.DrawSize(Rot4.South, this);
+                return currentProccess.ChildCombinedTexture(Rot4.South, this);
             }
         }
 
@@ -66,9 +66,9 @@ namespace RW_NodeTree
         {
             get
             {
-                if (currentProccess == null) return subGraphic.MatWest;
-                base.drawSize = currentProccess.DrawSize(Rot4.West, subGraphic);
-                return currentProccess.ChildCombinedTexture(Rot4.West, subGraphic);
+                if (currentProccess == null) return SubGraphic.MatWest;
+                base.drawSize = currentProccess.DrawSize(Rot4.West, this);
+                return currentProccess.ChildCombinedTexture(Rot4.West, this);
             }
         }
 
@@ -76,7 +76,7 @@ namespace RW_NodeTree
         {
             get
             {
-                if (subGraphic != null && (currentProccess == null)) return subGraphic.WestFlipped;
+                if (SubGraphic != null && (currentProccess == null)) return SubGraphic.WestFlipped;
                 return base.WestFlipped;
             }
         }
@@ -85,7 +85,7 @@ namespace RW_NodeTree
         {
             get
             {
-                if (subGraphic != null && (currentProccess == null)) return subGraphic.UseSameGraphicForGhost;
+                if (SubGraphic != null && (currentProccess == null)) return SubGraphic.UseSameGraphicForGhost;
                 return base.UseSameGraphicForGhost;
             }
         }
@@ -94,7 +94,7 @@ namespace RW_NodeTree
         {
             get
             {
-                if (subGraphic != null && (currentProccess == null)) return subGraphic.ShouldDrawRotated;
+                if (SubGraphic != null && (currentProccess == null)) return SubGraphic.ShouldDrawRotated;
                 return base.ShouldDrawRotated;
             }
         }
@@ -103,7 +103,7 @@ namespace RW_NodeTree
         {
             get
             {
-                if (subGraphic != null && (currentProccess == null)) return subGraphic.EastFlipped;
+                if (SubGraphic != null && (currentProccess == null)) return SubGraphic.EastFlipped;
                 return base.EastFlipped;
             }
         }
@@ -112,15 +112,15 @@ namespace RW_NodeTree
         {
             get
             {
-                if (subGraphic != null && (currentProccess == null)) return subGraphic.DrawRotatedExtraAngleOffset;
+                if (SubGraphic != null && (currentProccess == null)) return SubGraphic.DrawRotatedExtraAngleOffset;
                 return base.DrawRotatedExtraAngleOffset;
             }
         }
 
         public override Mesh MeshAt(Rot4 rot)
         {
-            if (currentProccess == null) return subGraphic?.MeshAt(rot);
-            base.drawSize = currentProccess.DrawSize(rot, subGraphic);
+            if (currentProccess == null) return SubGraphic?.MeshAt(rot);
+            base.drawSize = currentProccess.DrawSize(rot, this);
             //if (Prefs.DevMode) Log.Message(" DrawSize: currentProccess=" + currentProccess + "; Rot4=" + rot + "; size=" + base.drawSize + ";\n");
             return base.MeshAt(rot);
         }
@@ -129,25 +129,25 @@ namespace RW_NodeTree
         {
             CompChildNodeProccesser comp_ChildNodeProccesser = thing;
             if (thing == null) comp_ChildNodeProccesser = currentProccess;
-            if (comp_ChildNodeProccesser == null) return subGraphic?.MatAt(rot, thing);
-            base.drawSize = comp_ChildNodeProccesser.DrawSize(rot, subGraphic);
-            return comp_ChildNodeProccesser.ChildCombinedTexture(rot, subGraphic);
+            if (comp_ChildNodeProccesser == null) return SubGraphic?.MatAt(rot, thing);
+            base.drawSize = comp_ChildNodeProccesser.DrawSize(rot, this);
+            return comp_ChildNodeProccesser.ChildCombinedTexture(rot, this);
         }
 
         public override Material MatSingleFor(Thing thing)
         {
             CompChildNodeProccesser comp_ChildNodeProccesser = thing;
             if (thing == null) comp_ChildNodeProccesser = currentProccess;
-            if (comp_ChildNodeProccesser == null) return subGraphic?.MatSingleFor(thing);
-            base.drawSize = comp_ChildNodeProccesser.DrawSize(thing.Rotation, subGraphic);
-            return comp_ChildNodeProccesser.ChildCombinedTexture(thing.Rotation, subGraphic);
+            if (comp_ChildNodeProccesser == null) return SubGraphic?.MatSingleFor(thing);
+            base.drawSize = comp_ChildNodeProccesser.DrawSize(thing.Rotation, this);
+            return comp_ChildNodeProccesser.ChildCombinedTexture(thing.Rotation, this);
         }
 
         public override void DrawWorker(Vector3 loc, Rot4 rot, ThingDef thingDef, Thing thing, float extraRotation)
         {
             CompChildNodeProccesser comp_ChildNodeProccesser = thing;
             if (thing == null) comp_ChildNodeProccesser = currentProccess;
-            if (comp_ChildNodeProccesser == null) subGraphic?.DrawWorker(loc, rot, thingDef, thing, extraRotation);
+            if (comp_ChildNodeProccesser == null) SubGraphic?.DrawWorker(loc, rot, thingDef, thing, extraRotation);
             else base.DrawWorker(loc, rot, thingDef, thing, extraRotation);
         }
 
@@ -155,10 +155,10 @@ namespace RW_NodeTree
         {
             CompChildNodeProccesser comp_ChildNodeProccesser = thing;
             if (thing == null) comp_ChildNodeProccesser = currentProccess;
-            if (comp_ChildNodeProccesser == null) subGraphic?.Print(layer, thing, extraRotation);
+            if (comp_ChildNodeProccesser == null) SubGraphic?.Print(layer, thing, extraRotation);
             else
             {
-                base.drawSize = comp_ChildNodeProccesser.DrawSize(thing.Rotation, subGraphic);
+                base.drawSize = comp_ChildNodeProccesser.DrawSize(thing.Rotation, this);
                 base.Print(layer, thing, extraRotation);
             }
         }
