@@ -93,7 +93,7 @@ namespace RW_NodeTree.Patch
                 if (_FinalizeValue?.DeclaringType == type && _FinalizeValue.HasMethodBody())
                 {
                     patcher.Patch(_FinalizeValue, new HarmonyMethod(_PreStatWorker_FinalizeValue), new HarmonyMethod(_PostStatWorker_FinalizeValue));
-                    if (Prefs.DevMode) Log.Message(type + "::" + _FinalizeValue + " PatchSuccess\n");
+                    //if (Prefs.DevMode) Log.Message(type + "::" + _FinalizeValue + " PatchSuccess\n");
                 }
             }
         }
