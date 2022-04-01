@@ -49,7 +49,7 @@ namespace RW_NodeTree.Patch
                     if (
                         codes[0].opcode == OpCodes.Ldloc_0      &&  codes[1].opcode == OpCodes.Ldarg_2  &&
                         codes[2].opcode == OpCodes.Ldloc_1      &&  codes[3].Calls(Vector3_get_up)      &&
-                        codes[4].Calls(Quaternion_AngleAxis)    &&  codes[5].opcode == OpCodes.Ldloc_3 &&
+                        codes[4].Calls(Quaternion_AngleAxis)    &&  codes[5].opcode == OpCodes.Ldloc_3  &&
                         codes[6].opcode == OpCodes.Ldc_I4_0     &&  codes[7].Calls(Graphics_DrawMeshOrg)
                     )
                     {
