@@ -26,9 +26,8 @@ namespace RW_NodeTree
         {
             get
             {
-                if (currentProccess == null) return SubGraphic?.MatSingle;
-                base.drawSize = currentProccess.DrawSize(currentProccess.parent.Rotation, this);
-                return currentProccess.ChildCombinedTexture(currentProccess.parent.Rotation, this);
+                if (currentProccess == null) return SubGraphic?.MatSingle ?? BaseContent.BadMat;
+                return MatAt(currentProccess.parent.Rotation);
             }
         }
 
@@ -36,9 +35,8 @@ namespace RW_NodeTree
         {
             get
             {
-                if (currentProccess == null) return SubGraphic?.MatNorth;
-                base.drawSize = currentProccess.DrawSize(Rot4.North, this);
-                return currentProccess.ChildCombinedTexture(Rot4.North, this);
+                if (currentProccess == null) return SubGraphic?.MatNorth ?? BaseContent.BadMat;
+                return MatAt(Rot4.North);
             }
         }
 
@@ -46,9 +44,8 @@ namespace RW_NodeTree
         {
             get
             {
-                if (currentProccess == null) return SubGraphic?.MatEast;
-                base.drawSize = currentProccess.DrawSize(Rot4.East, this);
-                return currentProccess.ChildCombinedTexture(Rot4.East, this);
+                if (currentProccess == null) return SubGraphic?.MatEast ?? BaseContent.BadMat;
+                return MatAt(Rot4.East);
             }
         }
 
@@ -56,9 +53,8 @@ namespace RW_NodeTree
         {
             get
             {
-                if (currentProccess == null) return SubGraphic?.MatSouth;
-                base.drawSize = currentProccess.DrawSize(Rot4.South, this);
-                return currentProccess.ChildCombinedTexture(Rot4.South, this);
+                if (currentProccess == null) return SubGraphic?.MatSouth ?? BaseContent.BadMat;
+                return MatAt(Rot4.South);
             }
         }
 
@@ -66,9 +62,8 @@ namespace RW_NodeTree
         {
             get
             {
-                if (currentProccess == null) return SubGraphic.MatWest;
-                base.drawSize = currentProccess.DrawSize(Rot4.West, this);
-                return currentProccess.ChildCombinedTexture(Rot4.West, this);
+                if (currentProccess == null) return SubGraphic.MatWest ?? BaseContent.BadMat;
+                return MatAt(Rot4.West);
             }
         }
 
@@ -77,7 +72,7 @@ namespace RW_NodeTree
             get
             {
                 if (SubGraphic != null && (currentProccess == null)) return SubGraphic.WestFlipped;
-                return base.WestFlipped;
+                return false;
             }
         }
 
@@ -86,7 +81,7 @@ namespace RW_NodeTree
             get
             {
                 if (SubGraphic != null && (currentProccess == null)) return SubGraphic.UseSameGraphicForGhost;
-                return base.UseSameGraphicForGhost;
+                return false;
             }
         }
 
@@ -95,7 +90,7 @@ namespace RW_NodeTree
             get
             {
                 if (SubGraphic != null && (currentProccess == null)) return SubGraphic.ShouldDrawRotated;
-                return base.ShouldDrawRotated;
+                return false;
             }
         }
 
@@ -104,7 +99,7 @@ namespace RW_NodeTree
             get
             {
                 if (SubGraphic != null && (currentProccess == null)) return SubGraphic.EastFlipped;
-                return base.EastFlipped;
+                return false;
             }
         }
 
@@ -113,14 +108,14 @@ namespace RW_NodeTree
             get
             {
                 if (SubGraphic != null && (currentProccess == null)) return SubGraphic.DrawRotatedExtraAngleOffset;
-                return base.DrawRotatedExtraAngleOffset;
+                return 0;
             }
         }
 
         public override Mesh MeshAt(Rot4 rot)
         {
             if (currentProccess == null) return SubGraphic?.MeshAt(rot);
-            base.drawSize = currentProccess.DrawSize(rot, this);
+            UpdateDrawSize(currentProccess.DrawSize(rot, this));
             //if (Prefs.DevMode) Log.Message(" DrawSize: currentProccess=" + currentProccess + "; Rot4=" + rot + "; size=" + base.drawSize + ";\n");
             return base.MeshAt(rot);
         }
@@ -130,7 +125,7 @@ namespace RW_NodeTree
             CompChildNodeProccesser comp_ChildNodeProccesser = thing;
             if (thing == null) comp_ChildNodeProccesser = currentProccess;
             if (comp_ChildNodeProccesser == null) return SubGraphic?.MatAt(rot, thing);
-            base.drawSize = comp_ChildNodeProccesser.DrawSize(rot, this);
+            UpdateDrawSize(comp_ChildNodeProccesser.DrawSize(rot, this));
             return comp_ChildNodeProccesser.ChildCombinedTexture(rot, this);
         }
 
@@ -139,7 +134,8 @@ namespace RW_NodeTree
             CompChildNodeProccesser comp_ChildNodeProccesser = thing;
             if (thing == null) comp_ChildNodeProccesser = currentProccess;
             if (comp_ChildNodeProccesser == null) return SubGraphic?.MatSingleFor(thing);
-            base.drawSize = comp_ChildNodeProccesser.DrawSize(thing.Rotation, this);
+            UpdateDrawSize(comp_ChildNodeProccesser.DrawSize(thing.Rotation, this));
+            Graphic graphic = thing.Graphic;
             return comp_ChildNodeProccesser.ChildCombinedTexture(thing.Rotation, this);
         }
 
@@ -148,7 +144,7 @@ namespace RW_NodeTree
             CompChildNodeProccesser comp_ChildNodeProccesser = thing;
             if (thing == null) comp_ChildNodeProccesser = currentProccess;
             if (comp_ChildNodeProccesser == null) SubGraphic?.DrawWorker(loc, rot, thingDef, thing, extraRotation);
-            else base.DrawWorker(loc, rot, thingDef, thing, extraRotation);
+            else base.DrawWorker(loc, Rot4.North, thingDef, thing, extraRotation);
         }
 
         public override void Print(SectionLayer layer, Thing thing, float extraRotation)
@@ -158,9 +154,23 @@ namespace RW_NodeTree
             if (comp_ChildNodeProccesser == null) SubGraphic?.Print(layer, thing, extraRotation);
             else
             {
-                base.drawSize = comp_ChildNodeProccesser.DrawSize(thing.Rotation, this);
+                UpdateDrawSize(comp_ChildNodeProccesser.DrawSize(thing.Rotation, this));
                 base.Print(layer, thing, extraRotation);
             }
+        }
+
+        public void UpdateDrawSize(Vector2 size)
+        {
+            Graphic graphic = currentProccess.parent.Graphic;
+            if (graphic.GetGraphic_ChildNode() == this)
+            {
+                while (graphic != null && graphic != this)
+                {
+                    graphic.drawSize = size;
+                    graphic = graphic.subGraphic();
+                }
+            }
+            this.drawSize = size;
         }
 
         private CompChildNodeProccesser currentProccess = null;

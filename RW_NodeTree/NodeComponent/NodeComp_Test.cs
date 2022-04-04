@@ -58,12 +58,12 @@ namespace RW_NodeTree.NodeComponent
                             info.matrices[k].SetRow(0, new Vector4(new Vector3(cache.x, cache.y, cache.z).magnitude, 0, 0, 0));
 
                             cache = info.matrices[k].GetRow(1);
-                            info.matrices[k].SetRow(1, new Vector4(0, new Vector3(cache.x, cache.y, cache.z).magnitude, 0, 0));
+                            info.matrices[k].SetRow(1, new Vector4(0, new Vector3(cache.x, cache.y, cache.z).magnitude, 0, i));
 
                             cache = info.matrices[k].GetRow(2);
                             info.matrices[k].SetRow(2, new Vector4(0, 0, new Vector3(cache.x, cache.y, cache.z).magnitude, 1));
 
-                            info.matrices[k] = Matrix4x4.Rotate(Quaternion.Euler(0, i * 360 / ChildNodes.Count + frame, 0)) * info.matrices[k];
+                            info.matrices[k] = Matrix4x4.Rotate(Quaternion.Euler(0, i * 360 / ChildNodes.Count + frame * Props.roatedSpeed, 0)) * info.matrices[k];
 
                             cache = info.matrices[k].GetRow(0);
                             info.matrices[k].SetRow(0, new Vector4(new Vector3(cache.x, cache.y, cache.z).magnitude, 0, 0, cache.w));
@@ -230,5 +230,7 @@ namespace RW_NodeTree.NodeComponent
         }
 
         public List<ThingDef> thingDefs = new List<ThingDef>();
+
+        public float roatedSpeed = 1;
     }
 }
