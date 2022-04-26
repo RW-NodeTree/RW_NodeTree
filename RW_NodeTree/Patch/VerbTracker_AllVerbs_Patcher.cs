@@ -59,15 +59,21 @@ namespace RW_NodeTree
             {
                 bool result;
                 int current = Thread.CurrentThread.ManagedThreadId;
-                if (!notSetVerbDirectOwner.TryGetValue(current, out result))
+                lock(notSetVerbDirectOwner)
                 {
-                    notSetVerbDirectOwner.Add(current, false);
+                    if (!notSetVerbDirectOwner.TryGetValue(current, out result))
+                    {
+                        notSetVerbDirectOwner.Add(current, false);
+                    }
                 }
                 return result;
             }
             set
             {
-                notSetVerbDirectOwner.SetOrAdd(Thread.CurrentThread.ManagedThreadId, value);
+                lock(notSetVerbDirectOwner)
+                {
+                    notSetVerbDirectOwner.SetOrAdd(Thread.CurrentThread.ManagedThreadId, value);
+                }
             }
         }
 

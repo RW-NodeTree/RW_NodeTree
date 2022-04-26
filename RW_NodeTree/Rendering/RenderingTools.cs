@@ -58,10 +58,13 @@ namespace RW_NodeTree.Rendering
                 int current = Thread.CurrentThread.ManagedThreadId;
 
                 LinkStack<List<RenderInfo>> list;
-                if (!renderInfos.TryGetValue(current, out list))
+                lock(renderInfos)
                 {
-                    list = new LinkStack<List<RenderInfo>>();
-                    renderInfos.Add(current, list);
+                    if (!renderInfos.TryGetValue(current, out list))
+                    {
+                        list = new LinkStack<List<RenderInfo>>();
+                        renderInfos.Add(current, list);
+                    }
                 }
                 if(list.Count > 0) return true;
 
@@ -72,19 +75,22 @@ namespace RW_NodeTree.Rendering
                 int current = Thread.CurrentThread.ManagedThreadId;
 
                 LinkStack<List<RenderInfo>> list;
-                if (!renderInfos.TryGetValue(current, out list))
+                lock (renderInfos)
                 {
-                    list = new LinkStack<List<RenderInfo>>();
-                    renderInfos.Add(current, list);
-                }
+                    if (!renderInfos.TryGetValue(current, out list))
+                    {
+                        list = new LinkStack<List<RenderInfo>>();
+                        renderInfos.Add(current, list);
+                    }
 
-                if (value)
-                {
-                    list.Push(new List<RenderInfo>());
-                }
-                else
-                {
-                    list.Pop();
+                    if (value)
+                    {
+                        list.Push(new List<RenderInfo>());
+                    }
+                    else
+                    {
+                        list.Pop();
+                    }
                 }
             }
         }
@@ -98,12 +104,15 @@ namespace RW_NodeTree.Rendering
             {
                 LinkStack<List<RenderInfo>> result;
                 int current = Thread.CurrentThread.ManagedThreadId;
-                if (!renderInfos.TryGetValue(current, out result))
+                lock (renderInfos)
                 {
-                    result = new LinkStack<List<RenderInfo>>();
-                    renderInfos.Add(current, result);
+                    if (!renderInfos.TryGetValue(current, out result))
+                    {
+                        result = new LinkStack<List<RenderInfo>>();
+                        renderInfos.Add(current, result);
+                    }
+                    return result.Peek();
                 }
-                return result.Peek();
             }
         }
 
