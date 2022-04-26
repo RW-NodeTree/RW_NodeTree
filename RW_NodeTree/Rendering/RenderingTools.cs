@@ -10,7 +10,7 @@ using Verse;
 using UnityEngine;
 using System.Runtime.CompilerServices;
 using UnityEngine.Rendering;
-using DataStructor;
+using RW_NodeTree.Tools;
 
 namespace RW_NodeTree.Rendering
 {
@@ -30,7 +30,7 @@ namespace RW_NodeTree.Rendering
             {
                 if (camera == null)
                 {
-                    GameObject gameObject = new GameObject("Preview_Rander_Camera");
+                    GameObject gameObject = new GameObject("Off_Screen_Rendering_Camera");
                     camera = gameObject.AddComponent<Camera>();
                     camera.orthographic = true;
                     camera.orthographicSize = 1;
@@ -120,7 +120,10 @@ namespace RW_NodeTree.Rendering
         /// Render a perview texture by infos
         /// </summary>
         /// <param name="infos">all arranged render infos</param>
+        /// <param name="cachedRenderTarget"></param>
+        /// <param name="target"></param>
         /// <param name="size">force render texture size</param>
+        /// <param name="TextureSizeFactor"></param>
         /// <returns></returns>
         public static void RenderToTarget(List<RenderInfo> infos, ref RenderTexture cachedRenderTarget, ref Texture2D target, Vector2Int size = default(Vector2Int), int TextureSizeFactor = (int)DefaultTextureSizeFactor)
         {
@@ -156,17 +159,9 @@ namespace RW_NodeTree.Rendering
                 RenderInfo info = infos[i];
                 for (int j = 0; j < info.matrices.Length; ++j)
                 {
-                    info.matrices[j].m13 += CanvasHeight;
+                    info.matrices[j].m13 += RenderingTools.CanvasHeight;
                 }
-                if(info.probeAnchor != null || !info.DrawMeshInstanced)
-                {
-                    for (int j = 0; j < info.matrices.Length && j < info.count; ++j)
-                        Graphics.DrawMesh(info.mesh, info.matrices[j], info.material, info.layer, Camera, info.submeshIndex, info.properties, info.castShadows, info.receiveShadows, info.probeAnchor, info.lightProbeUsage, info.lightProbeProxyVolume);
-                }
-                else
-                {
-                    Graphics.DrawMeshInstanced(info.mesh, info.submeshIndex, info.material, info.matrices, info.count, info.properties, info.castShadows, info.receiveShadows, info.layer, Camera, info.lightProbeUsage, info.lightProbeProxyVolume);
-                }
+                info.DrawInfo(Camera);
             }
             Camera.Render();
             Camera.targetTexture = empty;
@@ -195,6 +190,7 @@ namespace RW_NodeTree.Rendering
         /// get the standard texture size of rendering infos
         /// </summary>
         /// <param name="infos">all arranged render infos</param>
+        /// <param name="TextureSizeFactor"></param>
         /// <returns>standard size of texture</returns>
         public static Vector2Int DrawSize(List<RenderInfo> infos, int TextureSizeFactor = (int)DefaultTextureSizeFactor)
         {

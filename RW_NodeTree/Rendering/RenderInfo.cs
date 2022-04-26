@@ -13,19 +13,57 @@ namespace RW_NodeTree.Rendering
     /// </summary>
     public struct RenderInfo
     {
-
+        /// <summary>
+        /// the parms mesh in DrawMesh or DrawMeshInstanced
+        /// </summary>
         public Mesh mesh;
+        /// <summary>
+        /// the parm submeshIndex in DrawMesh or DrawMeshInstanced
+        /// </summary>
         public int submeshIndex;
+        /// <summary>
+        /// the parm matrices in DrawMeshInstanced or the parm matrix in DrawMesh
+        /// </summary>
         public Matrix4x4[] matrices;
+        /// <summary>
+        /// the parms material in DrawMesh or DrawMeshInstanced
+        /// </summary>
         public Material material;
+        /// <summary>
+        /// the parms properties in DrawMesh or DrawMeshInstanced
+        /// </summary>
         public MaterialPropertyBlock properties;
+        /// <summary>
+        /// the parms castShadows in DrawMesh or DrawMeshInstanced
+        /// </summary>
         public ShadowCastingMode castShadows;
+        /// <summary>
+        /// the parms receiveShadows in DrawMesh or DrawMeshInstanced
+        /// </summary>
         public bool receiveShadows;
+        /// <summary>
+        /// the parms layer in DrawMesh or DrawMeshInstanced
+        /// </summary>
         public int layer;
+        /// <summary>
+        /// the parms probeAnchor in DrawMesh or DrawMeshInstanced
+        /// </summary>
         public Transform probeAnchor;
+        /// <summary>
+        /// the parms lightProbeUsage in DrawMesh or DrawMeshInstanced
+        /// </summary>
         public LightProbeUsage lightProbeUsage;
+        /// <summary>
+        /// the parms lightProbeProxyVolume in DrawMesh or DrawMeshInstanced
+        /// </summary>
         public LightProbeProxyVolume lightProbeProxyVolume;
+        /// <summary>
+        /// the parms count in DrawMesh or DrawMeshInstanced
+        /// </summary>
         public int count;
+        /// <summary>
+        /// Used to select the drawing method between DrawMesh and DrawMeshInstanced.If is true,it will call DrawMeshInstanced, else will select DrawMesh
+        /// </summary>
         public bool DrawMeshInstanced;
 
         public RenderInfo(Mesh mesh, int submeshIndex, Matrix4x4 matrix, Material material, int layer, bool DrawMeshInstanced = false)
@@ -66,7 +104,7 @@ namespace RW_NodeTree.Rendering
         {
             this.mesh = mesh;
             this.submeshIndex = submeshIndex;
-            this.matrices = matrices;
+            this.matrices = (Matrix4x4[])matrices.Clone();
             this.material = material;
             this.properties = properties;
             this.castShadows = castShadows;
@@ -101,6 +139,23 @@ namespace RW_NodeTree.Rendering
                 ",\n\tlightProbeProxyVolume : " + lightProbeProxyVolume +
                 ",\n\tcount : " + count +
                 ",\n\tDrawMeshInstanced : " + DrawMeshInstanced + "\n]\n";
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="camera"></param>
+        public void DrawInfo(Camera camera)
+        {
+            if (probeAnchor != null || !DrawMeshInstanced)
+            {
+                for (int j = 0; j < matrices.Length && j < count; ++j)
+                    Graphics.DrawMesh(mesh, matrices[j], material, layer, camera, submeshIndex, properties, castShadows, receiveShadows, probeAnchor, lightProbeUsage, lightProbeProxyVolume);
+            }
+            else
+            {
+                Graphics.DrawMeshInstanced(mesh, submeshIndex, material, matrices, count, properties, castShadows, receiveShadows, layer, camera, lightProbeUsage, lightProbeProxyVolume);
+            }
         }
     }
 }

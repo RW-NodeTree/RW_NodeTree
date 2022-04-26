@@ -135,7 +135,6 @@ namespace RW_NodeTree
             if (thing == null) comp_ChildNodeProccesser = currentProccess;
             if (comp_ChildNodeProccesser == null) return SubGraphic?.MatSingleFor(thing);
             UpdateDrawSize(comp_ChildNodeProccesser.DrawSize(thing.Rotation, this));
-            Graphic graphic = thing.Graphic;
             return comp_ChildNodeProccesser.ChildCombinedTexture(thing.Rotation, this);
         }
 
@@ -159,6 +158,10 @@ namespace RW_NodeTree
             }
         }
 
+        /// <summary>
+        /// update all draw size of the parent graphic of this graphic and itself
+        /// </summary>
+        /// <param name="size">size for update</param>
         public void UpdateDrawSize(Vector2 size)
         {
             Graphic graphic = currentProccess.parent.Graphic;

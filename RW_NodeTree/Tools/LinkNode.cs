@@ -5,36 +5,36 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DataStructor
+namespace RW_NodeTree.Tools
 {
-    public interface LinkNode<T>
+    public interface ILinkNode<T>
     {
         T Data { get; set; }
         void DropNode();
     }
-    public interface LinkNodeHasNext<T> : LinkNode<T>, IEnumerable<T>
+    public interface ILinkNodeHasNext<T> : ILinkNode<T>, IEnumerable<T>
     {
-        LinkNode<T> Next { get; set; }
-        bool InsertNext(LinkNode<T> next);
+        ILinkNode<T> Next { get; set; }
+        bool InsertNext(ILinkNode<T> next);
     }
-    public interface LinkNodeHasPerv<T> : LinkNode<T>, IEnumerable<T>
+    public interface ILinkNodeHasPerv<T> : ILinkNode<T>, IEnumerable<T>
     {
-        LinkNode<T> Perv { get; set; }
-        bool InsertPerv(LinkNode<T> next);
+        ILinkNode<T> Perv { get; set; }
+        bool InsertPerv(ILinkNode<T> next);
     }
 
-    public class LinkNodeLinkNext<T> : LinkNodeHasNext<T>
+    public class LinkNodeLinkNext<T> : ILinkNodeHasNext<T>
     {
         public struct Enumerator : IEnumerator<T>, IEnumerator, IDisposable
         {
-            public Enumerator(LinkNodeHasNext<T> head) : this()
+            public Enumerator(ILinkNodeHasNext<T> head) : this()
             {
                 _head = head;
             }
 
-            private LinkNodeHasNext<T> _head;
+            private ILinkNodeHasNext<T> _head;
 
-            private LinkNodeHasNext<T> _currentElement;
+            private ILinkNodeHasNext<T> _currentElement;
 
             public T Current
             {
@@ -59,7 +59,7 @@ namespace DataStructor
             public bool MoveNext()
             {
                 bool isNullBefore = _currentElement == null;
-                _currentElement = _currentElement?.Next as LinkNodeHasNext<T> ?? _head;
+                _currentElement = _currentElement?.Next as ILinkNodeHasNext<T> ?? _head;
                 return _currentElement != null && (_currentElement != _head || isNullBefore);
             }
 
@@ -73,21 +73,21 @@ namespace DataStructor
             Data = data;
         }
 
-        public LinkNode<T> Next 
+        public ILinkNode<T> Next 
         { 
             get => next; 
             set
             {
-                LinkNodeHasPerv<T> cachedNext = next as LinkNodeHasPerv<T>;
+                ILinkNodeHasPerv<T> cachedNext = next as ILinkNodeHasPerv<T>;
                 next = value;
                 if (cachedNext != null)
                 {
                     cachedNext.Perv = null;
                 }
-                cachedNext = value as LinkNodeHasPerv<T>;
+                cachedNext = value as ILinkNodeHasPerv<T>;
                 if (cachedNext != null)
                 {
-                    LinkNodeHasNext<T> cachedPerv = cachedNext.Perv as LinkNodeHasNext<T>;
+                    ILinkNodeHasNext<T> cachedPerv = cachedNext.Perv as ILinkNodeHasNext<T>;
                     if (cachedPerv != null)
                     {
                         cachedPerv.Next = null;
@@ -100,7 +100,7 @@ namespace DataStructor
 
         public void DropNode()
         {
-            LinkNodeHasPerv<T> next = Next as LinkNodeHasPerv<T>;
+            ILinkNodeHasPerv<T> next = Next as ILinkNodeHasPerv<T>;
             if (next != null)
             {
                 next.Perv = null;
@@ -108,22 +108,22 @@ namespace DataStructor
             Next = null;
         }
 
-        public bool InsertNext(LinkNode<T> next)
+        public bool InsertNext(ILinkNode<T> next)
         {
             if(next != null)
             {
                 next.DropNode();
-                LinkNodeHasNext<T> cachedPerv = next as LinkNodeHasNext<T>;
+                ILinkNodeHasNext<T> cachedPerv = next as ILinkNodeHasNext<T>;
                 if (cachedPerv != null)
                 {
                     cachedPerv.Next = Next;
                 }
-                LinkNodeHasPerv<T> cachedNext = next as LinkNodeHasPerv<T>;
+                ILinkNodeHasPerv<T> cachedNext = next as ILinkNodeHasPerv<T>;
                 if (cachedNext != null)
                 {
                     cachedNext.Perv = this;
                 }
-                cachedNext = Next as LinkNodeHasPerv<T>;
+                cachedNext = Next as ILinkNodeHasPerv<T>;
                 if (cachedNext != null)
                 {
                     cachedNext.Perv = next;
@@ -146,22 +146,22 @@ namespace DataStructor
             return GetEnumerator();
         }
 
-        private LinkNode<T> next = null;
+        private ILinkNode<T> next = null;
 
         private T data;
     }
-    public class LinkNodeLinkPerv<T> : LinkNodeHasPerv<T>
+    public class LinkNodeLinkPerv<T> : ILinkNodeHasPerv<T>
     {
         public struct Enumerator : IEnumerator<T>, IEnumerator, IDisposable
         {
-            public Enumerator(LinkNodeHasPerv<T> head) : this()
+            public Enumerator(ILinkNodeHasPerv<T> head) : this()
             {
                 _head = head;
             }
 
-            private LinkNodeHasPerv<T> _head;
+            private ILinkNodeHasPerv<T> _head;
 
-            private LinkNodeHasPerv<T> _currentElement;
+            private ILinkNodeHasPerv<T> _currentElement;
 
             public T Current
             {
@@ -186,7 +186,7 @@ namespace DataStructor
             public bool MoveNext()
             {
                 bool isNullBefore = _currentElement == null;
-                _currentElement = _currentElement?.Perv as LinkNodeHasPerv<T> ?? _head;
+                _currentElement = _currentElement?.Perv as ILinkNodeHasPerv<T> ?? _head;
                 return _currentElement != null && (_currentElement != _head || isNullBefore);
             }
 
@@ -200,21 +200,21 @@ namespace DataStructor
             Data = data;
         }
 
-        public LinkNode<T> Perv
+        public ILinkNode<T> Perv
         {
             get => perv;
             set
             {
-                LinkNodeHasNext<T> cachedPerv = perv as LinkNodeHasNext<T>;
+                ILinkNodeHasNext<T> cachedPerv = perv as ILinkNodeHasNext<T>;
                 perv = value;
                 if (cachedPerv != null)
                 {
                     cachedPerv.Next = null;
                 }
-                cachedPerv = value as LinkNodeHasNext<T>;
+                cachedPerv = value as ILinkNodeHasNext<T>;
                 if (cachedPerv != null)
                 {
-                    LinkNodeHasPerv<T> cachedNext = cachedPerv.Next as LinkNodeHasPerv<T>;
+                    ILinkNodeHasPerv<T> cachedNext = cachedPerv.Next as ILinkNodeHasPerv<T>;
                     if (cachedNext != null)
                     {
                         cachedNext.Perv = null;
@@ -227,7 +227,7 @@ namespace DataStructor
 
         public void DropNode()
         {
-            LinkNodeHasNext<T> perv = Perv as LinkNodeHasNext<T>;
+            ILinkNodeHasNext<T> perv = Perv as ILinkNodeHasNext<T>;
             if (perv != null)
             {
                 perv.Next = null;
@@ -235,22 +235,22 @@ namespace DataStructor
             Perv = null;
         }
 
-        public bool InsertPerv(LinkNode<T> perv)
+        public bool InsertPerv(ILinkNode<T> perv)
         {
             if (perv != null)
             {
                 perv.DropNode();
-                LinkNodeHasPerv<T> cachedNext = perv as LinkNodeHasPerv<T>;
+                ILinkNodeHasPerv<T> cachedNext = perv as ILinkNodeHasPerv<T>;
                 if (cachedNext != null)
                 {
                     cachedNext.Perv = Perv;
                 }
-                LinkNodeHasNext<T> cachedPerv = perv as LinkNodeHasNext<T>;
+                ILinkNodeHasNext<T> cachedPerv = perv as ILinkNodeHasNext<T>;
                 if (cachedPerv != null)
                 {
                     cachedPerv.Next = this;
                 }
-                cachedPerv = Perv as LinkNodeHasNext<T>;
+                cachedPerv = Perv as ILinkNodeHasNext<T>;
                 if (cachedPerv != null)
                 {
                     cachedPerv.Next = perv;
@@ -273,32 +273,32 @@ namespace DataStructor
             return GetEnumerator();
         }
 
-        private LinkNode<T> perv = null;
+        private ILinkNode<T> perv = null;
 
         private T data;
     }
-    public class LinkNodeLinkNextAndPerv<T> : LinkNodeHasNext<T> , LinkNodeHasPerv<T>
+    public class LinkNodeLinkNextAndPerv<T> : ILinkNodeHasNext<T> , ILinkNodeHasPerv<T>
     {
         public LinkNodeLinkNextAndPerv(T data)
         {
             Data = data;
         }
 
-        public LinkNode<T> Next
+        public ILinkNode<T> Next
         {
             get => next;
             set
             {
-                LinkNodeHasPerv<T> cachedNext = next as LinkNodeHasPerv<T>;
+                ILinkNodeHasPerv<T> cachedNext = next as ILinkNodeHasPerv<T>;
                 next = value;
                 if (cachedNext != null)
                 {
                     cachedNext.Perv = null;
                 }
-                cachedNext = value as LinkNodeHasPerv<T>;
+                cachedNext = value as ILinkNodeHasPerv<T>;
                 if (cachedNext != null)
                 {
-                    LinkNodeHasNext<T> cachedPerv = cachedNext.Perv as LinkNodeHasNext<T>;
+                    ILinkNodeHasNext<T> cachedPerv = cachedNext.Perv as ILinkNodeHasNext<T>;
                     if (cachedPerv != null)
                     {
                         cachedPerv.Next = null;
@@ -307,21 +307,21 @@ namespace DataStructor
                 }
             }
         }
-        public LinkNode<T> Perv
+        public ILinkNode<T> Perv
         {
             get => perv;
             set
             {
-                LinkNodeHasNext<T> cachedPerv = perv as LinkNodeHasNext<T>;
+                ILinkNodeHasNext<T> cachedPerv = perv as ILinkNodeHasNext<T>;
                 perv = value;
                 if (cachedPerv != null)
                 {
                     cachedPerv.Next = null;
                 }
-                cachedPerv = value as LinkNodeHasNext<T>;
+                cachedPerv = value as ILinkNodeHasNext<T>;
                 if (cachedPerv != null)
                 {
-                    LinkNodeHasPerv<T> cachedNext = cachedPerv.Next as LinkNodeHasPerv<T>;
+                    ILinkNodeHasPerv<T> cachedNext = cachedPerv.Next as ILinkNodeHasPerv<T>;
                     if (cachedNext != null)
                     {
                         cachedNext.Perv = null;
@@ -334,12 +334,12 @@ namespace DataStructor
 
         public void DropNode()
         {
-            LinkNodeHasPerv<T> next = Next as LinkNodeHasPerv<T>;
+            ILinkNodeHasPerv<T> next = Next as ILinkNodeHasPerv<T>;
             if (next != null)
             {
                 next.Perv = Perv;
             }
-            LinkNodeHasNext<T> perv = Perv as LinkNodeHasNext<T>;
+            ILinkNodeHasNext<T> perv = Perv as ILinkNodeHasNext<T>;
             if (perv != null)
             {
                 perv.Next = Next;
@@ -348,22 +348,22 @@ namespace DataStructor
             Perv = null;
         }
 
-        public bool InsertNext(LinkNode<T> next)
+        public bool InsertNext(ILinkNode<T> next)
         {
             if (next != null)
             {
                 next.DropNode();
-                LinkNodeHasNext<T> cachedPerv = next as LinkNodeHasNext<T>;
+                ILinkNodeHasNext<T> cachedPerv = next as ILinkNodeHasNext<T>;
                 if (cachedPerv != null)
                 {
                     cachedPerv.Next = Next;
                 }
-                LinkNodeHasPerv<T> cachedNext = next as LinkNodeHasPerv<T>;
+                ILinkNodeHasPerv<T> cachedNext = next as ILinkNodeHasPerv<T>;
                 if (cachedNext != null)
                 {
                     cachedNext.Perv = this;
                 }
-                cachedNext = Next as LinkNodeHasPerv<T>;
+                cachedNext = Next as ILinkNodeHasPerv<T>;
                 if (cachedNext != null)
                 {
                     cachedNext.Perv = next;
@@ -376,22 +376,22 @@ namespace DataStructor
         }
 
 
-        public bool InsertPerv(LinkNode<T> perv)
+        public bool InsertPerv(ILinkNode<T> perv)
         {
             if (perv != null)
             {
                 perv.DropNode();
-                LinkNodeHasPerv<T> cachedNext = perv as LinkNodeHasPerv<T>;
+                ILinkNodeHasPerv<T> cachedNext = perv as ILinkNodeHasPerv<T>;
                 if (cachedNext != null)
                 {
                     cachedNext.Perv = Perv;
                 }
-                LinkNodeHasNext<T> cachedPerv = perv as LinkNodeHasNext<T>;
+                ILinkNodeHasNext<T> cachedPerv = perv as ILinkNodeHasNext<T>;
                 if (cachedPerv != null)
                 {
                     cachedPerv.Next = this;
                 }
-                cachedPerv = Perv as LinkNodeHasNext<T>;
+                cachedPerv = Perv as ILinkNodeHasNext<T>;
                 if (cachedPerv != null)
                 {
                     cachedPerv.Next = perv;
@@ -413,9 +413,9 @@ namespace DataStructor
             return GetEnumerator();
         }
 
-        private LinkNode<T> next = null;
+        private ILinkNode<T> next = null;
 
-        private LinkNode<T> perv = null;
+        private ILinkNode<T> perv = null;
 
         private T data;
     }

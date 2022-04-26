@@ -9,6 +9,9 @@ using UnityEngine;
 
 namespace RW_NodeTree.Tools
 {
+    /// <summary>
+    /// Object simple copy function
+    /// </summary>
     public static class ObjectHelper
     {
         /// <summary>

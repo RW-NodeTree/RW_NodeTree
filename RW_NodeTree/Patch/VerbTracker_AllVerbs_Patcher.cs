@@ -77,7 +77,11 @@ namespace RW_NodeTree
             }
         }
 
-
+        /// <summary>
+        /// Get all original verbs of verbTracker
+        /// </summary>
+        /// <param name="verbTracker">target VerbTracker</param>
+        /// <returns>all verbs before parent convert</returns>
         public static List<Verb> GetAllOriginalVerbs(VerbTracker verbTracker)
         {
             if(verbTracker != null)
@@ -95,7 +99,7 @@ namespace RW_NodeTree
         /// event proccesser after VerbTracker.AllVerbs
         /// (WARRING!!!: Don't invoke any method if thet will invoke VerbTracker.AllVerbs)
         /// </summary>
-        /// <param name="verbTracker">VerbTracker instance</param>
+        /// <param name="ownerType">VerbTracker instance</param>
         /// <param name="result">result of VerbTracker.AllVerbs</param>
         internal List<Verb> PostVerbTracker_AllVerbs(Type ownerType, List<Verb> result)
         {
@@ -108,10 +112,10 @@ namespace RW_NodeTree
                 {
                     Verb verb = result[i];
                     IVerbOwner verbOwner = verb.DirectOwner;
-                    GetAfterConvertVerbCorrespondingThing(ownerType, verb, out verb);
+                    verb = GetAfterConvertVerbCorrespondingThing(ownerType, verb).Item2;
                     if (verbOwner != null && (verbOwner == parent || (verbOwner as ThingComp)?.parent == parent))
                     {
-                        Thing thing = this.GetBeforeConvertVerbCorrespondingThing(ownerType, result[i], out _);
+                        Thing thing = this.GetBeforeConvertVerbCorrespondingThing(ownerType, result[i]).Item1;
                         verbOwner = GetSameTypeVerbOwner(ownerType, thing);
                         if (verbOwner != null)
                         {

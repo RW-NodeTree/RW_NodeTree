@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DataStructor
+namespace RW_NodeTree.Tools
 {
     public class LinkStack<T> : IEnumerable<T>, IEnumerable, IReadOnlyCollection<T>, ICollection
     {

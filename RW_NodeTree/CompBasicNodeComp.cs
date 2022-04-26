@@ -80,11 +80,8 @@ namespace RW_NodeTree
         /// <param name="verbAfterConvert">verb after convert</param>
         /// <param name="toolAfterConvert">tool after convert</param>
         /// <param name="verbPropertiesAfterConvert">verbProperties after convert</param>
-        /// <param name="verbBeforeConvert">verb before convert</param>
-        /// <param name="toolBeforeConvert">tool before convert</param>
-        /// <param name="verbPropertiesBeforeConvert">verbProperties before convert</param>
         /// <returns>Corresponding thing before verb convert</returns>
-        protected virtual Thing GetBeforeConvertVerbCorrespondingThing(Type ownerType, Thing result, Verb verbAfterConvert, Tool toolAfterConvert, VerbProperties verbPropertiesAfterConvert, ref Verb verbBeforeConvert, ref Tool toolBeforeConvert, ref VerbProperties verbPropertiesBeforeConvert)
+        protected virtual (Thing, Verb, Tool, VerbProperties) GetBeforeConvertVerbCorrespondingThing(Type ownerType, (Thing, Verb, Tool, VerbProperties) result, Verb verbAfterConvert, Tool toolAfterConvert, VerbProperties verbPropertiesAfterConvert)
         {
             return result;
         }
@@ -95,14 +92,11 @@ namespace RW_NodeTree
         /// </summary>
         /// <param name="ownerType">the type of verbowner</param>
         /// <param name="result">result of other node comp</param>
-        /// <param name="verbAfterConvert">verb after convert</param>
-        /// <param name="toolAfterConvert">tool after convert</param>
-        /// <param name="verbPropertiesAfterConvert">verbProperties after convert</param>
         /// <param name="verbBeforeConvert">verb before convert</param>
         /// <param name="toolBeforeConvert">tool before convert</param>
         /// <param name="verbPropertiesBeforeConvert">verbProperties before convert</param>
         /// <returns>Corresponding thing before verb convert</returns>
-        protected virtual Thing GetAfterConvertVerbCorrespondingThing(Type ownerType, Thing result, Verb verbBeforeConvert, Tool toolBeforeConvert, VerbProperties verbPropertiesBeforeConvert, ref Verb verbAfterConvert, ref Tool toolAfterConvert, ref VerbProperties verbPropertiesAfterConvert)
+        protected virtual (Thing, Verb, Tool, VerbProperties) GetAfterConvertVerbCorrespondingThing(Type ownerType, (Thing, Verb, Tool, VerbProperties) result, Verb verbBeforeConvert, Tool toolBeforeConvert, VerbProperties verbPropertiesBeforeConvert)
         {
             return result;
         }
@@ -131,19 +125,17 @@ namespace RW_NodeTree
         /// <summary>
         /// Adapte draw steep of this node
         /// </summary>
-        /// <param name="ids">Corresponding is</param>
-        /// <param name="nodes">Corresponding node</param>
-        /// <param name="renderInfos">Corresponding render infos</param>
-        protected virtual void AdapteDrawSteep(ref List<NodeRenderingInfos> nodeRenderingInfos)
+        /// <param name="nodeRenderingInfos">Corresponding is</param>
+        protected virtual void AdapteDrawSteep(ref List<(Thing, string, List<RenderInfo>)> nodeRenderingInfos)
         {
             return;
         }
-        internal Thing internal_GetBeforeConvertVerbCorrespondingThing(Type ownerType, Thing result, Verb verbAfterConvert, Tool toolAfterConvert, VerbProperties verbPropertiesAfterConvert, ref Verb verbBeforeConvert, ref Tool toolBeforeConvert, ref VerbProperties verbPropertiesBeforeConvert)
-            => GetBeforeConvertVerbCorrespondingThing(ownerType, result, verbAfterConvert, toolAfterConvert, verbPropertiesAfterConvert, ref verbBeforeConvert, ref toolBeforeConvert, ref verbPropertiesBeforeConvert);
-        internal Thing internal_GetAfterConvertVerbCorrespondingThing(Type ownerType, Thing result, Verb verbAfterConvert, Tool toolAfterConvert, VerbProperties verbPropertiesAfterConvert, ref Verb verbBeforeConvert, ref Tool toolBeforeConvert, ref VerbProperties verbPropertiesBeforeConvert)
-            => GetAfterConvertVerbCorrespondingThing(ownerType, result, verbBeforeConvert, toolBeforeConvert, verbPropertiesBeforeConvert, ref verbAfterConvert, ref toolAfterConvert, ref verbPropertiesAfterConvert);
+        internal (Thing, Verb, Tool, VerbProperties) internal_GetBeforeConvertVerbCorrespondingThing(Type ownerType, (Thing, Verb, Tool, VerbProperties) result, Verb verbAfterConvert, Tool toolAfterConvert, VerbProperties verbPropertiesAfterConvert)
+            => GetBeforeConvertVerbCorrespondingThing(ownerType, result, verbAfterConvert, toolAfterConvert, verbPropertiesAfterConvert);
+        internal (Thing, Verb, Tool, VerbProperties) internal_GetAfterConvertVerbCorrespondingThing(Type ownerType, (Thing, Verb, Tool, VerbProperties) result, Verb verbBeforeConvert, Tool toolBeforeConvert, VerbProperties verbPropertiesBeforeConvert)
+            => GetAfterConvertVerbCorrespondingThing(ownerType, result, verbBeforeConvert, toolBeforeConvert, verbPropertiesBeforeConvert);
         internal bool internal_UpdateNode(CompChildNodeProccesser actionNode) => UpdateNode(actionNode);
         internal bool internal_AllowNode(Thing node, string id = null) => AllowNode(node, id);
-        internal void internal_AdapteDrawSteep(ref List<NodeRenderingInfos> nodeRenderingInfos) => AdapteDrawSteep(ref nodeRenderingInfos);
+        internal void internal_AdapteDrawSteep(ref List<(Thing, string, List<RenderInfo>)> nodeRenderingInfos) => AdapteDrawSteep(ref nodeRenderingInfos);
     }
 }

@@ -134,266 +134,184 @@ namespace RW_NodeTree
         #region Post
         #endregion
 
-
         /// <summary>
-        /// Return the correct verb ownner and complemented before&after verb
+        /// 
         /// </summary>
-        /// <param name="verbOwner">Verb container</param>
-        /// <param name="verbBeforeConvert">Verb before convert</param>
-        /// <param name="verbAfterConvert">Verb after convert</param>
-        /// <returns>correct verb ownner</returns>
-        public Thing GetBeforeConvertVerbCorrespondingThing(Type ownerType, Verb verbAfterConvert, out Verb verbBeforeConvert)
+        /// <param name="ownerType"></param>
+        /// <param name="thing"></param>
+        /// <param name="verb"></param>
+        /// <param name="tool"></param>
+        /// <param name="verbProperties"></param>
+        /// <returns></returns>
+        public static bool CheckVerbDatasVaildityAndAdapt(Type ownerType, Thing thing, ref Verb verb, ref Tool tool, ref VerbProperties verbProperties)
         {
-            return GetBeforeConvertVerbCorrespondingThing(ownerType, verbAfterConvert, null, null, out verbBeforeConvert, out _, out _);
-        }
+            if (ownerType == null || !typeof(IVerbOwner).IsAssignableFrom(ownerType) || thing == null || (verb == null && tool == null && verbProperties == null)) return false;
 
+            List<VerbProperties> verbsPropertiesCache = tool?.VerbsProperties.ToList();
+            List<Verb> allVerbs = GetAllOriginalVerbs(GetSameTypeVerbOwner(ownerType, thing)?.VerbTracker);
 
-        /// <summary>
-        /// Return the correct verb ownner and complemented before&after verb info
-        /// </summary>
-        /// <param name="verbOwner">Verb container</param>
-        /// <param name="verbPropertiesBeforeConvert">verbProperties of verbBeforeConvert</param>
-        /// <param name="toolBeforeConvert">tool of verbBeforeConvert</param>
-        /// <param name="verbPropertiesAfterConvert">verbProperties of verbAfterConvert</param>
-        /// <param name="toolAfterConvert">tool of verbAfterConvert</param>
-        /// <returns>correct verb ownner</returns>
-        public Thing GetBeforeConvertVerbCorrespondingThing(Type ownerType, Tool toolAfterConvert, VerbProperties verbPropertiesAfterConvert, out Tool toolBeforeConvert, out VerbProperties verbPropertiesBeforeConvert)
-        {
-            return GetBeforeConvertVerbCorrespondingThing(ownerType, null, toolAfterConvert, verbPropertiesAfterConvert, out _, out toolBeforeConvert, out verbPropertiesBeforeConvert);
-        }
-
-
-        /// <summary>
-        /// Return the correct verb ownner and complemented before&after verb info
-        /// </summary>
-        /// <param name="verbOwner">Verb container</param>
-        /// <param name="verbBeforeConvert">Verb before convert</param>
-        /// <param name="verbPropertiesBeforeConvert">verbProperties of verbBeforeConvert</param>
-        /// <param name="toolBeforeConvert">tool of verbBeforeConvert</param>
-        /// <param name="verbAfterConvert">Verb after convert</param>
-        /// <param name="verbPropertiesAfterConvert">verbProperties of verbAfterConvert</param>
-        /// <param name="toolAfterConvert">tool of verbAfterConvert</param>
-        /// <returns>correct verb ownner</returns>
-        public Thing GetBeforeConvertVerbCorrespondingThing(Type ownerType, Verb verbAfterConvert, Tool toolAfterConvert, VerbProperties verbPropertiesAfterConvert, out Verb verbBeforeConvert, out Tool toolBeforeConvert, out VerbProperties verbPropertiesBeforeConvert)
-        {
-            verbBeforeConvert = null;
-            toolBeforeConvert = null;
-            verbPropertiesBeforeConvert = null;
-            List<VerbProperties> verbsPropertiesCache = toolAfterConvert?.VerbsProperties.ToList();
-            List<Verb> allVerbs = GetAllOriginalVerbs(GetSameTypeVerbOwner(ownerType, parent)?.VerbTracker);
-            Thing result = parent;
-
-            if (verbAfterConvert != null)
+            if (verb != null)
             {
-                if (allVerbs != null && !allVerbs.Contains(verbAfterConvert))
+                if (allVerbs != null && !allVerbs.Contains(verb))
                 {
-                    return null;
+                    return false;
                 }
                 else
                 {
-                    toolAfterConvert = verbAfterConvert.tool;
-                    verbPropertiesAfterConvert = verbAfterConvert.verbProps;
+                    tool = verb.tool;
+                    verbProperties = verb.verbProps;
                 }
             }
-            else if (verbsPropertiesCache != null && (verbPropertiesAfterConvert == null || !verbsPropertiesCache.Contains(verbPropertiesAfterConvert)))
+            else if (verbsPropertiesCache != null && (verbProperties == null || !verbsPropertiesCache.Contains(verbProperties)))
             {
-                verbPropertiesAfterConvert = verbsPropertiesCache.FirstOrDefault();
-            }
-
-            if(allVerbs != null)
-            {
-                verbAfterConvert = allVerbs.Find(x => x.tool == toolAfterConvert && x.verbProps == verbPropertiesAfterConvert);
-                if (verbAfterConvert == null)
-                {
-                    return null;
-                }
-            }
-
-            verbBeforeConvert = verbAfterConvert;
-            toolBeforeConvert = toolAfterConvert;
-            verbPropertiesBeforeConvert = verbPropertiesAfterConvert;
-            if (ownerType != null && typeof(IVerbOwner).IsAssignableFrom(ownerType) && verbPropertiesAfterConvert != null)
-            {
-                Verb verbCache = null;
-                Tool toolCache = null;
-                VerbProperties verbPropertiesCache = null;
-                foreach (CompBasicNodeComp comp in AllNodeComp)
-                {
-                    result = comp.internal_GetBeforeConvertVerbCorrespondingThing(ownerType, result, verbAfterConvert, toolAfterConvert, verbPropertiesAfterConvert, ref verbCache, ref toolCache, ref verbPropertiesCache) ?? result;
-                }
-
-
-                verbsPropertiesCache = toolCache?.VerbsProperties.ToList();
-                allVerbs = GetAllOriginalVerbs(GetSameTypeVerbOwner(ownerType, result)?.VerbTracker);
-
-                if (verbCache != null)
-                {
-                    if (allVerbs != null && !allVerbs.Contains(verbCache))
-                    {
-                        return parent;
-                    }
-                    else
-                    {
-                        toolCache = verbCache.tool;
-                        verbPropertiesCache = verbCache.verbProps;
-                    }
-                }
-                else if (verbsPropertiesCache != null && (verbPropertiesCache == null || !verbsPropertiesCache.Contains(verbPropertiesCache)))
-                {
-                    verbPropertiesCache = verbsPropertiesCache.FirstOrDefault();
-                }
-
-                if (allVerbs != null)
-                {
-                    verbCache = allVerbs.Find(x => x.tool == toolCache && x.verbProps == verbPropertiesCache);
-                    if (verbCache == null)
-                    {
-                        return parent;
-                    }
-                }
-
-                verbBeforeConvert = verbCache;
-                toolBeforeConvert = toolCache;
-                verbPropertiesBeforeConvert = verbPropertiesCache;
-
-                if (result != null && result != parent)
-                {
-                    result = ((CompChildNodeProccesser)result)?.GetBeforeConvertVerbCorrespondingThing(ownerType, verbBeforeConvert, toolBeforeConvert, verbPropertiesBeforeConvert, out verbBeforeConvert, out toolBeforeConvert, out verbPropertiesBeforeConvert) ?? result;
-                }
-                return result;
-            }
-            return parent;
-        }
-
-
-        /// <summary>
-        /// Return the correct verb ownner and complemented before&after verb
-        /// </summary>
-        /// <param name="verbOwner">Verb container</param>
-        /// <param name="verbBeforeConvert">Verb before convert</param>
-        /// <param name="verbAfterConvert">Verb after convert</param>
-        /// <returns>correct verb ownner</returns>
-        public Thing GetAfterConvertVerbCorrespondingThing(Type ownerType, Verb verbBeforeConvert, out Verb verbAfterConvert)
-        {
-            return GetAfterConvertVerbCorrespondingThing(ownerType, verbBeforeConvert, null, null, out verbAfterConvert, out _, out _);
-        }
-
-
-        /// <summary>
-        /// Return the correct verb ownner and complemented before&after verb info
-        /// </summary>
-        /// <param name="verbOwner">Verb container</param>
-        /// <param name="verbPropertiesBeforeConvert">verbProperties of verbBeforeConvert</param>
-        /// <param name="toolBeforeConvert">tool of verbBeforeConvert</param>
-        /// <param name="verbPropertiesAfterConvert">verbProperties of verbAfterConvert</param>
-        /// <param name="toolAfterConvert">tool of verbAfterConvert</param>
-        /// <returns>correct verb ownner</returns>
-        public Thing GetAfterConvertVerbCorrespondingThing(Type ownerType, Tool toolBeforeConvert, VerbProperties verbPropertiesBeforeConvert, out Tool toolAfterConvert, out VerbProperties verbPropertiesAfterConvert)
-        {
-            return GetAfterConvertVerbCorrespondingThing(ownerType, null, toolBeforeConvert, verbPropertiesBeforeConvert, out _, out toolAfterConvert, out verbPropertiesAfterConvert);
-        }
-
-
-        /// <summary>
-        /// Return the correct verb ownner and complemented before&after verb info
-        /// </summary>
-        /// <param name="verbOwner">Verb container</param>
-        /// <param name="verbBeforeConvert">Verb before convert</param>
-        /// <param name="verbPropertiesBeforeConvert">verbProperties of verbBeforeConvert</param>
-        /// <param name="toolBeforeConvert">tool of verbBeforeConvert</param>
-        /// <param name="verbAfterConvert">Verb after convert</param>
-        /// <param name="verbPropertiesAfterConvert">verbProperties of verbAfterConvert</param>
-        /// <param name="toolAfterConvert">tool of verbAfterConvert</param>
-        /// <returns>correct verb ownner</returns>
-        public Thing GetAfterConvertVerbCorrespondingThing(Type ownerType, Verb verbBeforeConvert, Tool toolBeforeConvert, VerbProperties verbPropertiesBeforeConvert, out Verb verbAfterConvert, out Tool toolAfterConvert, out VerbProperties verbPropertiesAfterConvert)
-        {
-            verbAfterConvert = null;
-            toolAfterConvert = null;
-            verbPropertiesAfterConvert = null;
-            List<VerbProperties> verbsPropertiesCache = toolBeforeConvert?.VerbsProperties.ToList();
-            List<Verb> allVerbs = GetAllOriginalVerbs(GetSameTypeVerbOwner(ownerType, parent)?.VerbTracker);
-            Thing result = parent;
-
-            if (verbBeforeConvert != null)
-            {
-                if (allVerbs != null && !allVerbs.Contains(verbBeforeConvert))
-                {
-                    return null;
-                }
-                else
-                {
-                    toolBeforeConvert = verbBeforeConvert.tool;
-                    verbPropertiesBeforeConvert = verbBeforeConvert.verbProps;
-                }
-            }
-            else if (verbsPropertiesCache != null && (verbPropertiesBeforeConvert == null || !verbsPropertiesCache.Contains(verbPropertiesBeforeConvert)))
-            {
-                verbPropertiesBeforeConvert = verbsPropertiesCache.FirstOrDefault();
+                verbProperties = verbsPropertiesCache.FirstOrDefault();
             }
 
             if (allVerbs != null)
             {
-                verbBeforeConvert = allVerbs?.Find(x => x.tool == toolBeforeConvert && x.verbProps == verbPropertiesBeforeConvert);
-                if (verbBeforeConvert == null)
+                Tool toolCache = tool;
+                VerbProperties verbPropertiesCache = verbProperties;
+                verb = allVerbs.Find(x => x.tool == toolCache && x.verbProps == verbPropertiesCache);
+                if (verb == null)
                 {
-                    return null;
+                    return false;
                 }
             }
+            return true;
+        }
 
-            verbAfterConvert = verbBeforeConvert;
-            toolAfterConvert = toolBeforeConvert;
-            verbPropertiesAfterConvert = verbPropertiesBeforeConvert;
-            if (ownerType != null && typeof(IVerbOwner).IsAssignableFrom(ownerType) && verbPropertiesBeforeConvert != null)
+
+        /// <summary>
+        /// Return the correct verb ownner and complemented before&after verb
+        /// </summary>
+        /// <param name="verbAfterConvert">Verb after convert</param>
+        /// <returns>Verb infos before convert</returns>
+        public (Thing, Verb, Tool, VerbProperties) GetBeforeConvertVerbCorrespondingThing(Type ownerType, Verb verbAfterConvert)
+        {
+            return GetBeforeConvertVerbCorrespondingThing(ownerType, verbAfterConvert, null, null);
+        }
+
+
+        /// <summary>
+        /// Return the correct verb ownner and complemented before&after verb info
+        /// </summary>
+        /// <param name="verbPropertiesAfterConvert">verbProperties of verbAfterConvert</param>
+        /// <param name="toolAfterConvert">tool of verbAfterConvert</param>
+        /// <returns>Verb infos before convert</returns>
+        public (Thing, Verb, Tool, VerbProperties) GetBeforeConvertVerbCorrespondingThing(Type ownerType, Tool toolAfterConvert, VerbProperties verbPropertiesAfterConvert)
+        {
+            return GetBeforeConvertVerbCorrespondingThing(ownerType, null, toolAfterConvert, verbPropertiesAfterConvert);
+        }
+
+
+        /// <summary>
+        /// Return the correct verb ownner and complemented before&after verb info
+        /// </summary>
+        /// <param name="verbAfterConvert">Verb after convert</param>
+        /// <param name="verbPropertiesAfterConvert">verbProperties of verbAfterConvert</param>
+        /// <param name="toolAfterConvert">tool of verbAfterConvert</param>
+        /// <returns>Verb infos before convert</returns>
+        public (Thing, Verb, Tool, VerbProperties) GetBeforeConvertVerbCorrespondingThing(Type ownerType, Verb verbAfterConvert, Tool toolAfterConvert, VerbProperties verbPropertiesAfterConvert)
+        {
+            (Thing, Verb, Tool, VerbProperties) result = default((Thing, Verb, Tool, VerbProperties));
+
+            if (!CheckVerbDatasVaildityAndAdapt(ownerType, parent, ref verbAfterConvert, ref toolAfterConvert, ref verbPropertiesAfterConvert)) return result;
+
+            result = (parent, verbAfterConvert, toolAfterConvert, verbPropertiesAfterConvert);
+            if (ownerType != null && typeof(IVerbOwner).IsAssignableFrom(ownerType) && verbPropertiesAfterConvert != null)
             {
-                Verb verbCache = null;
-                Tool toolCache = null;
-                VerbProperties verbPropertiesCache = null;
+                (Thing, Verb, Tool, VerbProperties) cache = result;
                 foreach (CompBasicNodeComp comp in AllNodeComp)
                 {
-                    result = comp.internal_GetAfterConvertVerbCorrespondingThing(ownerType, result, verbBeforeConvert, toolBeforeConvert, verbPropertiesBeforeConvert, ref verbCache, ref toolCache, ref verbPropertiesCache) ?? result;
+                    Thing before = cache.Item1;
+                    cache = comp.internal_GetBeforeConvertVerbCorrespondingThing(ownerType, cache, verbAfterConvert, toolAfterConvert, verbPropertiesAfterConvert);
+                    cache.Item1 = cache.Item1 ?? before;
                 }
 
 
-                verbsPropertiesCache = toolCache?.VerbsProperties.ToList();
-                allVerbs = GetAllOriginalVerbs(GetSameTypeVerbOwner(ownerType, result)?.VerbTracker);
+                if (!CheckVerbDatasVaildityAndAdapt(ownerType, cache.Item1, ref cache.Item2, ref cache.Item3, ref cache.Item4)) return result;
 
-                if (verbCache != null)
+                result = cache;
+
+                if (result.Item1 != null && result.Item1 != parent && ((CompChildNodeProccesser)result.Item1) != null)
                 {
-                    if (allVerbs != null && !allVerbs.Contains(verbCache))
-                    {
-                        return parent;
-                    }
-                    else
-                    {
-                        toolCache = verbCache.tool;
-                        verbPropertiesCache = verbCache.verbProps;
-                    }
+                    Thing before = result.Item1;
+                    result = ((CompChildNodeProccesser)result.Item1).GetBeforeConvertVerbCorrespondingThing(ownerType, result.Item2, result.Item3, result.Item4);
+                    result.Item1 = result.Item1 ?? before;
                 }
-                else if (verbsPropertiesCache != null && (verbPropertiesCache == null || !verbsPropertiesCache.Contains(verbPropertiesCache)))
-                {
-                    verbPropertiesCache = verbsPropertiesCache.FirstOrDefault();
-                }
-
-                if (allVerbs != null)
-                {
-                    verbCache = allVerbs.Find(x => x.tool == toolCache && x.verbProps == verbPropertiesCache);
-                    if (verbCache == null)
-                    {
-                        return parent;
-                    }
-                }
-
-                verbAfterConvert = verbCache;
-                toolAfterConvert = toolCache;
-                verbPropertiesAfterConvert = verbPropertiesCache;
-
-                if (result != null && result != parent)
-                {
-                    result = ((CompChildNodeProccesser)result)?.GetAfterConvertVerbCorrespondingThing(ownerType, verbAfterConvert, toolAfterConvert, verbPropertiesAfterConvert, out verbAfterConvert, out toolAfterConvert, out verbPropertiesAfterConvert) ?? result;
-                }
-                return result;
             }
-            return parent;
+            return result;
+        }
+
+
+        /// <summary>
+        /// Return the correct verb ownner and complemented before&after verb
+        /// </summary>
+        /// <param name="verbOwner">Verb container</param>
+        /// <param name="verbBeforeConvert">Verb before convert</param>
+        /// <param name="verbAfterConvert">Verb after convert</param>
+        /// <returns>correct verb ownner</returns>
+        public (Thing, Verb, Tool, VerbProperties) GetAfterConvertVerbCorrespondingThing(Type ownerType, Verb verbBeforeConvert)
+        {
+            return GetAfterConvertVerbCorrespondingThing(ownerType, verbBeforeConvert, null, null);
+        }
+
+
+        /// <summary>
+        /// Return the correct verb ownner and complemented before&after verb info
+        /// </summary>
+        /// <param name="verbOwner">Verb container</param>
+        /// <param name="verbPropertiesBeforeConvert">verbProperties of verbBeforeConvert</param>
+        /// <param name="toolBeforeConvert">tool of verbBeforeConvert</param>
+        /// <param name="verbPropertiesAfterConvert">verbProperties of verbAfterConvert</param>
+        /// <param name="toolAfterConvert">tool of verbAfterConvert</param>
+        /// <returns>correct verb ownner</returns>
+        public (Thing, Verb, Tool, VerbProperties) GetAfterConvertVerbCorrespondingThing(Type ownerType, Tool toolBeforeConvert, VerbProperties verbPropertiesBeforeConvert)
+        {
+            return GetAfterConvertVerbCorrespondingThing(ownerType, null, toolBeforeConvert, verbPropertiesBeforeConvert);
+        }
+
+
+        /// <summary>
+        /// Return the correct verb ownner and complemented before&after verb info
+        /// </summary>
+        /// <param name="verbOwner">Verb container</param>
+        /// <param name="verbBeforeConvert">Verb before convert</param>
+        /// <param name="verbPropertiesBeforeConvert">verbProperties of verbBeforeConvert</param>
+        /// <param name="toolBeforeConvert">tool of verbBeforeConvert</param>
+        /// <param name="verbAfterConvert">Verb after convert</param>
+        /// <param name="verbPropertiesAfterConvert">verbProperties of verbAfterConvert</param>
+        /// <param name="toolAfterConvert">tool of verbAfterConvert</param>
+        /// <returns>correct verb ownner</returns>
+        public (Thing, Verb, Tool, VerbProperties) GetAfterConvertVerbCorrespondingThing(Type ownerType, Verb verbBeforeConvert, Tool toolBeforeConvert, VerbProperties verbPropertiesBeforeConvert)
+        {
+            (Thing, Verb, Tool, VerbProperties) result = default((Thing, Verb, Tool, VerbProperties));
+
+            if (!CheckVerbDatasVaildityAndAdapt(ownerType, parent, ref verbBeforeConvert, ref toolBeforeConvert, ref verbPropertiesBeforeConvert)) return result;
+
+            result = (parent, verbBeforeConvert, toolBeforeConvert, verbPropertiesBeforeConvert);
+            if (ownerType != null && typeof(IVerbOwner).IsAssignableFrom(ownerType) && verbPropertiesBeforeConvert != null)
+            {
+                (Thing, Verb, Tool, VerbProperties) cache = result;
+                foreach (CompBasicNodeComp comp in AllNodeComp)
+                {
+                    Thing before = cache.Item1;
+                    cache = comp.internal_GetAfterConvertVerbCorrespondingThing(ownerType, cache, verbBeforeConvert, toolBeforeConvert, verbPropertiesBeforeConvert);
+                    cache.Item1 = cache.Item1 ?? before;
+                }
+
+                if (!CheckVerbDatasVaildityAndAdapt(ownerType, cache.Item1, ref cache.Item2, ref cache.Item3, ref cache.Item4)) return result;
+
+                result = cache;
+
+                if (result.Item1 != null && result.Item1 != parent && ((CompChildNodeProccesser)result.Item1) != null)
+                {
+                    Thing before = result.Item1;
+                    result = ((CompChildNodeProccesser)result.Item1).GetAfterConvertVerbCorrespondingThing(ownerType, result.Item2, result.Item3, result.Item4);
+                    result.Item1 = result.Item1 ?? before;
+                }
+            }
+            return result;
         }
 
         /// <summary>
@@ -404,6 +322,9 @@ namespace RW_NodeTree
             IsRandereds = 0;
         }
 
+        /// <summary>
+        /// Rimworld Defined method, used for load and save game saves.
+        /// </summary>
         public override void PostExposeData()
         {
             Scribe_Deep.Look<NodeContainer>(ref this.childNodes, "innerContainer", this);
@@ -453,7 +374,7 @@ namespace RW_NodeTree
             {
                 return materials[rot_int]; 
             }
-            List<NodeRenderingInfos> nodeRenderingInfos = new List<NodeRenderingInfos>(childNodes.Count + 1);
+            List<(Thing, string, List<RenderInfo>)> nodeRenderingInfos = new List<(Thing, string, List<RenderInfo>)>(childNodes.Count + 1);
 
             //if (Prefs.DevMode)
             //{
@@ -477,7 +398,7 @@ namespace RW_NodeTree
                 try
                 {
                     subGraphic.Draw(Vector3.zero, rot, parent);
-                    nodeRenderingInfos.Add(new NodeRenderingInfos(this, null, RenderingTools.RenderInfos));
+                    nodeRenderingInfos.Add((this, null, RenderingTools.RenderInfos));
                 }
                 catch (Exception ex)
                 {
@@ -500,7 +421,7 @@ namespace RW_NodeTree
                         child.Rotation = new Rot4((rot.AsInt + rotCache.AsInt) & 3);
                         child.DrawAt(Vector3.zero);
                         child.Rotation = rotCache;
-                        nodeRenderingInfos.Add(new NodeRenderingInfos(child, container[(uint)i], RenderingTools.RenderInfos));
+                        nodeRenderingInfos.Add((child, container[(uint)i], RenderingTools.RenderInfos));
                     }
                 }
                 catch (Exception ex)
@@ -517,9 +438,9 @@ namespace RW_NodeTree
             }
 
             List<RenderInfo> final = new List<RenderInfo>();
-            foreach(NodeRenderingInfos infos in nodeRenderingInfos)
+            foreach((Thing, string, List<RenderInfo>) infos in nodeRenderingInfos)
             {
-                final.AddRange(infos.renderInfos);
+                final.AddRange(infos.Item3);
             }
 
             RenderTexture cachedRenderTarget = null;

@@ -41,13 +41,13 @@ namespace RW_NodeTree.NodeComponent
             //if (Prefs.DevMode) Log.Message("\"" + ((parent.def.uiIconPath == null) ? "null" : parent.def.uiIconPath) + "\"");
         }
 
-        protected override void AdapteDrawSteep(ref List<NodeRenderingInfos> nodeRenderingInfos)
+        protected override void AdapteDrawSteep(ref List<(Thing, string, List<RenderInfo>)> nodeRenderingInfos)
         {
             for (int i = 0; i < nodeRenderingInfos.Count; i++)
             {
-                if(nodeRenderingInfos[i].node != parent)
+                if(nodeRenderingInfos[i].Item1 != parent)
                 {
-                    List<RenderInfo> infos = nodeRenderingInfos[i].renderInfos;
+                    List<RenderInfo> infos = nodeRenderingInfos[i].Item3;
                     //infos.Add(new RenderInfo(thing.Graphic.MeshAt(Rot4.South), 0, Matrix4x4.identity, thing.Graphic.MatSingleFor(thing), 0));
                     for (int j = 0; j < infos.Count; j++)
                     {
@@ -82,7 +82,7 @@ namespace RW_NodeTree.NodeComponent
             return;
         }
 
-        protected override Thing GetBeforeConvertVerbCorrespondingThing(Type ownerType, Thing result, Verb verbAfterConvert, Tool toolAfterConvert, VerbProperties verbPropertiesAfterConvert, ref Verb verbBeforeConvert, ref Tool toolBeforeConvert, ref VerbProperties verbPropertiesBeforeConvert)
+        protected override (Thing, Verb, Tool, VerbProperties) GetBeforeConvertVerbCorrespondingThing(Type ownerType, (Thing, Verb, Tool, VerbProperties) result, Verb verbAfterConvert, Tool toolAfterConvert, VerbProperties verbPropertiesAfterConvert)
         {
             if(verbPropertiesAfterConvert != null)
             {
@@ -91,21 +91,23 @@ namespace RW_NodeTree.NodeComponent
                 {
                     IVerbOwner verbOwner = CompChildNodeProccesser.GetSameTypeVerbOwner(ownerType, conatiner[i]);
                     List<Verb> allVerb = CompChildNodeProccesser.GetAllOriginalVerbs(verbOwner?.VerbTracker);
-                    verbBeforeConvert = allVerb?.Find(x => x.verbProps == verbPropertiesAfterConvert && x.tool == toolAfterConvert);
-                    if (verbBeforeConvert != null)
+                    result.Item2 = allVerb?.Find(x => x.verbProps == verbPropertiesAfterConvert && x.tool == toolAfterConvert);
+                    if (result.Item2 != null)
                     {
-                        return conatiner[i];
+                        result.Item1 = conatiner[i];
+                        return result;
                     }
                 }
             }
             return result;
         }
 
-        protected override Thing GetAfterConvertVerbCorrespondingThing(Type verbOwner, Thing result, Verb verbBeforeConvert, Tool toolBeforeConvert, VerbProperties verbPropertiesBeforeConvert, ref Verb verbAfterConvert, ref Tool toolAfterConvert, ref VerbProperties verbPropertiesAfterConvert)
+        protected override (Thing, Verb, Tool, VerbProperties) GetAfterConvertVerbCorrespondingThing(Type verbOwner, (Thing, Verb, Tool, VerbProperties) result, Verb verbBeforeConvert, Tool toolBeforeConvert, VerbProperties verbPropertiesBeforeConvert)
         {
-            toolAfterConvert = toolBeforeConvert;
-            verbPropertiesAfterConvert = verbPropertiesBeforeConvert;
-            return (verbPropertiesBeforeConvert != null) ?(Thing) ParentProccesser : result;
+            result.Item3 = toolBeforeConvert;
+            result.Item4 = verbPropertiesBeforeConvert;
+            result.Item1 = (verbPropertiesBeforeConvert != null) ? (Thing)ParentProccesser : result.Item1;
+            return result;
         }
 
         protected override List<VerbProperties> PostIVerbOwner_GetVerbProperties(Type ownerType, List<VerbProperties> result, Dictionary<string, object> forPostRead)
