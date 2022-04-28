@@ -221,13 +221,43 @@ namespace RW_NodeTree
             if (ownerType != null && typeof(IVerbOwner).IsAssignableFrom(ownerType) && verbPropertiesAfterConvert != null)
             {
                 (Thing, Verb, Tool, VerbProperties) cache = result;
-                foreach (CompBasicNodeComp comp in AllNodeComp)
+                if(toolAfterConvert != null)
                 {
-                    Thing before = cache.Item1;
-                    cache = comp.internal_GetBeforeConvertVerbCorrespondingThing(ownerType, cache, verbAfterConvert, toolAfterConvert, verbPropertiesAfterConvert);
-                    cache.Item1 = cache.Item1 ?? before;
+                    List<VerbToolRegiestInfo> Registed;
+                    if (!regiestedNodeVerbToolInfos.TryGetValue(ownerType, out Registed))
+                    {
+                        Registed = new List<VerbToolRegiestInfo>();
+                        regiestedNodeVerbToolInfos.Add(ownerType, Registed);
+                    }
+                    for (int i = 0; i < Registed.Count; i++)
+                    {
+                        VerbToolRegiestInfo regiestInfo = Registed[i];
+                        if (regiestInfo.afterCobvertTool == toolAfterConvert)
+                        {
+                            cache = (ChildNodes[regiestInfo.id] ?? parent, null, regiestInfo.berforConvertTool, null);
+                            break;
+                        }
+                    }
                 }
-
+                else
+                {
+                    List<VerbPropertiesRegiestInfo> Registed;
+                    if (!regiestedNodeVerbPropertiesInfos.TryGetValue(ownerType, out Registed))
+                    {
+                        Registed = new List<VerbPropertiesRegiestInfo>();
+                        regiestedNodeVerbPropertiesInfos.Add(ownerType, Registed);
+                    }
+                    for (int i = 0; i < Registed.Count; i++)
+                    {
+                        VerbPropertiesRegiestInfo regiestInfo = Registed[i];
+                        if (regiestInfo.afterConvertProperties == verbPropertiesAfterConvert)
+                        {
+                            cache = (ChildNodes[regiestInfo.id] ?? parent, null, null, regiestInfo.berforConvertProperties);
+                            break;
+                        }
+                    }
+                }
+                //if (Prefs.DevMode) Log.Message(cache.ToString());
 
                 if (!CheckVerbDatasVaildityAndAdapt(ownerType, cache.Item1, ref cache.Item2, ref cache.Item3, ref cache.Item4)) return result;
 
@@ -275,13 +305,10 @@ namespace RW_NodeTree
         /// <summary>
         /// Return the correct verb ownner and complemented before&after verb info
         /// </summary>
-        /// <param name="verbOwner">Verb container</param>
+        /// <param name="ownerType">Verb container</param>
         /// <param name="verbBeforeConvert">Verb before convert</param>
         /// <param name="verbPropertiesBeforeConvert">verbProperties of verbBeforeConvert</param>
         /// <param name="toolBeforeConvert">tool of verbBeforeConvert</param>
-        /// <param name="verbAfterConvert">Verb after convert</param>
-        /// <param name="verbPropertiesAfterConvert">verbProperties of verbAfterConvert</param>
-        /// <param name="toolAfterConvert">tool of verbAfterConvert</param>
         /// <returns>correct verb ownner</returns>
         public (Thing, Verb, Tool, VerbProperties) GetAfterConvertVerbCorrespondingThing(Type ownerType, Verb verbBeforeConvert, Tool toolBeforeConvert, VerbProperties verbPropertiesBeforeConvert)
         {
@@ -293,11 +320,44 @@ namespace RW_NodeTree
             if (ownerType != null && typeof(IVerbOwner).IsAssignableFrom(ownerType) && verbPropertiesBeforeConvert != null)
             {
                 (Thing, Verb, Tool, VerbProperties) cache = result;
-                foreach (CompBasicNodeComp comp in AllNodeComp)
+                if(ParentProccesser != null)
                 {
-                    Thing before = cache.Item1;
-                    cache = comp.internal_GetAfterConvertVerbCorrespondingThing(ownerType, cache, verbBeforeConvert, toolBeforeConvert, verbPropertiesBeforeConvert);
-                    cache.Item1 = cache.Item1 ?? before;
+                    if (toolBeforeConvert != null)
+                    {
+                        List<VerbToolRegiestInfo> Registed;
+                        if (!regiestedNodeVerbToolInfos.TryGetValue(ownerType, out Registed))
+                        {
+                            Registed = new List<VerbToolRegiestInfo>();
+                            regiestedNodeVerbToolInfos.Add(ownerType, Registed);
+                        }
+                        for (int i = 0; i < Registed.Count; i++)
+                        {
+                            VerbToolRegiestInfo regiestInfo = Registed[i];
+                            if (regiestInfo.berforConvertTool == toolBeforeConvert)
+                            {
+                                cache = (ParentProccesser, null, regiestInfo.afterCobvertTool, null);
+                                break;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        List<VerbPropertiesRegiestInfo> Registed;
+                        if (!regiestedNodeVerbPropertiesInfos.TryGetValue(ownerType, out Registed))
+                        {
+                            Registed = new List<VerbPropertiesRegiestInfo>();
+                            regiestedNodeVerbPropertiesInfos.Add(ownerType, Registed);
+                        }
+                        for (int i = 0; i < Registed.Count; i++)
+                        {
+                            VerbPropertiesRegiestInfo regiestInfo = Registed[i];
+                            if (regiestInfo.berforConvertProperties == verbPropertiesBeforeConvert)
+                            {
+                                cache = (ParentProccesser, null, null, regiestInfo.afterConvertProperties);
+                                break;
+                            }
+                        }
+                    }
                 }
 
                 if (!CheckVerbDatasVaildityAndAdapt(ownerType, cache.Item1, ref cache.Item2, ref cache.Item3, ref cache.Item4)) return result;
@@ -555,6 +615,10 @@ namespace RW_NodeTree
         private Material[] materials = new Material[4];
 
         private byte IsRandereds = 0;
+        //a a b b b
+        public readonly Dictionary<Type, List<VerbToolRegiestInfo>> regiestedNodeVerbToolInfos = new Dictionary<Type, List<VerbToolRegiestInfo>>();
+
+        public readonly Dictionary<Type, List<VerbPropertiesRegiestInfo>> regiestedNodeVerbPropertiesInfos = new Dictionary<Type, List<VerbPropertiesRegiestInfo>>();
 
 
         /*
@@ -566,6 +630,7 @@ namespace RW_NodeTree
                                 new Vector4(     0,      0,      0.5f,   1      )
                             );
         */
+
 
     }
 

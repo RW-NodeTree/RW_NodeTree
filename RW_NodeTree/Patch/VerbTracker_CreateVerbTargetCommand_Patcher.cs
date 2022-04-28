@@ -22,6 +22,7 @@ namespace RW_NodeTree.Patch
         private static void PreVerbTracker_CreateVerbTargetCommand(ref Thing ownerThing, Verb verb)
         {
             ownerThing = verb?.EquipmentSource ?? ownerThing;
+            //if (Prefs.DevMode) Log.Message(verb + " : " + verb?.EquipmentSource);
         }
 
         [HarmonyPostfix]

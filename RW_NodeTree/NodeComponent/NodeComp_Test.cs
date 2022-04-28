@@ -82,52 +82,38 @@ namespace RW_NodeTree.NodeComponent
             return;
         }
 
-        protected override (Thing, Verb, Tool, VerbProperties) GetBeforeConvertVerbCorrespondingThing(Type ownerType, (Thing, Verb, Tool, VerbProperties) result, Verb verbAfterConvert, Tool toolAfterConvert, VerbProperties verbPropertiesAfterConvert)
+        protected override List<VerbPropertiesRegiestInfo> PostIVerbOwner_GetVerbProperties(Type ownerType, List<VerbPropertiesRegiestInfo> result, Dictionary<string, object> forPostRead)
         {
-            if(verbPropertiesAfterConvert != null)
+            NodeContainer conatiner = ChildNodes;
+            for (int i = 0; i < conatiner.Count; i++)
             {
-                NodeContainer conatiner = ChildNodes;
-                for(int i = 0; i < conatiner.Count; i++)
+                List<VerbProperties> VerbPropertiesForAdd = CompChildNodeProccesser.GetSameTypeVerbOwner(ownerType, conatiner[i])?.VerbProperties;
+                if(VerbPropertiesForAdd != null)
                 {
-                    IVerbOwner verbOwner = CompChildNodeProccesser.GetSameTypeVerbOwner(ownerType, conatiner[i]);
-                    List<Verb> allVerb = CompChildNodeProccesser.GetAllOriginalVerbs(verbOwner?.VerbTracker);
-                    result.Item2 = allVerb?.Find(x => x.verbProps == verbPropertiesAfterConvert && x.tool == toolAfterConvert);
-                    if (result.Item2 != null)
+                    result.Capacity += VerbPropertiesForAdd.Count;
+                    foreach (VerbProperties verbProperties in VerbPropertiesForAdd)
                     {
-                        result.Item1 = conatiner[i];
-                        return result;
+                        result.Add(new VerbPropertiesRegiestInfo(conatiner[(uint)i], verbProperties, verbProperties));
                     }
                 }
             }
             return result;
         }
 
-        protected override (Thing, Verb, Tool, VerbProperties) GetAfterConvertVerbCorrespondingThing(Type verbOwner, (Thing, Verb, Tool, VerbProperties) result, Verb verbBeforeConvert, Tool toolBeforeConvert, VerbProperties verbPropertiesBeforeConvert)
-        {
-            result.Item3 = toolBeforeConvert;
-            result.Item4 = verbPropertiesBeforeConvert;
-            result.Item1 = (verbPropertiesBeforeConvert != null) ? (Thing)ParentProccesser : result.Item1;
-            return result;
-        }
-
-        protected override List<VerbProperties> PostIVerbOwner_GetVerbProperties(Type ownerType, List<VerbProperties> result, Dictionary<string, object> forPostRead)
+        protected override List<VerbToolRegiestInfo> PostIVerbOwner_GetTools(Type ownerType, List<VerbToolRegiestInfo> result, Dictionary<string, object> forPostRead)
         {
             NodeContainer conatiner = ChildNodes;
             for (int i = 0; i < conatiner.Count; i++)
             {
-                IVerbOwner verbOwner = CompChildNodeProccesser.GetSameTypeVerbOwner(ownerType, conatiner[i]);
-                if(verbOwner != null) result.AddRange(verbOwner.VerbProperties);
-            }
-            return result;
-        }
-
-        protected override List<Tool> PostIVerbOwner_GetTools(Type ownerType, List<Tool> result, Dictionary<string, object> forPostRead)
-        {
-            NodeContainer conatiner = ChildNodes;
-            for (int i = 0; i < conatiner.Count; i++)
-            {
-                IVerbOwner verbOwner = CompChildNodeProccesser.GetSameTypeVerbOwner(ownerType, conatiner[i]);
-                if (verbOwner != null) result.AddRange(verbOwner.Tools);
+                List<Tool> ToolsForAdd = CompChildNodeProccesser.GetSameTypeVerbOwner(ownerType, conatiner[i])?.Tools;
+                if (ToolsForAdd != null)
+                {
+                    result.Capacity += ToolsForAdd.Count;
+                    foreach (Tool tool in ToolsForAdd)
+                    {
+                        result.Add(new VerbToolRegiestInfo(conatiner[(uint)i], tool, tool));
+                    }
+                }
             }
             return result;
         }

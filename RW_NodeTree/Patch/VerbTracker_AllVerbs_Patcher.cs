@@ -120,6 +120,7 @@ namespace RW_NodeTree
                         if (verbOwner != null)
                         {
                             verb.verbTracker = verbOwner.VerbTracker;
+                            //if (Prefs.DevMode) Log.Message(verb + " : " + thing);
                         }
                     }
                     result[i] = verb;

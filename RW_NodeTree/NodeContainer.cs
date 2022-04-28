@@ -97,6 +97,8 @@ namespace RW_NodeTree
             {
                 CompChildNodeProccesser proccess = this.Comp;
                 if (actionNode == null) actionNode = proccess;
+                proccess.regiestedNodeVerbToolInfos.Clear();
+                proccess.regiestedNodeVerbPropertiesInfos.Clear();
                 foreach (Thing node in this)
                 {
                     StopEventBubble = (((CompChildNodeProccesser)node)?.UpdateNode(actionNode) ?? false) || StopEventBubble;

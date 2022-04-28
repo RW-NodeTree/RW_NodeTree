@@ -150,10 +150,21 @@ namespace RW_NodeTree
         {
             if (ownerType != null && typeof(IVerbOwner).IsAssignableFrom(ownerType))
             {
+                List<VerbPropertiesRegiestInfo> verbPropertiesRegiestInfo = new List<VerbPropertiesRegiestInfo>(verbProperties.Count);
+                foreach (VerbProperties verbProperty in verbProperties)
+                {
+                    verbPropertiesRegiestInfo.Add(new VerbPropertiesRegiestInfo(null, verbProperty, verbProperty));
+                }
                 foreach (CompBasicNodeComp comp in AllNodeComp)
                 {
-                    verbProperties = comp.internal_PostIVerbOwner_GetVerbProperties(ownerType, verbProperties, forPostRead) ?? verbProperties;
+                    verbPropertiesRegiestInfo = comp.internal_PostIVerbOwner_GetVerbProperties(ownerType, verbPropertiesRegiestInfo, forPostRead) ?? verbPropertiesRegiestInfo;
                 }
+                verbProperties = new List<VerbProperties>(verbPropertiesRegiestInfo.Count);
+                foreach(VerbPropertiesRegiestInfo regiestInfo in verbPropertiesRegiestInfo)
+                {
+                    verbProperties.Add(regiestInfo.afterConvertProperties);
+                }
+                regiestedNodeVerbPropertiesInfos.SetOrAdd(ownerType, verbPropertiesRegiestInfo);
             }
             return verbProperties;
         }
@@ -168,10 +179,21 @@ namespace RW_NodeTree
         {
             if (ownerType != null && typeof(IVerbOwner).IsAssignableFrom(ownerType))
             {
+                List<VerbToolRegiestInfo> verbToolRegiestInfo = new List<VerbToolRegiestInfo>(tools.Count);
+                foreach (Tool tool in tools)
+                {
+                    verbToolRegiestInfo.Add(new VerbToolRegiestInfo(null, tool, tool));
+                }
                 foreach (CompBasicNodeComp comp in AllNodeComp)
                 {
-                    tools = comp.internal_PostIVerbOwner_GetTools(ownerType, tools, forPostRead) ?? tools;
+                    verbToolRegiestInfo = comp.internal_PostIVerbOwner_GetTools(ownerType, verbToolRegiestInfo, forPostRead) ?? verbToolRegiestInfo;
                 }
+                tools = new List<Tool>(verbToolRegiestInfo.Count);
+                foreach (VerbToolRegiestInfo regiestInfo in verbToolRegiestInfo)
+                {
+                    tools.Add(regiestInfo.afterCobvertTool);
+                }
+                regiestedNodeVerbToolInfos.SetOrAdd(ownerType, verbToolRegiestInfo);
             }
             return tools;
         }
@@ -186,11 +208,11 @@ namespace RW_NodeTree
         {
             return;
         }
-        protected virtual List<VerbProperties> PostIVerbOwner_GetVerbProperties(Type ownerType, List<VerbProperties> result, Dictionary<string, object> forPostRead)
+        protected virtual List<VerbPropertiesRegiestInfo> PostIVerbOwner_GetVerbProperties(Type ownerType, List<VerbPropertiesRegiestInfo> result, Dictionary<string, object> forPostRead)
         {
             return result;
         }
-        protected virtual List<Tool> PostIVerbOwner_GetTools(Type ownerType, List<Tool> result, Dictionary<string, object> forPostRead)
+        protected virtual List<VerbToolRegiestInfo> PostIVerbOwner_GetTools(Type ownerType, List<VerbToolRegiestInfo> result, Dictionary<string, object> forPostRead)
         {
             return result;
         }
@@ -198,9 +220,9 @@ namespace RW_NodeTree
             => PreIVerbOwner_GetVerbProperties(ownerType, forPostRead);
         internal void internal_PreIVerbOwner_GetTools(Type ownerType, Dictionary<string, object> forPostRead)
             => PreIVerbOwner_GetTools(ownerType, forPostRead);
-        internal List<VerbProperties> internal_PostIVerbOwner_GetVerbProperties(Type ownerType, List<VerbProperties> result, Dictionary<string, object> forPostRead)
+        internal List<VerbPropertiesRegiestInfo> internal_PostIVerbOwner_GetVerbProperties(Type ownerType, List<VerbPropertiesRegiestInfo> result, Dictionary<string, object> forPostRead)
             => PostIVerbOwner_GetVerbProperties(ownerType, result, forPostRead);
-        internal List<Tool> internal_PostIVerbOwner_GetTools(Type ownerType, List<Tool> result, Dictionary<string, object> forPostRead)
+        internal List<VerbToolRegiestInfo> internal_PostIVerbOwner_GetTools(Type ownerType, List<VerbToolRegiestInfo> result, Dictionary<string, object> forPostRead)
             => PostIVerbOwner_GetTools(ownerType, result, forPostRead);
     }
 }
