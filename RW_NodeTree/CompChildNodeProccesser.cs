@@ -383,6 +383,20 @@ namespace RW_NodeTree
         }
 
         /// <summary>
+        /// set all Verbs need regenerate
+        /// </summary>
+        public void ResetVerbs()
+        {
+            regiestedNodeVerbToolInfos.Clear();
+            regiestedNodeVerbPropertiesInfos.Clear();
+            foreach (ThingComp comp in parent.AllComps)
+            {
+                (comp as IVerbOwner)?.VerbTracker?.VerbsNeedReinitOnLoad();
+            }
+            (parent as IVerbOwner)?.VerbTracker?.VerbsNeedReinitOnLoad();
+        }
+
+        /// <summary>
         /// Rimworld Defined method, used for load and save game saves.
         /// </summary>
         public override void PostExposeData()

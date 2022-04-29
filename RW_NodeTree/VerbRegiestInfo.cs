@@ -7,7 +7,7 @@ using Verse;
 
 namespace RW_NodeTree
 {
-    public class VerbToolRegiestInfo
+    public struct VerbToolRegiestInfo
     {
         public VerbToolRegiestInfo(string id, Tool berforConvertTool, Tool afterCobvertTool)
         {
@@ -16,16 +16,18 @@ namespace RW_NodeTree
             this.afterCobvertTool = afterCobvertTool;
         }
 
+        public bool Vaildity => berforConvertTool != null && afterCobvertTool != null;
+
         public override string ToString()
         {
             return $"id={id}; berforConvertTool={berforConvertTool}; afterCobvertTool={afterCobvertTool}";
         }
 
-        public readonly string id;
-        public readonly Tool berforConvertTool, afterCobvertTool;
+        public string id;
+        public Tool berforConvertTool, afterCobvertTool;
     }
 
-    public class VerbPropertiesRegiestInfo
+    public struct VerbPropertiesRegiestInfo
     {
         public VerbPropertiesRegiestInfo(string id, VerbProperties berforConvertProperties, VerbProperties afterConvertProperties)
         {
@@ -33,13 +35,14 @@ namespace RW_NodeTree
             this.berforConvertProperties = berforConvertProperties;
             this.afterConvertProperties = afterConvertProperties;
         }
+        public bool Vaildity => berforConvertProperties != null && afterConvertProperties != null;
 
         public override string ToString()
         {
             return $"id={id}; berforConvertProperties={berforConvertProperties}; afterConvertProperties={afterConvertProperties}";
         }
 
-        public readonly string id;
-        public readonly VerbProperties berforConvertProperties, afterConvertProperties;
+        public string id;
+        public VerbProperties berforConvertProperties,afterConvertProperties;
     }
 }

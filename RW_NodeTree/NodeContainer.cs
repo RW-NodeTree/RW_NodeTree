@@ -97,8 +97,6 @@ namespace RW_NodeTree
             {
                 CompChildNodeProccesser proccess = this.Comp;
                 if (actionNode == null) actionNode = proccess;
-                proccess.regiestedNodeVerbToolInfos.Clear();
-                proccess.regiestedNodeVerbPropertiesInfos.Clear();
                 foreach (Thing node in this)
                 {
                     StopEventBubble = (((CompChildNodeProccesser)node)?.UpdateNode(actionNode) ?? false) || StopEventBubble;
@@ -110,12 +108,8 @@ namespace RW_NodeTree
                         StopEventBubble = comp.internal_UpdateNode(actionNode) || StopEventBubble;
                     }
                 }
-                foreach(ThingComp comp in proccess.parent.AllComps)
-                {
-                    (comp as IVerbOwner)?.VerbTracker?.VerbsNeedReinitOnLoad();
-                }
-                (proccess.parent as IVerbOwner)?.VerbTracker?.VerbsNeedReinitOnLoad();
-                proccess.ResetRenderedTexture();
+                proccess?.ResetVerbs();
+                proccess?.ResetRenderedTexture();
                 NeedUpdate = false;
             }
             return StopEventBubble;

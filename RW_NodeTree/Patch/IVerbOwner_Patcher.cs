@@ -150,21 +150,32 @@ namespace RW_NodeTree
         {
             if (ownerType != null && typeof(IVerbOwner).IsAssignableFrom(ownerType))
             {
-                List<VerbPropertiesRegiestInfo> verbPropertiesRegiestInfo = new List<VerbPropertiesRegiestInfo>(verbProperties.Count);
-                foreach (VerbProperties verbProperty in verbProperties)
+                List<VerbPropertiesRegiestInfo> verbPropertiesRegiestInfo;
+                if (!regiestedNodeVerbPropertiesInfos.TryGetValue(ownerType, out verbPropertiesRegiestInfo))
                 {
-                    verbPropertiesRegiestInfo.Add(new VerbPropertiesRegiestInfo(null, verbProperty, verbProperty));
-                }
-                foreach (CompBasicNodeComp comp in AllNodeComp)
-                {
-                    verbPropertiesRegiestInfo = comp.internal_PostIVerbOwner_GetVerbProperties(ownerType, verbPropertiesRegiestInfo, forPostRead) ?? verbPropertiesRegiestInfo;
+                    verbPropertiesRegiestInfo = new List<VerbPropertiesRegiestInfo>(verbProperties.Count);
+                    foreach (VerbProperties verbProperty in verbProperties)
+                    {
+                        verbPropertiesRegiestInfo.Add(new VerbPropertiesRegiestInfo(null, verbProperty, verbProperty));
+                    }
+                    foreach (CompBasicNodeComp comp in AllNodeComp)
+                    {
+                        verbPropertiesRegiestInfo = comp.internal_PostIVerbOwner_GetVerbProperties(ownerType, verbPropertiesRegiestInfo, forPostRead) ?? verbPropertiesRegiestInfo;
+                    }
+                    for (int i = verbPropertiesRegiestInfo.Count - 1; i >= 0; i--)
+                    {
+                        if (!verbPropertiesRegiestInfo[i].Vaildity)
+                        {
+                            verbPropertiesRegiestInfo.RemoveAt(i);
+                        }
+                    }
+                    regiestedNodeVerbPropertiesInfos.Add(ownerType, verbPropertiesRegiestInfo);
                 }
                 verbProperties = new List<VerbProperties>(verbPropertiesRegiestInfo.Count);
                 foreach(VerbPropertiesRegiestInfo regiestInfo in verbPropertiesRegiestInfo)
                 {
                     verbProperties.Add(regiestInfo.afterConvertProperties);
                 }
-                regiestedNodeVerbPropertiesInfos.SetOrAdd(ownerType, verbPropertiesRegiestInfo);
             }
             return verbProperties;
         }
@@ -179,21 +190,32 @@ namespace RW_NodeTree
         {
             if (ownerType != null && typeof(IVerbOwner).IsAssignableFrom(ownerType))
             {
-                List<VerbToolRegiestInfo> verbToolRegiestInfo = new List<VerbToolRegiestInfo>(tools.Count);
-                foreach (Tool tool in tools)
+                List<VerbToolRegiestInfo> verbToolRegiestInfo;
+                if (!regiestedNodeVerbToolInfos.TryGetValue(ownerType,out verbToolRegiestInfo))
                 {
-                    verbToolRegiestInfo.Add(new VerbToolRegiestInfo(null, tool, tool));
-                }
-                foreach (CompBasicNodeComp comp in AllNodeComp)
-                {
-                    verbToolRegiestInfo = comp.internal_PostIVerbOwner_GetTools(ownerType, verbToolRegiestInfo, forPostRead) ?? verbToolRegiestInfo;
+                    verbToolRegiestInfo = new List<VerbToolRegiestInfo>(tools.Count);
+                    foreach (Tool tool in tools)
+                    {
+                        verbToolRegiestInfo.Add(new VerbToolRegiestInfo(null, tool, tool));
+                    }
+                    foreach (CompBasicNodeComp comp in AllNodeComp)
+                    {
+                        verbToolRegiestInfo = comp.internal_PostIVerbOwner_GetTools(ownerType, verbToolRegiestInfo, forPostRead) ?? verbToolRegiestInfo;
+                    }
+                    for (int i = verbToolRegiestInfo.Count - 1; i >= 0; i--)
+                    {
+                        if (!verbToolRegiestInfo[i].Vaildity)
+                        {
+                            verbToolRegiestInfo.RemoveAt(i);
+                        }
+                    }
+                    regiestedNodeVerbToolInfos.Add(ownerType, verbToolRegiestInfo);
                 }
                 tools = new List<Tool>(verbToolRegiestInfo.Count);
                 foreach (VerbToolRegiestInfo regiestInfo in verbToolRegiestInfo)
                 {
                     tools.Add(regiestInfo.afterCobvertTool);
                 }
-                regiestedNodeVerbToolInfos.SetOrAdd(ownerType, verbToolRegiestInfo);
             }
             return tools;
         }
