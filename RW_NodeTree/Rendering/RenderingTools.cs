@@ -261,7 +261,7 @@ namespace RW_NodeTree.Rendering
                     vert3d = center + extents;
                     vert4d = matrix * new Vector4(vert3d.x, vert3d.y, vert3d.z, 1);
                     result.x = (int)Math.Ceiling(Math.Max(result.x, Math.Abs(vert4d.x) * TowTimesTextureSizeFactor));
-                    result.y = (int)Math.Ceiling(Math.Max(result.y, Math.Abs(vert4d.z) * TowTimesTextureSizeFactor));
+                    result.y = (int)Math.Ceiling(Math.Max(result.y, Math.Abs(vert4d.y) * TowTimesTextureSizeFactor));
 
                     //( 1, 1,-1)
                     extents.x *= -1;
