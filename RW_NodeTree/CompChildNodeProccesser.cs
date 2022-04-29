@@ -462,7 +462,6 @@ namespace RW_NodeTree
                 }
                 catch (Exception ex)
                 {
-                    RenderingTools.StartOrEndDrawCatchingBlock = false;
                     Log.Error(ex.ToString());
                 }
                 RenderingTools.StartOrEndDrawCatchingBlock = false;
@@ -486,7 +485,6 @@ namespace RW_NodeTree
                 }
                 catch (Exception ex)
                 {
-                    RenderingTools.StartOrEndDrawCatchingBlock = false;
                     Log.Error(ex.ToString());
                 }
                 RenderingTools.StartOrEndDrawCatchingBlock = false;
@@ -503,9 +501,7 @@ namespace RW_NodeTree
                 final.AddRange(infos.Item3);
             }
 
-            RenderTexture cachedRenderTarget = null;
-            RenderingTools.RenderToTarget(final, ref cachedRenderTarget, ref textures[rot_int], TextureSizeFactor: Props.TextureSizeFactor);
-            GameObject.Destroy(cachedRenderTarget);
+            RenderingTools.RenderToTarget(final, ref cachedRenderTargets[rot_int], ref textures[rot_int], default(Vector2Int), Props.TextureSizeFactor, Props.ExceedanceFactor, Props.ExceedanceOffset);
 
 
             Shader shader = subGraphic.Shader;
@@ -612,6 +608,8 @@ namespace RW_NodeTree
 
         private Texture2D[] textures = new Texture2D[4];
 
+        private RenderTexture[] cachedRenderTargets = new RenderTexture[4];
+
         private Material[] materials = new Material[4];
 
         private byte IsRandereds = 0;
@@ -641,6 +639,8 @@ namespace RW_NodeTree
             base.compClass = typeof(CompChildNodeProccesser);
         }
 
+        public float ExceedanceFactor = 1f;
+        public float ExceedanceOffset = 1f;
         public int TextureSizeFactor = (int)RenderingTools.DefaultTextureSizeFactor;
         public FilterMode TextureFilterMode = FilterMode.Bilinear;
     }

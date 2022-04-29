@@ -32,6 +32,8 @@
       <li Class="RW_NodeTree.CompProperties_ChildNodeProccesser">
         <TextureSizeFactor>256</TextureSizeFactor>
         <TextureFilterMode>Bilinear</TextureFilterMode>
+		<ExceedanceFactor>2</ExceedanceFactor>
+		<ExceedanceOffset>1</ExceedanceOffset>
       </li>
       <li Class="RW_NodeTree.NodeComponent.CompProperties_Test">
         <thingDefs>
