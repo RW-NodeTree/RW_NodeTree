@@ -116,6 +116,8 @@ namespace RW_NodeTree.Rendering
             }
         }
 
+
+
         /// <summary>
         /// Render a perview texture by infos
         /// </summary>
@@ -124,9 +126,45 @@ namespace RW_NodeTree.Rendering
         /// <param name="target"></param>
         /// <param name="size">force render texture size</param>
         /// <param name="TextureSizeFactor"></param>
-        /// <returns></returns>
-        public static void RenderToTarget(List<RenderInfo> infos,ref RenderTexture cachedRenderTarget, ref Texture2D target, Vector2Int size = default(Vector2Int), int TextureSizeFactor = (int)DefaultTextureSizeFactor, float ExceedanceFactor = 1f, float ExceedanceOffset = 1f)
+        public static void RenderToTarget(List<RenderInfo> infos, ref RenderTexture cachedRenderTarget, ref Texture2D target, Vector2Int size = default(Vector2Int), int TextureSizeFactor = (int)DefaultTextureSizeFactor, float ExceedanceFactor = 1f, float ExceedanceOffset = 1f)
         {
+            RenderToTarget(infos, ref cachedRenderTarget, size, TextureSizeFactor, ExceedanceFactor, ExceedanceOffset);
+            if (target == null || target.width != cachedRenderTarget.width || target.height != cachedRenderTarget.height)
+            {
+                if (target != null) GameObject.Destroy(target);
+                target = new Texture2D(cachedRenderTarget.width, cachedRenderTarget.height, TextureFormat.ARGB32, false);
+            }
+            //Camera.targetTexture = null;
+            Graphics.CopyTexture(cachedRenderTarget, target);
+            //GameObject.Destroy(cachedRenderTarget);
+            //RenderTexture cache = RenderTexture.active;
+            //RenderTexture.active = render;
+
+            //tex.ReadPixels(new Rect(0, 0, render.width, render.height), 0, 0);
+            //tex.Apply();
+
+            //RenderTexture.active = cache;
+        }
+
+
+        /// <summary>
+        /// Render a perview texture by infos
+        /// </summary>
+        /// <param name="infos">all arranged render infos</param>
+        /// <param name="cachedRenderTarget"></param>
+        /// <param name="size">force render texture size</param>
+        /// <param name="TextureSizeFactor"></param>
+        public static void RenderToTarget(List<RenderInfo> infos, ref RenderTexture cachedRenderTarget, Vector2Int size = default(Vector2Int), int TextureSizeFactor = (int)DefaultTextureSizeFactor, float ExceedanceFactor = 1f, float ExceedanceOffset = 1f)
+        {
+            for (int i = 0; i < infos.Count; i++)
+            {
+                RenderInfo info = infos[i];
+                for (int j = 0; j < info.matrices.Length; ++j)
+                {
+                    info.matrices[j].m13 += RenderingTools.CanvasHeight;
+                }
+            }
+
             if (size.x <= 0 || size.y <= 0)
             {
                 size = DrawSize(infos, TextureSizeFactor);
@@ -139,27 +177,23 @@ namespace RW_NodeTree.Rendering
 
             Camera.Render();
             //if (Prefs.DevMode) Log.Message("RenderToTarget size:" + size);
-            if(target != null)
+            //Debug.Log("RenderToTarget size:" + size);
+            if (cachedRenderTarget != null)
             {
-                if (target.width <= MaxTexSize &&
-                    target.width <= size.x * ExceedanceFactor + TextureSizeFactor * ExceedanceOffset &&
-                    target.width >= size.x
+                if (cachedRenderTarget.width <= MaxTexSize &&
+                    cachedRenderTarget.width <= size.x * ExceedanceFactor + TextureSizeFactor * ExceedanceOffset &&
+                    cachedRenderTarget.width >= size.x
                     )
                 {
-                    size.x = target.width;
+                    size.x = cachedRenderTarget.width;
                 }
-                if (target.height <= MaxTexSize &&
-                    target.height <= size.y * ExceedanceFactor + TextureSizeFactor * ExceedanceOffset &&
-                    target.height >= size.y
+                if (cachedRenderTarget.height <= MaxTexSize &&
+                    cachedRenderTarget.height <= size.y * ExceedanceFactor + TextureSizeFactor * ExceedanceOffset &&
+                    cachedRenderTarget.height >= size.y
                     )
                 {
-                    size.y = target.height;
+                    size.y = cachedRenderTarget.height;
                 }
-            }
-            if (target == null || target.width != size.x || target.height != size.y)
-            {
-                if (target != null) GameObject.Destroy(target);
-                target = new Texture2D(size.x, size.y, TextureFormat.ARGB32, false);
             }
             if (cachedRenderTarget == null || cachedRenderTarget.width != size.x || cachedRenderTarget.height != size.y)
             {
@@ -171,25 +205,10 @@ namespace RW_NodeTree.Rendering
             Camera.orthographicSize = size.y / (float)(TextureSizeFactor << 1);
             for (int i = 0; i < infos.Count; i++)
             {
-                RenderInfo info = infos[i];
-                for (int j = 0; j < info.matrices.Length; ++j)
-                {
-                    info.matrices[j].m13 += RenderingTools.CanvasHeight;
-                }
-                info.DrawInfo(Camera);
+                infos[i].DrawInfo(Camera);
             }
             Camera.Render();
             Camera.targetTexture = empty;
-            //Camera.targetTexture = null;
-            Graphics.CopyTexture(cachedRenderTarget, target);
-            //GameObject.Destroy(cachedRenderTarget);
-            //RenderTexture cache = RenderTexture.active;
-            //RenderTexture.active = render;
-
-            //tex.ReadPixels(new Rect(0, 0, render.width, render.height), 0, 0);
-            //tex.Apply();
-
-            //RenderTexture.active = cache;
         }
 
         /// <summary>
@@ -203,7 +222,7 @@ namespace RW_NodeTree.Rendering
             Matrix4x4 camearMatrix = Camera.transform.worldToLocalMatrix;
             Vector2Int result = default(Vector2Int);
             float TowTimesTextureSizeFactor = TextureSizeFactor << 1;
-            camearMatrix.m13 += CanvasHeight;
+            //camearMatrix.m13 += CanvasHeight;
             foreach (RenderInfo info in infos)
             {
                 Bounds bounds = info.mesh.bounds;
