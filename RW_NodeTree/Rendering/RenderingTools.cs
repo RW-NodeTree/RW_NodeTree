@@ -203,6 +203,7 @@ namespace RW_NodeTree.Rendering
             Matrix4x4 camearMatrix = Camera.transform.worldToLocalMatrix;
             Vector2Int result = default(Vector2Int);
             float TowTimesTextureSizeFactor = TextureSizeFactor << 1;
+            camearMatrix.m13 += CanvasHeight;
             foreach (RenderInfo info in infos)
             {
                 Bounds bounds = info.mesh.bounds;
