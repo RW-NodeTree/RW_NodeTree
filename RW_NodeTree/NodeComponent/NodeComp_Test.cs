@@ -74,7 +74,8 @@ namespace RW_NodeTree.NodeComponent
                             cache = info.matrices[k].GetRow(2);
                             info.matrices[k].SetRow(2, new Vector4(0, 0, new Vector3(cache.x, cache.y, cache.z).magnitude, cache.w));
                         }
-
+                        info.CanUseFastDrawingMode = true;
+                        infos[j] = info;
                         //Log.Message(ids[i] + " info :\n" + info);
                     }
                 }

@@ -117,6 +117,26 @@ namespace RW_NodeTree.Rendering
             this.DrawMeshInstanced = DrawMeshInstanced;
         }
 
+        public bool CanUseFastDrawingMode
+        {
+            get
+            {
+                return properties == null && probeAnchor == null && lightProbeProxyVolume == null && castShadows == ShadowCastingMode.Off && lightProbeUsage == LightProbeUsage.Off && !receiveShadows;
+            }
+            set
+            {
+                if (value)
+                {
+                    properties = null;
+                    probeAnchor = null;
+                    lightProbeProxyVolume = null;
+                    castShadows = ShadowCastingMode.Off;
+                    lightProbeUsage = LightProbeUsage.Off;
+                    receiveShadows = false;
+                }
+            }
+        }
+
         public override string ToString()
         {
             string str = base.ToString() + " :\n[\n\tmesh : " + mesh + ",\n\tsubmeshIndex : " + submeshIndex + ",\n\tmatrices :\n\t";
@@ -155,6 +175,37 @@ namespace RW_NodeTree.Rendering
             else
             {
                 Graphics.DrawMeshInstanced(mesh, submeshIndex, material, matrices, count, properties, castShadows, receiveShadows, layer, camera, lightProbeUsage, lightProbeProxyVolume);
+            }
+        }
+
+        public void DrawInfoFast(RenderTexture target, Matrix4x4 ProjectionMatrix, Color backgroundColor, bool clearDepth, bool clearColor)
+        {
+            if (target != null && CanUseFastDrawingMode)
+            {
+                RenderTexture backUp = RenderTexture.active;
+                int passCount = material.passCount;
+
+                RenderTexture.active = target;
+
+                GL.PushMatrix();
+
+                Camera camera = Camera.current;
+                GL.LoadProjectionMatrix(ProjectionMatrix * (camera != null ? camera.cameraToWorldMatrix : Matrix4x4.identity));
+                GL.Clear(clearDepth, clearColor, backgroundColor);
+
+                //GL.LoadIdentity();
+                for (int i = 0; i < matrices.Length && i < count; ++i)
+                {
+                    for (int j = 0; j < passCount; ++j)
+                    {
+                        material.SetPass(j);
+                        Graphics.DrawMeshNow(mesh, matrices[i], submeshIndex);
+                    }
+                }
+
+                GL.PopMatrix();
+                RenderTexture.active = backUp;
+
             }
         }
     }

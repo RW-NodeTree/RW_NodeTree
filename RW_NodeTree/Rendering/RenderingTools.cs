@@ -48,6 +48,20 @@ namespace RW_NodeTree.Rendering
         }
 
 
+        public static Color BackgroundColor
+        {
+            get => Camera.backgroundColor;
+            set => Camera.backgroundColor = value;
+        }
+
+
+        public static bool AutoClear
+        {
+            get => Camera.clearFlags < CameraClearFlags.Nothing;
+            set => Camera.clearFlags = value ? CameraClearFlags.SolidColor : CameraClearFlags.Nothing;
+        }
+
+
         /// <summary>
         /// getter: if there has any block,it will return true;setter:for setting block start or end
         /// </summary>
@@ -136,6 +150,7 @@ namespace RW_NodeTree.Rendering
             }
             //Camera.targetTexture = null;
             Graphics.CopyTexture(cachedRenderTarget, target);
+            //target.Apply();
             //GameObject.Destroy(cachedRenderTarget);
             //RenderTexture cache = RenderTexture.active;
             //RenderTexture.active = render;
@@ -175,40 +190,60 @@ namespace RW_NodeTree.Rendering
                 size.y = Mathf.Clamp(size.y, 1, MaxTexSize);
             }
 
-            Camera.Render();
+            size = CheckAndResizeRenderTexture(ref cachedRenderTarget, size, TextureSizeFactor, ExceedanceFactor, ExceedanceOffset);
+
             //if (Prefs.DevMode) Log.Message("RenderToTarget size:" + size);
             //Debug.Log("RenderToTarget size:" + size);
-            if (cachedRenderTarget != null)
-            {
-                if (cachedRenderTarget.width <= MaxTexSize &&
-                    cachedRenderTarget.width <= size.x * ExceedanceFactor + TextureSizeFactor * ExceedanceOffset &&
-                    cachedRenderTarget.width >= size.x
-                    )
-                {
-                    size.x = cachedRenderTarget.width;
-                }
-                if (cachedRenderTarget.height <= MaxTexSize &&
-                    cachedRenderTarget.height <= size.y * ExceedanceFactor + TextureSizeFactor * ExceedanceOffset &&
-                    cachedRenderTarget.height >= size.y
-                    )
-                {
-                    size.y = cachedRenderTarget.height;
-                }
-            }
-            if (cachedRenderTarget == null || cachedRenderTarget.width != size.x || cachedRenderTarget.height != size.y)
-            {
-                if (cachedRenderTarget != null) GameObject.Destroy(cachedRenderTarget);
-                cachedRenderTarget = new RenderTexture(size.x, size.y, 16, RenderTextureFormat.ARGB32);
-            }
 
             Camera.targetTexture = cachedRenderTarget;
             Camera.orthographicSize = size.y / (float)(TextureSizeFactor << 1);
-            for (int i = 0; i < infos.Count; i++)
+            if(CanUseFastDraw(infos))
             {
-                infos[i].DrawInfo(Camera);
+                bool clear = AutoClear;
+                for (int i = 0; i < infos.Count; i++)
+                {
+                    infos[i].DrawInfoFast(cachedRenderTarget, Camera.projectionMatrix * Camera.worldToCameraMatrix, BackgroundColor, clear, clear);
+                    clear = false;
+                }
             }
-            Camera.Render();
+            else
+            {
+                //Camera.Render();
+                for (int i = 0; i < infos.Count; i++)
+                {
+                    infos[i].DrawInfo(Camera);
+                }
+                Camera.Render();
+            }
             Camera.targetTexture = empty;
+        }
+
+
+        public static Vector2Int CheckAndResizeRenderTexture(ref RenderTexture renderTexture, Vector2Int size, int TextureSizeFactor = (int)DefaultTextureSizeFactor, float ExceedanceFactor = 1f, float ExceedanceOffset = 1f)
+        {
+            if (renderTexture != null)
+            {
+                if (renderTexture.width <= MaxTexSize &&
+                    renderTexture.width <= size.x * ExceedanceFactor + TextureSizeFactor * ExceedanceOffset &&
+                    renderTexture.width >= size.x
+                    )
+                {
+                    size.x = renderTexture.width;
+                }
+                if (renderTexture.height <= MaxTexSize &&
+                    renderTexture.height <= size.y * ExceedanceFactor + TextureSizeFactor * ExceedanceOffset &&
+                    renderTexture.height >= size.y
+                    )
+                {
+                    size.y = renderTexture.height;
+                }
+            }
+            if (renderTexture == null || renderTexture.width != size.x || renderTexture.height != size.y)
+            {
+                if (renderTexture != null) GameObject.Destroy(renderTexture);
+                renderTexture = new RenderTexture(size.x, size.y, 16, RenderTextureFormat.ARGB32);
+            }
+            return size;
         }
 
         /// <summary>
@@ -296,6 +331,16 @@ namespace RW_NodeTree.Rendering
                 }
             }
             return result;
+        }
+
+
+        public static bool CanUseFastDraw(List<RenderInfo> infos)
+        {
+            foreach (var info in infos)
+            {
+                if (!info.CanUseFastDrawingMode) return false;
+            }
+            return true;
         }
 
         private static Dictionary<int, LinkStack<List<RenderInfo>>> renderInfos = new Dictionary<int, LinkStack<List<RenderInfo>>>();
