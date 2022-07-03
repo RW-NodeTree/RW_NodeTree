@@ -194,12 +194,12 @@ namespace RW_NodeTree.Rendering
                 GL.Clear(clearDepth, clearColor, backgroundColor);
 
                 //GL.LoadIdentity();
-                for (int i = 0; i < matrices.Length && i < count; ++i)
+                for (int i = 0; i < passCount; ++i)
                 {
-                    for (int j = 0; j < passCount; ++j)
+                    material.SetPass(i);
+                    for (int j = 0; j < matrices.Length && j < count; ++j)
                     {
-                        material.SetPass(j);
-                        Graphics.DrawMeshNow(mesh, matrices[i], submeshIndex);
+                        Graphics.DrawMeshNow(mesh, matrices[j], submeshIndex);
                     }
                 }
 
