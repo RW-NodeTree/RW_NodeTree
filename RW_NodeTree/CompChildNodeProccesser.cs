@@ -48,7 +48,7 @@ namespace RW_NodeTree
         /// <summary>
         /// root of this node tree
         /// </summary>
-        public Thing RootNode
+        public CompChildNodeProccesser RootNode
         {
             get
             {

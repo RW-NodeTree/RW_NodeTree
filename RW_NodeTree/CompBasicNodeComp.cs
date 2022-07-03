@@ -50,7 +50,7 @@ namespace RW_NodeTree
         /// <summary>
         /// root of this node tree
         /// </summary>
-        public Thing RootNode => NodeProccesser?.RootNode;
+        public CompChildNodeProccesser RootNode => NodeProccesser?.RootNode;
 
 
         /// <summary>
