@@ -27,7 +27,7 @@ namespace RW_NodeTree.NodeComponent
                 {
                     ThingDef def = Props.thingDefs[i];
                     Thing node = ThingMaker.MakeThing(def);
-                    proccesser.AppendChild(node,"Node_" + i);
+                    proccesser.AddOrSetChildById("Node_" + i,node);
                 }
             }
         }

@@ -17,9 +17,9 @@ namespace RW_NodeTree.Patch
             "GraphicColoredFor",
             typeof(Thing)
         )]
-        private static void PostGraphicData_GraphicColoredFor(GraphicData __instance, Thing t,ref Graphic __result)
+        private static void PostGraphicData_GraphicColoredFor(/**GraphicData __instance, **/Thing t,ref Graphic __result)
         {
-            __result = ((CompChildNodeProccesser)t)?.CreateGraphic_ChildNode(__result, __instance) ?? __result;
+            ((CompChildNodeProccesser)t)?.CreateGraphic_ChildNode(ref __result);
         }
 
     }
@@ -38,28 +38,21 @@ namespace RW_NodeTree
         /// create Graphic_ChildNode and insert into the Graphic nestification;
         /// </summary>
         /// <param name="OrgGraphic"></param>
-        /// <param name="data"></param>
         /// <returns></returns>
-        public Graphic CreateGraphic_ChildNode(Graphic OrgGraphic, GraphicData data)
+        internal void CreateGraphic_ChildNode(ref Graphic OrgGraphic)
         {
-            Graphic_Linked graphic_Linked = OrgGraphic as Graphic_Linked;
-            if (graphic_Linked != null)
+            if (OrgGraphic is Graphic_Linked graphic_Linked)
             {
-                OrgGraphic = Graphic_Linked_SubGraphic(graphic_Linked);
+                OrgGraphic = ref Graphic_Linked_SubGraphic(graphic_Linked);
             }
-            Graphic_RandomRotated graphic_RandomRotated = OrgGraphic as Graphic_RandomRotated;
-            if (graphic_RandomRotated != null)
+            if (OrgGraphic is Graphic_RandomRotated graphic_RandomRotated)
             {
-                OrgGraphic = Graphic_RandomRotated_SubGraphic(graphic_RandomRotated);
+                OrgGraphic = ref Graphic_RandomRotated_SubGraphic(graphic_RandomRotated);
             }
             OrgGraphic = new Graphic_ChildNode(this, OrgGraphic);
-            if (graphic_RandomRotated != null) OrgGraphic = new Graphic_RandomRotated(OrgGraphic, Graphic_RandomRotated_MaxAngle(graphic_RandomRotated));
-            if (data.Linked) OrgGraphic = GraphicUtility.WrapLinked(OrgGraphic, data.linkType);
-            return OrgGraphic;
         }
 
         private static AccessTools.FieldRef<Graphic_Linked, Graphic> Graphic_Linked_SubGraphic = AccessTools.FieldRefAccess<Graphic>(typeof(Graphic_Linked), "subGraphic");
         private static AccessTools.FieldRef<Graphic_RandomRotated, Graphic> Graphic_RandomRotated_SubGraphic = AccessTools.FieldRefAccess<Graphic>(typeof(Graphic_RandomRotated), "subGraphic");
-        private static AccessTools.FieldRef<Graphic_RandomRotated, float> Graphic_RandomRotated_MaxAngle = AccessTools.FieldRefAccess<float>(typeof(Graphic_RandomRotated), "maxAngle");
     }
 }

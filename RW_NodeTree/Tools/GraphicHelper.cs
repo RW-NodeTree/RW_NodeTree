@@ -21,10 +21,27 @@ namespace RW_NodeTree.Tools
         /// <returns>sub graphic</returns>
         public static Graphic subGraphic(this Graphic parent)
         {
-            FieldInfo fieldInfo = parent?.GetType().GetField("subGraphic", AccessTools.all);
-            if(fieldInfo != null)
+            if(parent != null)
             {
-                return fieldInfo.GetValue(parent) as Graphic;
+                Type type = parent.GetType();
+                AccessTools.FieldRef<Graphic, Graphic> subGraphic;
+                //FieldInfo subGraphic;
+                if (!TypeFieldInfos.TryGetValue(type, out subGraphic))
+                {
+                    try
+                    {
+                        subGraphic = AccessTools.FieldRefAccess<Graphic>(type, "subGraphic");
+                    }
+                    catch { }
+                    //subGraphic = parent?.GetType().GetField("subGraphic", AccessTools.all);
+                    TypeFieldInfos.Add(type, subGraphic);
+                }
+                //= parent?.GetType().GetField("subGraphic", AccessTools.all);
+                if (subGraphic != null)
+                {
+                    return subGraphic(parent);
+                    //return subGraphic.GetValue(parent) as Graphic;
+                }
             }
             return null;
         }
@@ -45,5 +62,8 @@ namespace RW_NodeTree.Tools
             //if (Prefs.DevMode) Log.Message(" parent = " + parent + " graphic = " + graphic);
             return graphic ?? parent;
         }
+
+        private static Dictionary<Type, AccessTools.FieldRef<Graphic, Graphic>> TypeFieldInfos = new Dictionary<Type, AccessTools.FieldRef<Graphic, Graphic>>();
+        //private static Dictionary<Type, FieldInfo> TypeFieldInfos = new Dictionary<Type, FieldInfo>();
     }
 }

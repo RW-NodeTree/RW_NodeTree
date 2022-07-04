@@ -411,7 +411,7 @@ namespace RW_NodeTree
         /// <param name="node"></param>
         /// <param name="id"></param>
         /// <returns></returns>
-        public bool AppendChild(Thing node, string id = null)
+        public bool AddOrSetChildById(string id, Thing node)
         {
             if(node != null)
             {
@@ -429,12 +429,27 @@ namespace RW_NodeTree
         }
 
         /// <summary>
+        /// Get Child By Id
+        /// </summary>
+        /// <param name="id">id</param>
+        /// <returns>child element</returns>
+        public Thing GetChildById(string id)
+        {
+            NodeContainer child = ChildNodes;
+            if (child != null)
+            {
+                return child[id];
+            }
+            return null;
+        }
+
+        /// <summary>
         /// Render all child things
         /// </summary>
         /// <param name="rot">rotate</param>
         /// <param name="subGraphic">orging Graphic of this</param>
         /// <returns>result of rendering</returns>
-        public Material ChildCombinedTexture(Rot4 rot, Graphic subGraphic = null)
+        public Material GetAndUpdateChildTexture(Rot4 rot, Graphic subGraphic = null)
         {
             int rot_int = rot.AsInt;
             if (((IsRandereds >> rot_int) & 1) == 1 && materials[rot_int] != null)
@@ -530,10 +545,10 @@ namespace RW_NodeTree
         }
 
 
-        public Vector2 DrawSize(Rot4 rot, Graphic subGraphic)
+        public Vector2 GetAndUpdateDrawSize(Rot4 rot, Graphic subGraphic = null)
         {
             int rot_int = rot.AsInt;
-            if (((IsRandereds >> rot_int) & 1) == 0 || textures[rot_int] == null) ChildCombinedTexture(rot, subGraphic);
+            if (((IsRandereds >> rot_int) & 1) == 0 || textures[rot_int] == null) GetAndUpdateChildTexture(rot, subGraphic);
             Vector2 result = new Vector2(textures[rot_int].width, textures[rot_int].height) / Props.TextureSizeFactor;
             //if (Prefs.DevMode) Log.Message(" DrawSize: thing=" + parent + "; Rot4=" + rot + "; textureWidth=" + textures[rot_int].width + "; result=" + result + ";\n");
             return result;

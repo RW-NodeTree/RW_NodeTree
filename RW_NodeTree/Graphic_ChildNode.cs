@@ -115,45 +115,41 @@ namespace RW_NodeTree
         public override Mesh MeshAt(Rot4 rot)
         {
             if (currentProccess == null) return SubGraphic?.MeshAt(rot);
-            UpdateDrawSize(currentProccess.DrawSize(rot, this));
+            UpdateDrawSize(currentProccess.GetAndUpdateDrawSize(rot, this));
             //if (Prefs.DevMode) Log.Message(" DrawSize: currentProccess=" + currentProccess + "; Rot4=" + rot + "; size=" + base.drawSize + ";\n");
             return base.MeshAt(rot);
         }
 
         public override Material MatAt(Rot4 rot, Thing thing = null)
         {
-            CompChildNodeProccesser comp_ChildNodeProccesser = thing;
-            if (thing == null) comp_ChildNodeProccesser = currentProccess;
-            if (comp_ChildNodeProccesser == null) return SubGraphic?.MatAt(rot, thing);
-            UpdateDrawSize(comp_ChildNodeProccesser.DrawSize(rot, this));
-            return comp_ChildNodeProccesser.ChildCombinedTexture(rot, this);
+            CompChildNodeProccesser comp_ChildNodeProccesser = ((CompChildNodeProccesser)thing) ?? currentProccess;
+            if (comp_ChildNodeProccesser != currentProccess) return SubGraphic?.MatAt(rot, thing);
+            UpdateDrawSize(comp_ChildNodeProccesser.GetAndUpdateDrawSize(rot, this));
+            return comp_ChildNodeProccesser.GetAndUpdateChildTexture(rot, this);
         }
 
         public override Material MatSingleFor(Thing thing)
         {
-            CompChildNodeProccesser comp_ChildNodeProccesser = thing;
-            if (thing == null) comp_ChildNodeProccesser = currentProccess;
-            if (comp_ChildNodeProccesser == null) return SubGraphic?.MatSingleFor(thing);
-            UpdateDrawSize(comp_ChildNodeProccesser.DrawSize(thing.Rotation, this));
-            return comp_ChildNodeProccesser.ChildCombinedTexture(thing.Rotation, this);
+            CompChildNodeProccesser comp_ChildNodeProccesser = ((CompChildNodeProccesser)thing) ?? currentProccess;
+            if (comp_ChildNodeProccesser != currentProccess) return SubGraphic?.MatSingleFor(thing);
+            UpdateDrawSize(comp_ChildNodeProccesser.GetAndUpdateDrawSize(thing.Rotation, this));
+            return comp_ChildNodeProccesser.GetAndUpdateChildTexture(thing.Rotation, this);
         }
 
         public override void DrawWorker(Vector3 loc, Rot4 rot, ThingDef thingDef, Thing thing, float extraRotation)
         {
-            CompChildNodeProccesser comp_ChildNodeProccesser = thing;
-            if (thing == null) comp_ChildNodeProccesser = currentProccess;
-            if (comp_ChildNodeProccesser == null) SubGraphic?.DrawWorker(loc, rot, thingDef, thing, extraRotation);
+            CompChildNodeProccesser comp_ChildNodeProccesser = ((CompChildNodeProccesser)thing) ?? currentProccess;
+            if (comp_ChildNodeProccesser != currentProccess) SubGraphic?.DrawWorker(loc, rot, thingDef, thing, extraRotation);
             else base.DrawWorker(loc, Rot4.North, thingDef, thing, extraRotation);
         }
 
         public override void Print(SectionLayer layer, Thing thing, float extraRotation)
         {
-            CompChildNodeProccesser comp_ChildNodeProccesser = thing;
-            if (thing == null) comp_ChildNodeProccesser = currentProccess;
-            if (comp_ChildNodeProccesser == null) SubGraphic?.Print(layer, thing, extraRotation);
+            CompChildNodeProccesser comp_ChildNodeProccesser = ((CompChildNodeProccesser)thing) ?? currentProccess;
+            if (comp_ChildNodeProccesser != currentProccess) SubGraphic?.Print(layer, thing, extraRotation);
             else
             {
-                UpdateDrawSize(comp_ChildNodeProccesser.DrawSize(thing.Rotation, this));
+                UpdateDrawSize(comp_ChildNodeProccesser.GetAndUpdateDrawSize(thing.Rotation, this));
                 base.Print(layer, thing, extraRotation);
             }
         }
@@ -162,18 +158,19 @@ namespace RW_NodeTree
         /// update all draw size of the parent graphic of this graphic and itself
         /// </summary>
         /// <param name="size">size for update</param>
-        public void UpdateDrawSize(Vector2 size)
+        private void UpdateDrawSize(Vector2 size)
         {
             Graphic graphic = currentProccess.parent.Graphic;
-            if (graphic.GetGraphic_ChildNode() == this)
+            //if (graphic.GetGraphic_ChildNode() == this)
+            if(this.drawSize != size)
             {
                 while (graphic != null && graphic != this)
                 {
                     graphic.drawSize = size;
                     graphic = graphic.subGraphic();
                 }
+                this.drawSize = size;
             }
-            this.drawSize = size;
         }
 
         private CompChildNodeProccesser currentProccess = null;
