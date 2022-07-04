@@ -14,21 +14,50 @@ namespace RW_NodeTree.Patch
     internal static partial class StatWorker_Patcher
     {
 
-        private readonly static MethodInfo _PreStatWorker_GetExplanationUnfinalized = typeof(StatWorker_Patcher).GetMethod("PreStatWorker_GetExplanationUnfinalized", BindingFlags.NonPublic | BindingFlags.Static);
-        private readonly static MethodInfo _PreStatWorker_GetExplanationFinalizePart = typeof(StatWorker_Patcher).GetMethod("PreStatWorker_GetExplanationFinalizePart", BindingFlags.NonPublic | BindingFlags.Static);
-        private readonly static MethodInfo _PostStatWorker_GetExplanationUnfinalized = typeof(StatWorker_Patcher).GetMethod("PostStatWorker_GetExplanationUnfinalized", BindingFlags.NonPublic | BindingFlags.Static);
-        private readonly static MethodInfo _PostStatWorker_GetExplanationFinalizePart = typeof(StatWorker_Patcher).GetMethod("PostStatWorker_GetExplanationFinalizePart", BindingFlags.NonPublic | BindingFlags.Static);
-        private readonly static Type[] StatWorker_GetExplanationUnfinalized_ParmsType = new Type[] { typeof(StatRequest), typeof(ToStringNumberSense) };
-        private readonly static Type[] StatWorker_GetExplanationFinalizePart_ParmsType = new Type[] { typeof(StatRequest), typeof(ToStringNumberSense), typeof(float) };
+        private static readonly MethodInfo _PreStatWorker_GetExplanationUnfinalized = typeof(StatWorker_Patcher).GetMethod("PreStatWorker_GetExplanationUnfinalized", BindingFlags.NonPublic | BindingFlags.Static);
+        private static readonly MethodInfo _PreStatWorker_GetExplanationFinalizePart = typeof(StatWorker_Patcher).GetMethod("PreStatWorker_GetExplanationFinalizePart", BindingFlags.NonPublic | BindingFlags.Static);
+        private static readonly MethodInfo _PostStatWorker_GetExplanationUnfinalized = typeof(StatWorker_Patcher).GetMethod("PostStatWorker_GetExplanationUnfinalized", BindingFlags.NonPublic | BindingFlags.Static);
+        private static readonly MethodInfo _PostStatWorker_GetExplanationFinalizePart = typeof(StatWorker_Patcher).GetMethod("PostStatWorker_GetExplanationFinalizePart", BindingFlags.NonPublic | BindingFlags.Static);
+        private static readonly Type[] StatWorker_GetExplanationUnfinalized_ParmsType = new Type[] { typeof(StatRequest), typeof(ToStringNumberSense) };
+        private static readonly Type[] StatWorker_GetExplanationFinalizePart_ParmsType = new Type[] { typeof(StatRequest), typeof(ToStringNumberSense), typeof(float) };
+
+        private static readonly Dictionary<Type, MethodInfo> MethodInfo_GetExplanationUnfinalized_OfType = new Dictionary<Type, MethodInfo>();
+        private static readonly Dictionary<Type, MethodInfo> MethodInfo_GetExplanationFinalizePart_OfType = new Dictionary<Type, MethodInfo>();
+
+        private static MethodInfo GetMethodInfo_GetExplanationUnfinalized_OfType(Type type)
+        {
+            MethodInfo result;
+            if (!MethodInfo_GetExplanationUnfinalized_OfType.TryGetValue(type, out result))
+            {
+                MethodInfo_GetExplanationUnfinalized_OfType.Add(type,
+                    result = type.GetMethod(
+                        "GetExplanationUnfinalized",
+                        StatWorker_GetExplanationUnfinalized_ParmsType
+                    )
+                );
+            }
+            return result;
+        }
+        private static MethodInfo GetMethodInfo_GetExplanationFinalizePart_OfType(Type type)
+        {
+            MethodInfo result;
+            if (!MethodInfo_GetExplanationFinalizePart_OfType.TryGetValue(type, out result))
+            {
+                MethodInfo_GetExplanationFinalizePart_OfType.Add(type,
+                    result = type.GetMethod(
+                        "GetExplanationFinalizePart",
+                        StatWorker_GetExplanationFinalizePart_ParmsType
+                    )
+                );
+            }
+            return result;
+        }
 
         private static void PreStatWorker_GetExplanationUnfinalized(StatWorker __instance, MethodInfo __originalMethod, StatRequest req, ToStringNumberSense numberSense, ref Dictionary<string, object> __state)
         {
             if (__originalMethod.DeclaringType
                 ==
-                __instance.GetType().GetMethod(
-                    "GetExplanationUnfinalized",
-                    StatWorker_GetExplanationUnfinalized_ParmsType
-                ).DeclaringType
+                GetMethodInfo_GetExplanationUnfinalized_OfType(__instance.GetType()).DeclaringType
             )
             {
                 __state = new Dictionary<string, object>();
@@ -39,10 +68,7 @@ namespace RW_NodeTree.Patch
         {
             if (__originalMethod.DeclaringType
                 ==
-                __instance.GetType().GetMethod(
-                    "GetExplanationFinalizePart",
-                    StatWorker_GetExplanationFinalizePart_ParmsType
-                ).DeclaringType
+                GetMethodInfo_GetExplanationFinalizePart_OfType(__instance.GetType()).DeclaringType
             )
             {
                 __state = new Dictionary<string, object>();
@@ -53,10 +79,7 @@ namespace RW_NodeTree.Patch
         {
             if (__originalMethod.DeclaringType
                 ==
-                __instance.GetType().GetMethod(
-                    "GetExplanationUnfinalized",
-                    StatWorker_GetExplanationUnfinalized_ParmsType
-                ).DeclaringType
+                GetMethodInfo_GetExplanationUnfinalized_OfType(__instance.GetType()).DeclaringType
             )
             {
                 __result = ((CompChildNodeProccesser)req.Thing)?.PostStatWorker_GetExplanationUnfinalized(__instance, req, numberSense, __result, __state) ?? __result;
@@ -66,10 +89,7 @@ namespace RW_NodeTree.Patch
         {
             if (__originalMethod.DeclaringType
                 ==
-                __instance.GetType().GetMethod(
-                    "GetExplanationFinalizePart",
-                    StatWorker_GetExplanationFinalizePart_ParmsType
-                ).DeclaringType
+                GetMethodInfo_GetExplanationFinalizePart_OfType(__instance.GetType()).DeclaringType
             )
             {
                 __result = ((CompChildNodeProccesser)req.Thing)?.PostStatWorker_GetExplanationFinalizePart(__instance, req, numberSense, finalVal, __result, __state) ?? __result;
@@ -80,19 +100,13 @@ namespace RW_NodeTree.Patch
         {
             if (typeof(StatWorker).IsAssignableFrom(type))
             {
-                MethodInfo _GetExplanationUnfinalized = type.GetMethod(
-                    "GetExplanationUnfinalized",
-                    StatWorker_GetExplanationUnfinalized_ParmsType
-                );
+                MethodInfo _GetExplanationUnfinalized = GetMethodInfo_GetExplanationUnfinalized_OfType(type);
                 if (_GetExplanationUnfinalized?.DeclaringType == type && _GetExplanationUnfinalized.HasMethodBody())
                 {
                     patcher.Patch(_GetExplanationUnfinalized, new HarmonyMethod(_PreStatWorker_GetExplanationUnfinalized), new HarmonyMethod(_PostStatWorker_GetExplanationUnfinalized));
                     //if (Prefs.DevMode) Log.Message(type + "::" + _GetExplanationUnfinalized + " PatchSuccess\n");
                 }
-                MethodInfo _GetExplanationFinalizePart = type.GetMethod(
-                    "GetExplanationFinalizePart",
-                    StatWorker_GetExplanationFinalizePart_ParmsType
-                );
+                MethodInfo _GetExplanationFinalizePart = GetMethodInfo_GetExplanationFinalizePart_OfType(type);
                 if (_GetExplanationFinalizePart?.DeclaringType == type && _GetExplanationFinalizePart.HasMethodBody())
                 {
                     patcher.Patch(_GetExplanationFinalizePart, new HarmonyMethod(_PreStatWorker_GetExplanationFinalizePart), new HarmonyMethod(_PostStatWorker_GetExplanationFinalizePart));

@@ -63,7 +63,7 @@ namespace RW_NodeTree.Tools
             return graphic ?? parent;
         }
 
-        private static Dictionary<Type, AccessTools.FieldRef<Graphic, Graphic>> TypeFieldInfos = new Dictionary<Type, AccessTools.FieldRef<Graphic, Graphic>>();
+        private static readonly Dictionary<Type, AccessTools.FieldRef<Graphic, Graphic>> TypeFieldInfos = new Dictionary<Type, AccessTools.FieldRef<Graphic, Graphic>>();
         //private static Dictionary<Type, FieldInfo> TypeFieldInfos = new Dictionary<Type, FieldInfo>();
     }
 }

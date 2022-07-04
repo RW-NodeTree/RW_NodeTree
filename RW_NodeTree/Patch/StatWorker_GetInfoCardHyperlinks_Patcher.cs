@@ -13,20 +13,32 @@ namespace RW_NodeTree.Patch
 {
     internal static partial class StatWorker_Patcher
     {
-        private readonly static MethodInfo _PostStatWorker_GetInfoCardHyperlinks = typeof(StatWorker_Patcher).GetMethod("PostStatWorker_GetInfoCardHyperlinks", BindingFlags.NonPublic | BindingFlags.Static);
-        private readonly static Type[] StatWorker_GetInfoCardHyperlinks_ParmsType = new Type[] { typeof(StatRequest)};
+        private static readonly MethodInfo _PostStatWorker_GetInfoCardHyperlinks = typeof(StatWorker_Patcher).GetMethod("PostStatWorker_GetInfoCardHyperlinks", BindingFlags.NonPublic | BindingFlags.Static);
+        private static readonly Type[] StatWorker_GetInfoCardHyperlinks_ParmsType = new Type[] { typeof(StatRequest)};
+
+        private static readonly Dictionary<Type, MethodInfo> MethodInfo_GetInfoCardHyperlinks_OfType = new Dictionary<Type, MethodInfo>();
+
+        private static MethodInfo GetMethodInfo_GetInfoCardHyperlinks_OfType(Type type)
+        {
+            MethodInfo result;
+            if (!MethodInfo_GetInfoCardHyperlinks_OfType.TryGetValue(type, out result))
+            {
+                MethodInfo_GetInfoCardHyperlinks_OfType.Add(type,
+                    result = type.GetMethod(
+                        "GetInfoCardHyperlinks",
+                        StatWorker_GetInfoCardHyperlinks_ParmsType
+                    )
+                );
+            }
+            return result;
+        }
 
         private static void PostStatWorker_GetInfoCardHyperlinks(StatWorker __instance, MethodInfo __originalMethod, StatRequest statRequest, ref IEnumerable<Dialog_InfoCard.Hyperlink> __result)
         {
-
-            MethodInfo _GetInfoCardHyperlinks = __instance.GetType().GetMethod(
-                "GetInfoCardHyperlinks",
-                StatWorker_GetInfoCardHyperlinks_ParmsType
-            );
             //if (Prefs.DevMode) Log.Message("__originalMethod.GetType() : " + __originalMethod.GetType() + "; _GetInfoCardHyperlinks.GetType() : " + _GetInfoCardHyperlinks.GetType() + "; same : " + (_GetInfoCardHyperlinks == __originalMethod));
             if (__originalMethod.DeclaringType
                 ==
-                _GetInfoCardHyperlinks.DeclaringType
+                GetMethodInfo_GetInfoCardHyperlinks_OfType(__instance.GetType()).DeclaringType
             )
             __result = ((CompChildNodeProccesser)statRequest.Thing)?.PostStatWorker_GetInfoCardHyperlinks(__instance, statRequest, __result) ?? __result;
         }
@@ -35,10 +47,7 @@ namespace RW_NodeTree.Patch
         {
             if (typeof(StatWorker).IsAssignableFrom(type))
             {
-                MethodInfo _GetInfoCardHyperlinks = type.GetMethod(
-                    "GetInfoCardHyperlinks",
-                    StatWorker_GetInfoCardHyperlinks_ParmsType
-                );
+                MethodInfo _GetInfoCardHyperlinks = GetMethodInfo_GetInfoCardHyperlinks_OfType(type);
                 if (_GetInfoCardHyperlinks?.DeclaringType == type && _GetInfoCardHyperlinks.HasMethodBody())
                 {
                     patcher.Patch(_GetInfoCardHyperlinks, null, new HarmonyMethod(_PostStatWorker_GetInfoCardHyperlinks));

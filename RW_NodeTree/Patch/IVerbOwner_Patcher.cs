@@ -13,10 +13,38 @@ namespace RW_NodeTree.Patch
 {
     internal static partial class IVerbOwner_Patcher
     {
-        private readonly static MethodInfo _PreIVerbOwner_GetVerbProperties = typeof(IVerbOwner_Patcher).GetMethod("PreIVerbOwner_GetVerbProperties", BindingFlags.NonPublic | BindingFlags.Static);
-        private readonly static MethodInfo _PreIVerbOwner_GetTools = typeof(IVerbOwner_Patcher).GetMethod("PreIVerbOwner_GetTools", BindingFlags.NonPublic | BindingFlags.Static);
-        private readonly static MethodInfo _PostIVerbOwner_GetVerbProperties = typeof(IVerbOwner_Patcher).GetMethod("PostIVerbOwner_GetVerbProperties", BindingFlags.NonPublic | BindingFlags.Static);
-        private readonly static MethodInfo _PostIVerbOwner_GetTools = typeof(IVerbOwner_Patcher).GetMethod("PostIVerbOwner_GetTools", BindingFlags.NonPublic | BindingFlags.Static);
+        private static readonly MethodInfo _PreIVerbOwner_GetVerbProperties = typeof(IVerbOwner_Patcher).GetMethod("PreIVerbOwner_GetVerbProperties", BindingFlags.NonPublic | BindingFlags.Static);
+        private static readonly MethodInfo _PreIVerbOwner_GetTools = typeof(IVerbOwner_Patcher).GetMethod("PreIVerbOwner_GetTools", BindingFlags.NonPublic | BindingFlags.Static);
+        private static readonly MethodInfo _PostIVerbOwner_GetVerbProperties = typeof(IVerbOwner_Patcher).GetMethod("PostIVerbOwner_GetVerbProperties", BindingFlags.NonPublic | BindingFlags.Static);
+        private static readonly MethodInfo _PostIVerbOwner_GetTools = typeof(IVerbOwner_Patcher).GetMethod("PostIVerbOwner_GetTools", BindingFlags.NonPublic | BindingFlags.Static);
+
+        private static readonly Dictionary<Type, MethodInfo> MethodInfo_get_VerbProperties_OfType = new Dictionary<Type, MethodInfo>();
+        private static readonly Dictionary<Type, MethodInfo> MethodInfo_get_Tools_OfType = new Dictionary<Type, MethodInfo>();
+
+        private static MethodInfo GetMethodInfo_get_VerbProperties_OfType(Type type)
+        {
+            MethodInfo result;
+            if (!MethodInfo_get_VerbProperties_OfType.TryGetValue(type, out result))
+            {
+                MethodInfo_get_VerbProperties_OfType.Add(
+                    type,
+                    result = type.GetMethod("get_VerbProperties", BindingFlags.Public | BindingFlags.Instance)
+                );
+            }
+            return result;
+        }
+        private static MethodInfo GetMethodInfo_get_Tools_OfType(Type type)
+        {
+            MethodInfo result;
+            if (!MethodInfo_get_Tools_OfType.TryGetValue(type, out result))
+            {
+                MethodInfo_get_Tools_OfType.Add(
+                    type,
+                    result = type.GetMethod("get_Tools", BindingFlags.Public | BindingFlags.Instance)
+                );
+            }
+            return result;
+        }
 
 
 
@@ -25,7 +53,7 @@ namespace RW_NodeTree.Patch
             Type type = __instance.GetType();
             if (__originalMethod.DeclaringType
                 ==
-                type.GetMethod("get_VerbProperties", BindingFlags.Public | BindingFlags.Instance).DeclaringType
+                GetMethodInfo_get_VerbProperties_OfType(type).DeclaringType
             )
             {
                 __state = new Dictionary<string ,object>();
@@ -39,7 +67,7 @@ namespace RW_NodeTree.Patch
             Type type = __instance.GetType();
             if (__originalMethod.DeclaringType
                 ==
-                type.GetMethod("get_Tools", BindingFlags.Public | BindingFlags.Instance).DeclaringType
+                GetMethodInfo_get_Tools_OfType(type).DeclaringType
             )
             {
                 __state = new Dictionary<string, object>();
@@ -52,7 +80,7 @@ namespace RW_NodeTree.Patch
             Type type = __instance.GetType();
             if (__originalMethod.DeclaringType
                 ==
-                type.GetMethod("get_VerbProperties", BindingFlags.Public | BindingFlags.Instance).DeclaringType
+                GetMethodInfo_get_VerbProperties_OfType(type).DeclaringType
             )
             {
                 __result = (__result != null) ? new List<VerbProperties>(__result) : new List<VerbProperties>();
@@ -66,7 +94,7 @@ namespace RW_NodeTree.Patch
             Type type = __instance.GetType();
             if (__originalMethod.DeclaringType
                 ==
-                type.GetMethod("get_Tools", BindingFlags.Public | BindingFlags.Instance).DeclaringType
+                GetMethodInfo_get_Tools_OfType(type).DeclaringType
             )
             {
                 __result = (__result != null) ? new List<Tool>(__result) : new List<Tool>();
@@ -79,14 +107,14 @@ namespace RW_NodeTree.Patch
         {
             if (typeof(IVerbOwner).IsAssignableFrom(type))
             {
-                MethodInfo _get_VerbProperties = type.GetMethod("get_VerbProperties", BindingFlags.Public | BindingFlags.Instance);
+                MethodInfo _get_VerbProperties = GetMethodInfo_get_VerbProperties_OfType(type);
                 if (_get_VerbProperties?.DeclaringType == type && _get_VerbProperties.HasMethodBody())
                 {
                     patcher.Patch(_get_VerbProperties, new HarmonyMethod(_PreIVerbOwner_GetVerbProperties), new HarmonyMethod(_PostIVerbOwner_GetVerbProperties));
                     //if (Prefs.DevMode) Log.Message(type + "::" + _get_VerbProperties + " PatchSuccess\n");
                 }
 
-                MethodInfo _get_Tools = type.GetMethod("get_Tools", BindingFlags.Public | BindingFlags.Instance);
+                MethodInfo _get_Tools = GetMethodInfo_get_Tools_OfType(type);
                 if (_get_Tools?.DeclaringType == type && _get_Tools.HasMethodBody())
                 {
                     patcher.Patch(_get_Tools, new HarmonyMethod(_PreIVerbOwner_GetTools), new HarmonyMethod(_PostIVerbOwner_GetTools));
