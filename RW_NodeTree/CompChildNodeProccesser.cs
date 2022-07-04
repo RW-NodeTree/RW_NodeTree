@@ -632,7 +632,9 @@ namespace RW_NodeTree
         private Material[] materials = new Material[4];
 
         private byte IsRandereds = 0;
-        //a a b b b
+
+        public readonly Dictionary<string, object> dataset = new Dictionary<string, object>();
+
         public readonly Dictionary<Type, List<VerbToolRegiestInfo>> regiestedNodeVerbToolInfos = new Dictionary<Type, List<VerbToolRegiestInfo>>();
 
         public readonly Dictionary<Type, List<VerbPropertiesRegiestInfo>> regiestedNodeVerbPropertiesInfos = new Dictionary<Type, List<VerbPropertiesRegiestInfo>>();
