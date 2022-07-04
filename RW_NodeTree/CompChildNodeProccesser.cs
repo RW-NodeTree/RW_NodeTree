@@ -380,6 +380,7 @@ namespace RW_NodeTree
         public void ResetRenderedTexture()
         {
             IsRandereds = 0;
+            ParentProccesser?.ResetRenderedTexture();
         }
 
         /// <summary>
@@ -417,18 +418,10 @@ namespace RW_NodeTree
                 NodeContainer child = ChildNodes;
                 if (child != null)
                 {
-                    ThingOwner owner = node.holdingOwner;
-                    owner?.Remove(node);
-                    Thing nodeBefore = child[id];
                     child[id] = node;
                     if (child[id] == node)
                     {
                         return true;
-                    }
-                    else
-                    {
-                        owner?.TryAdd(node);
-                        child[id] = nodeBefore;
                     }
                 }
             }

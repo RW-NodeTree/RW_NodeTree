@@ -38,7 +38,7 @@ namespace RW_NodeTree
                         Remove(t);
                     }
                     innerIdList.Add(id);
-                    if (value == null || !TryAdd(value))
+                    if (value == null || (!TryAdd(value) && t != null && !TryAdd(t)))
                     {
                         innerIdList.RemoveAt(Count);
                     }
@@ -131,14 +131,22 @@ namespace RW_NodeTree
 
         public override bool TryAdd(Thing item, bool canMergeWithExistingStacks = true)
         {
-            Map map = item?.Map;
-            if (map != null) item.DeSpawn();
-            if (base.TryAdd(item, false))
+            ThingOwner owner = item.holdingOwner;
+            if(owner != this)
             {
-                NeedUpdate = true;
-                return true;
+                item.holdingOwner = null;
+                if (base.TryAdd(item, false))
+                {
+                    ThingOwner cache = item.holdingOwner;
+                    item.holdingOwner = owner;
+                    item.holdingOwner?.Remove(item);
+                    item.holdingOwner = cache;
+                    if (item.Spawned) item.DeSpawn();
+                    NeedUpdate = true;
+                    return true;
+                }
+                item.holdingOwner = owner;
             }
-            if (map != null) item.SpawnSetup(map, false);
             return false;
         }
 
