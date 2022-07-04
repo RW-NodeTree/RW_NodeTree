@@ -554,10 +554,7 @@ namespace RW_NodeTree
             return true;
         }
 
-        public bool UpdateNode(CompChildNodeProccesser actionNode = null)
-        {
-            return ChildNodes.UpdateNode(actionNode);
-        }
+        public bool UpdateNode() => ChildNodes.internal_UpdateNode();
 
         public void GetChildHolders(List<IThingHolder> outChildren)
         {

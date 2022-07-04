@@ -90,7 +90,7 @@ namespace RW_NodeTree
             Scribe_Collections.Look<string>(ref this.innerIdList, "innerIdList", LookMode.Value);
         }
 
-        public bool UpdateNode(CompChildNodeProccesser actionNode = null)
+        internal bool internal_UpdateNode(CompChildNodeProccesser actionNode = null)
         {
             bool StopEventBubble = false;
             if (NeedUpdate)
@@ -99,7 +99,7 @@ namespace RW_NodeTree
                 if (actionNode == null) actionNode = proccess;
                 foreach (Thing node in this)
                 {
-                    StopEventBubble = (((CompChildNodeProccesser)node)?.UpdateNode(actionNode) ?? false) || StopEventBubble;
+                    StopEventBubble = (((CompChildNodeProccesser)node)?.ChildNodes?.internal_UpdateNode(actionNode) ?? false) || StopEventBubble;
                 }
                 if(!StopEventBubble)
                 {
