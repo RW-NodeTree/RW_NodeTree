@@ -97,12 +97,24 @@ namespace RW_NodeTree
         /// Adapte draw steep of this node
         /// </summary>
         /// <param name="nodeRenderingInfos">Corresponding is</param>
-        protected virtual void AdapteDrawSteep(ref List<(Thing, string, List<RenderInfo>)> nodeRenderingInfos)
+        protected virtual List<(Thing, string, List<RenderInfo>)> AdapteDrawSteep(List<(Thing, string, List<RenderInfo>)> nodeRenderingInfos)
         {
-            return;
+            return nodeRenderingInfos;
         }
+
+        /// <summary>
+        /// call when registed node id
+        /// </summary>
+        /// <param name="regiestedNodeId">registed id</param>
+        protected virtual HashSet<string> RegiestedNodeId(HashSet<string> regiestedNodeId)
+        {
+            return regiestedNodeId;
+        }
+
+
         internal bool internal_UpdateNode(CompChildNodeProccesser actionNode) => UpdateNode(actionNode);
         internal bool internal_AllowNode(Thing node, string id = null) => AllowNode(node, id);
-        internal void internal_AdapteDrawSteep(ref List<(Thing, string, List<RenderInfo>)> nodeRenderingInfos) => AdapteDrawSteep(ref nodeRenderingInfos);
+        internal List<(Thing, string, List<RenderInfo>)> internal_AdapteDrawSteep(List<(Thing, string, List<RenderInfo>)> nodeRenderingInfos) => AdapteDrawSteep(nodeRenderingInfos);
+        internal HashSet<string> internal_RegiestedNodeId(HashSet<string> regiestedNodeId) => RegiestedNodeId(regiestedNodeId);
     }
 }

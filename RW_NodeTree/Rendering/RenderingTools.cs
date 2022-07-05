@@ -343,9 +343,9 @@ namespace RW_NodeTree.Rendering
             return true;
         }
 
-        private static Dictionary<int, LinkStack<List<RenderInfo>>> renderInfos = new Dictionary<int, LinkStack<List<RenderInfo>>>();
         private static Camera camera = null;
         internal static RenderTexture empty = new RenderTexture(1, 1, 0, RenderTextureFormat.ARGB32);
+        private static readonly Dictionary<int, LinkStack<List<RenderInfo>>> renderInfos = new Dictionary<int, LinkStack<List<RenderInfo>>>();
         public const int CanvasHeight = 4096;
         public const int MaxTexSize = 4096;
         public const int DefaultTextureSizeFactor = 128;

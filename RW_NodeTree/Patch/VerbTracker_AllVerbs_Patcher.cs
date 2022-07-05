@@ -129,6 +129,6 @@ namespace RW_NodeTree
             return result;
         }
 
-        private Dictionary<int, bool> notSetVerbDirectOwner = new Dictionary<int, bool>();
+        private readonly Dictionary<int, bool> notSetVerbDirectOwner = new Dictionary<int, bool>();
     }
 }

@@ -84,6 +84,22 @@ namespace RW_NodeTree
             }
         }
 
+        public HashSet<string> RegiestedNodeId
+        {
+            get
+            {
+                if(regiestedNodeId == null || regiestedNodeId.Count == 0)
+                {
+                    regiestedNodeId = new HashSet<string>();
+                    foreach (CompBasicNodeComp comp in AllNodeComp)
+                    {
+                        regiestedNodeId = comp.internal_RegiestedNodeId(regiestedNodeId) ?? regiestedNodeId;
+                    }
+                }
+                return new HashSet<string>(regiestedNodeId);
+            }
+        }
+
         public override bool AllowStackWith(Thing other)
         {
             return false;
@@ -223,12 +239,7 @@ namespace RW_NodeTree
                 (Thing, Verb, Tool, VerbProperties) cache = result;
                 if(toolAfterConvert != null)
                 {
-                    List<VerbToolRegiestInfo> Registed;
-                    if (!regiestedNodeVerbToolInfos.TryGetValue(ownerType, out Registed))
-                    {
-                        Registed = new List<VerbToolRegiestInfo>();
-                        regiestedNodeVerbToolInfos.Add(ownerType, Registed);
-                    }
+                    List<VerbToolRegiestInfo> Registed = GetRegiestedNodeVerbToolInfos(ownerType);
                     for (int i = 0; i < Registed.Count; i++)
                     {
                         VerbToolRegiestInfo regiestInfo = Registed[i];
@@ -241,12 +252,7 @@ namespace RW_NodeTree
                 }
                 else
                 {
-                    List<VerbPropertiesRegiestInfo> Registed;
-                    if (!regiestedNodeVerbPropertiesInfos.TryGetValue(ownerType, out Registed))
-                    {
-                        Registed = new List<VerbPropertiesRegiestInfo>();
-                        regiestedNodeVerbPropertiesInfos.Add(ownerType, Registed);
-                    }
+                    List<VerbPropertiesRegiestInfo> Registed = GetRegiestedNodeVerbPropertiesInfos(ownerType);
                     for (int i = 0; i < Registed.Count; i++)
                     {
                         VerbPropertiesRegiestInfo regiestInfo = Registed[i];
@@ -324,12 +330,7 @@ namespace RW_NodeTree
                 {
                     if (toolBeforeConvert != null)
                     {
-                        List<VerbToolRegiestInfo> Registed;
-                        if (!regiestedNodeVerbToolInfos.TryGetValue(ownerType, out Registed))
-                        {
-                            Registed = new List<VerbToolRegiestInfo>();
-                            regiestedNodeVerbToolInfos.Add(ownerType, Registed);
-                        }
+                        List<VerbToolRegiestInfo> Registed = GetRegiestedNodeVerbToolInfos(ownerType);
                         for (int i = 0; i < Registed.Count; i++)
                         {
                             VerbToolRegiestInfo regiestInfo = Registed[i];
@@ -342,12 +343,7 @@ namespace RW_NodeTree
                     }
                     else
                     {
-                        List<VerbPropertiesRegiestInfo> Registed;
-                        if (!regiestedNodeVerbPropertiesInfos.TryGetValue(ownerType, out Registed))
-                        {
-                            Registed = new List<VerbPropertiesRegiestInfo>();
-                            regiestedNodeVerbPropertiesInfos.Add(ownerType, Registed);
-                        }
+                        List<VerbPropertiesRegiestInfo> Registed = GetRegiestedNodeVerbPropertiesInfos(ownerType);
                         for (int i = 0; i < Registed.Count; i++)
                         {
                             VerbPropertiesRegiestInfo regiestInfo = Registed[i];
@@ -397,6 +393,30 @@ namespace RW_NodeTree
             (parent as IVerbOwner)?.VerbTracker?.VerbsNeedReinitOnLoad();
         }
 
+
+        public List<VerbToolRegiestInfo> GetRegiestedNodeVerbToolInfos(Type ownerType)
+        {
+            if (ownerType != null && typeof(IVerbOwner).IsAssignableFrom(ownerType))
+            {
+                List<VerbToolRegiestInfo> Registed;
+                regiestedNodeVerbToolInfos.TryGetValue(ownerType, out Registed);
+                return Registed != null ? new List<VerbToolRegiestInfo>(Registed) : new List<VerbToolRegiestInfo>();
+            }
+            return new List<VerbToolRegiestInfo>();
+        }
+
+
+        public List<VerbPropertiesRegiestInfo> GetRegiestedNodeVerbPropertiesInfos(Type ownerType)
+        {
+            if(ownerType != null && typeof(IVerbOwner).IsAssignableFrom(ownerType))
+            {
+                List<VerbPropertiesRegiestInfo> Registed;
+                regiestedNodeVerbPropertiesInfos.TryGetValue(ownerType, out Registed);
+                return Registed != null ? new List<VerbPropertiesRegiestInfo>(Registed) : new List<VerbPropertiesRegiestInfo>();
+            }
+            return new List<VerbPropertiesRegiestInfo>();
+        }
+
         /// <summary>
         /// Rimworld Defined method, used for load and save game saves.
         /// </summary>
@@ -409,9 +429,26 @@ namespace RW_NodeTree
         /// 
         /// </summary>
         /// <param name="node"></param>
+        /// <returns></returns>
+        public bool AppendChild(Thing node)
+        {
+            if(Props.NodeIdAutoInsertByRegiested)
+            {
+                foreach (string id in RegiestedNodeId)
+                {
+                    if (AppendChild(id, node)) return true;
+                }
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="node"></param>
         /// <param name="id"></param>
         /// <returns></returns>
-        public bool AddOrSetChildById(string id, Thing node)
+        public bool AppendChild(string id, Thing node)
         {
             if(node != null)
             {
@@ -514,7 +551,7 @@ namespace RW_NodeTree
 
             foreach (CompBasicNodeComp comp in AllNodeComp)
             {
-                comp.internal_AdapteDrawSteep(ref nodeRenderingInfos);
+                nodeRenderingInfos = comp.internal_AdapteDrawSteep(nodeRenderingInfos) ?? nodeRenderingInfos;
             }
 
             List<RenderInfo> final = new List<RenderInfo>();
@@ -562,6 +599,7 @@ namespace RW_NodeTree
         /// <returns></returns>
         public bool AllowNode(Thing node, string id = null)
         {
+            if (Props.ForceNodeIdControl && !RegiestedNodeId.Contains(id)) return false;
             foreach (CompBasicNodeComp comp in AllNodeComp)
             {
                 if (!comp.internal_AllowNode(node, id)) return false;
@@ -623,21 +661,24 @@ namespace RW_NodeTree
         }
         #endregion
 
-        private NodeContainer childNodes;
-
-        private Texture2D[] textures = new Texture2D[4];
-
-        private RenderTexture[] cachedRenderTargets = new RenderTexture[4];
-
-        private Material[] materials = new Material[4];
 
         private byte IsRandereds = 0;
 
+        private NodeContainer childNodes;
+
+        private HashSet<string> regiestedNodeId = new HashSet<string>();
+
+        private readonly Texture2D[] textures = new Texture2D[4];
+
+        private readonly RenderTexture[] cachedRenderTargets = new RenderTexture[4];
+
+        private readonly Material[] materials = new Material[4];
+
+        private readonly Dictionary<Type, List<VerbToolRegiestInfo>> regiestedNodeVerbToolInfos = new Dictionary<Type, List<VerbToolRegiestInfo>>();
+
+        private readonly Dictionary<Type, List<VerbPropertiesRegiestInfo>> regiestedNodeVerbPropertiesInfos = new Dictionary<Type, List<VerbPropertiesRegiestInfo>>();
+
         public readonly Dictionary<string, object> dataset = new Dictionary<string, object>();
-
-        public readonly Dictionary<Type, List<VerbToolRegiestInfo>> regiestedNodeVerbToolInfos = new Dictionary<Type, List<VerbToolRegiestInfo>>();
-
-        public readonly Dictionary<Type, List<VerbPropertiesRegiestInfo>> regiestedNodeVerbPropertiesInfos = new Dictionary<Type, List<VerbPropertiesRegiestInfo>>();
 
 
         /*
@@ -660,6 +701,8 @@ namespace RW_NodeTree
             base.compClass = typeof(CompChildNodeProccesser);
         }
 
+        public bool ForceNodeIdControl = false;
+        public bool NodeIdAutoInsertByRegiested = true;
         public float ExceedanceFactor = 1f;
         public float ExceedanceOffset = 1f;
         public int TextureSizeFactor = (int)RenderingTools.DefaultTextureSizeFactor;

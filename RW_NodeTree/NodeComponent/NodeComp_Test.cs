@@ -27,7 +27,7 @@ namespace RW_NodeTree.NodeComponent
                 {
                     ThingDef def = Props.thingDefs[i];
                     Thing node = ThingMaker.MakeThing(def);
-                    proccesser.AddOrSetChildById("Node_" + i,node);
+                    proccesser.AppendChild("Node_" + i,node);
                 }
             }
         }
@@ -41,7 +41,7 @@ namespace RW_NodeTree.NodeComponent
             //if (Prefs.DevMode) Log.Message("\"" + ((parent.def.uiIconPath == null) ? "null" : parent.def.uiIconPath) + "\"");
         }
 
-        protected override void AdapteDrawSteep(ref List<(Thing, string, List<RenderInfo>)> nodeRenderingInfos)
+        protected override List<(Thing, string, List<RenderInfo>)> AdapteDrawSteep(List<(Thing, string, List<RenderInfo>)> nodeRenderingInfos)
         {
             for (int i = 0; i < nodeRenderingInfos.Count; i++)
             {
@@ -80,7 +80,7 @@ namespace RW_NodeTree.NodeComponent
                     }
                 }
             }
-            return;
+            return nodeRenderingInfos;
         }
 
         protected override List<VerbPropertiesRegiestInfo> PostIVerbOwner_GetVerbProperties(Type ownerType, List<VerbPropertiesRegiestInfo> result, Dictionary<string, object> forPostRead)
