@@ -88,13 +88,14 @@ namespace RW_NodeTree
         {
             get
             {
-                if(regiestedNodeId == null || regiestedNodeId.Count == 0)
+                if(regiestedNodeId.Count <= 0)
                 {
-                    regiestedNodeId = new HashSet<string>();
+                    HashSet<string>  regiestedNodeId = new HashSet<string>();
                     foreach (CompBasicNodeComp comp in AllNodeComp)
                     {
                         regiestedNodeId = comp.internal_RegiestedNodeId(regiestedNodeId) ?? regiestedNodeId;
                     }
+                    this.regiestedNodeId.AddRange(regiestedNodeId);
                 }
                 return new HashSet<string>(regiestedNodeId);
             }
@@ -391,6 +392,14 @@ namespace RW_NodeTree
                 (comp as IVerbOwner)?.VerbTracker?.VerbsNeedReinitOnLoad();
             }
             (parent as IVerbOwner)?.VerbTracker?.VerbsNeedReinitOnLoad();
+            ParentProccesser?.ResetVerbs();
+        }
+
+
+        public void ResetRegiestedNodeId()
+        {
+            regiestedNodeId.Clear();
+            ParentProccesser?.ResetRegiestedNodeId();
         }
 
 
@@ -666,13 +675,13 @@ namespace RW_NodeTree
 
         private NodeContainer childNodes;
 
-        private HashSet<string> regiestedNodeId = new HashSet<string>();
+        private readonly Material[] materials = new Material[4];
 
         private readonly Texture2D[] textures = new Texture2D[4];
 
         private readonly RenderTexture[] cachedRenderTargets = new RenderTexture[4];
 
-        private readonly Material[] materials = new Material[4];
+        private readonly HashSet<string> regiestedNodeId = new HashSet<string>();
 
         private readonly Dictionary<Type, List<VerbToolRegiestInfo>> regiestedNodeVerbToolInfos = new Dictionary<Type, List<VerbToolRegiestInfo>>();
 

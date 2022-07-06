@@ -96,21 +96,34 @@ namespace RW_NodeTree
             if (NeedUpdate)
             {
                 CompChildNodeProccesser proccess = this.Comp;
-                if (actionNode == null) actionNode = proccess;
-                foreach (Thing node in this)
+                if(proccess != null)
                 {
-                    StopEventBubble = (((CompChildNodeProccesser)node)?.ChildNodes?.internal_UpdateNode(actionNode) ?? false) || StopEventBubble;
-                }
-                if(!StopEventBubble)
-                {
-                    foreach (CompBasicNodeComp comp in proccess.AllNodeComp)
+                    bool reset = true;
+                    if (actionNode == null) actionNode = proccess;
+                    foreach (Thing node in this)
                     {
-                        StopEventBubble = comp.internal_UpdateNode(actionNode) || StopEventBubble;
+                        NodeContainer container = ((CompChildNodeProccesser)node)?.ChildNodes;
+                        if (container != null)
+                        {
+                            StopEventBubble = container.internal_UpdateNode(actionNode) || StopEventBubble;
+                            reset = false;
+                        }
+                    }
+                    if (!StopEventBubble)
+                    {
+                        foreach (CompBasicNodeComp comp in proccess.AllNodeComp)
+                        {
+                            StopEventBubble = comp.internal_UpdateNode(actionNode) || StopEventBubble;
+                        }
+                    }
+                    if (reset)
+                    {
+                        proccess.ResetVerbs();
+                        proccess.ResetRenderedTexture();
+                        proccess.ResetRegiestedNodeId();
+                        NeedUpdate = false;
                     }
                 }
-                proccess?.ResetVerbs();
-                proccess?.ResetRenderedTexture();
-                NeedUpdate = false;
             }
             return StopEventBubble;
         }
