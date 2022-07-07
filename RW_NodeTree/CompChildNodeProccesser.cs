@@ -464,7 +464,7 @@ namespace RW_NodeTree
                 NodeContainer child = ChildNodes;
                 if (child != null)
                 {
-                    if(replace && child[id] != null) return false;
+                    if(!replace && child[id] != null) return false;
                     child[id] = node;
                     if (child[id] == node)
                     {
