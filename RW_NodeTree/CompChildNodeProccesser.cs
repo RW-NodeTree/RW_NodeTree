@@ -445,7 +445,7 @@ namespace RW_NodeTree
             {
                 foreach (string id in RegiestedNodeId)
                 {
-                    if (AppendChild(id, node)) return true;
+                    if (AppendChild(id, node, false)) return true;
                 }
             }
             return false;
@@ -457,13 +457,14 @@ namespace RW_NodeTree
         /// <param name="node"></param>
         /// <param name="id"></param>
         /// <returns></returns>
-        public bool AppendChild(string id, Thing node)
+        public bool AppendChild(string id, Thing node, bool replace = true)
         {
             if(node != null)
             {
                 NodeContainer child = ChildNodes;
                 if (child != null)
                 {
+                    if(replace && child[id] != null) return false;
                     child[id] = node;
                     if (child[id] == node)
                     {
