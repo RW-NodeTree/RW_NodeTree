@@ -10,7 +10,7 @@ using Verse;
 using UnityEngine;
 using System.Runtime.CompilerServices;
 using UnityEngine.Rendering;
-using RW_NodeTree.Tools;
+using RW_NodeTree.DataStructure;
 
 namespace RW_NodeTree.Rendering
 {

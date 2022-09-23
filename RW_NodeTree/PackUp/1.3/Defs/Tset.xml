@@ -35,7 +35,7 @@
 		<ExceedanceFactor>2</ExceedanceFactor>
 		<ExceedanceOffset>1</ExceedanceOffset>
       </li>
-      <li Class="RW_NodeTree.NodeComponent.CompProperties_Test">
+      <li Class="RW_NodeTree.Test.CompProperties_Test">
         <thingDefs>
           <li>Gun_Test_A</li>
           <li>Gun_Test_B</li>
@@ -101,7 +101,7 @@
 				<TextureSizeFactor>256</TextureSizeFactor>
 				<TextureFilterMode>Bilinear</TextureFilterMode>
 			</li>
-			<li Class="RW_NodeTree.NodeComponent.CompProperties_Test">
+			<li Class="RW_NodeTree.Test.CompProperties_Test">
 				<thingDefs>
 					<li>Gun_Autopistol</li>
 					<li>Gun_BoltActionRifle</li>
@@ -172,7 +172,7 @@
 				<TextureSizeFactor>256</TextureSizeFactor>
 				<TextureFilterMode>Bilinear</TextureFilterMode>
 			</li>
-			<li Class="RW_NodeTree.NodeComponent.CompProperties_Test">
+			<li Class="RW_NodeTree.Test.CompProperties_Test">
 				<thingDefs>
 					<li>Gun_ChainShotgun</li>
 					<li>Gun_HeavySMG</li>

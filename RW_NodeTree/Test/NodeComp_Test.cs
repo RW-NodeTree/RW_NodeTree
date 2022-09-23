@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 using UnityEngine;
 using Verse;
 
-namespace RW_NodeTree.NodeComponent
+namespace RW_NodeTree.Test
 {
     public class NodeComp_Test : CompBasicNodeComp
     {
@@ -27,7 +27,7 @@ namespace RW_NodeTree.NodeComponent
                 {
                     ThingDef def = Props.thingDefs[i];
                     Thing node = ThingMaker.MakeThing(def);
-                    proccesser.AppendChild("Node_" + i,node);
+                    proccesser.SetOrAdd("Node_" + i,node);
                 }
             }
         }

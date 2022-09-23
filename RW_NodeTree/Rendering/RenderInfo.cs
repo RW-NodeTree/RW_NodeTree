@@ -65,6 +65,11 @@ namespace RW_NodeTree.Rendering
         /// Used to select the drawing method between DrawMesh and DrawMeshInstanced.If is true,it will call DrawMeshInstanced, else will select DrawMesh
         /// </summary>
         public bool DrawMeshInstanced;
+        /// <summary>
+        /// disable fast mode
+        /// recommand disable when rendering many same thing, when is true, It will rendered by unity camera.
+        /// </summary>
+        public bool disableFastMode;
 
         public RenderInfo(Mesh mesh, int submeshIndex, Matrix4x4 matrix, Material material, int layer, bool DrawMeshInstanced = false)
         {
@@ -81,6 +86,7 @@ namespace RW_NodeTree.Rendering
             this.lightProbeProxyVolume = null;
             this.count = 1;
             this.DrawMeshInstanced = DrawMeshInstanced;
+            this.disableFastMode = false;
         }
 
         public RenderInfo(Mesh mesh, int submeshIndex, Matrix4x4 matrix, Material material, int layer, MaterialPropertyBlock properties, ShadowCastingMode castShadows, bool receiveShadows, Transform probeAnchor, LightProbeUsage lightProbeUsage, LightProbeProxyVolume lightProbeProxyVolume)
@@ -98,6 +104,7 @@ namespace RW_NodeTree.Rendering
             this.lightProbeProxyVolume = lightProbeProxyVolume;
             this.count = 1;
             this.DrawMeshInstanced = false;
+            this.disableFastMode = false;
         }
 
         public RenderInfo(Mesh mesh, int submeshIndex, Material material, Matrix4x4[] matrices, int count, MaterialPropertyBlock properties, ShadowCastingMode castShadows, bool receiveShadows, int layer, LightProbeUsage lightProbeUsage, LightProbeProxyVolume lightProbeProxyVolume, bool DrawMeshInstanced = true)
@@ -115,17 +122,18 @@ namespace RW_NodeTree.Rendering
             this.lightProbeProxyVolume = lightProbeProxyVolume;
             this.count = count;
             this.DrawMeshInstanced = DrawMeshInstanced;
+            this.disableFastMode = false;
         }
 
         public bool CanUseFastDrawingMode
         {
             get
             {
-                return properties == null && probeAnchor == null && lightProbeProxyVolume == null && castShadows == ShadowCastingMode.Off && lightProbeUsage == LightProbeUsage.Off && !receiveShadows;
+                return !disableFastMode && properties == null && probeAnchor == null && lightProbeProxyVolume == null && castShadows == ShadowCastingMode.Off && lightProbeUsage == LightProbeUsage.Off && !receiveShadows;
             }
             set
             {
-                if (value)
+                if (disableFastMode = value)
                 {
                     properties = null;
                     probeAnchor = null;

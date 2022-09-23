@@ -5,11 +5,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace RW_NodeTree.Tools
+namespace RW_NodeTree.DataStructure
 {
     public interface ILinkNode<T>
     {
-        T Data { get; set; }
+        T Value { get; set; }
         void DropNode();
     }
     public interface ILinkNodeHasNext<T> : ILinkNode<T>, IEnumerable<T>
@@ -44,7 +44,7 @@ namespace RW_NodeTree.Tools
                     {
                         return default(T);
                     }
-                    return _currentElement.Data;
+                    return _currentElement.Value;
                 }
             }
 
@@ -70,7 +70,7 @@ namespace RW_NodeTree.Tools
         }
         public LinkNodeLinkNext(T data)
         {
-            Data = data;
+            Value = data;
         }
 
         public ILinkNode<T> Next 
@@ -96,7 +96,7 @@ namespace RW_NodeTree.Tools
                 }
             }
         }
-        public T Data { get => data; set => data = value; }
+        public T Value { get => data; set => data = value; }
 
         public void DropNode()
         {
@@ -171,7 +171,7 @@ namespace RW_NodeTree.Tools
                     {
                         return default(T);
                     }
-                    return _currentElement.Data;
+                    return _currentElement.Value;
                 }
             }
 
@@ -197,7 +197,7 @@ namespace RW_NodeTree.Tools
         }
         public LinkNodeLinkPerv(T data)
         {
-            Data = data;
+            Value = data;
         }
 
         public ILinkNode<T> Perv
@@ -223,7 +223,7 @@ namespace RW_NodeTree.Tools
                 }
             }
         }
-        public T Data { get => data; set => data = value; }
+        public T Value { get => data; set => data = value; }
 
         public void DropNode()
         {
@@ -281,7 +281,7 @@ namespace RW_NodeTree.Tools
     {
         public LinkNodeLinkNextAndPerv(T data)
         {
-            Data = data;
+            Value = data;
         }
 
         public ILinkNode<T> Next
@@ -330,7 +330,7 @@ namespace RW_NodeTree.Tools
                 }
             }
         }
-        public T Data { get => data; set => data = value; }
+        public T Value { get => data; set => data = value; }
 
         public void DropNode()
         {

@@ -1,4 +1,5 @@
 ﻿using HarmonyLib;
+using RW_NodeTree.DataStructure;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,36 +12,37 @@ namespace RW_NodeTree
     /// <summary>
     /// Node storge proccesser
     /// </summary>
-    public class NodeContainer : ThingOwner<Thing>, IList<Thing>
+    public class NodeContainer : ThingOwner<Thing>, IDictionary<string, Thing>
     {
 
-        public NodeContainer(CompChildNodeProccesser proccesser) : base(proccesser)
-        {
-        }
+        public NodeContainer(CompChildNodeProccesser proccesser) : base(proccesser) { }
 
         public string this[uint index] => innerIdList[(int)index];
 
 
-        public Thing this[string id]
+        public Thing this[string key]
         {
             get
             {
-                int index = innerIdList.IndexOf(id);
-                return ((index >= 0) ? this[index] : null);
+                if (!key.NullOrEmpty())
+                {
+                    int index = innerIdList.IndexOf(key);
+                    return ((index >= 0) ? this[index] : null);
+                }
+                return null;
             }
             set
             {
-                if (!id.NullOrEmpty())
+                if (!key.NullOrEmpty())
                 {
-                    Thing t = this[id];
-                    if (t != null)
+                    Thing t = this[key];
+                    if((t != null ? Remove(t) : true) && value != null)
                     {
-                        Remove(t);
-                    }
-                    innerIdList.Add(id);
-                    if (value == null || (!TryAdd(value) && t != null && !TryAdd(t)))
-                    {
-                        innerIdList.RemoveAt(Count);
+                        innerIdList.Add(key);
+                        if (!TryAdd(value) && t != null && !TryAdd(t))
+                        {
+                            innerIdList.RemoveAt(Count);
+                        }
                     }
                 }
             }
@@ -56,7 +58,7 @@ namespace RW_NodeTree
             }
             set
             {
-                if(Comp != null && !value.NullOrEmpty() && !innerIdList.Contains(value) && Comp.AllowNode(item,value))
+                if(Comp != null && !value.NullOrEmpty() && !innerIdList.Contains(value) && Comp.AllowNode(item, value))
                 {
                     int index = base.IndexOf(item);
                     innerIdList[index] = value;
@@ -83,6 +85,12 @@ namespace RW_NodeTree
                 }
             }
         }
+
+        ICollection<string> IDictionary<string, Thing>.Keys => InnerIdListForReading;
+
+        ICollection<Thing> IDictionary<string, Thing>.Values => InnerListForReading;
+
+        bool ICollection<KeyValuePair<string, Thing>>.IsReadOnly => ((ICollection<Thing>)this).IsReadOnly;
 
         public override void ExposeData()
         {
@@ -186,6 +194,82 @@ namespace RW_NodeTree
                 parent = (thingHolder as ThingComp)?.parent ?? (thingHolder as Thing);
             }
             return parent == node;
+        }
+
+        public bool ContainsKey(string key)
+        {
+            return innerIdList.Contains(key);
+        }
+
+        public void Add(string key, Thing value)
+        {
+            if (!key.NullOrEmpty())
+            {
+                Thing t = this[key];
+                if (t == null && value != null)
+                {
+                    innerIdList.Add(key);
+                    if (!TryAdd(value) && t != null && !TryAdd(t))
+                    {
+                        innerIdList.RemoveAt(Count);
+                    }
+                }
+            }
+        }
+
+        public bool Remove(string key)
+        {
+            return Remove(this[key]);
+        }
+
+        public bool TryGetValue(string key, out Thing value)
+        {
+            value = null;
+            if (!key.NullOrEmpty())
+            {
+                int index = innerIdList.IndexOf(key);
+                if(index >= 0)
+                {
+                    value = this[index];
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        void ICollection<KeyValuePair<string, Thing>>.Add(KeyValuePair<string, Thing> item)
+        {
+            Add(item.Key, item.Value);
+        }
+
+        bool ICollection<KeyValuePair<string, Thing>>.Contains(KeyValuePair<string, Thing> item)
+        {
+            return item.Value != null && this[item.Key] == item.Value;
+        }
+
+        public void CopyTo(KeyValuePair<string, Thing>[] array, int arrayIndex)
+        {
+            for(int i = 0; i < Count; i++)
+            {
+                array[i + arrayIndex] = new KeyValuePair<string, Thing>(this[(uint)i], this[i]);
+            }
+        }
+
+        bool ICollection<KeyValuePair<string, Thing>>.Remove(KeyValuePair<string, Thing> item)
+        {
+            if(((ICollection<KeyValuePair<string, Thing>>)this).Contains(item))
+            {
+                return Remove(item.Value);
+            }
+            return false;
+        }
+
+        IEnumerator<KeyValuePair<string, Thing>> IEnumerable<KeyValuePair<string, Thing>>.GetEnumerator()
+        {
+            for(int i = 0; i < Count; i++)
+            {
+                yield return new KeyValuePair<string, Thing>(this[(uint)i], this[i]);
+            }
         }
 
         private bool needUpdate = true;

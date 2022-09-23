@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace RW_NodeTree.Tools
+namespace RW_NodeTree.DataStructure
 {
     public class LinkStack<T> : IEnumerable<T>, IEnumerable, IReadOnlyCollection<T>, ICollection
     {
@@ -51,7 +51,7 @@ namespace RW_NodeTree.Tools
 
         public T Peek()
         {
-            return peekNode.Data;
+            return peekNode.Value;
         }
 
         public T Pop()
@@ -59,7 +59,7 @@ namespace RW_NodeTree.Tools
             LinkNodeLinkNext<T> cache = peekNode;
             peekNode = cache.Next as LinkNodeLinkNext<T>;
             cache.Next = null;
-            return cache.Data;
+            return cache.Value;
         }
 
         public void Push(T obj)

@@ -37,7 +37,8 @@
     <StartupObject />
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="NodeComponent\NodeComp_Test.cs" />
+    <Compile Include="DataStructure\LinnerNode.cs" />
+    <Compile Include="Test\NodeComp_Test.cs" />
     <Compile Include="Patch\GenRecipe_Patcher.cs" />
     <Compile Include="Patch\Graphic_RandomRotated_Patcher.cs" />
     <Compile Include="Patch\Pawn_ApparelTracker_Patcher.cs" />
@@ -54,8 +55,8 @@
     <Compile Include="Patch\VerbTracker_CreateVerbTargetCommand_Patcher.cs" />
     <Compile Include="Patch\Verb_Patcher.cs" />
     <Compile Include="Tools\GraphicHelper.cs" />
-    <Compile Include="Tools\LinkStack.cs" />
-    <Compile Include="Tools\LinkNode.cs" />
+    <Compile Include="DataStructure\LinkStack.cs" />
+    <Compile Include="DataStructure\LinkNode.cs" />
     <Compile Include="Tools\ObjectHelper.cs" />
     <Compile Include="VerbRegiestInfo.cs" />
     <Reference Include="0Harmony">
@@ -296,6 +297,7 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="PackUp\1.3\Assemblies\" />
+    <Folder Include="UI\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

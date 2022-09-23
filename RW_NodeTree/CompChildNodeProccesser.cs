@@ -90,7 +90,7 @@ namespace RW_NodeTree
             {
                 if(regiestedNodeId.Count <= 0)
                 {
-                    HashSet<string>  regiestedNodeId = new HashSet<string>();
+                    HashSet<string> regiestedNodeId = new HashSet<string>();
                     foreach (CompBasicNodeComp comp in AllNodeComp)
                     {
                         regiestedNodeId = comp.internal_RegiestedNodeId(regiestedNodeId) ?? regiestedNodeId;
@@ -441,11 +441,32 @@ namespace RW_NodeTree
         /// <returns></returns>
         public bool AppendChild(Thing node)
         {
-            if(Props.NodeIdAutoInsertByRegiested)
+            return AppendChild(null, node);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="node"></param>
+        /// <returns></returns>
+        public bool AppendChild(string id, Thing node)
+        {
+            if (node != null)
             {
-                foreach (string id in RegiestedNodeId)
+                if(id.NullOrEmpty())
                 {
-                    if (AppendChild(id, node, false)) return true;
+                    if (Props.NodeIdAutoInsertByRegiested)
+                    {
+                        foreach (string regedid in RegiestedNodeId)
+                        {
+                            if (AppendChild(regedid, node)) return true;
+                        }
+                    }
+                }
+                else if (ChildNodes[id] == null)
+                {
+                    ChildNodes[id] = node;
+                    if (ChildNodes[id] == node) return true;
                 }
             }
             return false;
@@ -454,40 +475,61 @@ namespace RW_NodeTree
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="node"></param>
         /// <param name="id"></param>
         /// <returns></returns>
-        public bool AppendChild(string id, Thing node, bool replace = true)
+        public bool RemoveChild(string id)
         {
-            if(node != null)
+            if(!id.NullOrEmpty())
             {
-                NodeContainer child = ChildNodes;
-                if (child != null)
-                {
-                    if(!replace && child[id] != null) return false;
-                    child[id] = node;
-                    if (child[id] == node)
-                    {
-                        return true;
-                    }
-                }
+                return RemoveChild(ChildNodes[id]);
             }
             return false;
         }
 
         /// <summary>
-        /// Get Child By Id
+        /// 
         /// </summary>
-        /// <param name="id">id</param>
-        /// <returns>child element</returns>
-        public Thing GetChildById(string id)
+        /// <param name="node"></param>
+        /// <returns></returns>
+        public bool RemoveChild(Thing node)
         {
-            NodeContainer child = ChildNodes;
-            if (child != null)
+            if(node != null)
             {
-                return child[id];
+                return ChildNodes.Remove(node);
             }
-            return null;
+            return false;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="id">target id</param>
+        /// <param name="node">node to append</param>
+        /// <returns>true if insert success</returns>
+        public bool SetChild(string id, Thing node)
+        {
+            if (!id.NullOrEmpty() && node != null && ChildNodes[id] != null)
+            {
+                ChildNodes[id] = node;
+                return ChildNodes[id] == node;
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="id">target id</param>
+        /// <param name="node">node to append</param>
+        /// <returns>true if insert success</returns>
+        public bool SetOrAdd(string id, Thing node)
+        {
+            if (!id.NullOrEmpty() && node != null)
+            {
+                ChildNodes[id] = node;
+                return ChildNodes[id] == node;
+            }
+            return false;
         }
 
         /// <summary>
