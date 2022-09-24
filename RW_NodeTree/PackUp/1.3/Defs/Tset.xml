@@ -1,48 +1,48 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <Defs>
 
-  <!-- ================================= Industrial ==================================== -->
+	<!-- ================================= Industrial ==================================== -->
 
-  <ThingDef ParentName="BaseGunWithQuality">
-    <defName>Gun_Test</defName>
-    <label>test item</label>
-    <drawerType>RealtimeOnly</drawerType>
-    <tickerType>Normal</tickerType>
-    <description>An ancient pattern double-action revolver. It's not very powerful, but has a decent range for a pistol and is quick on the draw.</description>
-    <graphicData>
-      <texPath>UI/Buttons/InfoButton</texPath>
-      <graphicClass>Graphic_Single</graphicClass>
-    </graphicData>
-    <uiIconScale>1.4</uiIconScale>
-    <soundInteract>Interact_Revolver</soundInteract>
-	  <statBases>
-		  <Mass>2.5</Mass>
-	  </statBases>
-	  <tools>
-		  <li>
-			  <label>test gun smash</label>
-			  <capacities>
-				  <li>Blunt</li>
-			  </capacities>
-			  <power>9</power>
-			  <cooldownTime>2</cooldownTime>
-		  </li>
-	  </tools>
-    <comps>
-      <li Class="RW_NodeTree.CompProperties_ChildNodeProccesser">
-        <TextureSizeFactor>256</TextureSizeFactor>
-        <TextureFilterMode>Bilinear</TextureFilterMode>
-		<ExceedanceFactor>2</ExceedanceFactor>
-		<ExceedanceOffset>1</ExceedanceOffset>
-      </li>
-      <li Class="RW_NodeTree.Test.CompProperties_Test">
-        <thingDefs>
-          <li>Gun_Test_A</li>
-          <li>Gun_Test_B</li>
-        </thingDefs>
-      </li>
-    </comps>
-  </ThingDef>
+	<ThingDef ParentName="BaseGunWithQuality">
+		<defName>Gun_Test</defName>
+		<label>test item</label>
+		<drawerType>RealtimeOnly</drawerType>
+		<tickerType>Normal</tickerType>
+		<description>An ancient pattern double-action revolver. It's not very powerful, but has a decent range for a pistol and is quick on the draw.</description>
+		<graphicData>
+		<texPath>UI/Buttons/InfoButton</texPath>
+		<graphicClass>Graphic_Single</graphicClass>
+		</graphicData>
+		<uiIconScale>1.4</uiIconScale>
+		<soundInteract>Interact_Revolver</soundInteract>
+		<statBases>
+			<Mass>2.5</Mass>
+		</statBases>
+		<tools>
+			<li>
+				<label>test gun smash</label>
+				<capacities>
+					<li>Blunt</li>
+				</capacities>
+				<power>9</power>
+				<cooldownTime>2</cooldownTime>
+			</li>
+		</tools>
+		<comps>
+		<li Class="RW_NodeTree.CompProperties_ChildNodeProccesser">
+			<TextureSizeFactor>256</TextureSizeFactor>
+			<TextureFilterMode>Bilinear</TextureFilterMode>
+			<ExceedanceFactor>2</ExceedanceFactor>
+			<ExceedanceOffset>1</ExceedanceOffset>
+		</li>
+		<li Class="RW_NodeTree.Test.CompProperties_Test">
+			<thingDefs>
+			<li>Gun_Test_A</li>
+			<li>Gun_Test_B</li>
+			</thingDefs>
+		</li>
+		</comps>
+	</ThingDef>
 	
 	
 	<ThingDef ParentName="BaseGunWithQuality">
