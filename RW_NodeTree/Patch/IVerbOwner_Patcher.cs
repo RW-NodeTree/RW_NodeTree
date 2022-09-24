@@ -1,12 +1,8 @@
 ﻿using HarmonyLib;
-using RimWorld;
+using RW_NodeTree.Tools;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
-using System.Reflection.Emit;
-using System.Text;
-using System.Threading.Tasks;
 using Verse;
 
 namespace RW_NodeTree.Patch
@@ -236,6 +232,13 @@ namespace RW_NodeTree
                         {
                             verbToolRegiestInfo.RemoveAt(i);
                         }
+                    }
+                    for(int i = 0; i < verbToolRegiestInfo.Count; i++)
+                    {
+                        VerbToolRegiestInfo regiestInfo = verbToolRegiestInfo[i];
+                        regiestInfo.afterCobvertTool = (Tool)regiestInfo.afterCobvertTool.SimpleCopy();
+                        regiestInfo.afterCobvertTool.id = i.ToString();
+                        verbToolRegiestInfo[i] = regiestInfo;
                     }
                     regiestedNodeVerbToolInfos.Add(ownerType, verbToolRegiestInfo);
                 }

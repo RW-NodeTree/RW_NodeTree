@@ -96,6 +96,8 @@ namespace RW_NodeTree
         {
             base.ExposeData();
             Scribe_Collections.Look<string>(ref this.innerIdList, "innerIdList", LookMode.Value);
+            Scribe_Values.Look<bool>(ref this.needUpdate, "needUpdate", true);
+            //if (Scribe.mode == LoadSaveMode.PostLoadInit) needUpdate = false;
         }
 
         internal bool internal_UpdateNode(CompChildNodeProccesser actionNode = null)
