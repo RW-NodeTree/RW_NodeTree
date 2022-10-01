@@ -603,7 +603,7 @@ namespace RW_NodeTree
 
             foreach (CompBasicNodeComp comp in AllNodeComp)
             {
-                nodeRenderingInfos = comp.internal_AdapteDrawSteep(nodeRenderingInfos) ?? nodeRenderingInfos;
+                nodeRenderingInfos = comp.internal_AdapteDrawSteep(nodeRenderingInfos, rot, subGraphic) ?? nodeRenderingInfos;
             }
 
             List<RenderInfo> final = new List<RenderInfo>();

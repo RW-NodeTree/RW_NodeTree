@@ -36,10 +36,10 @@ namespace RW_NodeTree
                 if (!key.NullOrEmpty())
                 {
                     Thing t = this[key];
-                    if((t != null ? Remove(t) : true) && value != null)
+                    if(value != null && (t != null ? Remove(t) : true))
                     {
                         innerIdList.Add(key);
-                        if (!TryAdd(value) && t != null && !TryAdd(t))
+                        if (!TryAdd(value) && (t == null || !TryAdd(t)))
                         {
                             innerIdList.RemoveAt(Count);
                         }

@@ -92,12 +92,14 @@ namespace RW_NodeTree
         {
             return true;
         }
-
         /// <summary>
         /// Adapte draw steep of this node
         /// </summary>
-        /// <param name="nodeRenderingInfos">Corresponding is</param>
-        protected virtual List<(Thing, string, List<RenderInfo>)> AdapteDrawSteep(List<(Thing, string, List<RenderInfo>)> nodeRenderingInfos)
+        /// <param name="nodeRenderingInfos">Corresponding rendering infos with id and part</param>
+        /// <param name="rot">rotation</param>
+        /// <param name="graphic">original graphic</param>
+        /// <returns></returns>
+        protected virtual List<(Thing, string, List<RenderInfo>)> AdapteDrawSteep(List<(Thing, string, List<RenderInfo>)> nodeRenderingInfos, Rot4 rot, Graphic graphic)
         {
             return nodeRenderingInfos;
         }
@@ -114,7 +116,7 @@ namespace RW_NodeTree
 
         internal bool internal_UpdateNode(CompChildNodeProccesser actionNode) => UpdateNode(actionNode);
         internal bool internal_AllowNode(Thing node, string id = null) => AllowNode(node, id);
-        internal List<(Thing, string, List<RenderInfo>)> internal_AdapteDrawSteep(List<(Thing, string, List<RenderInfo>)> nodeRenderingInfos) => AdapteDrawSteep(nodeRenderingInfos);
+        internal List<(Thing, string, List<RenderInfo>)> internal_AdapteDrawSteep(List<(Thing, string, List<RenderInfo>)> nodeRenderingInfos, Rot4 rot, Graphic graphic) => AdapteDrawSteep(nodeRenderingInfos, rot, graphic);
         internal HashSet<string> internal_RegiestedNodeId(HashSet<string> regiestedNodeId) => RegiestedNodeId(regiestedNodeId);
     }
 }
