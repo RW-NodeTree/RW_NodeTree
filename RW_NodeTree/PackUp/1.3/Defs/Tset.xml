@@ -13,7 +13,7 @@
 		<texPath>UI/Buttons/InfoButton</texPath>
 		<graphicClass>Graphic_Single</graphicClass>
 		</graphicData>
-		<uiIconScale>1.4</uiIconScale>
+		<uiIconScale>1</uiIconScale>
 		<soundInteract>Interact_Revolver</soundInteract>
 		<statBases>
 			<Mass>2.5</Mass>
@@ -55,7 +55,7 @@
 			<texPath>Things/Item/Equipment/WeaponRanged/Revolver</texPath>
 			<graphicClass>Graphic_Single</graphicClass>
 		</graphicData>
-		<uiIconScale>1.4</uiIconScale>
+		<uiIconScale>1</uiIconScale>
 		<soundInteract>Interact_Revolver</soundInteract>
 		<statBases>
 			<Mass>1.4</Mass>
@@ -124,7 +124,7 @@
 			<texPath>Things/Item/Equipment/WeaponRanged/MachinePistol</texPath>
 			<graphicClass>Graphic_Single</graphicClass>
 		</graphicData>
-		<uiIconScale>1.4</uiIconScale>
+		<uiIconScale>1</uiIconScale>
 		<soundInteract>Interact_SMG</soundInteract>
 		<statBases>
 			<Mass>2.5</Mass>
