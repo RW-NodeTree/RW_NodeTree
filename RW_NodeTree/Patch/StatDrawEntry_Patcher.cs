@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using HarmonyLib;
 using RimWorld;
 using UnityEngine;
@@ -7,22 +8,25 @@ using Verse;
 namespace RW_NodeTree.Patch
 {
 	[HarmonyPatch(typeof(StatDrawEntry))]
-	internal static class StatDrawEntry_Patcher
+    public static class StatDrawEntry_Patcher
 	{
 		[HarmonyPostfix]
 		[HarmonyPatch(typeof(StatDrawEntry), "get_ValueString")]
-		private static void PostStatDrawEntry_ValueString(StatDrawEntry __instance, string __result)
+        internal static void PostStatDrawEntry_ValueString(StatDrawEntry __instance, string __result)
 		{
-			ref string valueStringInt = ref StatDrawEntry_valueStringInt(__instance);
-			if (valueStringInt.NullOrEmpty())
-			{
-				valueStringInt = __result;
-			}
+			if(__instance.hasOptionalReq)
+            {
+                ref string valueStringInt = ref StatDrawEntry_valueStringInt(__instance);
+                if (valueStringInt.NullOrEmpty())
+                {
+                    valueStringInt = __result;
+                }
+            }
 		}
 
 		[HarmonyPrefix]
 		[HarmonyPatch(typeof(StatDrawEntry), "GetExplanationText")]
-		public static bool GetExplanationTextPostfix(StatDrawEntry __instance, ref string __result)
+        internal static bool PreStatDrawEntry_GetExplanationText(StatDrawEntry __instance, ref string __result)
 		{
 			ref string explanationText = ref StatDrawEntry_explanationText(__instance);
 			if (!explanationText.NullOrEmpty())
@@ -31,16 +35,24 @@ namespace RW_NodeTree.Patch
 				return false;
 			}
 			return true;
-		}
+        }
 
-		[HarmonyPostfix]
-		[HarmonyPatch(typeof(StatDrawEntry), "GetExplanationText")]
-		public static void GetExplanationTextPostfix(StatDrawEntry __instance, string __result)
-		{
-			StatDrawEntry_explanationText(__instance) = __result;
-		}
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(StatDrawEntry), "GetExplanationText")]
+        internal static void PostStatDrawEntry_GetExplanationText(StatDrawEntry __instance, string __result)
+        {
+            StatDrawEntry_explanationText(__instance) = __result;
+        }
 
-		private static AccessTools.FieldRef<StatDrawEntry, string> StatDrawEntry_valueStringInt = AccessTools.FieldRefAccess<string>(typeof(StatDrawEntry), "valueStringInt");
-		private static AccessTools.FieldRef<StatDrawEntry, string> StatDrawEntry_explanationText = AccessTools.FieldRefAccess<string>(typeof(StatDrawEntry), "explanationText");
-	}
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(StatDrawEntry), "GetHyperlinks")]
+        internal static void PostStatDrawEntry_GetHyperlinks(StatDrawEntry __instance, IEnumerable<Dialog_InfoCard.Hyperlink> __result)
+        {
+            StatDrawEntry_hyperlinks(__instance) = __result;
+        }
+
+        public static readonly AccessTools.FieldRef<StatDrawEntry, string> StatDrawEntry_valueStringInt = AccessTools.FieldRefAccess<string>(typeof(StatDrawEntry), "valueStringInt");
+        public static readonly AccessTools.FieldRef<StatDrawEntry, string> StatDrawEntry_explanationText = AccessTools.FieldRefAccess<string>(typeof(StatDrawEntry), "explanationText");
+        public static readonly AccessTools.FieldRef<StatDrawEntry, IEnumerable<Dialog_InfoCard.Hyperlink>> StatDrawEntry_hyperlinks = AccessTools.FieldRefAccess<IEnumerable<Dialog_InfoCard.Hyperlink>>(typeof(StatDrawEntry), "hyperlinks");
+    }
 }
