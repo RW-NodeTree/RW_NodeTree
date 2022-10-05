@@ -378,7 +378,7 @@ namespace RW_NodeTree
         {
             IsRandereds = 0;
             ParentProccesser?.ResetRenderedTexture();
-            if(parent.Spawned) parent.DirtyMapMesh(parent.Map);
+            if(parent.Spawned && parent.def.drawerType >= DrawerType.MapMeshOnly) parent.DirtyMapMesh(parent.Map);
         }
 
         /// <summary>

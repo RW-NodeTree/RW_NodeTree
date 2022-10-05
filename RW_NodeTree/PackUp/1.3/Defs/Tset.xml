@@ -6,7 +6,7 @@
 	<ThingDef ParentName="BaseGunWithQuality">
 		<defName>Gun_Test</defName>
 		<label>test item</label>
-		<drawerType>RealtimeOnly</drawerType>
+		<drawerType>MapMeshOnly</drawerType>
 		<tickerType>Normal</tickerType>
 		<description>An ancient pattern double-action revolver. It's not very powerful, but has a decent range for a pistol and is quick on the draw.</description>
 		<graphicData>
@@ -48,7 +48,7 @@
 	<ThingDef ParentName="BaseGunWithQuality">
 		<defName>Gun_Test_A</defName>
 		<label>test item A</label>
-		<drawerType>RealtimeOnly</drawerType>
+		<drawerType>MapMeshOnly</drawerType>
 		<tickerType>Normal</tickerType>
 		<description>An ancient pattern double-action revolver. It's not very powerful, but has a decent range for a pistol and is quick on the draw.</description>
 		<graphicData>
@@ -117,7 +117,7 @@
 	<ThingDef ParentName="BaseGunWithQuality">
 		<defName>Gun_Test_B</defName>
 		<label>test item B</label>
-		<drawerType>RealtimeOnly</drawerType>
+		<drawerType>MapMeshOnly</drawerType>
 		<tickerType>Normal</tickerType>
 		<description>A micro-submachine gun. It is short-ranged, but very light in the hands. Its rate of fire tends to make up for its weakness.</description>
 		<graphicData>
