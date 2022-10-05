@@ -31,8 +31,8 @@ namespace RW_NodeTree.Patch
                 CompChildNodeProccesser proccesser = ((CompChildNodeProccesser)thing);
                 if(proccesser != null)
                 {
+                    Rot4 defaultPlacingRot = thing.def.defaultPlacingRot;
                     ref Vector2 drawSize = ref thing.def.graphicData.drawSize;
-                    ref Rot4 defaultPlacingRot = ref thing.def.defaultPlacingRot;
                     __state = (drawSize, thing.def.size);
                     drawSize = proccesser.GetAndUpdateDrawSize(defaultPlacingRot);
                     if (defaultPlacingRot.IsHorizontal) drawSize = drawSize.Rotated();
