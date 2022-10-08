@@ -55,6 +55,7 @@
     <Compile Include="Patch\VerbTracker_AllVerbs_Patcher.cs" />
     <Compile Include="Patch\VerbTracker_CreateVerbTargetCommand_Patcher.cs" />
     <Compile Include="Patch\Verb_Patcher.cs" />
+    <Compile Include="Tools\DictionaryHelper.cs" />
     <Compile Include="Tools\GraphicHelper.cs" />
     <Compile Include="DataStructure\LinkStack.cs" />
     <Compile Include="DataStructure\LinkNode.cs" />

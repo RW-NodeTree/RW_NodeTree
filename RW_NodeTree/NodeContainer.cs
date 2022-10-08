@@ -1,10 +1,12 @@
 ﻿using HarmonyLib;
 using RW_NodeTree.DataStructure;
+using RW_NodeTree.Tools;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using UnityEngine;
 using Verse;
 
 namespace RW_NodeTree
@@ -12,7 +14,7 @@ namespace RW_NodeTree
     /// <summary>
     /// Node storge proccesser
     /// </summary>
-    public class NodeContainer : ThingOwner<Thing>, IDictionary<string, Thing>
+    public class NodeContainer : ThingOwner, IDictionary<string, Thing>
     {
 
         public NodeContainer(CompChildNodeProccesser proccesser) : base(proccesser) { }
@@ -52,7 +54,7 @@ namespace RW_NodeTree
         {
             get
             {
-                int index = base.IndexOf(item);
+                int index = IndexOf(item);
                 if(index < 0) return null;
                 return innerIdList[index];
             }
@@ -60,7 +62,7 @@ namespace RW_NodeTree
             {
                 if(Comp != null && !value.NullOrEmpty() && !innerIdList.Contains(value) && Comp.AllowNode(item, value))
                 {
-                    int index = base.IndexOf(item);
+                    int index = IndexOf(item);
                     innerIdList[index] = value;
                     NeedUpdate = true;
                 }
@@ -68,6 +70,8 @@ namespace RW_NodeTree
         }
 
         public List<string> InnerIdListForReading => this.innerIdList;
+
+        public List<Thing> InnerListForReading => this.innerList;
 
         public CompChildNodeProccesser Comp => (CompChildNodeProccesser)base.Owner;
 
@@ -92,11 +96,21 @@ namespace RW_NodeTree
 
         bool ICollection<KeyValuePair<string, Thing>>.IsReadOnly => ((ICollection<Thing>)this).IsReadOnly;
 
+        public override int Count => Math.Min(innerList.Count,innerIdList.Count);
+
         public override void ExposeData()
         {
             base.ExposeData();
-            Scribe_Collections.Look<string>(ref this.innerIdList, "innerIdList", LookMode.Value);
-            Scribe_Values.Look<bool>(ref this.needUpdate, "needUpdate", true);
+
+            Scribe.EnterNode("InnerList");
+
+            for(int i = 0; i < Count; i++)
+            {
+                Thing thing = innerList[i];
+                string id = innerIdList[i];
+            }
+            Scribe.ExitNode();
+            Scribe_Values.Look<bool>(ref this.needUpdate, "needUpdate");
             //if (Scribe.mode == LoadSaveMode.PostLoadInit) needUpdate = false;
         }
 
@@ -110,7 +124,7 @@ namespace RW_NodeTree
                 {
                     bool reset = true;
                     if (actionNode == null) actionNode = proccess;
-                    foreach (Thing node in this)
+                    foreach (Thing node in this.innerList)
                     {
                         NodeContainer container = ((CompChildNodeProccesser)node)?.ChildNodes;
                         if (container != null)
@@ -149,39 +163,94 @@ namespace RW_NodeTree
 
         public override int TryAdd(Thing item, int count, bool canMergeWithExistingStacks = true)
         {
-            return base.TryAdd(item, count, false);
+            if (count <= 0)
+            {
+                return 0;
+            }
+
+            if (item == null)
+            {
+                Log.Warning("Tried to add null item to ThingOwner.");
+                return 0;
+            }
+
+            if (Contains(item))
+            {
+                Log.Warning(string.Concat("Tried to add ", item, " to ThingOwner but this item is already here."));
+                return 0;
+            }
+
+            if (!CanAcceptAnyOf(item, canMergeWithExistingStacks))
+            {
+                return 0;
+            }
+
+            int stackCount = item.stackCount;
+            int num = Mathf.Min(stackCount, count);
+            Thing thing = item.SplitOff(num);
+            if (!TryAdd(thing, canMergeWithExistingStacks))
+            {
+                if (thing != item)
+                {
+                    int result = stackCount - item.stackCount - thing.stackCount;
+                    item.TryAbsorbStack(thing, respectStackLimit: false);
+                    return result;
+                }
+
+                return stackCount - item.stackCount;
+            }
+
+            return num;
         }
 
         public override bool TryAdd(Thing item, bool canMergeWithExistingStacks = true)
         {
-            ThingOwner owner = item.holdingOwner;
-            if(owner != this)
+
+            if (item == null)
             {
-                item.holdingOwner = null;
-                if (base.TryAdd(item, false))
-                {
-                    ThingOwner cache = item.holdingOwner;
-                    item.holdingOwner = owner;
-                    item.holdingOwner?.Remove(item);
-                    item.holdingOwner = cache;
-                    if (item.Spawned) item.DeSpawn();
-                    NeedUpdate = true;
-                    return true;
-                }
-                item.holdingOwner = owner;
+                Log.Warning("Tried to add null item to ThingOwner.");
+                return false;
             }
-            return false;
+
+            if (Contains(item))
+            {
+                Log.Warning("Tried to add " + item.ToStringSafe() + " to ThingOwner but this item is already here.");
+                return false;
+            }
+
+            if (!CanAcceptAnyOf(item, canMergeWithExistingStacks))
+            {
+                return false;
+            }
+
+            if (Count >= maxStacks)
+            {
+                return false;
+            }
+
+            item.holdingOwner?.Remove(item);
+            if(item.holdingOwner == null) item.holdingOwner = this;
+            innerList.Add(item);
+            NeedUpdate = true;
+            return true;
         }
 
         public override bool Remove(Thing item)
         {
-            int index = IndexOf(item);
-            if(base.Remove(item))
+            if (!Contains(item))
             {
-                innerIdList.RemoveAt(index);
-                return true;
+                return false;
             }
-            return false;
+
+            if (item.holdingOwner == this)
+            {
+                item.holdingOwner = null;
+            }
+
+            int index = innerList.LastIndexOf(item);
+            innerList.RemoveAt(index);
+            innerIdList.RemoveAt(index);
+            return true;
         }
 
 
@@ -274,7 +343,13 @@ namespace RW_NodeTree
             }
         }
 
-        private bool needUpdate = true;
+        public override int IndexOf(Thing item) => innerList.IndexOf(item);
+
+        protected override Thing GetAt(int index) => innerList[index];
+
+        private bool needUpdate = false;
+
+        private List<Thing> innerList = new List<Thing>();
 
         private List<string> innerIdList = new List<string>();
     }

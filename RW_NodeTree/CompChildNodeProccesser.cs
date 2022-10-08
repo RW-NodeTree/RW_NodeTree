@@ -88,14 +88,15 @@ namespace RW_NodeTree
         {
             get
             {
-                if(regiestedNodeId.Count <= 0)
+                HashSet<string> regiestedNodeId = this.regiestedNodeId.GetOrAdd(AccessKey ?? "");
+                if (regiestedNodeId.Count <= 0)
                 {
-                    HashSet<string> regiestedNodeId = new HashSet<string>();
+                    HashSet<string> cache = new HashSet<string>();
                     foreach (CompBasicNodeComp comp in AllNodeComp)
                     {
-                        regiestedNodeId = comp.internal_RegiestedNodeId(regiestedNodeId) ?? regiestedNodeId;
+                        cache = comp.internal_RegiestedNodeId(cache) ?? cache;
                     }
-                    this.regiestedNodeId.AddRange(regiestedNodeId);
+                    regiestedNodeId.AddRange(cache);
                 }
                 return new HashSet<string>(regiestedNodeId);
             }
@@ -376,7 +377,7 @@ namespace RW_NodeTree
         /// </summary>
         public void ResetRenderedTexture()
         {
-            IsRandereds = 0;
+            foreach (OffScreenRenderingCache cache in OffScreenRenderingCaches.Values) cache.ResetRenderedTexture();
             ParentProccesser?.ResetRenderedTexture();
             if(parent.Spawned && parent.def.drawerType >= DrawerType.MapMeshOnly) parent.DirtyMapMesh(parent.Map);
         }
@@ -386,8 +387,8 @@ namespace RW_NodeTree
         /// </summary>
         public void ResetVerbs()
         {
-            regiestedNodeVerbToolInfos.Clear();
-            regiestedNodeVerbPropertiesInfos.Clear();
+            regiestedNodeVerbToolInfos.GetOrAdd(AccessKey ?? "").Clear();
+            regiestedNodeVerbPropertiesInfos.GetOrAdd(AccessKey ?? "").Clear();
             foreach (ThingComp comp in parent.AllComps)
             {
                 (comp as IVerbOwner)?.VerbTracker?.VerbsNeedReinitOnLoad();
@@ -399,7 +400,7 @@ namespace RW_NodeTree
 
         public void ResetRegiestedNodeId()
         {
-            regiestedNodeId.Clear();
+            regiestedNodeId.GetOrAdd(AccessKey ?? "").Clear();
             ParentProccesser?.ResetRegiestedNodeId();
         }
 
@@ -408,9 +409,7 @@ namespace RW_NodeTree
         {
             if (ownerType != null && typeof(IVerbOwner).IsAssignableFrom(ownerType))
             {
-                List<VerbToolRegiestInfo> Registed;
-                regiestedNodeVerbToolInfos.TryGetValue(ownerType, out Registed);
-                return Registed != null ? new List<VerbToolRegiestInfo>(Registed) : new List<VerbToolRegiestInfo>();
+                return regiestedNodeVerbToolInfos.GetOrAdd(AccessKey ?? "").TryGetValue(ownerType) ?? new List<VerbToolRegiestInfo>();
             }
             return new List<VerbToolRegiestInfo>();
         }
@@ -420,9 +419,7 @@ namespace RW_NodeTree
         {
             if(ownerType != null && typeof(IVerbOwner).IsAssignableFrom(ownerType))
             {
-                List<VerbPropertiesRegiestInfo> Registed;
-                regiestedNodeVerbPropertiesInfos.TryGetValue(ownerType, out Registed);
-                return Registed != null ? new List<VerbPropertiesRegiestInfo>(Registed) : new List<VerbPropertiesRegiestInfo>();
+                return regiestedNodeVerbPropertiesInfos.GetOrAdd(AccessKey ?? "").TryGetValue(ownerType) ?? new List<VerbPropertiesRegiestInfo>();
             }
             return new List<VerbPropertiesRegiestInfo>();
         }
@@ -432,7 +429,8 @@ namespace RW_NodeTree
         /// </summary>
         public override void PostExposeData()
         {
-            Scribe_Deep.Look<NodeContainer>(ref this.childNodes, "innerContainer", this);
+            Scribe_Deep.Look(ref this.childNodes, "innerContainer", this);
+            Scribe_Values.Look(ref this.AccessKey, "AccessKey");
         }
 
         /// <summary>
@@ -541,11 +539,9 @@ namespace RW_NodeTree
         /// <returns>result of rendering</returns>
         public Material GetAndUpdateChildTexture(Rot4 rot, Graphic subGraphic = null)
         {
-            int rot_int = rot.AsInt;
-            if (((IsRandereds >> rot_int) & 1) == 1 && materials[rot_int] != null)
-            {
-                return materials[rot_int]; 
-            }
+            OffScreenRenderingCache cache = GetOffScreenRenderingCache(AccessKey);
+            (Material material, Texture2D texture, RenderTexture cachedRenderTarget, bool IsRandered) = cache[rot];
+            if (IsRandered && material != null) return material;
             List<(Thing, string, List<RenderInfo>)> nodeRenderingInfos = new List<(Thing, string, List<RenderInfo>)>(childNodes.Count + 1);
 
             //if (Prefs.DevMode)
@@ -613,34 +609,50 @@ namespace RW_NodeTree
                 final.AddRange(infos.Item3);
             }
 
-            RenderingTools.RenderToTarget(final, ref cachedRenderTargets[rot_int], ref textures[rot_int], default(Vector2Int), Props.TextureSizeFactor, Props.ExceedanceFactor, Props.ExceedanceOffset);
+            RenderingTools.RenderToTarget(final, ref cachedRenderTarget, ref texture, default(Vector2Int), Props.TextureSizeFactor, Props.ExceedanceFactor, Props.ExceedanceOffset);
 
 
             Shader shader = subGraphic.Shader;
 
-            textures[rot_int].wrapMode = TextureWrapMode.Clamp;
-            textures[rot_int].filterMode = Props.TextureFilterMode;
+            texture.wrapMode = TextureWrapMode.Clamp;
+            texture.filterMode = Props.TextureFilterMode;
 
-            if (materials[rot_int] == null)
+            if (material == null)
             {
-                materials[rot_int] = new Material(shader);
+                material = new Material(shader);
             }
             else if(shader != null)
             {
-                materials[rot_int].shader = shader;
+                material.shader = shader;
             }
-            materials[rot_int].mainTexture = textures[rot_int];
-            IsRandereds |= (byte)(1 << rot_int);
-            return materials[rot_int];
+            material.mainTexture = texture;
+            IsRandered = true;
+            cache[rot] = (material, texture, cachedRenderTarget, IsRandered);
+            return material;
         }
 
 
         public Vector2 GetAndUpdateDrawSize(Rot4 rot, Graphic subGraphic = null)
         {
-            int rot_int = rot.AsInt;
-            if (((IsRandereds >> rot_int) & 1) == 0 || textures[rot_int] == null) GetAndUpdateChildTexture(rot, subGraphic);
-            Vector2 result = new Vector2(textures[rot_int].width, textures[rot_int].height) / Props.TextureSizeFactor;
+            OffScreenRenderingCache cache = GetOffScreenRenderingCache(AccessKey);
+            (Material material, Texture2D texture, RenderTexture cachedRenderTarget, bool IsRandered) = cache[rot];
+            if (IsRandered || texture == null) GetAndUpdateChildTexture(rot, subGraphic);
+            Vector2 result = new Vector2(texture.width, texture.height) / Props.TextureSizeFactor;
             //if (Prefs.DevMode) Log.Message(" DrawSize: thing=" + parent + "; Rot4=" + rot + "; textureWidth=" + textures[rot_int].width + "; result=" + result + ";\n");
+            cache[rot] = (material, texture, cachedRenderTarget, IsRandered);
+            return result;
+        }
+
+
+        private OffScreenRenderingCache GetOffScreenRenderingCache(string key)
+        {
+            key = key ?? "";
+            OffScreenRenderingCache result;
+            if(!OffScreenRenderingCaches.TryGetValue(key,out result))
+            {
+                result = new OffScreenRenderingCache();
+                OffScreenRenderingCaches.Add(key, result);
+            }
             return result;
         }
 
@@ -702,6 +714,69 @@ namespace RW_NodeTree
             return null;
         }
 
+
+        private class OffScreenRenderingCache
+        {
+            public (Material, Texture2D, RenderTexture, bool) this[Rot4 index]
+            {
+                get
+                {
+                    switch(index.AsByte)
+                    {
+                        case 0: return (materialNorth, textureNorth, cachedRenderTargetNorth, (IsRandereds & 1) == 1);
+                        case 1: return (materialEast, textureEast, cachedRenderTargetEast, ((IsRandereds >> 1) & 1) == 1);
+                        case 2: return (materialSouth, textureSouth, cachedRenderTargetSouth, ((IsRandereds >> 2) & 1) == 1);
+                        case 3: return (materialWest, textureWest, cachedRenderTargetWest, ((IsRandereds >> 3) & 1) == 1);
+                        default: return (materialNorth, textureNorth, cachedRenderTargetNorth, (IsRandereds & 1) == 1);
+                    }
+                } 
+                set
+                {
+                    switch (index.AsByte)
+                    {
+                        case 0:
+                            materialNorth = value.Item1;
+                            textureNorth = value.Item2;
+                            cachedRenderTargetNorth = value.Item3;
+                            break;
+                        case 1:
+                            materialEast = value.Item1;
+                            textureEast = value.Item2;
+                            cachedRenderTargetEast = value.Item3;
+                            break;
+                        case 2:
+                            materialSouth = value.Item1;
+                            textureSouth = value.Item2;
+                            cachedRenderTargetSouth = value.Item3;
+                            break;
+                        case 3:
+                            materialWest = value.Item1;
+                            textureWest = value.Item2;
+                            cachedRenderTargetWest = value.Item3;
+                            break;
+                        default:
+                            materialNorth = value.Item1;
+                            textureNorth = value.Item2;
+                            cachedRenderTargetNorth = value.Item3;
+                            break;
+                    }
+                    if (value.Item4) IsRandereds |= (byte)(1 << index.AsByte);
+                    else IsRandereds &= (byte)~(1 << index.AsByte);
+
+                }
+            }
+
+            public void ResetRenderedTexture() => IsRandereds = 0;
+
+            public Material materialNorth, materialEast, materialSouth, materialWest;
+
+            public Texture2D textureNorth, textureEast, textureSouth, textureWest;
+
+            public RenderTexture cachedRenderTargetNorth, cachedRenderTargetEast, cachedRenderTargetSouth, cachedRenderTargetWest;
+
+            public byte IsRandereds;
+        }
+
         #region operator
         public static implicit operator Thing(CompChildNodeProccesser node)
         {
@@ -715,23 +790,17 @@ namespace RW_NodeTree
         #endregion
 
 
-        private byte IsRandereds = 0;
-
         private NodeContainer childNodes;
 
-        private readonly Material[] materials = new Material[4];
+        private readonly Dictionary<string, HashSet<string>> regiestedNodeId = new Dictionary<string, HashSet<string>>();
 
-        private readonly Texture2D[] textures = new Texture2D[4];
+        private readonly Dictionary<string, OffScreenRenderingCache> OffScreenRenderingCaches = new Dictionary<string, OffScreenRenderingCache>();
 
-        private readonly RenderTexture[] cachedRenderTargets = new RenderTexture[4];
+        private readonly Dictionary<string, Dictionary<Type, List<VerbToolRegiestInfo>>> regiestedNodeVerbToolInfos = new Dictionary<string, Dictionary<Type, List<VerbToolRegiestInfo>>>();
 
-        private readonly HashSet<string> regiestedNodeId = new HashSet<string>();
+        private readonly Dictionary<string, Dictionary<Type, List<VerbPropertiesRegiestInfo>>> regiestedNodeVerbPropertiesInfos = new Dictionary<string, Dictionary<Type, List<VerbPropertiesRegiestInfo>>>();
 
-        private readonly Dictionary<Type, List<VerbToolRegiestInfo>> regiestedNodeVerbToolInfos = new Dictionary<Type, List<VerbToolRegiestInfo>>();
-
-        private readonly Dictionary<Type, List<VerbPropertiesRegiestInfo>> regiestedNodeVerbPropertiesInfos = new Dictionary<Type, List<VerbPropertiesRegiestInfo>>();
-
-        public readonly Dictionary<string, object> dataset = new Dictionary<string, object>();
+        public string AccessKey = "";
 
 
         /*
