@@ -6,6 +6,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml;
+using System.Xml.Linq;
 using UnityEngine;
 using Verse;
 
@@ -104,12 +106,60 @@ namespace RW_NodeTree
 
             Scribe.EnterNode("InnerList");
 
-            for(int i = 0; i < Count; i++)
+            if(Scribe.mode == LoadSaveMode.Saving)
             {
-                Thing thing = innerList[i];
-                string id = innerIdList[i];
+                HashSet<string> UsedIds = DebugLoadIDsSavingErrorsChecker_deepSaved(Scribe.saver.loadIDsErrorsChecker);
+                for (int i = 0; i < Count; i++)
+                {
+                    Thing thing = innerList[i];
+                    string id = innerIdList[i];
+                    if (UsedIds.Contains(thing.GetUniqueLoadID())) Scribe_References.Look(ref thing, id);
+                    else Scribe_Deep.Look(ref thing, id);
+                }
+            }
+            else
+            {
+                int i = 0;
+                for (XmlNode xmlNode = Scribe.loader.curXmlParent.FirstChild; xmlNode != null; xmlNode = xmlNode.NextSibling)
+                {
+                    if (xmlNode.NodeType == XmlNodeType.Element)
+                    {
+                        if (innerList.Count <= i) innerList.Add(null);
+                        if (innerIdList.Count <= i) innerIdList.Add(null);
+                        innerIdList[i] = xmlNode.Name;
+                        if (xmlNode.FirstChild.NodeType == XmlNodeType.Text)
+                        {
+                            Thing thing = innerList[i];
+                            Scribe_References.Look(ref thing, innerIdList[i]);
+                            innerList[i] = thing;
+                        }
+                        else
+                        {
+                            Thing thing = innerList[i];
+                            Scribe_Deep.Look(ref thing, innerIdList[i]);
+                            innerList[i] = thing;
+                        }
+                        i++;
+                    }
+                }
             }
             Scribe.ExitNode();
+            for(int i = Count - 1; i >= 0; i--)
+            {
+                if (innerList[i] == null || innerIdList[i] == null)
+                {
+                    innerList.RemoveAt(i);
+                    innerIdList.RemoveAt(i);
+                }
+            }
+            for (int i = innerList.Count - 1; i >= Count; i--)
+            {
+                innerList.RemoveAt(i);
+            }
+            for (int i = innerIdList.Count - 1; i >= Count; i--)
+            {
+                innerIdList.RemoveAt(i);
+            }
             Scribe_Values.Look<bool>(ref this.needUpdate, "needUpdate");
             //if (Scribe.mode == LoadSaveMode.PostLoadInit) needUpdate = false;
         }
@@ -343,6 +393,9 @@ namespace RW_NodeTree
             }
         }
 
+
+        private static readonly AccessTools.FieldRef<DebugLoadIDsSavingErrorsChecker,HashSet<string>> DebugLoadIDsSavingErrorsChecker_deepSaved = AccessTools.FieldRefAccess<DebugLoadIDsSavingErrorsChecker,HashSet<string>>( "deepSaved");
+
         public override int IndexOf(Thing item) => innerList.IndexOf(item);
 
         protected override Thing GetAt(int index) => innerList[index];
@@ -352,5 +405,6 @@ namespace RW_NodeTree
         private List<Thing> innerList = new List<Thing>();
 
         private List<string> innerIdList = new List<string>();
+
     }
 }
