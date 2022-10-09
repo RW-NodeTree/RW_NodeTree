@@ -173,7 +173,7 @@ namespace RW_NodeTree.Test
             StringBuilder stringBuilder = new StringBuilder();
             if (statWorker is StatWorker_MeleeAverageDPS || statWorker is StatWorker_MeleeAverageArmorPenetration)
             {
-                foreach (Thing thing in NodeProccesser.ChildNodes)
+                foreach (Thing thing in (IEnumerable<Thing>)NodeProccesser.ChildNodes)
                 {
                     stringBuilder.AppendLine("  " + thing.Label + ":");
                     string exp = "\n" + statWorker.GetExplanationUnfinalized(StatRequest.For(thing), numberSense);
@@ -190,7 +190,7 @@ namespace RW_NodeTree.Test
             absorbed = false;
             int count = NodeProccesser.ChildNodes.Count + 1;
             dinfo.SetAmount(dinfo.Amount / count);
-            foreach (Thing thing in NodeProccesser.ChildNodes)
+            foreach (Thing thing in (IEnumerable<Thing>)NodeProccesser.ChildNodes)
             {
                 thing.TakeDamage(dinfo);
             }
@@ -202,7 +202,7 @@ namespace RW_NodeTree.Test
             {
                 yield return hyperlink;
             }
-            foreach(Thing thing in NodeProccesser.ChildNodes)
+            foreach(Thing thing in (IEnumerable<Thing>)NodeProccesser.ChildNodes)
             {
                 yield return new Dialog_InfoCard.Hyperlink(thing);
             }

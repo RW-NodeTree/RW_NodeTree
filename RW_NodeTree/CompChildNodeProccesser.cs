@@ -20,11 +20,6 @@ namespace RW_NodeTree
     public partial class CompChildNodeProccesser : ThingComp, IThingHolder
     {
 
-        public CompChildNodeProccesser()
-        {
-            childNodes = new NodeContainer(this);
-        }
-
         public CompProperties_ChildNodeProccesser Props => (CompProperties_ChildNodeProccesser)props;
 
 
@@ -429,8 +424,9 @@ namespace RW_NodeTree
         /// </summary>
         public override void PostExposeData()
         {
-            Scribe_Deep.Look(ref this.childNodes, "innerContainer", this);
-            Scribe_Values.Look(ref this.AccessKey, "AccessKey");
+            //Scribe_Deep.Look(ref this.childNodes, "innerContainer", this);
+            Scribe_Collections.Look(ref childNodes, "innerContainer", LookMode.Deep, this);
+            Scribe_Collections.Look(ref childNodesAccessKeys, "innerContainerAccessKeys", LookMode.Value);
         }
 
         /// <summary>
@@ -681,11 +677,26 @@ namespace RW_NodeTree
 
         public ThingOwner GetDirectlyHeldThings()
         {
-            if(childNodes == null)
+            AccessKey = AccessKey ?? string.Empty;
+            if (childNodes == null)
             {
-                childNodes = new NodeContainer(this);
+                childNodes = new List<NodeContainer>();
             }
-            return childNodes;
+            if (childNodesAccessKeys == null)
+            {
+                childNodesAccessKeys = new List<string>();
+            }
+            for(int i = 0; i < childNodes.Count && i < childNodes.Count; i++)
+            {
+                if (childNodesAccessKeys[i] == AccessKey)
+                {
+                    return childNodes[i];
+                }
+            }
+            NodeContainer result = new NodeContainer(this);
+            childNodes.Add(result);
+            childNodesAccessKeys.Add(AccessKey);
+            return result;
         }
 
         public static IVerbOwner GetSameTypeVerbOwner(Type ownerType, Thing thing)
@@ -790,7 +801,9 @@ namespace RW_NodeTree
         #endregion
 
 
-        private NodeContainer childNodes;
+        private List<string> childNodesAccessKeys = new List<string>();
+
+        private List<NodeContainer> childNodes = new List<NodeContainer>();
 
         private readonly Dictionary<string, HashSet<string>> regiestedNodeId = new Dictionary<string, HashSet<string>>();
 
@@ -800,7 +813,7 @@ namespace RW_NodeTree
 
         private readonly Dictionary<string, Dictionary<Type, List<VerbPropertiesRegiestInfo>>> regiestedNodeVerbPropertiesInfos = new Dictionary<string, Dictionary<Type, List<VerbPropertiesRegiestInfo>>>();
 
-        public string AccessKey = "";
+        public static string AccessKey = "";
 
 
         /*
