@@ -113,7 +113,7 @@ namespace RW_NodeTree
                 {
                     Thing thing = innerList[i];
                     string id = innerIdList[i];
-                    if (UsedIds.Contains(thing.GetUniqueLoadID())) Scribe_References.Look(ref thing, id);
+                    if (UsedIds.Contains(thing.GetUniqueLoadID()) || (thing.holdingOwner != null && thing.holdingOwner != this)) Scribe_References.Look(ref thing, id);
                     else Scribe_Deep.Look(ref thing, id);
                 }
             }
