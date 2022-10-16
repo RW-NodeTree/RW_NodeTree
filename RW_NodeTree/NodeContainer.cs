@@ -151,6 +151,10 @@ namespace RW_NodeTree
                     innerList.RemoveAt(i);
                     innerIdList.RemoveAt(i);
                 }
+                else
+                {
+                    innerList[i].holdingOwner = this;
+                }
             }
             for (int i = innerList.Count - 1; i >= Count; i--)
             {
