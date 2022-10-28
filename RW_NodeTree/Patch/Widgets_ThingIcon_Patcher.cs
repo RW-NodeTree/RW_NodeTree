@@ -21,7 +21,8 @@ namespace RW_NodeTree.Patch
             typeof(Rect),
             typeof(Thing),
             typeof(float),
-            typeof(Rot4?)
+            typeof(Rot4?),
+            typeof(bool)
         )]
         private static void PreWidgets_ThingIcon(Thing thing, ref (Vector2, IntVec2)? __state)
         {
@@ -50,7 +51,8 @@ namespace RW_NodeTree.Patch
             typeof(Rect),
             typeof(Thing),
             typeof(float),
-            typeof(Rot4?)
+            typeof(Rot4?),
+            typeof(bool)
         )]
         private static void PostWidgets_ThingIcon(Thing thing, ref (Vector2, IntVec2)? __state)
         {

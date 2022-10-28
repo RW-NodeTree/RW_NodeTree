@@ -421,8 +421,8 @@ namespace RW_NodeTree
         /// </summary>
         public override void PostExposeData()
         {
-            //Scribe_Deep.Look(ref this.childNodes, "innerContainer", this);
-            Scribe_Collections.Look(ref childNodes, "innerContainer", LookMode.Deep, this);
+            Scribe_Deep.Look(ref this.childNodes, "innerContainer", this);
+            //Scribe_Collections.Look(ref childNodes, "innerContainer", LookMode.Deep, this);
             Scribe_Collections.Look(ref childNodesAccessKeys, "innerContainerAccessKeys", LookMode.Value);
         }
 
@@ -620,6 +620,7 @@ namespace RW_NodeTree
             OffScreenRenderingCache cache = GetOffScreenRenderingCache(RenderingKey);
             (Material material, Texture2D texture, RenderTexture cachedRenderTarget, bool IsRandered) = cache[rot];
             if (IsRandered || texture == null) GetAndUpdateChildTexture(rot, subGraphic);
+            (material, texture, cachedRenderTarget, IsRandered) = cache[rot];
             Vector2 result = new Vector2(texture.width, texture.height) / Props.TextureSizeFactor;
             //if (Prefs.DevMode) Log.Message(" DrawSize: thing=" + parent + "; Rot4=" + rot + "; textureWidth=" + textures[rot_int].width + "; result=" + result + ";\n");
             cache[rot] = (material, texture, cachedRenderTarget, IsRandered);
@@ -712,26 +713,11 @@ namespace RW_NodeTree
 
         public ThingOwner GetDirectlyHeldThings()
         {
-            RenderingKey = RenderingKey ?? string.Empty;
             if (childNodes == null)
             {
-                childNodes = new List<NodeContainer>();
+                childNodes = new NodeContainer(this);
             }
-            if (childNodesAccessKeys == null)
-            {
-                childNodesAccessKeys = new List<string>();
-            }
-            for(int i = 0; i < childNodes.Count && i < childNodes.Count; i++)
-            {
-                if (childNodesAccessKeys[i] == RenderingKey)
-                {
-                    return childNodes[i];
-                }
-            }
-            NodeContainer result = new NodeContainer(this);
-            childNodes.Add(result);
-            childNodesAccessKeys.Add(RenderingKey);
-            return result;
+            return childNodes;
         }
 
         public static IVerbOwner GetSameTypeVerbOwner(Type ownerType, Thing thing)
@@ -836,9 +822,9 @@ namespace RW_NodeTree
         #endregion
 
 
-        private List<string> childNodesAccessKeys = new List<string>();
+        private NodeContainer childNodes;
 
-        private List<NodeContainer> childNodes = new List<NodeContainer>();
+        private List<string> childNodesAccessKeys = new List<string>();
 
         private readonly HashSet<string> regiestedNodeId = new HashSet<string>();
 
