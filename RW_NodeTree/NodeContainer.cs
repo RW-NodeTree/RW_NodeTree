@@ -40,7 +40,7 @@ namespace RW_NodeTree
                 if (!key.NullOrEmpty())
                 {
                     Thing t = this[key];
-                    if(value != null && (t != null ? Remove(t) : true))
+                    if((t != null ? Remove(t) : true) && value != null)
                     {
                         innerIdList.Add(key);
                         if (!TryAdd(value) && (t == null || !TryAdd(t)))
@@ -281,7 +281,6 @@ namespace RW_NodeTree
 
             if (Count >= maxStacks) goto fail;
 
-            item.holdingOwner?.Remove(item);
             if(item.holdingOwner == null) item.holdingOwner = this;
             innerList.Add(item);
             NeedUpdate = true;
