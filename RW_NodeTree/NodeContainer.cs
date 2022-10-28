@@ -92,6 +92,20 @@ namespace RW_NodeTree
             }
         }
 
+        internal Thing InternalParent
+        {
+            get
+            {
+                int index = innerIdList.IndexOf("");
+                return ((index >= 0) ? this[index] : null);
+            }
+            set
+            {
+                innerIdList.Add("");
+                innerList.Add(value);
+            }
+        }
+
         ICollection<string> IDictionary<string, Thing>.Keys => InnerIdListForReading;
 
         ICollection<Thing> IDictionary<string, Thing>.Values => InnerListForReading;
@@ -139,6 +153,7 @@ namespace RW_NodeTree
                             Scribe_Deep.Look(ref thing, innerIdList[i]);
                             innerList[i] = thing;
                         }
+                        if(innerList[i].holdingOwner == null) innerList[i].holdingOwner = this;
                         i++;
                     }
                 }

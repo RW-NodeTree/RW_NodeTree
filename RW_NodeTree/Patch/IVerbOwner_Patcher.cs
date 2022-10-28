@@ -175,7 +175,7 @@ namespace RW_NodeTree
             if (ownerType != null && typeof(IVerbOwner).IsAssignableFrom(ownerType))
             {
                 List<VerbPropertiesRegiestInfo> verbPropertiesRegiestInfo;
-                if (!regiestedNodeVerbPropertiesInfos.GetOrAdd(AccessKey ?? "").TryGetValue(ownerType, out verbPropertiesRegiestInfo))
+                if (!regiestedNodeVerbPropertiesInfos.TryGetValue(ownerType, out verbPropertiesRegiestInfo))
                 {
                     verbPropertiesRegiestInfo = new List<VerbPropertiesRegiestInfo>(verbProperties.Count);
                     foreach (VerbProperties verbProperty in verbProperties)
@@ -193,7 +193,7 @@ namespace RW_NodeTree
                             verbPropertiesRegiestInfo.RemoveAt(i);
                         }
                     }
-                    regiestedNodeVerbPropertiesInfos.GetOrAdd(AccessKey ?? "").Add(ownerType, verbPropertiesRegiestInfo);
+                    regiestedNodeVerbPropertiesInfos.Add(ownerType, verbPropertiesRegiestInfo);
                 }
                 verbProperties = new List<VerbProperties>(verbPropertiesRegiestInfo.Count);
                 foreach(VerbPropertiesRegiestInfo regiestInfo in verbPropertiesRegiestInfo)
@@ -215,7 +215,7 @@ namespace RW_NodeTree
             if (ownerType != null && typeof(IVerbOwner).IsAssignableFrom(ownerType))
             {
                 List<VerbToolRegiestInfo> verbToolRegiestInfo;
-                if (!regiestedNodeVerbToolInfos.GetOrAdd(AccessKey ?? "").TryGetValue(ownerType,out verbToolRegiestInfo))
+                if (!regiestedNodeVerbToolInfos.TryGetValue(ownerType,out verbToolRegiestInfo))
                 {
                     verbToolRegiestInfo = new List<VerbToolRegiestInfo>(tools.Count);
                     foreach (Tool tool in tools)
@@ -240,7 +240,7 @@ namespace RW_NodeTree
                         regiestInfo.afterCobvertTool.id = i.ToString();
                         verbToolRegiestInfo[i] = regiestInfo;
                     }
-                    regiestedNodeVerbToolInfos.GetOrAdd(AccessKey ?? "").Add(ownerType, verbToolRegiestInfo);
+                    regiestedNodeVerbToolInfos.Add(ownerType, verbToolRegiestInfo);
                 }
                 tools = new List<Tool>(verbToolRegiestInfo.Count);
                 foreach (VerbToolRegiestInfo regiestInfo in verbToolRegiestInfo)

@@ -83,7 +83,6 @@ namespace RW_NodeTree
         {
             get
             {
-                HashSet<string> regiestedNodeId = this.regiestedNodeId.GetOrAdd(AccessKey ?? "");
                 if (regiestedNodeId.Count <= 0)
                 {
                     HashSet<string> cache = new HashSet<string>();
@@ -382,8 +381,6 @@ namespace RW_NodeTree
         /// </summary>
         public void ResetVerbs()
         {
-            regiestedNodeVerbToolInfos.GetOrAdd(AccessKey ?? "").Clear();
-            regiestedNodeVerbPropertiesInfos.GetOrAdd(AccessKey ?? "").Clear();
             foreach (ThingComp comp in parent.AllComps)
             {
                 (comp as IVerbOwner)?.VerbTracker?.VerbsNeedReinitOnLoad();
@@ -395,7 +392,7 @@ namespace RW_NodeTree
 
         public void ResetRegiestedNodeId()
         {
-            regiestedNodeId.GetOrAdd(AccessKey ?? "").Clear();
+            regiestedNodeId.Clear();
             ParentProccesser?.ResetRegiestedNodeId();
         }
 
@@ -404,7 +401,7 @@ namespace RW_NodeTree
         {
             if (ownerType != null && typeof(IVerbOwner).IsAssignableFrom(ownerType))
             {
-                return regiestedNodeVerbToolInfos.GetOrAdd(AccessKey ?? "").TryGetValue(ownerType) ?? new List<VerbToolRegiestInfo>();
+                return regiestedNodeVerbToolInfos.TryGetValue(ownerType) ?? new List<VerbToolRegiestInfo>();
             }
             return new List<VerbToolRegiestInfo>();
         }
@@ -414,7 +411,7 @@ namespace RW_NodeTree
         {
             if(ownerType != null && typeof(IVerbOwner).IsAssignableFrom(ownerType))
             {
-                return regiestedNodeVerbPropertiesInfos.GetOrAdd(AccessKey ?? "").TryGetValue(ownerType) ?? new List<VerbPropertiesRegiestInfo>();
+                return regiestedNodeVerbPropertiesInfos.TryGetValue(ownerType) ?? new List<VerbPropertiesRegiestInfo>();
             }
             return new List<VerbPropertiesRegiestInfo>();
         }
@@ -535,7 +532,7 @@ namespace RW_NodeTree
         /// <returns>result of rendering</returns>
         public Material GetAndUpdateChildTexture(Rot4 rot, Graphic subGraphic = null)
         {
-            OffScreenRenderingCache cache = GetOffScreenRenderingCache(AccessKey);
+            OffScreenRenderingCache cache = GetOffScreenRenderingCache(RenderingKey);
             (Material material, Texture2D texture, RenderTexture cachedRenderTarget, bool IsRandered) = cache[rot];
             if (IsRandered && material != null) return material;
             List<(Thing, string, List<RenderInfo>)> nodeRenderingInfos = new List<(Thing, string, List<RenderInfo>)>(childNodes.Count + 1);
@@ -630,7 +627,7 @@ namespace RW_NodeTree
 
         public Vector2 GetAndUpdateDrawSize(Rot4 rot, Graphic subGraphic = null)
         {
-            OffScreenRenderingCache cache = GetOffScreenRenderingCache(AccessKey);
+            OffScreenRenderingCache cache = GetOffScreenRenderingCache(RenderingKey);
             (Material material, Texture2D texture, RenderTexture cachedRenderTarget, bool IsRandered) = cache[rot];
             if (IsRandered || texture == null) GetAndUpdateChildTexture(rot, subGraphic);
             Vector2 result = new Vector2(texture.width, texture.height) / Props.TextureSizeFactor;
@@ -677,7 +674,7 @@ namespace RW_NodeTree
 
         public ThingOwner GetDirectlyHeldThings()
         {
-            AccessKey = AccessKey ?? string.Empty;
+            RenderingKey = RenderingKey ?? string.Empty;
             if (childNodes == null)
             {
                 childNodes = new List<NodeContainer>();
@@ -688,14 +685,14 @@ namespace RW_NodeTree
             }
             for(int i = 0; i < childNodes.Count && i < childNodes.Count; i++)
             {
-                if (childNodesAccessKeys[i] == AccessKey)
+                if (childNodesAccessKeys[i] == RenderingKey)
                 {
                     return childNodes[i];
                 }
             }
             NodeContainer result = new NodeContainer(this);
             childNodes.Add(result);
-            childNodesAccessKeys.Add(AccessKey);
+            childNodesAccessKeys.Add(RenderingKey);
             return result;
         }
 
@@ -805,15 +802,15 @@ namespace RW_NodeTree
 
         private List<NodeContainer> childNodes = new List<NodeContainer>();
 
-        private readonly Dictionary<string, HashSet<string>> regiestedNodeId = new Dictionary<string, HashSet<string>>();
+        private readonly HashSet<string> regiestedNodeId = new HashSet<string>();
 
         private readonly Dictionary<string, OffScreenRenderingCache> OffScreenRenderingCaches = new Dictionary<string, OffScreenRenderingCache>();
 
-        private readonly Dictionary<string, Dictionary<Type, List<VerbToolRegiestInfo>>> regiestedNodeVerbToolInfos = new Dictionary<string, Dictionary<Type, List<VerbToolRegiestInfo>>>();
+        private readonly Dictionary<Type, List<VerbToolRegiestInfo>> regiestedNodeVerbToolInfos = new Dictionary<Type, List<VerbToolRegiestInfo>>();
 
-        private readonly Dictionary<string, Dictionary<Type, List<VerbPropertiesRegiestInfo>>> regiestedNodeVerbPropertiesInfos = new Dictionary<string, Dictionary<Type, List<VerbPropertiesRegiestInfo>>>();
+        private readonly Dictionary<Type, List<VerbPropertiesRegiestInfo>> regiestedNodeVerbPropertiesInfos = new Dictionary<Type, List<VerbPropertiesRegiestInfo>>();
 
-        public static string AccessKey = "";
+        public static string RenderingKey = "";
 
 
         /*
