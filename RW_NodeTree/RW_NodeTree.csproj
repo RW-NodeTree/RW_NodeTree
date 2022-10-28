@@ -38,7 +38,6 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="DataStructure\LinnerNode.cs" />
-    <Compile Include="Patch\ThingComp_ParentHolder_Patcher.cs" />
     <Compile Include="Patch\Widgets_ThingIcon_Patcher.cs" />
     <Compile Include="Test\NodeComp_Test.cs" />
     <Compile Include="Patch\GenRecipe_Patcher.cs" />

@@ -92,20 +92,6 @@ namespace RW_NodeTree
             }
         }
 
-        internal Thing InternalParent
-        {
-            get
-            {
-                int index = innerIdList.IndexOf("");
-                return ((index >= 0) ? this[index] : null);
-            }
-            set
-            {
-                innerIdList.Add("");
-                innerList.Add(value);
-            }
-        }
-
         ICollection<string> IDictionary<string, Thing>.Keys => InnerIdListForReading;
 
         ICollection<Thing> IDictionary<string, Thing>.Values => InnerListForReading;
@@ -377,6 +363,14 @@ namespace RW_NodeTree
             return false;
         }
 
+        public IEnumerator<KeyValuePair<string, Thing>> GetEnumerator()
+        {
+            for (int i = 0; i < Count; i++)
+            {
+                yield return new KeyValuePair<string, Thing>(this[(uint)i], this[i]);
+            }
+        }
+
         void ICollection<KeyValuePair<string, Thing>>.Add(KeyValuePair<string, Thing> item)
         {
             Add(item.Key, item.Value);
@@ -402,14 +396,6 @@ namespace RW_NodeTree
                 return Remove(item.Value);
             }
             return false;
-        }
-
-        IEnumerator<KeyValuePair<string, Thing>> IEnumerable<KeyValuePair<string, Thing>>.GetEnumerator()
-        {
-            for(int i = 0; i < Count; i++)
-            {
-                yield return new KeyValuePair<string, Thing>(this[(uint)i], this[i]);
-            }
         }
 
 
