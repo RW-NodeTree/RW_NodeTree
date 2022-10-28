@@ -267,6 +267,8 @@ namespace RW_NodeTree
                 return false;
             }
 
+            if (innerIdList.Count <= Count) return false;
+
             string id = innerIdList[Count];
             Comp.internal_PerAdd(ref item, ref id);
             innerIdList[Count] = id;
@@ -294,10 +296,13 @@ namespace RW_NodeTree
 
         public override bool Remove(Thing item)
         {
+            int index = innerList.LastIndexOf(item);
 
-            string id = innerIdList[Count];
+            if(index < 0) return false;
+
+            string id = innerIdList[index];
             Comp.internal_PerRemove(ref item, ref id);
-            innerIdList[Count] = id;
+            innerIdList[index] = id;
 
             if (!Contains(item))
             {
@@ -305,7 +310,6 @@ namespace RW_NodeTree
                 return false;
             }
 
-            int index = innerList.LastIndexOf(item);
             innerList.RemoveAt(index);
             innerIdList.RemoveAt(index);
             Comp.internal_PostRemove(item, id, true);
