@@ -38,7 +38,7 @@ namespace RW_NodeTree
     /// </summary>
     public partial class CompChildNodeProccesser : ThingComp, IThingHolder
     {
-        public IEnumerable<Thing> PostGenRecipe_MakeRecipeProducts(RecipeDef recipeDef, Pawn worker, List<Thing> ingredients, Thing dominantIngredient1, IBillGiver billGiver, Precept_ThingStyle precept, RecipeInvokeSource InvokeSource, IEnumerable<Thing> result)
+        internal IEnumerable<Thing> PostGenRecipe_MakeRecipeProducts(RecipeDef recipeDef, Pawn worker, List<Thing> ingredients, Thing dominantIngredient1, IBillGiver billGiver, Precept_ThingStyle precept, RecipeInvokeSource InvokeSource, IEnumerable<Thing> result)
         {
             foreach (CompBasicNodeComp comp in AllNodeComp)
             {

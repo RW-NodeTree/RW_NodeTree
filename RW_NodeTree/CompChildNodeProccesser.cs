@@ -431,17 +431,7 @@ namespace RW_NodeTree
         /// </summary>
         /// <param name="node"></param>
         /// <returns></returns>
-        public bool AppendChild(Thing node)
-        {
-            return AppendChild(null, node);
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="node"></param>
-        /// <returns></returns>
-        public bool AppendChild(string id, Thing node)
+        public bool AppendChild(Thing node, string id = null)
         {
             if (node != null)
             {
@@ -451,7 +441,7 @@ namespace RW_NodeTree
                     {
                         foreach (string regedid in RegiestedNodeId)
                         {
-                            if (AppendChild(regedid, node)) return true;
+                            if (AppendChild(node, regedid)) return true;
                         }
                     }
                 }
@@ -665,7 +655,55 @@ namespace RW_NodeTree
             return true;
         }
 
+        /// <summary>
+        /// Update node tree
+        /// </summary>
+        /// <returns></returns>
         public bool UpdateNode() => ChildNodes.internal_UpdateNode();
+
+        internal void internal_PerAdd(ref Thing node, ref string id)
+        {
+            Thing nodeCache = node;
+            string idCache = id;
+            foreach(CompBasicNodeComp comp in AllNodeComp)
+            {
+                comp.internal_PerAdd(ref nodeCache, ref idCache);
+                nodeCache = nodeCache ?? node;
+                idCache = idCache ?? id;
+            }
+            node = nodeCache;
+            id = idCache;
+        }
+
+        internal void internal_PostAdd(Thing node, string id, bool success)
+        {
+            foreach (CompBasicNodeComp comp in AllNodeComp)
+            {
+                comp.internal_PostAdd(node, id, success);
+            }
+        }
+
+        internal void internal_PerRemove(ref Thing node, ref string id)
+        {
+            Thing nodeCache = node;
+            string idCache = id;
+            foreach (CompBasicNodeComp comp in AllNodeComp)
+            {
+                comp.internal_PerRemove(ref nodeCache, ref idCache);
+                nodeCache = nodeCache ?? node;
+                idCache = idCache ?? id;
+            }
+            node = nodeCache;
+            id = idCache;
+        }
+
+        internal void internal_PostRemove(Thing node, string id, bool success)
+        {
+            foreach (CompBasicNodeComp comp in AllNodeComp)
+            {
+                comp.internal_PostRemove(node, id, success);
+            }
+        }
 
         public void GetChildHolders(List<IThingHolder> outChildren)
         {

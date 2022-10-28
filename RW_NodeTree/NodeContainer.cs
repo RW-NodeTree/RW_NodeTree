@@ -267,44 +267,49 @@ namespace RW_NodeTree
                 return false;
             }
 
+            string id = innerIdList[Count];
+            Comp.internal_PerAdd(ref item, ref id);
+            innerIdList[Count] = id;
+
             if (Contains(item))
             {
                 Log.Warning("Tried to add " + item.ToStringSafe() + " to ThingOwner but this item is already here.");
-                return false;
+                goto fail;
             }
 
-            if (!CanAcceptAnyOf(item, canMergeWithExistingStacks))
-            {
-                return false;
-            }
+            if (!CanAcceptAnyOf(item, canMergeWithExistingStacks)) goto fail;
 
-            if (Count >= maxStacks)
-            {
-                return false;
-            }
+            if (Count >= maxStacks) goto fail;
 
             item.holdingOwner?.Remove(item);
             if(item.holdingOwner == null) item.holdingOwner = this;
             innerList.Add(item);
             NeedUpdate = true;
+
+            Comp.internal_PostAdd(item, id, true);
             return true;
+            fail:
+            Comp.internal_PostAdd(item, id, false);
+            return false;
         }
 
         public override bool Remove(Thing item)
         {
+
+            string id = innerIdList[Count];
+            Comp.internal_PerRemove(ref item, ref id);
+            innerIdList[Count] = id;
+
             if (!Contains(item))
             {
+                Comp.internal_PostRemove(item, id, false);
                 return false;
-            }
-
-            if (item.holdingOwner == this)
-            {
-                item.holdingOwner = null;
             }
 
             int index = innerList.LastIndexOf(item);
             innerList.RemoveAt(index);
             innerIdList.RemoveAt(index);
+            Comp.internal_PostRemove(item, id, true);
             return true;
         }
 

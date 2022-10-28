@@ -74,7 +74,7 @@ namespace RW_NodeTree
         /// <param name="result">result of StatWorker.GetInfoCardHyperlinks(), modifiable</param>
         /// <param name="statWorker">StatWorker</param>
         /// <param name="reqstatRequest">parm 'reqstatRequest' of StatWorker.GetInfoCardHyperlinks()</param>
-        public IEnumerable<Dialog_InfoCard.Hyperlink> PostStatWorker_GetInfoCardHyperlinks(StatWorker statWorker, StatRequest reqstatRequest, IEnumerable<Dialog_InfoCard.Hyperlink> result)
+        internal IEnumerable<Dialog_InfoCard.Hyperlink> PostStatWorker_GetInfoCardHyperlinks(StatWorker statWorker, StatRequest reqstatRequest, IEnumerable<Dialog_InfoCard.Hyperlink> result)
         {
             foreach (CompBasicNodeComp comp in AllNodeComp)
             {

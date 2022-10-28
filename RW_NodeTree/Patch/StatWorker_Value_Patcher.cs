@@ -129,7 +129,7 @@ namespace RW_NodeTree
         /// <param name="statWorker">StatWorker</param>
         /// <param name="req">parm 'req' of StatWorker.GetValueUnfinalized()</param>
         /// <param name="applyPostProcess">parm 'applyPostProcess' of StatWorker.GetValueUnfinalized()</param>
-        public void PreStatWorker_GetValueUnfinalized(StatWorker statWorker, StatRequest req, bool applyPostProcess, Dictionary<string, object> forPostRead)
+        internal void PreStatWorker_GetValueUnfinalized(StatWorker statWorker, StatRequest req, bool applyPostProcess, Dictionary<string, object> forPostRead)
         {
             foreach (CompBasicNodeComp comp in AllNodeComp)
             {
@@ -145,7 +145,7 @@ namespace RW_NodeTree
         /// <param name="statWorker">StatWorker</param>
         /// <param name="req">parm 'req' of StatWorker.FinalizeValue()</param>
         /// <param name="applyPostProcess">parm 'applyPostProcess' of StatWorker.FinalizeValue()</param>
-        public float PreStatWorker_FinalizeValue(StatWorker statWorker, StatRequest req, bool applyPostProcess, float result, Dictionary<string, object> forPostRead)
+        internal float PreStatWorker_FinalizeValue(StatWorker statWorker, StatRequest req, bool applyPostProcess, float result, Dictionary<string, object> forPostRead)
         {
             foreach (CompBasicNodeComp comp in AllNodeComp)
             {
@@ -162,7 +162,7 @@ namespace RW_NodeTree
         /// <param name="statWorker">StatWorker</param>
         /// <param name="req">parm 'req' of StatWorker.GetValueUnfinalized()</param>
         /// <param name="applyPostProcess">parm 'applyPostProcess' of StatWorker.GetValueUnfinalized()</param>
-        public float PostStatWorker_GetValueUnfinalized(StatWorker statWorker, StatRequest req, bool applyPostProcess, float result, Dictionary<string, object> forPostRead)
+        internal float PostStatWorker_GetValueUnfinalized(StatWorker statWorker, StatRequest req, bool applyPostProcess, float result, Dictionary<string, object> forPostRead)
         {
             foreach (CompBasicNodeComp comp in AllNodeComp)
             {
@@ -179,7 +179,7 @@ namespace RW_NodeTree
         /// <param name="statWorker">StatWorker</param>
         /// <param name="req">parm 'req' of StatWorker.FinalizeValue()</param>
         /// <param name="applyPostProcess">parm 'applyPostProcess' of StatWorker.FinalizeValue()</param>
-        public float PostStatWorker_FinalizeValue(StatWorker statWorker, StatRequest req, bool applyPostProcess, float result, Dictionary<string, object> forPostRead)
+        internal float PostStatWorker_FinalizeValue(StatWorker statWorker, StatRequest req, bool applyPostProcess, float result, Dictionary<string, object> forPostRead)
         {
             foreach (CompBasicNodeComp comp in AllNodeComp)
             {

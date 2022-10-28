@@ -42,7 +42,7 @@ namespace RW_NodeTree
         /// <param name="def">ThingDef instance</param>
         /// <param name="req">parm 'req' of ThingDef.SpecialDisplayStats()</param>
         /// <param name="result">result of ThingDef.SpecialDisplayStats</param>
-        public IEnumerable<StatDrawEntry> PostThingDef_SpecialDisplayStats(ThingDef def, StatRequest req, IEnumerable<StatDrawEntry> result)
+        internal IEnumerable<StatDrawEntry> PostThingDef_SpecialDisplayStats(ThingDef def, StatRequest req, IEnumerable<StatDrawEntry> result)
         {
             foreach (CompBasicNodeComp comp in AllNodeComp)
             {
