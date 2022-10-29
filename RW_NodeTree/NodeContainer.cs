@@ -138,32 +138,32 @@ namespace RW_NodeTree
                             Thing thing = innerList[i];
                             Scribe_Deep.Look(ref thing, innerIdList[i]);
                             innerList[i] = thing;
+                            if(innerList[i] != null) innerList[i].holdingOwner = this;
                         }
-                        if(innerList[i].holdingOwner == null) innerList[i].holdingOwner = this;
                         i++;
                     }
                 }
             }
             Scribe.ExitNode();
-            for(int i = Count - 1; i >= 0; i--)
+
+            if (Scribe.mode == LoadSaveMode.ResolvingCrossRefs)
             {
-                if (innerList[i] == null || innerIdList[i] == null)
+                for (int i = Count - 1; i >= 0; i--)
+                {
+                    if (innerList[i] == null || innerIdList[i] == null)
+                    {
+                        innerList.RemoveAt(i);
+                        innerIdList.RemoveAt(i);
+                    }
+                }
+                for (int i = innerList.Count - 1; i >= Count; i--)
                 {
                     innerList.RemoveAt(i);
+                }
+                for (int i = innerIdList.Count - 1; i >= Count; i--)
+                {
                     innerIdList.RemoveAt(i);
                 }
-                else
-                {
-                    innerList[i].holdingOwner = this;
-                }
-            }
-            for (int i = innerList.Count - 1; i >= Count; i--)
-            {
-                innerList.RemoveAt(i);
-            }
-            for (int i = innerIdList.Count - 1; i >= Count; i--)
-            {
-                innerIdList.RemoveAt(i);
             }
             Scribe_Values.Look<bool>(ref this.needUpdate, "needUpdate");
             //if (Scribe.mode == LoadSaveMode.PostLoadInit) needUpdate = false;
@@ -267,13 +267,26 @@ namespace RW_NodeTree
                 return false;
             }
 
-            if (innerIdList.Count <= Count) return false;
-
-            string id = innerIdList[Count];
+            string id = null;
+            bool flag = innerIdList.Count > innerList.Count;
+            if (flag)
+            {
+                id = innerIdList[Count];
+            }
+            else
+            {
+                for (int i = innerList.Count - 1; i >= Count; i--)
+                {
+                    innerList.RemoveAt(i);
+                }
+            }
             Comp.internal_PerAdd(ref item, ref id);
-            innerIdList[Count] = id;
-
-            if (Contains(item))
+            if(!innerIdList.Contains(id) && !innerList.Contains(item))
+            {
+                if(flag) innerIdList[Count] = id;
+                else innerIdList.Add(id);
+            }
+            else
             {
                 Log.Warning("Tried to add " + item.ToStringSafe() + " to ThingOwner but this item is already here.");
                 goto fail;
@@ -296,15 +309,22 @@ namespace RW_NodeTree
 
         public override bool Remove(Thing item)
         {
+
+            for (int i = innerList.Count - 1; i >= Count; i--)
+            {
+                innerList.RemoveAt(i);
+            }
+            for (int i = innerIdList.Count - 1; i >= Count; i--)
+            {
+                innerIdList.RemoveAt(i);
+            }
+
+            Comp.internal_PerRemove(ref item);
+
             int index = innerList.LastIndexOf(item);
+            string id = index >= 0 ? innerIdList[index] : null;
 
-            if(index < 0) return false;
-
-            string id = innerIdList[index];
-            Comp.internal_PerRemove(ref item, ref id);
-            innerIdList[index] = id;
-
-            if (!Contains(item))
+            if (index < 0)
             {
                 Comp.internal_PostRemove(item, id, false);
                 return false;

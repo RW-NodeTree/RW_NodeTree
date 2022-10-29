@@ -684,18 +684,15 @@ namespace RW_NodeTree
             }
         }
 
-        internal void internal_PerRemove(ref Thing node, ref string id)
+        internal void internal_PerRemove(ref Thing node)
         {
             Thing nodeCache = node;
-            string idCache = id;
             foreach (CompBasicNodeComp comp in AllNodeComp)
             {
-                comp.internal_PerRemove(ref nodeCache, ref idCache);
+                comp.internal_PerRemove(ref nodeCache);
                 nodeCache = nodeCache ?? node;
-                idCache = idCache ?? id;
             }
             node = nodeCache;
-            id = idCache;
         }
 
         internal void internal_PostRemove(Thing node, string id, bool success)

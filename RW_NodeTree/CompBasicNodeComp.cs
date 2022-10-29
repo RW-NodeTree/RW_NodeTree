@@ -118,7 +118,7 @@ namespace RW_NodeTree
         /// </summary>
         /// <param name="node"></param>
         /// <param name="id"></param>
-        protected virtual void PerRemove(ref Thing node, ref string id)
+        protected virtual void PerRemove(ref Thing node)
         {
             return;
         }
@@ -159,7 +159,7 @@ namespace RW_NodeTree
         internal bool internal_AllowNode(Thing node, string id = null) => AllowNode(node, id);
         internal void internal_PerAdd(ref Thing node, ref string id) => PerAdd(ref node, ref id);
         internal void internal_PostAdd(Thing node, string id, bool success) => PostAdd(node, id, success);
-        internal void internal_PerRemove(ref Thing node, ref string id) => PerRemove(ref node, ref id);
+        internal void internal_PerRemove(ref Thing node) => PerRemove(ref node);
         internal void internal_PostRemove(Thing node, string id, bool success) => PostRemove(node, id, success);
         internal List<(Thing, string, List<RenderInfo>)> internal_AdapteDrawSteep(List<(Thing, string, List<RenderInfo>)> nodeRenderingInfos, Rot4 rot, Graphic graphic) => AdapteDrawSteep(nodeRenderingInfos, rot, graphic);
         internal HashSet<string> internal_RegiestedNodeId(HashSet<string> regiestedNodeId) => RegiestedNodeId(regiestedNodeId);
