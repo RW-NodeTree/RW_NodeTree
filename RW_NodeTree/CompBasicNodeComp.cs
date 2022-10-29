@@ -134,6 +134,26 @@ namespace RW_NodeTree
         }
 
         /// <summary>
+        /// Invoke when this item added in to container
+        /// </summary>
+        /// <param name="container"></param>
+        /// <param name="id"></param>
+        protected virtual void Added(NodeContainer container, string id)
+        {
+            return;
+        }
+
+        /// <summary>
+        /// Invoke when this item removed from container
+        /// </summary>
+        /// <param name="container"></param>
+        /// <param name="id"></param>
+        protected virtual void Removed(NodeContainer container, string id)
+        {
+            return;
+        }
+
+        /// <summary>
         /// Adapte draw steep of this node
         /// </summary>
         /// <param name="nodeRenderingInfos">Corresponding rendering infos with id and part</param>
@@ -161,6 +181,8 @@ namespace RW_NodeTree
         internal void internal_PostAdd(Thing node, string id, bool success) => PostAdd(node, id, success);
         internal void internal_PerRemove(ref Thing node) => PerRemove(ref node);
         internal void internal_PostRemove(Thing node, string id, bool success) => PostRemove(node, id, success);
+        internal void internal_Added(NodeContainer container, string id) => Added(container, id);
+        internal void internal_Removed(NodeContainer container, string id) => Removed(container, id);
         internal List<(Thing, string, List<RenderInfo>)> internal_AdapteDrawSteep(List<(Thing, string, List<RenderInfo>)> nodeRenderingInfos, Rot4 rot, Graphic graphic) => AdapteDrawSteep(nodeRenderingInfos, rot, graphic);
         internal HashSet<string> internal_RegiestedNodeId(HashSet<string> regiestedNodeId) => RegiestedNodeId(regiestedNodeId);
     }

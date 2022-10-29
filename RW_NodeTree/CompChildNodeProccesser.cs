@@ -371,7 +371,7 @@ namespace RW_NodeTree
         /// </summary>
         public void ResetRenderedTexture()
         {
-            foreach (OffScreenRenderingCache cache in OffScreenRenderingCaches.Values) cache.ResetRenderedTexture();
+            renderingCache.ResetRenderedTexture();
             ParentProccesser?.ResetRenderedTexture();
             if(parent.Spawned && parent.def.drawerType >= DrawerType.MapMeshOnly) parent.DirtyMapMesh(parent.Map);
         }
@@ -522,8 +522,7 @@ namespace RW_NodeTree
         /// <returns>result of rendering</returns>
         public Material GetAndUpdateChildTexture(Rot4 rot, Graphic subGraphic = null)
         {
-            OffScreenRenderingCache cache = GetOffScreenRenderingCache(RenderingKey);
-            (Material material, Texture2D texture, RenderTexture cachedRenderTarget, bool IsRandered) = cache[rot];
+            (Material material, Texture2D texture, RenderTexture cachedRenderTarget, bool IsRandered) = renderingCache[rot];
             if (IsRandered && material != null) return material;
             List<(Thing, string, List<RenderInfo>)> nodeRenderingInfos = new List<(Thing, string, List<RenderInfo>)>(childNodes.Count + 1);
 
@@ -610,33 +609,19 @@ namespace RW_NodeTree
             }
             material.mainTexture = texture;
             IsRandered = true;
-            cache[rot] = (material, texture, cachedRenderTarget, IsRandered);
+            renderingCache[rot] = (material, texture, cachedRenderTarget, IsRandered);
             return material;
         }
 
 
         public Vector2 GetAndUpdateDrawSize(Rot4 rot, Graphic subGraphic = null)
         {
-            OffScreenRenderingCache cache = GetOffScreenRenderingCache(RenderingKey);
-            (Material material, Texture2D texture, RenderTexture cachedRenderTarget, bool IsRandered) = cache[rot];
+            (Material material, Texture2D texture, RenderTexture cachedRenderTarget, bool IsRandered) = renderingCache[rot];
             if (IsRandered || texture == null) GetAndUpdateChildTexture(rot, subGraphic);
-            (material, texture, cachedRenderTarget, IsRandered) = cache[rot];
+            (material, texture, cachedRenderTarget, IsRandered) = renderingCache[rot];
             Vector2 result = new Vector2(texture.width, texture.height) / Props.TextureSizeFactor;
             //if (Prefs.DevMode) Log.Message(" DrawSize: thing=" + parent + "; Rot4=" + rot + "; textureWidth=" + textures[rot_int].width + "; result=" + result + ";\n");
-            cache[rot] = (material, texture, cachedRenderTarget, IsRandered);
-            return result;
-        }
-
-
-        private OffScreenRenderingCache GetOffScreenRenderingCache(string key)
-        {
-            key = key ?? "";
-            OffScreenRenderingCache result;
-            if(!OffScreenRenderingCaches.TryGetValue(key,out result))
-            {
-                result = new OffScreenRenderingCache();
-                OffScreenRenderingCaches.Add(key, result);
-            }
+            renderingCache[rot] = (material, texture, cachedRenderTarget, IsRandered);
             return result;
         }
 
@@ -681,6 +666,7 @@ namespace RW_NodeTree
             foreach (CompBasicNodeComp comp in AllNodeComp)
             {
                 comp.internal_PostAdd(node, id, success);
+                if (success) comp.internal_Removed(ChildNodes, id);
             }
         }
 
@@ -700,6 +686,7 @@ namespace RW_NodeTree
             foreach (CompBasicNodeComp comp in AllNodeComp)
             {
                 comp.internal_PostRemove(node, id, success);
+                if (success) comp.internal_Removed(ChildNodes, id);
             }
         }
 
@@ -823,15 +810,13 @@ namespace RW_NodeTree
 
         private List<string> childNodesAccessKeys = new List<string>();
 
-        private readonly HashSet<string> regiestedNodeId = new HashSet<string>();
+        private readonly OffScreenRenderingCache renderingCache = new OffScreenRenderingCache();
 
-        private readonly Dictionary<string, OffScreenRenderingCache> OffScreenRenderingCaches = new Dictionary<string, OffScreenRenderingCache>();
+        private readonly HashSet<string> regiestedNodeId = new HashSet<string>();
 
         private readonly Dictionary<Type, List<VerbToolRegiestInfo>> regiestedNodeVerbToolInfos = new Dictionary<Type, List<VerbToolRegiestInfo>>();
 
         private readonly Dictionary<Type, List<VerbPropertiesRegiestInfo>> regiestedNodeVerbPropertiesInfos = new Dictionary<Type, List<VerbPropertiesRegiestInfo>>();
-
-        public static string RenderingKey = "";
 
 
         /*
