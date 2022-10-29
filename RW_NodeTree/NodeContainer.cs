@@ -281,7 +281,7 @@ namespace RW_NodeTree
                 }
             }
             Comp.internal_PerAdd(ref item, ref id);
-            if(!innerIdList.Contains(id) && !innerList.Contains(item))
+            if(!innerList.Contains(item))
             {
                 if(flag) innerIdList[Count] = id;
                 else innerIdList.Add(id);
