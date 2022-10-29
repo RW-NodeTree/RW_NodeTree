@@ -296,8 +296,8 @@ namespace RW_NodeTree
 
             if (Count >= maxStacks) goto fail;
 
-            if(item.holdingOwner == null) item.holdingOwner = this;
             innerList.Add(item);
+            if(item.holdingOwner == null) item.holdingOwner = this;
             NeedUpdate = true;
 
             Comp.internal_PostAdd(item, id, true);
@@ -332,6 +332,9 @@ namespace RW_NodeTree
 
             innerList.RemoveAt(index);
             innerIdList.RemoveAt(index);
+
+            if(item.holdingOwner == this) item.holdingOwner = null;
+
             Comp.internal_PostRemove(item, id, true);
             return true;
         }
