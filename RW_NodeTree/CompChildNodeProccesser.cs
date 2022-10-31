@@ -644,6 +644,7 @@ namespace RW_NodeTree
         /// <returns></returns>
         public bool AllowNode(Thing node, string id = null)
         {
+            if (id.NullOrEmpty() || ChildNodes.IsChildOf(node)) return false;
             if (Props.ForceNodeIdControl && !RegiestedNodeId.Contains(id)) return false;
             foreach (CompBasicNodeComp comp in AllNodeComp)
             {

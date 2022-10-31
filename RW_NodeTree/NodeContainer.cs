@@ -209,7 +209,7 @@ namespace RW_NodeTree
 
         public override int GetCountCanAccept(Thing item, bool canMergeWithExistingStacks = true)
         {
-            if(Comp != null && innerIdList.Count > Count && !innerIdList[Count].NullOrEmpty() && !IsChildOf(item) && Comp.AllowNode(item, innerIdList[Count]))
+            if(Comp != null && innerIdList.Count > Count && Comp.AllowNode(item, innerIdList[Count]))
             {
                 return base.GetCountCanAccept(item, false);
             }
@@ -271,11 +271,11 @@ namespace RW_NodeTree
             bool flag = innerIdList.Count > innerList.Count;
             if (flag)
             {
-                id = innerIdList[Count];
                 for (int i = innerIdList.Count - 2; i >= Count; i--)
                 {
                     innerIdList.RemoveAt(i);
                 }
+                id = innerIdList[Count];
             }
             else
             {
