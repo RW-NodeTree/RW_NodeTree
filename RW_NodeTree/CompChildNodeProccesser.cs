@@ -109,6 +109,11 @@ namespace RW_NodeTree
 
         public override bool AllowStackWith(Thing other)
         {
+            CompChildNodeProccesser comp = other;
+            if(comp != null)
+            {
+                return comp.ChildNodes.Count == 0 && ChildNodes.Count == 0;
+            }
             return false;
         }
 

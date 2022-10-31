@@ -340,6 +340,8 @@ namespace RW_NodeTree
 
             if(item.holdingOwner == this) item.holdingOwner = null;
 
+            NeedUpdate = true;
+
             Comp.internal_PostRemove(item, id, true);
             ((CompChildNodeProccesser)item)?.internal_Removed(this, id);
             return true;
