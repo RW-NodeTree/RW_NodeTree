@@ -677,7 +677,14 @@ namespace RW_NodeTree
             foreach (CompBasicNodeComp comp in AllNodeComp)
             {
                 comp.internal_PostAdd(node, id, success);
-                if (success) comp.internal_Removed(ChildNodes, id);
+            }
+        }
+
+        internal void internal_Added(NodeContainer container, string id)
+        {
+            foreach (CompBasicNodeComp comp in AllNodeComp)
+            {
+                comp.internal_Added(container, id);
             }
         }
 
@@ -697,7 +704,14 @@ namespace RW_NodeTree
             foreach (CompBasicNodeComp comp in AllNodeComp)
             {
                 comp.internal_PostRemove(node, id, success);
-                if (success) comp.internal_Removed(ChildNodes, id);
+            }
+        }
+
+        internal void internal_Removed(NodeContainer container, string id)
+        {
+            foreach (CompBasicNodeComp comp in AllNodeComp)
+            {
+                comp.internal_Removed(container, id);
             }
         }
 

@@ -305,6 +305,7 @@ namespace RW_NodeTree
             NeedUpdate = true;
 
             Comp.internal_PostAdd(item, id, true);
+            ((CompChildNodeProccesser)item)?.internal_Added(this, id);
             return true;
             fail:
             Comp.internal_PostAdd(item, id, false);
@@ -340,6 +341,7 @@ namespace RW_NodeTree
             if(item.holdingOwner == this) item.holdingOwner = null;
 
             Comp.internal_PostRemove(item, id, true);
+            ((CompChildNodeProccesser)item)?.internal_Removed(this, id);
             return true;
         }
 
