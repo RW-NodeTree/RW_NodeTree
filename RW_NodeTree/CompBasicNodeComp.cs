@@ -45,7 +45,7 @@ namespace RW_NodeTree
         /// <summary>
         /// get parent node if it is a node
         /// </summary>
-        public CompChildNodeProccesser ParentProccesser => this.ParentHolder as CompChildNodeProccesser;
+        public CompChildNodeProccesser ParentProccesser => NodeProccesser?.ParentProccesser;
 
         /// <summary>
         /// root of this node tree
@@ -154,24 +154,34 @@ namespace RW_NodeTree
         }
 
         /// <summary>
-        /// Adapte draw steep of this node
-        /// </summary>
-        /// <param name="nodeRenderingInfos">Corresponding rendering infos with id and part</param>
-        /// <param name="rot">rotation</param>
-        /// <param name="graphic">original graphic</param>
-        /// <returns></returns>
-        protected virtual List<(Thing, string, List<RenderInfo>)> AdapteDrawSteep(List<(Thing, string, List<RenderInfo>)> nodeRenderingInfos, Rot4 rot, Graphic graphic)
-        {
-            return nodeRenderingInfos;
-        }
-
-        /// <summary>
         /// call when registed node id
         /// </summary>
         /// <param name="regiestedNodeId">registed id</param>
         protected virtual HashSet<string> RegiestedNodeId(HashSet<string> regiestedNodeId)
         {
             return regiestedNodeId;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="orginal"></param>
+        /// <returns></returns>
+        protected virtual CompChildNodeProccesser OverrideParentProccesser(CompChildNodeProccesser orginal)
+        {
+            return orginal;
+        }
+
+        /// <summary>
+        /// Adapte draw steep of this node
+        /// </summary>
+        /// <param name="nodeRenderingInfos">Corresponding rendering infos with id and part</param>
+        /// <param name="rot">rotation</param>
+        /// <param name="graphic">original graphic</param>
+        /// <returns></returns>
+        protected virtual List<(Thing, string, List<RenderInfo>)> OverrideDrawSteep(List<(Thing, string, List<RenderInfo>)> nodeRenderingInfos, Rot4 rot, Graphic graphic)
+        {
+            return nodeRenderingInfos;
         }
 
 
@@ -183,7 +193,8 @@ namespace RW_NodeTree
         internal void internal_PostRemove(Thing node, string id, bool success) => PostRemove(node, id, success);
         internal void internal_Added(NodeContainer container, string id) => Added(container, id);
         internal void internal_Removed(NodeContainer container, string id) => Removed(container, id);
-        internal List<(Thing, string, List<RenderInfo>)> internal_AdapteDrawSteep(List<(Thing, string, List<RenderInfo>)> nodeRenderingInfos, Rot4 rot, Graphic graphic) => AdapteDrawSteep(nodeRenderingInfos, rot, graphic);
         internal HashSet<string> internal_RegiestedNodeId(HashSet<string> regiestedNodeId) => RegiestedNodeId(regiestedNodeId);
+        internal CompChildNodeProccesser internal_OverrideParentProccesser(CompChildNodeProccesser orginal) => OverrideParentProccesser(orginal);
+        internal List<(Thing, string, List<RenderInfo>)> internal_OverrideDrawSteep(List<(Thing, string, List<RenderInfo>)> nodeRenderingInfos, Rot4 rot, Graphic graphic) => OverrideDrawSteep(nodeRenderingInfos, rot, graphic);
     }
 }

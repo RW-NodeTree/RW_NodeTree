@@ -38,7 +38,18 @@ namespace RW_NodeTree
         /// <summary>
         /// get parent node if it is a node
         /// </summary>
-        public CompChildNodeProccesser ParentProccesser => this.ParentHolder as CompChildNodeProccesser;
+        public CompChildNodeProccesser ParentProccesser
+        {
+            get
+            {
+                CompChildNodeProccesser result = this.ParentHolder as CompChildNodeProccesser;
+                foreach (CompBasicNodeComp comp in AllNodeComp)
+                {
+                    result = comp.internal_OverrideParentProccesser(result);
+                }
+                return result;
+            }
+        }
 
         /// <summary>
         /// root of this node tree
@@ -582,7 +593,7 @@ namespace RW_NodeTree
 
             foreach (CompBasicNodeComp comp in AllNodeComp)
             {
-                nodeRenderingInfos = comp.internal_AdapteDrawSteep(nodeRenderingInfos, rot, subGraphic) ?? nodeRenderingInfos;
+                nodeRenderingInfos = comp.internal_OverrideDrawSteep(nodeRenderingInfos, rot, subGraphic) ?? nodeRenderingInfos;
             }
 
             List<RenderInfo> final = new List<RenderInfo>();

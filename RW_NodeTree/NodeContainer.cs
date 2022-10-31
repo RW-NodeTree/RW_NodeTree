@@ -272,6 +272,10 @@ namespace RW_NodeTree
             if (flag)
             {
                 id = innerIdList[Count];
+                for (int i = innerIdList.Count - 2; i >= Count; i--)
+                {
+                    innerIdList.RemoveAt(i);
+                }
             }
             else
             {
