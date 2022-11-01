@@ -765,6 +765,21 @@ namespace RW_NodeTree
 
         private class OffScreenRenderingCache
         {
+            ~OffScreenRenderingCache()
+            {
+                GameObject.Destroy(materialNorth);
+                GameObject.Destroy(materialEast);
+                GameObject.Destroy(materialSouth);
+                GameObject.Destroy(materialWest);
+                GameObject.Destroy(textureNorth);
+                GameObject.Destroy(textureEast);
+                GameObject.Destroy(textureSouth);
+                GameObject.Destroy(textureWest);
+                GameObject.Destroy(cachedRenderTargetNorth);
+                GameObject.Destroy(cachedRenderTargetEast);
+                GameObject.Destroy(cachedRenderTargetSouth);
+                GameObject.Destroy(cachedRenderTargetWest);
+            }
             public (Material, Texture2D, RenderTexture, bool) this[Rot4 index]
             {
                 get
