@@ -3,6 +3,7 @@ using RW_NodeTree.DataStructure;
 using RW_NodeTree.Tools;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -172,17 +173,20 @@ namespace RW_NodeTree
         internal bool internal_UpdateNode(CompChildNodeProccesser actionNode = null)
         {
             bool StopEventBubble = false;
-            if (NeedUpdate)
+            CompChildNodeProccesser proccess = this.Comp;
+            if(proccess != null)
             {
-                CompChildNodeProccesser proccess = this.Comp;
-                if(proccess != null)
+                if (actionNode == null)
+                {
+                    return proccess.RootNode.ChildNodes.internal_UpdateNode(proccess);
+                }
+                else if (NeedUpdate)
                 {
                     bool reset = true;
-                    if (actionNode == null) actionNode = proccess;
                     foreach (Thing node in this.innerList)
                     {
                         NodeContainer container = ((CompChildNodeProccesser)node)?.ChildNodes;
-                        if (container != null)
+                        if (container != null && container.NeedUpdate)
                         {
                             StopEventBubble = container.internal_UpdateNode(actionNode) || StopEventBubble;
                             reset = false;
@@ -200,10 +204,10 @@ namespace RW_NodeTree
                         proccess.ResetVerbs();
                         proccess.ResetRenderedTexture();
                         proccess.ResetRegiestedNodeId();
-                        NeedUpdate = false;
                     }
                 }
             }
+            NeedUpdate = false;
             return StopEventBubble;
         }
 

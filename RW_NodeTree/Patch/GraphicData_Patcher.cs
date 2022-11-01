@@ -41,6 +41,7 @@ namespace RW_NodeTree
         /// <returns></returns>
         internal void CreateGraphic_ChildNode(ref Graphic OrgGraphic)
         {
+            OrgGraphic = OrgGraphic.GetColoredVersion(OrgGraphic.Shader, parent.DrawColor, parent.DrawColorTwo);
             if (OrgGraphic is Graphic_Linked graphic_Linked)
             {
                 OrgGraphic = ref Graphic_Linked_SubGraphic(graphic_Linked);

@@ -44,7 +44,6 @@
     <Compile Include="Patch\Graphic_RandomRotated_Patcher.cs" />
     <Compile Include="Patch\Pawn_ApparelTracker_Patcher.cs" />
     <Compile Include="Patch\StatDrawEntry_Patcher.cs" />
-    <Compile Include="Patch\PawnRenderer_DrawEquipmentAiming_Patcher.cs" />
     <Compile Include="Patch\Pawn_EquipmentTracker_Patcher.cs" />
     <Compile Include="Patch\Pawn_TryGetAttackVerb_Patcher.cs" />
     <Compile Include="Patch\StatWorker_GetInfoCardHyperlinks_Patcher.cs" />

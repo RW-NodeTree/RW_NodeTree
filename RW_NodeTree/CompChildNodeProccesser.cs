@@ -388,8 +388,8 @@ namespace RW_NodeTree
         public void ResetRenderedTexture()
         {
             renderingCache.ResetRenderedTexture();
-            ParentProccesser?.ResetRenderedTexture();
             if(parent.Spawned && parent.def.drawerType >= DrawerType.MapMeshOnly) parent.DirtyMapMesh(parent.Map);
+            ParentProccesser?.ResetRenderedTexture();
         }
 
         /// <summary>
@@ -634,7 +634,7 @@ namespace RW_NodeTree
         public Vector2 GetAndUpdateDrawSize(Rot4 rot, Graphic subGraphic = null)
         {
             (Material material, Texture2D texture, RenderTexture cachedRenderTarget, bool IsRandered) = renderingCache[rot];
-            if (IsRandered || texture == null) GetAndUpdateChildTexture(rot, subGraphic);
+            if (!IsRandered || texture == null) GetAndUpdateChildTexture(rot, subGraphic);
             (material, texture, cachedRenderTarget, IsRandered) = renderingCache[rot];
             Vector2 result = new Vector2(texture.width, texture.height) / Props.TextureSizeFactor;
             //if (Prefs.DevMode) Log.Message(" DrawSize: thing=" + parent + "; Rot4=" + rot + "; textureWidth=" + textures[rot_int].width + "; result=" + result + ";\n");
