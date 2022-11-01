@@ -402,6 +402,8 @@ namespace RW_NodeTree
                 (comp as IVerbOwner)?.VerbTracker?.VerbsNeedReinitOnLoad();
             }
             (parent as IVerbOwner)?.VerbTracker?.VerbsNeedReinitOnLoad();
+            regiestedNodeVerbPropertiesInfos.Clear();
+            regiestedNodeVerbToolInfos.Clear();
             ParentProccesser?.ResetVerbs();
         }
 
@@ -439,7 +441,6 @@ namespace RW_NodeTree
         {
             Scribe_Deep.Look(ref this.childNodes, "innerContainer", this);
             //Scribe_Collections.Look(ref childNodes, "innerContainer", LookMode.Deep, this);
-            Scribe_Collections.Look(ref childNodesAccessKeys, "innerContainerAccessKeys", LookMode.Value);
         }
 
         /// <summary>
@@ -838,8 +839,6 @@ namespace RW_NodeTree
 
 
         private NodeContainer childNodes;
-
-        private List<string> childNodesAccessKeys = new List<string>();
 
         private readonly OffScreenRenderingCache renderingCache = new OffScreenRenderingCache();
 
