@@ -32,7 +32,7 @@ namespace RW_NodeTree.Tools
                 if(type.IsClass && !type.IsAbstract)
                 {
                     result = Activator.CreateInstance(type);
-                    foreach (FieldInfo f in type.GetFields(AccessTools.all))
+                    foreach (FieldInfo f in type.GetFields(BindingFlags.Public | BindingFlags.Instance | BindingFlags.NonPublic))
                     {
                         f.SetValue(result, f.GetValue(obj));
                     }

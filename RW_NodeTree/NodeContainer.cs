@@ -121,7 +121,7 @@ namespace RW_NodeTree
                                 if (innerList.Count <= i) innerList.Add(null);
                                 if (innerIdList.Count <= i) innerIdList.Add(null);
                                 innerIdList[i] = xmlNode.Name;
-                                if (xmlNode.FirstChild.NodeType == XmlNodeType.Text && xmlNode.FirstChild.NextSibling == null)
+                                if (xmlNode.ChildNodes.Count == 1 && xmlNode.FirstChild.NodeType == XmlNodeType.Text)
                                 {
                                     Thing thing = innerList[i];
                                     Scribe_References.Look(ref thing, innerIdList[i]);
