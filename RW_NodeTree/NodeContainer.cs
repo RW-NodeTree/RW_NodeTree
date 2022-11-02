@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Linq;
@@ -29,28 +30,14 @@ namespace RW_NodeTree
         {
             get
             {
-                if (!key.NullOrEmpty())
+                if (key.IsVaildityKeyFormat())
                 {
                     int index = innerIdList.IndexOf(key);
                     return ((index >= 0) ? this[index] : null);
                 }
                 return null;
             }
-            set
-            {
-                if (!key.NullOrEmpty())
-                {
-                    Thing t = this[key];
-                    if((t != null ? Remove(t) : true) && value != null)
-                    {
-                        innerIdList.Add(key);
-                        if (!TryAdd(value) && (t == null || !TryAdd(t)))
-                        {
-                            innerIdList.RemoveAt(Count);
-                        }
-                    }
-                }
-            }
+            set => Add(key, value);
         }
 
         public string this[Thing item]
@@ -63,7 +50,7 @@ namespace RW_NodeTree
             }
             set
             {
-                if(Comp != null && !value.NullOrEmpty() && !innerIdList.Contains(value) && Comp.AllowNode(item, value))
+                if(Comp != null && value.IsVaildityKeyFormat() && !innerIdList.Contains(value) && Comp.AllowNode(item, value))
                 {
                     int index = IndexOf(item);
                     innerIdList[index] = value;
@@ -71,10 +58,6 @@ namespace RW_NodeTree
                 }
             }
         }
-
-        public List<string> InnerIdListForReading => this.innerIdList;
-
-        public List<Thing> InnerListForReading => this.innerList;
 
         public CompChildNodeProccesser Comp => (CompChildNodeProccesser)base.Owner;
 
@@ -93,9 +76,9 @@ namespace RW_NodeTree
             }
         }
 
-        ICollection<string> IDictionary<string, Thing>.Keys => InnerIdListForReading;
+        public ICollection<string> Keys => new List<string>(innerIdList);
 
-        ICollection<Thing> IDictionary<string, Thing>.Values => InnerListForReading;
+        public ICollection<Thing> Values => new List<Thing>(innerList);
 
         bool ICollection<KeyValuePair<string, Thing>>.IsReadOnly => ((ICollection<Thing>)this).IsReadOnly;
 
@@ -105,47 +88,86 @@ namespace RW_NodeTree
         {
             base.ExposeData();
 
-            Scribe.EnterNode("InnerList");
+            if(Scribe.EnterNode("InnerList"))
+            {
 
-            if(Scribe.mode == LoadSaveMode.Saving)
-            {
-                HashSet<string> UsedIds = DebugLoadIDsSavingErrorsChecker_deepSaved(Scribe.saver.loadIDsErrorsChecker);
-                for (int i = 0; i < Count; i++)
+                if (Scribe.mode == LoadSaveMode.Saving)
                 {
-                    Thing thing = innerList[i];
-                    string id = innerIdList[i];
-                    if (UsedIds.Contains(thing.GetUniqueLoadID()) || (thing.holdingOwner != null && thing.holdingOwner != this)) Scribe_References.Look(ref thing, id);
-                    else Scribe_Deep.Look(ref thing, id);
-                }
-            }
-            else
-            {
-                int i = 0;
-                for (XmlNode xmlNode = Scribe.loader.curXmlParent.FirstChild; xmlNode != null; xmlNode = xmlNode.NextSibling)
-                {
-                    if (xmlNode.NodeType == XmlNodeType.Element)
+                    HashSet<string> UsedIds = DebugLoadIDsSavingErrorsChecker_deepSaved(Scribe.saver.loadIDsErrorsChecker);
+                    for (int i = 0; i < Count; i++)
                     {
-                        if (innerList.Count <= i) innerList.Add(null);
-                        if (innerIdList.Count <= i) innerIdList.Add(null);
-                        innerIdList[i] = xmlNode.Name;
-                        if (xmlNode.FirstChild.NodeType == XmlNodeType.Text && xmlNode.FirstChild.NextSibling == null)
+                        Thing thing = innerList[i];
+                        string id = innerIdList[i];
+                        try
                         {
-                            Thing thing = innerList[i];
-                            Scribe_References.Look(ref thing, innerIdList[i]);
-                            innerList[i] = thing;
+                            if (UsedIds.Contains(thing.GetUniqueLoadID()) || (thing.holdingOwner != null && thing.holdingOwner != this)) Scribe_References.Look(ref thing, id);
+                            else Scribe_Deep.Look(ref thing, id);
                         }
-                        else
+                        catch(Exception e)
                         {
-                            Thing thing = innerList[i];
-                            Scribe_Deep.Look(ref thing, innerIdList[i]);
-                            innerList[i] = thing;
-                            if(innerList[i] != null) innerList[i].holdingOwner = this;
+                            Log.Error(e.ToString());
                         }
-                        i++;
                     }
                 }
+                else if(Scribe.mode == LoadSaveMode.LoadingVars)
+                {
+                    int i = 0;
+                    for (XmlNode xmlNode = Scribe.loader.curXmlParent.FirstChild; xmlNode != null; xmlNode = xmlNode.NextSibling)
+                    {
+                        if (xmlNode.NodeType == XmlNodeType.Element)
+                        {
+                            try
+                            {
+                                if (innerList.Count <= i) innerList.Add(null);
+                                if (innerIdList.Count <= i) innerIdList.Add(null);
+                                innerIdList[i] = xmlNode.Name;
+                                if (xmlNode.FirstChild.NodeType == XmlNodeType.Text && xmlNode.FirstChild.NextSibling == null)
+                                {
+                                    Thing thing = innerList[i];
+                                    Scribe_References.Look(ref thing, innerIdList[i]);
+                                    innerList[i] = thing;
+                                    innerIdList[i] += " !ref";
+                                }
+                                else
+                                {
+                                    Thing thing = innerList[i];
+                                    Scribe_Deep.Look(ref thing, innerIdList[i]);
+                                    innerList[i] = thing;
+                                    if (innerList[i] != null) innerList[i].holdingOwner = this;
+                                }
+                            }
+                            catch (Exception e)
+                            {
+                                Log.Error(e.ToString());
+                            }
+                            i++;
+                        }
+                    }
+                }
+                else
+                {
+                    for (int i = 0; i < Count; i++)
+                    {
+                        try
+                        {
+                            Thing thing = innerList[i];
+                            string id = innerIdList[i];
+                            if (id.EndsWith(" !ref"))
+                            {
+                                id = id.Substring(0, id.Length - 5);
+                                Scribe_References.Look(ref thing, id);
+                                innerIdList[i] = id;
+                                innerList[i] = thing;
+                            }
+                        }
+                        catch(Exception e)
+                        {
+                            Log.Error(e.ToString());
+                        }
+                    }
+                }
+                Scribe.ExitNode();
             }
-            Scribe.ExitNode();
 
             if (Scribe.mode == LoadSaveMode.ResolvingCrossRefs)
             {
@@ -291,8 +313,16 @@ namespace RW_NodeTree
             Comp.internal_PerAdd(ref item, ref id);
             if(!innerList.Contains(item))
             {
-                if(flag) innerIdList[Count] = id;
-                else innerIdList.Add(id);
+                if(id.IsVaildityKeyFormat())
+                {
+                    if(flag) innerIdList[Count] = id;
+                    else innerIdList.Add(id);
+                }
+                else
+                {
+                    Log.Warning("Invaild key format : " + id);
+                    goto fail;
+                }
             }
             else
             {
@@ -372,13 +402,13 @@ namespace RW_NodeTree
 
         public void Add(string key, Thing value)
         {
-            if (!key.NullOrEmpty())
+            if (key.IsVaildityKeyFormat())
             {
                 Thing t = this[key];
-                if (t == null && value != null)
+                if ((t != null ? Remove(t) : true) && value != null)
                 {
                     innerIdList.Add(key);
-                    if (!TryAdd(value) && t != null && !TryAdd(t))
+                    if (!TryAdd(value) && (t == null || !TryAdd(t)))
                     {
                         innerIdList.RemoveAt(Count);
                     }
