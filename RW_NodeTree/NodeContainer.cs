@@ -30,12 +30,9 @@ namespace RW_NodeTree
         {
             get
             {
-                if (key.IsVaildityKeyFormat())
-                {
-                    int index = innerIdList.IndexOf(key);
-                    return ((index >= 0) ? this[index] : null);
-                }
-                return null;
+                Thing result;
+                TryGetValue(key, out result);
+                return result;
             }
             set => Add(key, value);
         }
@@ -45,7 +42,7 @@ namespace RW_NodeTree
             get
             {
                 int index = IndexOf(item);
-                if(index < 0) return null;
+                if(index < 0 || index >= Count) return null;
                 return innerIdList[index];
             }
             set
@@ -53,8 +50,11 @@ namespace RW_NodeTree
                 if(Comp != null && value.IsVaildityKeyFormat() && !innerIdList.Contains(value) && Comp.AllowNode(item, value))
                 {
                     int index = IndexOf(item);
-                    innerIdList[index] = value;
-                    NeedUpdate = true;
+                    if (index >= 0 && index < Count)
+                    {
+                        innerIdList[index] = value;
+                        NeedUpdate = true;
+                    }
                 }
             }
         }
@@ -361,9 +361,9 @@ namespace RW_NodeTree
             Comp.internal_PerRemove(ref item);
 
             int index = innerList.LastIndexOf(item);
-            string id = index >= 0 ? innerIdList[index] : null;
+            string id = (index >= 0 && index < Count) ? innerIdList[index] : null;
 
-            if (index < 0)
+            if (index < 0 || index >= Count)
             {
                 Comp.internal_PostRemove(item, id, false);
                 return false;
@@ -424,10 +424,10 @@ namespace RW_NodeTree
         public bool TryGetValue(string key, out Thing value)
         {
             value = null;
-            if (!key.NullOrEmpty())
+            if (!key.IsVaildityKeyFormat())
             {
                 int index = innerIdList.IndexOf(key);
-                if(index >= 0)
+                if(index >= 0 && index < Count)
                 {
                     value = this[index];
                     return true;
