@@ -58,7 +58,6 @@
     <Compile Include="Tools\GraphicHelper.cs" />
     <Compile Include="DataStructure\LinkStack.cs" />
     <Compile Include="DataStructure\LinkNode.cs" />
-    <Compile Include="Tools\ObjectHelper.cs" />
     <Compile Include="VerbRegiestInfo.cs" />
     <Reference Include="0Harmony">
       <HintPath>D:\SteamLibrary\steamapps\workshop\content\294100\2009463077\Current\Assemblies\0Harmony.dll</HintPath>

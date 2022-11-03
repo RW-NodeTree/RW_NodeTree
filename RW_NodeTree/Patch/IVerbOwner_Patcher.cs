@@ -236,7 +236,7 @@ namespace RW_NodeTree
                     for(int i = 0; i < verbToolRegiestInfo.Count; i++)
                     {
                         VerbToolRegiestInfo regiestInfo = verbToolRegiestInfo[i];
-                        regiestInfo.afterCobvertTool = (Tool)regiestInfo.afterCobvertTool.SimpleCopy();
+                        regiestInfo.afterCobvertTool = Gen.MemberwiseClone(regiestInfo.afterCobvertTool);
                         regiestInfo.afterCobvertTool.id = i.ToString();
                         verbToolRegiestInfo[i] = regiestInfo;
                     }
