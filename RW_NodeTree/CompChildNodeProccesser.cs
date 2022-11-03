@@ -159,9 +159,6 @@ namespace RW_NodeTree
             ChildNodes.ThingOwnerTickLong();
         }
 
-        #region Post
-        #endregion
-
         /// <summary>
         /// 
         /// </summary>
@@ -882,6 +879,12 @@ namespace RW_NodeTree
         public CompProperties_ChildNodeProccesser()
         {
             base.compClass = typeof(CompChildNodeProccesser);
+        }
+
+        public override void ResolveReferences(ThingDef parentDef)
+        {
+            parentDef.comps.Remove(this);
+            parentDef.comps.Insert(0, this);
         }
 
         public bool ForceNodeIdControl = false;
