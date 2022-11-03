@@ -18,16 +18,22 @@ namespace RW_NodeTree.Patch
             typeof(Pawn),
             "TryGetAttackVerb"
         )]
-        public static bool PrePawn_TryGetAttackVerb(Pawn __instance, ref Verb __result)
+        public static void PrePawn_TryGetAttackVerb(Pawn __instance)
         {
-            JobDriver driver = __instance.CurJob?.GetCachedDriverDirect;
-            if (driver != null && typeof(JobDriver_AttackStatic).IsAssignableFrom(driver.GetType()) && __instance.CurJob.verbToUse != null && __instance.CurJob.verbToUse.Caster == __instance && __instance.CurJob.verbToUse.Available())
+            CompChildNodeProccesser weapon = __instance.equipment.Primary;
+            if(weapon != null)
             {
-                __result = __instance.CurJob.verbToUse;
-                //if (Prefs.DevMode) Log.Message("ticksToNextBurstShot : " + ticksToNextBurstShot(__result) + " state : " + __result.state + " caster : " + __result.caster);
-                return false;
+                JobDriver driver = __instance.CurJob?.GetCachedDriverDirect;
+                if(driver != null && typeof(JobDriver_AttackStatic).IsAssignableFrom(driver.GetType()) && __instance.CurJob.verbToUse.Caster == __instance)
+                {
+                    CompEquippable equippable = __instance.equipment.PrimaryEq;
+                    List<Verb> verbList = CompChildNodeProccesser.GetAllOriginalVerbs(equippable.verbTracker);
+                    if (verbList.Remove(__instance.CurJob.verbToUse))
+                    {
+                        verbList.Insert(0, __instance.CurJob.verbToUse);
+                    }
+                }
             }
-            return true;
         }
 
         //private static AccessTools.FieldRef<Verb, int> ticksToNextBurstShot = AccessTools.FieldRefAccess<int>(typeof(Verb), "ticksToNextBurstShot");

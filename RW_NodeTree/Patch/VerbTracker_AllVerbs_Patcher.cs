@@ -14,22 +14,21 @@ namespace RW_NodeTree.Patch
     [HarmonyPatch(typeof(VerbTracker))]
     internal static partial class VerbTracker_Patcher
     {
-        [HarmonyPrefix]
+        [HarmonyPostfix]
         [HarmonyPatch(
             typeof(VerbTracker),
             "get_PrimaryVerb"
         )]
-        private static bool PreVerbTracker_PrimaryVerb(VerbTracker __instance, ref Verb __result)
+        private static void PreVerbTracker_PrimaryVerb(VerbTracker __instance, ref Verb __result)
         {
             foreach(Verb verb in __instance.AllVerbs)
             {
-                if (verb.verbProps.isPrimary)
+                if (verb.verbProps.isPrimary && verb.Caster != null && verb.Available())
                 {
                     __result = verb;
-                    return false;
+                    return;
                 }
             }
-            return false;
         }
 
         [HarmonyPostfix]
@@ -125,8 +124,9 @@ namespace RW_NodeTree
                     }
                     result[i] = verb;
                 }
+                return result;
             }
-            return result;
+            return null;
         }
 
         private readonly Dictionary<int, bool> notSetVerbDirectOwner = new Dictionary<int, bool>();
