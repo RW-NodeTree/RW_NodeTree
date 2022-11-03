@@ -424,7 +424,7 @@ namespace RW_NodeTree
         public bool TryGetValue(string key, out Thing value)
         {
             value = null;
-            if (!key.IsVaildityKeyFormat())
+            if (key.IsVaildityKeyFormat())
             {
                 int index = innerIdList.IndexOf(key);
                 if(index >= 0 && index < Count)
