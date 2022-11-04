@@ -20,11 +20,11 @@ namespace RW_NodeTree.Patch
         )]
         public static void PrePawn_TryGetAttackVerb(Pawn __instance)
         {
-            CompChildNodeProccesser weapon = __instance.equipment.Primary;
+            CompChildNodeProccesser weapon = __instance.equipment?.Primary;
             if(weapon != null)
             {
-                JobDriver driver = __instance.CurJob?.GetCachedDriverDirect;
-                if(driver != null && typeof(JobDriver_AttackStatic).IsAssignableFrom(driver.GetType()) && __instance.CurJob.verbToUse?.Caster == __instance)
+                Job job = __instance.CurJob;
+                if(job != null && typeof(JobDriver_AttackStatic).IsAssignableFrom(job.def.driverClass) && job.verbToUse?.Caster == __instance)
                 {
                     CompEquippable equippable = __instance.equipment.PrimaryEq;
                     List<Verb> verbList = CompChildNodeProccesser.GetAllOriginalVerbs(equippable.verbTracker);
