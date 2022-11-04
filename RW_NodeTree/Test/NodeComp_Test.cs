@@ -27,7 +27,7 @@ namespace RW_NodeTree.Test
                 {
                     ThingDef def = Props.thingDefs[i];
                     Thing node = ThingMaker.MakeThing(def);
-                    proccesser.SetOrAdd("Node_" + i,node);
+                    proccesser.ChildNodes["Node_" + i] = node;
                 }
             }
         }
