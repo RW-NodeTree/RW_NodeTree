@@ -450,7 +450,7 @@ namespace RW_NodeTree
         {
             (Material material, Texture2D texture, RenderTexture cachedRenderTarget, bool IsRandered) = renderingCache[rot];
             if (IsRandered && material != null) return material;
-            List<(Thing, string, List<RenderInfo>)> nodeRenderingInfos = new List<(Thing, string, List<RenderInfo>)>(childNodes.Count + 1);
+            List<(Thing, string, List<RenderInfo>)> nodeRenderingInfos = new List<(Thing, string, List<RenderInfo>)>(ChildNodes.Count + 1);
 
             //if (Prefs.DevMode)
             //{
