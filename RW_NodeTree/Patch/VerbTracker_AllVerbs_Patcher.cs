@@ -19,11 +19,12 @@ namespace RW_NodeTree.Patch
             typeof(VerbTracker),
             "get_PrimaryVerb"
         )]
-        private static void PreVerbTracker_PrimaryVerb(VerbTracker __instance, ref Verb __result)
+        private static void PostVerbTracker_PrimaryVerb(VerbTracker __instance, ref Verb __result)
         {
-            foreach(Verb verb in __instance.AllVerbs)
+            CompChildNodeProccesser proccess = ((__instance.directOwner as ThingComp)?.parent) ?? ((__instance.directOwner) as Thing);
+            foreach (Verb verb in __instance.AllVerbs)
             {
-                if (verb.verbProps.isPrimary && verb.Caster != null && verb.Available())
+                if (verb.verbProps.isPrimary && (proccess == null || (verb.Caster != null && verb.Available())))
                 {
                     __result = verb;
                     return;
@@ -38,7 +39,7 @@ namespace RW_NodeTree.Patch
         )]
         private static void PostVerbTracker_AllVerbs(VerbTracker __instance, ref List<Verb> __result)
         {
-            CompChildNodeProccesser proccess = (((__instance.directOwner) as ThingComp)?.parent) ?? ((__instance.directOwner) as Thing);
+            CompChildNodeProccesser proccess = ((__instance.directOwner as ThingComp)?.parent) ?? ((__instance.directOwner) as Thing);
             __result = proccess?.PostVerbTracker_AllVerbs(__instance.directOwner?.GetType(), new List<Verb>(__result)) ?? __result;
         }
     }
