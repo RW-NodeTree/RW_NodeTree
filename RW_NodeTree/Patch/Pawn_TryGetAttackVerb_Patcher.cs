@@ -24,7 +24,7 @@ namespace RW_NodeTree.Patch
             if(weapon != null)
             {
                 JobDriver driver = __instance.CurJob?.GetCachedDriverDirect;
-                if(driver != null && typeof(JobDriver_AttackStatic).IsAssignableFrom(driver.GetType()) && __instance.CurJob.verbToUse.Caster == __instance)
+                if(driver != null && typeof(JobDriver_AttackStatic).IsAssignableFrom(driver.GetType()) && __instance.CurJob.verbToUse?.Caster == __instance)
                 {
                     CompEquippable equippable = __instance.equipment.PrimaryEq;
                     List<Verb> verbList = CompChildNodeProccesser.GetAllOriginalVerbs(equippable.verbTracker);
