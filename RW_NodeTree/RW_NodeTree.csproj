@@ -295,16 +295,13 @@
     <Content Include="PackUp\About\Preview.svg" />
     <Content Include="PackUp\About\PublishedFileId.txt" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="PackUp\1.4\Assemblies\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>rmdir /s/q "$(ProjectDir)\PackUp\1.4\Assemblies"
-mkdir "$(ProjectDir)\PackUp\1.4\Assemblies"
-copy "$(TargetDir)$(TargetName).*" "$(ProjectDir)\PackUp\1.4\Assemblies"
-rmdir /s/q "%25RW_HOME%25\Mods\$(ProjectName)"
+    <PostBuildEvent>rmdir "%25RW_HOME%25\Mods\$(ProjectName)" /s/q
 mkdir "%25RW_HOME%25\Mods\$(ProjectName)"
-xcopy "$(ProjectDir)\PackUp" "%25RW_HOME%25\Mods\$(ProjectName)" /e/s/q</PostBuildEvent>
+xcopy "$(ProjectDir)\PackUp" "%25RW_HOME%25\Mods\$(ProjectName)" /e/s/q
+mkdir "%25RW_HOME%25\Mods\$(ProjectName)\1.4\Assemblies"
+copy "$(TargetDir)$(TargetName).*" "%25RW_HOME%25\Mods\$(ProjectName)\1.4\Assemblies"</PostBuildEvent>
   </PropertyGroup>
 </Project>
