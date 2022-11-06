@@ -184,16 +184,15 @@ namespace RW_NodeTree.Test
             return result + "\n" + stringBuilder.ToString();
         }
 
-
-        protected override void PostPreApplyDamageWithRef(ref DamageInfo dinfo, out bool absorbed)
+        protected override bool PostThingWithComps_PreApplyDamage(ref DamageInfo dinfo, bool absorbed)
         {
-            absorbed = false;
             int count = NodeProccesser.ChildNodes.Count + 1;
             dinfo.SetAmount(dinfo.Amount / count);
             foreach (Thing thing in (IEnumerable<Thing>)NodeProccesser.ChildNodes)
             {
                 thing.TakeDamage(dinfo);
             }
+            return absorbed;
         }
 
         protected override IEnumerable<Dialog_InfoCard.Hyperlink> PostStatWorker_GetInfoCardHyperlinks(StatWorker statWorker, StatRequest reqstatRequest, IEnumerable<Dialog_InfoCard.Hyperlink> result)

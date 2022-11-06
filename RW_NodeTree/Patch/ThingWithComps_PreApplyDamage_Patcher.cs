@@ -1,4 +1,5 @@
 ﻿using HarmonyLib;
+using RimWorld;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,36 +17,46 @@ namespace RW_NodeTree.Patch
             typeof(ThingWithComps),
             "PreApplyDamage"
         )]
-        public static void TranspilThingWithComps_PreApplyDamage(ThingWithComps __instance, ref DamageInfo dinfo, ref bool absorbed)
+        public static void PostThingWithComps_PreApplyDamage(ThingWithComps __instance, ref DamageInfo dinfo, ref bool absorbed)
         {
             if (absorbed)
             {
                 return;
             }
-            if (__instance.AllComps != null)
-            {
-                for (int i = 0; i < __instance.AllComps.Count; i++)
-                {
-                    (__instance.AllComps[i] as CompBasicNodeComp)?.internal_PostPreApplyDamageWithRef(ref dinfo, out absorbed);
-                    if (absorbed)
-                    {
-                        return;
-                    }
-                }
-            }
+            absorbed = ((CompChildNodeProccesser)__instance)?.PostThingWithComps_PreApplyDamage(ref dinfo, absorbed) ?? absorbed;
         }
     }
 }
 
 namespace RW_NodeTree
 {
+    public partial class CompChildNodeProccesser : ThingComp, IThingHolder
+    {
+
+
+        /// <summary>
+        /// event proccesser after ThingDef.SpecialDisplayStats
+        /// (WARRING!!!: Don't invoke any method if thet will invoke ThingDef.SpecialDisplayStats)
+        /// </summary>
+        /// <param name="def">ThingDef instance</param>
+        /// <param name="req">parm 'req' of ThingDef.SpecialDisplayStats()</param>
+        /// <param name="result">result of ThingDef.SpecialDisplayStats</param>
+        public bool PostThingWithComps_PreApplyDamage(ref DamageInfo dinfo, bool absorbed)
+        {
+            foreach (CompBasicNodeComp comp in AllNodeComp)
+            {
+                absorbed = comp.internal_PostThingWithComps_PreApplyDamage(ref dinfo, absorbed);
+            }
+            return absorbed;
+        }
+    }
     public abstract partial class CompBasicNodeComp : ThingComp
     {
-        protected virtual void PostPreApplyDamageWithRef(ref DamageInfo dinfo, out bool absorbed)
+        protected virtual bool PostThingWithComps_PreApplyDamage(ref DamageInfo dinfo, bool absorbed)
         {
-            absorbed = false;
+            return absorbed;
         }
-        internal void internal_PostPreApplyDamageWithRef(ref DamageInfo dinfo, out bool absorbed) => PostPreApplyDamageWithRef(ref dinfo, out absorbed);
+        internal bool internal_PostThingWithComps_PreApplyDamage(ref DamageInfo dinfo, bool absorbed) => PostThingWithComps_PreApplyDamage(ref dinfo, absorbed);
 
     }
 }
