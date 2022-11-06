@@ -75,11 +75,11 @@ namespace RW_NodeTree
         /// <param name="result">result of StatWorker.GetInfoCardHyperlinks(), modifiable</param>
         /// <param name="statWorker">StatWorker</param>
         /// <param name="reqstatRequest">parm 'reqstatRequest' of StatWorker.GetInfoCardHyperlinks()</param>
-        internal IEnumerable<Dialog_InfoCard.Hyperlink> PostStatWorker_GetInfoCardHyperlinks(StatWorker statWorker, StatRequest reqstatRequest, IEnumerable<Dialog_InfoCard.Hyperlink> result)
+        internal IEnumerable<Dialog_InfoCard.Hyperlink> PostStatWorker_GetInfoCardHyperlinks(StatWorker statWorker, StatRequest statRequest, IEnumerable<Dialog_InfoCard.Hyperlink> result)
         {
             foreach (CompBasicNodeComp comp in AllNodeComp)
             {
-                result = comp.internal_PostStatWorker_GetInfoCardHyperlinks(statWorker, reqstatRequest, result) ?? result;
+                result = comp.internal_PostStatWorker_GetInfoCardHyperlinks(statWorker, statRequest, result) ?? result;
             }
             return result;
         }
@@ -87,11 +87,11 @@ namespace RW_NodeTree
     public abstract partial class CompBasicNodeComp : ThingComp
     {
 
-        protected virtual IEnumerable<Dialog_InfoCard.Hyperlink> PostStatWorker_GetInfoCardHyperlinks(StatWorker statWorker, StatRequest reqstatRequest, IEnumerable<Dialog_InfoCard.Hyperlink> result)
+        protected virtual IEnumerable<Dialog_InfoCard.Hyperlink> PostStatWorker_GetInfoCardHyperlinks(StatWorker statWorker, StatRequest statRequest, IEnumerable<Dialog_InfoCard.Hyperlink> result)
         {
             return result;
         }
-        internal IEnumerable<Dialog_InfoCard.Hyperlink> internal_PostStatWorker_GetInfoCardHyperlinks(StatWorker statWorker, StatRequest reqstatRequest, IEnumerable<Dialog_InfoCard.Hyperlink> result)
-            => PostStatWorker_GetInfoCardHyperlinks(statWorker, reqstatRequest, result);
+        internal IEnumerable<Dialog_InfoCard.Hyperlink> internal_PostStatWorker_GetInfoCardHyperlinks(StatWorker statWorker, StatRequest statRequest, IEnumerable<Dialog_InfoCard.Hyperlink> result)
+            => PostStatWorker_GetInfoCardHyperlinks(statWorker, statRequest, result);
     }
 }
