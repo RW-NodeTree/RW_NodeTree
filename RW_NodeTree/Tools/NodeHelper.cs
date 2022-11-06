@@ -12,14 +12,33 @@ namespace RW_NodeTree.Tools
     /// <summary>
     /// Graphic Function
     /// </summary>
-    public static class GraphicHelper
+    public static class NodeHelper
     {
+        public static CompChildNodeProccesser RootNode(this Thing thing)
+        {
+            CompChildNodeProccesser result = null;
+            if (thing != null)
+            {
+                IThingHolder parentHolder = thing.ParentHolder;
+                while(parentHolder != null)
+                {
+                    if(parentHolder is CompChildNodeProccesser)
+                    {
+                        result = parentHolder as CompChildNodeProccesser;
+                        result = result.RootNode;
+                        parentHolder = result;
+                    }
+                    parentHolder = parentHolder.ParentHolder;
+                }
+            }
+            return result;
+        }
         /// <summary>
         /// if graphic has sub graphic, It will return that;
         /// </summary>
         /// <param name="parent">current graphic</param>
         /// <returns>sub graphic</returns>
-        public static Graphic subGraphic(this Graphic parent)
+        public static Graphic SubGraphic(this Graphic parent)
         {
             if(parent != null)
             {
@@ -57,7 +76,7 @@ namespace RW_NodeTree.Tools
             while (graphic != null && !(graphic is Graphic_ChildNode))
             {
                 parent = graphic;
-                graphic = graphic.subGraphic();
+                graphic = graphic.SubGraphic();
             }
             //if (Prefs.DevMode) Log.Message(" parent = " + parent + " graphic = " + graphic);
             return graphic ?? parent;

@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Verse;
 using RW_NodeTree;
+using RW_NodeTree.Tools;
 
 namespace RW_NodeTree.Patch
 {
@@ -21,7 +22,7 @@ namespace RW_NodeTree.Patch
         )]
         private static void PreStatWorker_MeleeAverageDPS_GetCurrentWeaponUser(ref Thing weapon)
         {
-            weapon = ((CompChildNodeProccesser)weapon)?.RootNode ?? (weapon?.ParentHolder as CompChildNodeProccesser)?.RootNode ?? weapon;
+            weapon = weapon.RootNode() ?? weapon;
         }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using HarmonyLib;
 using RimWorld;
+using RW_NodeTree.Tools;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -60,7 +61,7 @@ namespace RW_NodeTree.Patch
             )
             {
                 __state = new Dictionary<string, object>();
-                ((CompChildNodeProccesser)req.Thing)?.PreStatWorker_GetValueUnfinalized(__instance, req, applyPostProcess, __state);
+                req.Thing.RootNode()?.PreStatWorker_GetValueUnfinalized(__instance, req, applyPostProcess, __state);
             }
         }
         private static void PreStatWorker_FinalizeValue(StatWorker __instance, MethodInfo __originalMethod, StatRequest req, bool applyPostProcess, ref float val, ref Dictionary<string, object> __state)
@@ -72,7 +73,7 @@ namespace RW_NodeTree.Patch
             )
             {
                 __state = new Dictionary<string, object>();
-                val = ((CompChildNodeProccesser)req.Thing)?.PreStatWorker_FinalizeValue(__instance, req, applyPostProcess, val, __state) ?? val;
+                val = req.Thing.RootNode()?.PreStatWorker_FinalizeValue(__instance, req, applyPostProcess, val, __state) ?? val;
             }
         }
         private static void PostStatWorker_GetValueUnfinalized(StatWorker __instance, MethodInfo __originalMethod, StatRequest req, bool applyPostProcess, ref float __result, ref Dictionary<string, object> __state)
@@ -81,7 +82,7 @@ namespace RW_NodeTree.Patch
                 ==
                 GetMethodInfo_GetValueUnfinalized_OfType(__instance.GetType()).DeclaringType
             )
-                __result = ((CompChildNodeProccesser)req.Thing)?.PostStatWorker_GetValueUnfinalized(__instance, req, applyPostProcess, __result, __state) ?? __result;
+                __result = req.Thing.RootNode()?.PostStatWorker_GetValueUnfinalized(__instance, req, applyPostProcess, __result, __state) ?? __result;
         }
         private static void PostStatWorker_FinalizeValue(StatWorker __instance, MethodInfo __originalMethod, StatRequest req, bool applyPostProcess, ref float val, ref Dictionary<string, object> __state)
         {
@@ -90,7 +91,7 @@ namespace RW_NodeTree.Patch
                 ==
                 GetMethodInfo_FinalizeValue_OfType(__instance.GetType()).DeclaringType
             )
-                val = ((CompChildNodeProccesser)req.Thing)?.PostStatWorker_FinalizeValue(__instance, req, applyPostProcess, val, __state) ?? val;
+                val = req.Thing.RootNode()?.PostStatWorker_FinalizeValue(__instance, req, applyPostProcess, val, __state) ?? val;
         }
 
         public static void PatchValue(Type type, Harmony patcher)
@@ -129,7 +130,7 @@ namespace RW_NodeTree
         /// <param name="statWorker">StatWorker</param>
         /// <param name="req">parm 'req' of StatWorker.GetValueUnfinalized()</param>
         /// <param name="applyPostProcess">parm 'applyPostProcess' of StatWorker.GetValueUnfinalized()</param>
-        internal void PreStatWorker_GetValueUnfinalized(StatWorker statWorker, StatRequest req, bool applyPostProcess, Dictionary<string, object> forPostRead)
+        public void PreStatWorker_GetValueUnfinalized(StatWorker statWorker, StatRequest req, bool applyPostProcess, Dictionary<string, object> forPostRead)
         {
             foreach (CompBasicNodeComp comp in AllNodeComp)
             {
@@ -145,7 +146,7 @@ namespace RW_NodeTree
         /// <param name="statWorker">StatWorker</param>
         /// <param name="req">parm 'req' of StatWorker.FinalizeValue()</param>
         /// <param name="applyPostProcess">parm 'applyPostProcess' of StatWorker.FinalizeValue()</param>
-        internal float PreStatWorker_FinalizeValue(StatWorker statWorker, StatRequest req, bool applyPostProcess, float result, Dictionary<string, object> forPostRead)
+        public float PreStatWorker_FinalizeValue(StatWorker statWorker, StatRequest req, bool applyPostProcess, float result, Dictionary<string, object> forPostRead)
         {
             foreach (CompBasicNodeComp comp in AllNodeComp)
             {
@@ -162,7 +163,7 @@ namespace RW_NodeTree
         /// <param name="statWorker">StatWorker</param>
         /// <param name="req">parm 'req' of StatWorker.GetValueUnfinalized()</param>
         /// <param name="applyPostProcess">parm 'applyPostProcess' of StatWorker.GetValueUnfinalized()</param>
-        internal float PostStatWorker_GetValueUnfinalized(StatWorker statWorker, StatRequest req, bool applyPostProcess, float result, Dictionary<string, object> forPostRead)
+        public float PostStatWorker_GetValueUnfinalized(StatWorker statWorker, StatRequest req, bool applyPostProcess, float result, Dictionary<string, object> forPostRead)
         {
             foreach (CompBasicNodeComp comp in AllNodeComp)
             {
@@ -179,7 +180,7 @@ namespace RW_NodeTree
         /// <param name="statWorker">StatWorker</param>
         /// <param name="req">parm 'req' of StatWorker.FinalizeValue()</param>
         /// <param name="applyPostProcess">parm 'applyPostProcess' of StatWorker.FinalizeValue()</param>
-        internal float PostStatWorker_FinalizeValue(StatWorker statWorker, StatRequest req, bool applyPostProcess, float result, Dictionary<string, object> forPostRead)
+        public float PostStatWorker_FinalizeValue(StatWorker statWorker, StatRequest req, bool applyPostProcess, float result, Dictionary<string, object> forPostRead)
         {
             foreach (CompBasicNodeComp comp in AllNodeComp)
             {

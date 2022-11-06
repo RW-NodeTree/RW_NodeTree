@@ -1,5 +1,6 @@
 ﻿using HarmonyLib;
 using RimWorld;
+using RW_NodeTree.Tools;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,7 +22,7 @@ namespace RW_NodeTree.Patch
             )]
         public static void PostStatsReportUtility_StatsToDraw(Thing thing, ref IEnumerable<StatDrawEntry> __result)
         {
-            __result = ((CompChildNodeProccesser)thing)?.PostStatsReportUtility_StatsToDraw(thing, __result) ?? __result;
+            __result = thing.RootNode()?.PostStatsReportUtility_StatsToDraw(thing, __result) ?? __result;
         }
     }
 }
@@ -41,7 +42,7 @@ namespace RW_NodeTree
         /// </summary>
         /// <param name="thing">parm 'thing' of StatsReportUtility.StatsToDraw()</param>
         /// <param name="result">result of ThingDef.SpecialDisplayStats</param>
-        internal IEnumerable<StatDrawEntry> PostStatsReportUtility_StatsToDraw(Thing thing, IEnumerable<StatDrawEntry> result)
+        public IEnumerable<StatDrawEntry> PostStatsReportUtility_StatsToDraw(Thing thing, IEnumerable<StatDrawEntry> result)
         {
             foreach (CompBasicNodeComp comp in AllNodeComp)
             {

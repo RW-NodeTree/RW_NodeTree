@@ -1,5 +1,6 @@
 ﻿using HarmonyLib;
 using RimWorld;
+using RW_NodeTree.Tools;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -40,7 +41,7 @@ namespace RW_NodeTree.Patch
                 ==
                 GetMethodInfo_GetInfoCardHyperlinks_OfType(__instance.GetType()).DeclaringType
             )
-            __result = ((CompChildNodeProccesser)statRequest.Thing)?.PostStatWorker_GetInfoCardHyperlinks(__instance, statRequest, __result) ?? __result;
+            __result = statRequest.Thing.RootNode()?.PostStatWorker_GetInfoCardHyperlinks(__instance, statRequest, __result) ?? __result;
         }
 
         public static void PatchGetInfoCardHyperlinks(Type type, Harmony patcher)

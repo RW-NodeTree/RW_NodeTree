@@ -167,7 +167,7 @@ namespace RW_NodeTree
                 while (graphic != null && graphic != this)
                 {
                     graphic.drawSize = size;
-                    graphic = graphic.subGraphic();
+                    graphic = graphic.SubGraphic();
                 }
                 this.drawSize = size;
             }
