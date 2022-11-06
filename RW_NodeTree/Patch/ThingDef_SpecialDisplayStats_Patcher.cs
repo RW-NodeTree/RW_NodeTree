@@ -1,5 +1,6 @@
 ﻿using HarmonyLib;
 using RimWorld;
+using RW_NodeTree.Tools;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,7 +22,7 @@ namespace RW_NodeTree.Patch
             )]
         public static void PostThingDef_SpecialDisplayStats(ThingDef __instance, StatRequest req, ref IEnumerable<StatDrawEntry> __result)
         {
-            __result = ((CompChildNodeProccesser)req.Thing)?.PostThingDef_SpecialDisplayStats(__instance, req, __result) ?? __result;
+            __result = req.Thing.RootNode()?.PostThingDef_SpecialDisplayStats(__instance, req, __result) ?? __result;
         }
     }
 }
