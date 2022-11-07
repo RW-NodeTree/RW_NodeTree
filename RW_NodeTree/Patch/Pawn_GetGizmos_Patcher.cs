@@ -1,5 +1,6 @@
 ﻿using HarmonyLib;
 using Mono.Unix.Native;
+using RimWorld;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,20 +15,24 @@ namespace RW_NodeTree.Patch
     [HarmonyPatch(typeof(Pawn))]
     internal static partial class Pawn_Patcher
     {
-
-        [HarmonyPrefix]
+        [HarmonyPostfix]
         [HarmonyPatch(
             typeof(Pawn),
             "GetGizmos"
         )]
-        private static void PrePawn_GetGizmos(Pawn __instance, ref Dictionary<Thing,List<VerbProperties>> __state)
+        private static void PostPawn_GetGizmos(Pawn __instance, ref IEnumerable<Gizmo> __result)
         {
-            ThingOwner list = __instance.equipment.GetDirectlyHeldThings();
-            __state = new Dictionary<Thing, List<VerbProperties>>();
+            __result = PerAndPostFixFor_Pawn_GetGizmos(__instance, __result) ?? __result;
+        }
+
+        private static IEnumerable<Gizmo> PerAndPostFixFor_Pawn_GetGizmos(Pawn instance, IEnumerable<Gizmo> result)
+        {
+            ThingOwner list = instance.equipment.GetDirectlyHeldThings();
+            List<(Thing, List<VerbProperties>)> state = new List<(Thing, List<VerbProperties>)>(list.Count);
             foreach (Thing thing in list)
             {
                 ThingDef_verbs(thing.def) = ThingDef_verbs(thing.def) ?? new List<VerbProperties>();
-                __state.Add(thing, new List<VerbProperties>(thing.def.Verbs));
+                state.Add((thing, new List<VerbProperties>(thing.def.Verbs)));
                 List<Verb> verbs = thing.TryGetComp<CompEquippable>().AllVerbs;
                 thing.def.Verbs.Clear();
                 foreach (Verb verb in verbs)
@@ -35,16 +40,10 @@ namespace RW_NodeTree.Patch
                     if (verb.tool == null) thing.def.Verbs.Add(verb.verbProps);
                 }
             }
-        }
 
-        [HarmonyPostfix]
-        [HarmonyPatch(
-            typeof(Pawn),
-            "GetGizmos"
-        )]
-        private static void PostPawn_GetGizmos(Pawn __instance, Dictionary<Thing, List<VerbProperties>> __state)
-        {
-            foreach ((Thing thing, List<VerbProperties> verbs) in __state)
+            foreach (Gizmo gizmo in result) yield return gizmo;
+
+            foreach ((Thing thing, List<VerbProperties> verbs) in state)
             {
                 thing.def.Verbs.Clear();
                 thing.def.Verbs.AddRange(verbs);
