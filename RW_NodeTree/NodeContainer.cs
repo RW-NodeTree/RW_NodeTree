@@ -394,17 +394,16 @@ namespace RW_NodeTree
             }
             return parent == node;
         }
+
         public bool IsChild(Thing node)
         {
             if (node == null) return false;
-            IThingHolder thingHolder = node.ParentHolder;
-            Thing parent = (thingHolder as ThingComp)?.parent ?? (thingHolder as Thing);
-            while (thingHolder != null && parent != Comp.parent)
+            ThingOwner Owner = node.holdingOwner;
+            while (Owner != null && Owner != this)
             {
-                thingHolder = thingHolder.ParentHolder;
-                parent = (thingHolder as ThingComp)?.parent ?? (thingHolder as Thing);
+                Owner = Owner.Owner.ParentHolder.GetDirectlyHeldThings();
             }
-            return parent == node;
+            return Owner == this;
         }
 
         public bool ContainsKey(string key)
