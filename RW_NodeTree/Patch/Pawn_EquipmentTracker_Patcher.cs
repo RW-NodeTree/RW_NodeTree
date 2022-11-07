@@ -20,7 +20,7 @@ namespace RW_NodeTree.Patch
         )]
         private static bool PrePawn_EquipmentTracker_EquipmentTrackerTick(Pawn_EquipmentTracker __instance)
         {
-            ThingOwner<ThingWithComps> list = Pawn_EquipmentTracker_equipment(__instance);
+            ThingOwner list = __instance.GetDirectlyHeldThings();
             list.ThingOwnerTick();
             for (int i = list.Count - 1; i >= 0; i--)
             {
@@ -47,7 +47,7 @@ namespace RW_NodeTree.Patch
         )]
         private static void PostPawn_EquipmentTracker_EquipmentTrackerTickRare(Pawn_EquipmentTracker __instance)
         {
-            ThingOwner<ThingWithComps> list = Pawn_EquipmentTracker_equipment(__instance);
+            ThingOwner list = __instance.GetDirectlyHeldThings();
             for (int i = list.Count - 1; i >= 0; i--)
             {
                 Thing t = list[i];
@@ -64,6 +64,5 @@ namespace RW_NodeTree.Patch
                 }
             }
         }
-        private static AccessTools.FieldRef<Pawn_EquipmentTracker, ThingOwner<ThingWithComps>> Pawn_EquipmentTracker_equipment = AccessTools.FieldRefAccess<ThingOwner<ThingWithComps>>(typeof(Pawn_EquipmentTracker), "equipment");
     }
 }
