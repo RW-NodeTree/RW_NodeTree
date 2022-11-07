@@ -394,6 +394,18 @@ namespace RW_NodeTree
             }
             return parent == node;
         }
+        public bool IsChild(Thing node)
+        {
+            if (node == null) return false;
+            IThingHolder thingHolder = node.ParentHolder;
+            Thing parent = (thingHolder as ThingComp)?.parent ?? (thingHolder as Thing);
+            while (thingHolder != null && parent != Comp.parent)
+            {
+                thingHolder = thingHolder.ParentHolder;
+                parent = (thingHolder as ThingComp)?.parent ?? (thingHolder as Thing);
+            }
+            return parent == node;
+        }
 
         public bool ContainsKey(string key)
         {
