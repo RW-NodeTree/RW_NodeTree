@@ -27,26 +27,33 @@ namespace RW_NodeTree.Patch
 
         private static IEnumerable<Gizmo> PerAndPostFixFor_Pawn_GetGizmos(Pawn instance, IEnumerable<Gizmo> result)
         {
-            ThingOwner list = instance.equipment.GetDirectlyHeldThings();
-            List<(Thing, List<VerbProperties>)> state = new List<(Thing, List<VerbProperties>)>(list.Count);
-            foreach (Thing thing in list)
+            ThingOwner list = instance.equipment?.GetDirectlyHeldThings();
+            List<(Thing, List<VerbProperties>)> state = null;
+            if (list != null)
             {
-                ThingDef_verbs(thing.def) = ThingDef_verbs(thing.def) ?? new List<VerbProperties>();
-                state.Add((thing, new List<VerbProperties>(thing.def.Verbs)));
-                List<Verb> verbs = thing.TryGetComp<CompEquippable>().AllVerbs;
-                thing.def.Verbs.Clear();
-                foreach (Verb verb in verbs)
+                state = new List<(Thing, List<VerbProperties>)>(list.Count);
+                foreach (Thing thing in list)
                 {
-                    if (verb.tool == null) thing.def.Verbs.Add(verb.verbProps);
+                    ThingDef_verbs(thing.def) = ThingDef_verbs(thing.def) ?? new List<VerbProperties>();
+                    state.Add((thing, new List<VerbProperties>(thing.def.Verbs)));
+                    List<Verb> verbs = thing.TryGetComp<CompEquippable>().AllVerbs;
+                    thing.def.Verbs.Clear();
+                    foreach (Verb verb in verbs)
+                    {
+                        if (verb.tool == null) thing.def.Verbs.Add(verb.verbProps);
+                    }
                 }
             }
 
             foreach (Gizmo gizmo in result) yield return gizmo;
 
-            foreach ((Thing thing, List<VerbProperties> verbs) in state)
+            if(state != null)
             {
-                thing.def.Verbs.Clear();
-                thing.def.Verbs.AddRange(verbs);
+                foreach ((Thing thing, List<VerbProperties> verbs) in state)
+                {
+                    thing.def.Verbs.Clear();
+                    thing.def.Verbs.AddRange(verbs);
+                }
             }
         }
 
