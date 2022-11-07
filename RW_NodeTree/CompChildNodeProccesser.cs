@@ -341,14 +341,6 @@ namespace RW_NodeTree
 
             if (!CheckVerbDatasVaildityAndAdapt(ownerType, parent, ref verbBeforeConvert, ref toolBeforeConvert, ref verbPropertiesBeforeConvert)) return result;
 
-            Dictionary<(Thing, Verb, Tool, VerbProperties), (Thing, Verb, Tool, VerbProperties)> caches;
-            if (!AfterConvertVerbCorrespondingThingCache.TryGetValue(ownerType, out caches))
-            {
-                caches = new Dictionary<(Thing, Verb, Tool, VerbProperties), (Thing, Verb, Tool, VerbProperties)>();
-                AfterConvertVerbCorrespondingThingCache.Add(ownerType,caches);
-            }
-            result = (parent, verbBeforeConvert, toolBeforeConvert, verbPropertiesBeforeConvert);
-            if(caches.TryGetValue(result,out result)) return result;
             result = (parent, verbBeforeConvert, toolBeforeConvert, verbPropertiesBeforeConvert);
 
             if (ownerType != null && typeof(IVerbOwner).IsAssignableFrom(ownerType) && verbPropertiesBeforeConvert != null)
@@ -395,7 +387,6 @@ namespace RW_NodeTree
                     result.Item1 = result.Item1 ?? before;
                 }
             }
-            caches.Add((parent, verbBeforeConvert, toolBeforeConvert, verbPropertiesBeforeConvert), result);
             return result;
         }
 
@@ -422,7 +413,6 @@ namespace RW_NodeTree
             regiestedNodeVerbPropertiesInfos.Clear();
             regiestedNodeVerbToolInfos.Clear();
             BeforeConvertVerbCorrespondingThingCache.Clear();
-            AfterConvertVerbCorrespondingThingCache.Clear();
             ParentProccesser?.ResetVerbs();
         }
 
@@ -795,8 +785,6 @@ namespace RW_NodeTree
         private readonly Dictionary<Type, List<VerbPropertiesRegiestInfo>> regiestedNodeVerbPropertiesInfos = new Dictionary<Type, List<VerbPropertiesRegiestInfo>>();
 
         private readonly Dictionary<Type, Dictionary<(Thing, Verb, Tool, VerbProperties), (Thing, Verb, Tool, VerbProperties)>> BeforeConvertVerbCorrespondingThingCache = new Dictionary<Type, Dictionary<(Thing, Verb, Tool, VerbProperties), (Thing, Verb, Tool, VerbProperties)>>();
-
-        private readonly Dictionary<Type, Dictionary<(Thing, Verb, Tool, VerbProperties), (Thing, Verb, Tool, VerbProperties)>> AfterConvertVerbCorrespondingThingCache = new Dictionary<Type, Dictionary<(Thing, Verb, Tool, VerbProperties), (Thing, Verb, Tool, VerbProperties)>>();
 
 
         /*
