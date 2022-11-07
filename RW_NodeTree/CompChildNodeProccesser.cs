@@ -242,7 +242,16 @@ namespace RW_NodeTree
 
             if (!CheckVerbDatasVaildityAndAdapt(ownerType, parent, ref verbAfterConvert, ref toolAfterConvert, ref verbPropertiesAfterConvert)) return result;
 
+            Dictionary<(Thing, Verb, Tool, VerbProperties), (Thing, Verb, Tool, VerbProperties)> caches;
+            if (!BeforeConvertVerbCorrespondingThingCache.TryGetValue(ownerType, out caches))
+            {
+                caches = new Dictionary<(Thing, Verb, Tool, VerbProperties), (Thing, Verb, Tool, VerbProperties)>();
+                BeforeConvertVerbCorrespondingThingCache.Add(ownerType, caches);
+            }
             result = (parent, verbAfterConvert, toolAfterConvert, verbPropertiesAfterConvert);
+            if (caches.TryGetValue(result, out result)) return result;
+            result = (parent, verbAfterConvert, toolAfterConvert, verbPropertiesAfterConvert);
+
             if (ownerType != null && typeof(IVerbOwner).IsAssignableFrom(ownerType) && verbPropertiesAfterConvert != null)
             {
                 (Thing, Verb, Tool, VerbProperties) cache = result;
@@ -285,6 +294,7 @@ namespace RW_NodeTree
                     result.Item1 = result.Item1 ?? before;
                 }
             }
+            caches.Add((parent, verbAfterConvert, toolAfterConvert, verbPropertiesAfterConvert), result);
             return result;
         }
 
@@ -331,7 +341,16 @@ namespace RW_NodeTree
 
             if (!CheckVerbDatasVaildityAndAdapt(ownerType, parent, ref verbBeforeConvert, ref toolBeforeConvert, ref verbPropertiesBeforeConvert)) return result;
 
+            Dictionary<(Thing, Verb, Tool, VerbProperties), (Thing, Verb, Tool, VerbProperties)> caches;
+            if (!AfterConvertVerbCorrespondingThingCache.TryGetValue(ownerType, out caches))
+            {
+                caches = new Dictionary<(Thing, Verb, Tool, VerbProperties), (Thing, Verb, Tool, VerbProperties)>();
+                AfterConvertVerbCorrespondingThingCache.Add(ownerType,caches);
+            }
             result = (parent, verbBeforeConvert, toolBeforeConvert, verbPropertiesBeforeConvert);
+            if(caches.TryGetValue(result,out result)) return result;
+            result = (parent, verbBeforeConvert, toolBeforeConvert, verbPropertiesBeforeConvert);
+
             if (ownerType != null && typeof(IVerbOwner).IsAssignableFrom(ownerType) && verbPropertiesBeforeConvert != null)
             {
                 (Thing, Verb, Tool, VerbProperties) cache = result;
@@ -376,6 +395,7 @@ namespace RW_NodeTree
                     result.Item1 = result.Item1 ?? before;
                 }
             }
+            caches.Add((parent, verbBeforeConvert, toolBeforeConvert, verbPropertiesBeforeConvert), result);
             return result;
         }
 
@@ -401,6 +421,8 @@ namespace RW_NodeTree
             (parent as IVerbOwner)?.VerbTracker?.VerbsNeedReinitOnLoad();
             regiestedNodeVerbPropertiesInfos.Clear();
             regiestedNodeVerbToolInfos.Clear();
+            BeforeConvertVerbCorrespondingThingCache.Clear();
+            AfterConvertVerbCorrespondingThingCache.Clear();
             ParentProccesser?.ResetVerbs();
         }
 
@@ -771,6 +793,10 @@ namespace RW_NodeTree
         private readonly Dictionary<Type, List<VerbToolRegiestInfo>> regiestedNodeVerbToolInfos = new Dictionary<Type, List<VerbToolRegiestInfo>>();
 
         private readonly Dictionary<Type, List<VerbPropertiesRegiestInfo>> regiestedNodeVerbPropertiesInfos = new Dictionary<Type, List<VerbPropertiesRegiestInfo>>();
+
+        private readonly Dictionary<Type, Dictionary<(Thing, Verb, Tool, VerbProperties), (Thing, Verb, Tool, VerbProperties)>> BeforeConvertVerbCorrespondingThingCache = new Dictionary<Type, Dictionary<(Thing, Verb, Tool, VerbProperties), (Thing, Verb, Tool, VerbProperties)>>();
+
+        private readonly Dictionary<Type, Dictionary<(Thing, Verb, Tool, VerbProperties), (Thing, Verb, Tool, VerbProperties)>> AfterConvertVerbCorrespondingThingCache = new Dictionary<Type, Dictionary<(Thing, Verb, Tool, VerbProperties), (Thing, Verb, Tool, VerbProperties)>>();
 
 
         /*
