@@ -16,10 +16,10 @@ namespace RW_NodeTree.Tools
     {
         public static CompChildNodeProccesser RootNode(this Thing thing)
         {
-            CompChildNodeProccesser result = null;
+            CompChildNodeProccesser result = thing;
             if (thing != null)
             {
-                IThingHolder parentHolder = thing.ParentHolder;
+                IThingHolder parentHolder = result ?? thing.ParentHolder;
                 while(parentHolder != null)
                 {
                     if(parentHolder is CompChildNodeProccesser)
