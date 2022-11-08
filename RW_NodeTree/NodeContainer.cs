@@ -401,7 +401,7 @@ namespace RW_NodeTree
             ThingOwner Owner = node.holdingOwner;
             while (Owner != null && Owner != this)
             {
-                Owner = Owner.Owner.ParentHolder.GetDirectlyHeldThings();
+                Owner = Owner.Owner?.ParentHolder?.GetDirectlyHeldThings();
             }
             return Owner == this;
         }
