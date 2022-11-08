@@ -37,7 +37,7 @@ namespace RW_NodeTree.Patch
                     __state = (drawSize, thing.def.size);
                     drawSize = proccesser.GetAndUpdateDrawSize(defaultPlacingRot);
                     if (defaultPlacingRot.IsHorizontal) drawSize = drawSize.Rotated();
-                    thing.def.size = new IntVec2((int)Math.Floor(drawSize.x), (int)Math.Floor(drawSize.y));
+                    thing.def.size = new IntVec2((int)Math.Ceiling(drawSize.x), (int)Math.Ceiling(drawSize.y));
                     //Log.Message($"thing.def.graphicData.drawSize : {drawSize}; cache : {__state}");
                 }
             }
@@ -56,7 +56,7 @@ namespace RW_NodeTree.Patch
         )]
         private static void PostWidgets_ThingIcon(Thing thing, ref (Vector2, IntVec2)? __state)
         {
-            if (thing?.def?.graphicData != null && __state != null)
+            if (thing?.def?.graphicData != null && __state.HasValue)
             {
                 thing.def.graphicData.drawSize = __state.Value.Item1;
                 thing.def.size = __state.Value.Item2;
