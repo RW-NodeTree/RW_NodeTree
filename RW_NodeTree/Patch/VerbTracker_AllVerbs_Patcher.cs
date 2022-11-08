@@ -112,9 +112,9 @@ namespace RW_NodeTree
                 {
                     Verb verb = result[i];
                     IVerbOwner verbOwner = verb.DirectOwner;
-                    verb = GetAfterConvertVerbCorrespondingThing(ownerType, verb).Item2;
                     if (verbOwner != null && (verbOwner == parent || (verbOwner as ThingComp)?.parent == parent))
                     {
+                        verb = GetAfterConvertVerbCorrespondingThing(ownerType, verb).Item2;
                         Thing thing = this.GetBeforeConvertVerbCorrespondingThing(ownerType, result[i]).Item1;
                         verbOwner = GetSameTypeVerbOwner(ownerType, thing);
                         if (verbOwner != null)

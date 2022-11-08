@@ -19,9 +19,10 @@ namespace RW_NodeTree.Patch
             typeof(Thing),
             typeof(Verb)
         )]
-        private static void PreVerbTracker_CreateVerbTargetCommand(ref Thing ownerThing, Verb verb)
+        private static void PreVerbTracker_CreateVerbTargetCommand(VerbTracker __instance,ref Thing ownerThing, Verb verb)
         {
             ownerThing = verb?.EquipmentSource ?? ownerThing;
+            ownerThing = ((CompChildNodeProccesser)ownerThing)?.GetBeforeConvertVerbCorrespondingThing(__instance.directOwner.GetType(), verb).Item1 ?? ownerThing;
             //if (Prefs.DevMode) Log.Message(verb + " : " + verb?.EquipmentSource);
         }
 
