@@ -38,6 +38,11 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="DataStructure\LinnerNode.cs" />
+    <Compile Include="Patch\CombatExtended\0HarmonyInjector_CombatExtended.cs" />
+    <Compile Include="Patch\CombatExtended\CombatExtended_JobDriver_Reload_Patcher.cs" />
+    <Compile Include="Patch\CombatExtended\CombatExtended_CompFireModes_Patcher.cs" />
+    <Compile Include="Patch\CombatExtended\CombatExtended_CompAmmoUser_Patcher.cs" />
+    <Compile Include="Patch\CombatExtended\CombatExtended_PawnRenderer_Patcher.cs" />
     <Compile Include="Patch\Pawn_GetGizmos_Patcher.cs" />
     <Compile Include="Patch\VerbTracker_ExposeData_Patcher.cs" />
     <Compile Include="Patch\Widgets_ThingIcon_Patcher.cs" />
