@@ -223,6 +223,7 @@ namespace RW_NodeTree.Rendering
         {
             if (renderTexture != null)
             {
+                ExceedanceFactor = Math.Max(ExceedanceFactor, 1f);
                 if (renderTexture.width <= MaxTexSize &&
                     renderTexture.width <= size.x * ExceedanceFactor + TextureSizeFactor * ExceedanceOffset &&
                     renderTexture.width >= size.x
