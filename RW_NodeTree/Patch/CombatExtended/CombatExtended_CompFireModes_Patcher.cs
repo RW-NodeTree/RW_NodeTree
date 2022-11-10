@@ -21,7 +21,7 @@ namespace RW_NodeTree.Patch.CombatExtended
 
         private static void PostCompFireModes_Verb(ThingComp __instance)
         {
-            CompChildNodeProccesser comp = __instance.parent.RootNode();
+            CompChildNodeProccesser comp = ((CompChildNodeProccesser)__instance.parent) ?? (__instance.ParentHolder as CompChildNodeProccesser);
             if (comp != null)
             {
                 CompFireModes_verbInt(__instance) = null;
