@@ -102,13 +102,13 @@ namespace RW_NodeTree.Patch
                 if (_ShouldShowFor?.DeclaringType == type && _ShouldShowFor.HasMethodBody())
                 {
                     patcher.Patch(_ShouldShowFor, new HarmonyMethod(_PreStatWorker_ShouldShowFor), new HarmonyMethod(_PostStatWorker_ShouldShowFor));
-                    if(Prefs.DevMode) Log.Message(type + "::" + _ShouldShowFor + " PatchSuccess\n");
+                    //if(Prefs.DevMode) Log.Message(type + "::" + _ShouldShowFor + " PatchSuccess\n");
                 }
                 MethodInfo _IsDisabledFor = GetMethodInfo_IsDisabledFor_OfType(type);
                 if (_IsDisabledFor?.DeclaringType == type && _IsDisabledFor.HasMethodBody())
                 {
                     patcher.Patch(_IsDisabledFor, new HarmonyMethod(_PreStatWorker_IsDisabledFor), new HarmonyMethod(_PostStatWorker_IsDisabledFor));
-                    if (Prefs.DevMode) Log.Message(type + "::" + _IsDisabledFor + " PatchSuccess\n");
+                    //if (Prefs.DevMode) Log.Message(type + "::" + _IsDisabledFor + " PatchSuccess\n");
                 }
             }
         }

@@ -64,7 +64,7 @@ namespace RW_NodeTree.Patch
                 if (_GetStatDrawEntryLabel?.DeclaringType == type && _GetStatDrawEntryLabel.HasMethodBody())
                 {
                     patcher.Patch(_GetStatDrawEntryLabel, new HarmonyMethod(_PreStatWorker_GetStatDrawEntryLabel), new HarmonyMethod(_PostStatWorker_GetStatDrawEntryLabel));
-                    if(Prefs.DevMode) Log.Message(type + "::" + _GetStatDrawEntryLabel + " PatchSuccess\n");
+                    //if(Prefs.DevMode) Log.Message(type + "::" + _GetStatDrawEntryLabel + " PatchSuccess\n");
                 }
             }
         }
