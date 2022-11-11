@@ -24,7 +24,7 @@ namespace RW_NodeTree.Patch
             CompChildNodeProccesser proccess = ((__instance.directOwner as ThingComp)?.parent) ?? ((__instance.directOwner) as Thing);
             foreach (Verb verb in __instance.AllVerbs)
             {
-                if (verb.verbProps.isPrimary && (proccess == null || (verb.Caster != null && verb.Available())))
+                if (verb.verbProps.isPrimary)
                 {
                     __result = verb;
                     return;
