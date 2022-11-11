@@ -44,6 +44,8 @@
     <Compile Include="Patch\CombatExtended\CombatExtended_CompAmmoUser_Patcher.cs" />
     <Compile Include="Patch\CombatExtended\CombatExtended_PawnRenderer_Patcher.cs" />
     <Compile Include="Patch\Pawn_GetGizmos_Patcher.cs" />
+    <Compile Include="Patch\StatWorker_StatDrawEntry_Patcher .cs" />
+    <Compile Include="Patch\StatWorker_ShouldShowForAndIsDisabledFor_Patcher .cs" />
     <Compile Include="Patch\VerbTracker_ExposeData_Patcher.cs" />
     <Compile Include="Patch\Widgets_ThingIcon_Patcher.cs" />
     <Compile Include="Test\NodeComp_Test.cs" />
