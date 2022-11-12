@@ -242,14 +242,14 @@ namespace RW_NodeTree
 
             if (!CheckVerbDatasVaildityAndAdapt(ownerType, parent, ref verbAfterConvert, ref toolAfterConvert, ref verbPropertiesAfterConvert)) return result;
 
-            Dictionary<(Thing, Verb, Tool, VerbProperties), (Thing, Verb, Tool, VerbProperties)> caches;
+            Dictionary<(Thing, Verb, Tool, VerbProperties, bool), (Thing, Verb, Tool, VerbProperties)> caches;
             if (!BeforeConvertVerbCorrespondingThingCache.TryGetValue(ownerType, out caches))
             {
-                caches = new Dictionary<(Thing, Verb, Tool, VerbProperties), (Thing, Verb, Tool, VerbProperties)>();
+                caches = new Dictionary<(Thing, Verb, Tool, VerbProperties, bool), (Thing, Verb, Tool, VerbProperties)>();
                 BeforeConvertVerbCorrespondingThingCache.Add(ownerType, caches);
             }
-            result = (parent, verbAfterConvert, toolAfterConvert, verbPropertiesAfterConvert);
-            if (caches.TryGetValue(result, out result)) return result;
+
+            if (caches.TryGetValue((parent, verbAfterConvert, toolAfterConvert, verbPropertiesAfterConvert, needVerb), out result)) return result;
             result = (parent, verbAfterConvert, toolAfterConvert, verbPropertiesAfterConvert);
 
             if (ownerType != null && typeof(IVerbOwner).IsAssignableFrom(ownerType) && verbPropertiesAfterConvert != null)
@@ -296,7 +296,7 @@ namespace RW_NodeTree
                     result.Item1 = result.Item1 ?? before;
                 }
             }
-            caches.Add((parent, verbAfterConvert, toolAfterConvert, verbPropertiesAfterConvert), result);
+            caches.Add((parent, verbAfterConvert, toolAfterConvert, verbPropertiesAfterConvert, needVerb), result);
             return result;
         }
 
@@ -786,7 +786,7 @@ namespace RW_NodeTree
 
         private readonly Dictionary<Type, List<VerbPropertiesRegiestInfo>> regiestedNodeVerbPropertiesInfos = new Dictionary<Type, List<VerbPropertiesRegiestInfo>>();
 
-        private readonly Dictionary<Type, Dictionary<(Thing, Verb, Tool, VerbProperties), (Thing, Verb, Tool, VerbProperties)>> BeforeConvertVerbCorrespondingThingCache = new Dictionary<Type, Dictionary<(Thing, Verb, Tool, VerbProperties), (Thing, Verb, Tool, VerbProperties)>>();
+        private readonly Dictionary<Type, Dictionary<(Thing, Verb, Tool, VerbProperties, bool), (Thing, Verb, Tool, VerbProperties)>> BeforeConvertVerbCorrespondingThingCache = new Dictionary<Type, Dictionary<(Thing, Verb, Tool, VerbProperties, bool), (Thing, Verb, Tool, VerbProperties)>>();
 
 
         /*
@@ -817,7 +817,7 @@ namespace RW_NodeTree
 
         public bool VerbDirectOwnerRedictory = false;
         public bool VerbEquipmentSourceRedictory = true;
-        public bool VerbIconVerbInstanceSource = true;
+        public bool VerbIconVerbInstanceSource = false;
         public bool ForceNodeIdControl = false;
         public bool NodeIdAutoInsertByRegiested = true;
         public float ExceedanceFactor = 1f;

@@ -23,7 +23,7 @@ namespace RW_NodeTree.Patch
         {
             CompChildNodeProccesser comp = ownerThing;
             ownerThing = comp?.GetBeforeConvertVerbCorrespondingThing(__instance.directOwner.GetType(), verb, comp.Props.VerbIconVerbInstanceSource).Item1 ?? ownerThing;
-            //if (Prefs.DevMode) Log.Message(verb + " : " + verb?.EquipmentSource);
+            //if (Prefs.DevMode) Log.Message(verb + " : " + ownerThing + " : " + comp.Props.VerbIconVerbInstanceSource);
         }
 
         [HarmonyPostfix]
