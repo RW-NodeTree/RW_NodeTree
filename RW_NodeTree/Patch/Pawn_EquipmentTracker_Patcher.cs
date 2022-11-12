@@ -64,5 +64,34 @@ namespace RW_NodeTree.Patch
                 }
             }
         }
+
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(Pawn_EquipmentTracker), "GetGizmos")]
+        private static void PostPawn_EquipmentTracker_GetGizmosPostfix(Pawn_EquipmentTracker __instance, ref IEnumerable<Gizmo> __result)
+        {
+            IEnumerable<Gizmo> forEach(Pawn_EquipmentTracker instance, IEnumerable< Gizmo> result)
+            {
+                foreach(Gizmo gizmo in result)
+                {
+                    yield return gizmo;
+                }
+                ThingOwner list = __instance.GetDirectlyHeldThings();
+                for(int i = list.Count - 1; i >= 0; i--)
+                {
+                    CompChildNodeProccesser proccesser = list[i];
+                    if(proccesser != null)
+                    {
+                        foreach(CompBasicNodeComp comp in proccesser.AllNodeComp)
+                        {
+                            foreach(Gizmo gizmo in comp.CompGetGizmosExtra())
+                            {
+                                yield return gizmo;
+                            }
+                        }
+                    }
+                }
+            }
+            __result = forEach(__instance, __result);
+        }
     }
 }
