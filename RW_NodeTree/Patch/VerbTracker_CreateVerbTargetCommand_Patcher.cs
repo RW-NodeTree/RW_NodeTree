@@ -21,7 +21,8 @@ namespace RW_NodeTree.Patch
         )]
         private static void PreVerbTracker_CreateVerbTargetCommand(VerbTracker __instance,ref Thing ownerThing, Verb verb)
         {
-            ownerThing = ((CompChildNodeProccesser)ownerThing)?.GetBeforeConvertVerbCorrespondingThing(__instance.directOwner.GetType(), verb).Item1 ?? ownerThing;
+            CompChildNodeProccesser comp = ownerThing;
+            ownerThing = comp?.GetBeforeConvertVerbCorrespondingThing(__instance.directOwner.GetType(), verb, comp.Props.CommandIconUseRedictoryToVerbInstanceSource).Item1 ?? ownerThing;
             //if (Prefs.DevMode) Log.Message(verb + " : " + verb?.EquipmentSource);
         }
 

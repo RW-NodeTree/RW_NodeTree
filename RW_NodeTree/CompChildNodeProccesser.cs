@@ -817,6 +817,7 @@ namespace RW_NodeTree
 
         public bool VerbDirectOwnerRedictory = false;
         public bool VerbEquipmentSourceRedictory = true;
+        public bool VerbIconVerbInstanceSource = true;
         public bool ForceNodeIdControl = false;
         public bool NodeIdAutoInsertByRegiested = true;
         public float ExceedanceFactor = 1f;

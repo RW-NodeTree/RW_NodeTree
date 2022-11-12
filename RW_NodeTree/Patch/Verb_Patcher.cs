@@ -57,6 +57,14 @@ namespace RW_NodeTree.Patch
         private static void PostVerb_UIIcon(Verb __instance, ref Texture2D __result)
         {
             Thing EquipmentSource = __instance.EquipmentSource;
+            CompChildNodeProccesser compChild = EquipmentSource;
+            if (compChild != null && compChild.Props.VerbIconVerbInstanceSource)
+            {
+                IVerbOwner directOwner = __instance.verbTracker.directOwner;
+                EquipmentSource = (directOwner as Thing) ?? (directOwner as ThingComp)?.parent;
+                compChild = EquipmentSource ?? (EquipmentSource?.ParentHolder as CompChildNodeProccesser);
+                EquipmentSource = (compChild?.GetBeforeConvertVerbCorrespondingThing(__instance.verbTracker.directOwner.GetType(), __instance, compChild.Props.VerbIconVerbInstanceSource).Item1 as ThingWithComps) ?? EquipmentSource;
+            }
             __result = (EquipmentSource?.Graphic?.MatSingleFor(EquipmentSource)?.mainTexture as Texture2D) ?? __result;
         }
     }
