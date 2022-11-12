@@ -17,7 +17,7 @@ namespace RW_NodeTree.Patch
             typeof(VerbTracker),
             "ExposeData"
         )]
-        private static void PreVerbTracker_CreateVerbTargetCommand(VerbTracker __instance, ref List<Verb> __state)
+        private static void PreVerbTracker_ExposeData(VerbTracker __instance, ref List<Verb> __state)
         {
             if (Scribe.mode == LoadSaveMode.ResolvingCrossRefs)
             {
@@ -30,7 +30,7 @@ namespace RW_NodeTree.Patch
             typeof(VerbTracker),
             "ExposeData"
         )]
-        private static void PostVerbTracker_CreateVerbTargetCommand(VerbTracker __instance, List<Verb> __state)
+        private static void PostVerbTracker_ExposeData(VerbTracker __instance, List<Verb> __state)
         {
             if(__state != null)
             {

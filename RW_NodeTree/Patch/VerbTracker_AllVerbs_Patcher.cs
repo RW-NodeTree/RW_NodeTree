@@ -110,20 +110,7 @@ namespace RW_NodeTree
             {
                 for (int i = 0; i < result.Count; i++)
                 {
-                    Verb verb = result[i];
-                    verb = GetAfterConvertVerbCorrespondingThing(ownerType, verb).Item2;
-                    IVerbOwner verbOwner = verb.DirectOwner;
-                    if (verbOwner != null && (verbOwner == parent || (verbOwner as ThingComp)?.parent == parent))
-                    {
-                        Thing thing = this.GetBeforeConvertVerbCorrespondingThing(ownerType, result[i]).Item1;
-                        verbOwner = GetSameTypeVerbOwner(ownerType, thing);
-                        if (verbOwner != null)
-                        {
-                            verb.verbTracker = verbOwner.VerbTracker;
-                            //if (Prefs.DevMode) Log.Message(verb + " : " + thing);
-                        }
-                    }
-                    result[i] = verb;
+                    result[i] = GetAfterConvertVerbCorrespondingThing(ownerType, result[i]).Item2;
                 }
                 return result;
             }

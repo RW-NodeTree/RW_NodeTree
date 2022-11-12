@@ -211,9 +211,9 @@ namespace RW_NodeTree
         /// </summary>
         /// <param name="verbAfterConvert">Verb after convert</param>
         /// <returns>Verb infos before convert</returns>
-        public (Thing, Verb, Tool, VerbProperties) GetBeforeConvertVerbCorrespondingThing(Type ownerType, Verb verbAfterConvert)
+        public (Thing, Verb, Tool, VerbProperties) GetBeforeConvertVerbCorrespondingThing(Type ownerType, Verb verbAfterConvert, bool needVerb = false)
         {
-            return GetBeforeConvertVerbCorrespondingThing(ownerType, verbAfterConvert, null, null);
+            return GetBeforeConvertVerbCorrespondingThing(ownerType, verbAfterConvert, null, null, needVerb);
         }
 
 
@@ -223,9 +223,9 @@ namespace RW_NodeTree
         /// <param name="verbPropertiesAfterConvert">verbProperties of verbAfterConvert</param>
         /// <param name="toolAfterConvert">tool of verbAfterConvert</param>
         /// <returns>Verb infos before convert</returns>
-        public (Thing, Verb, Tool, VerbProperties) GetBeforeConvertVerbCorrespondingThing(Type ownerType, Tool toolAfterConvert, VerbProperties verbPropertiesAfterConvert)
+        public (Thing, Verb, Tool, VerbProperties) GetBeforeConvertVerbCorrespondingThing(Type ownerType, Tool toolAfterConvert, VerbProperties verbPropertiesAfterConvert, bool needVerb = false)
         {
-            return GetBeforeConvertVerbCorrespondingThing(ownerType, null, toolAfterConvert, verbPropertiesAfterConvert);
+            return GetBeforeConvertVerbCorrespondingThing(ownerType, null, toolAfterConvert, verbPropertiesAfterConvert, needVerb);
         }
 
 
@@ -236,7 +236,7 @@ namespace RW_NodeTree
         /// <param name="verbPropertiesAfterConvert">verbProperties of verbAfterConvert</param>
         /// <param name="toolAfterConvert">tool of verbAfterConvert</param>
         /// <returns>Verb infos before convert</returns>
-        public (Thing, Verb, Tool, VerbProperties) GetBeforeConvertVerbCorrespondingThing(Type ownerType, Verb verbAfterConvert, Tool toolAfterConvert, VerbProperties verbPropertiesAfterConvert)
+        public (Thing, Verb, Tool, VerbProperties) GetBeforeConvertVerbCorrespondingThing(Type ownerType, Verb verbAfterConvert, Tool toolAfterConvert, VerbProperties verbPropertiesAfterConvert, bool needVerb = false)
         {
             (Thing, Verb, Tool, VerbProperties) result = default((Thing, Verb, Tool, VerbProperties));
 
@@ -285,12 +285,14 @@ namespace RW_NodeTree
 
                 if (!CheckVerbDatasVaildityAndAdapt(ownerType, cache.Item1, ref cache.Item2, ref cache.Item3, ref cache.Item4)) return result;
 
+                if (needVerb && cache.Item2 == null) return result;
+
                 result = cache;
 
                 if (result.Item1 != null && result.Item1 != parent && ((CompChildNodeProccesser)result.Item1) != null)
                 {
                     Thing before = result.Item1;
-                    result = ((CompChildNodeProccesser)result.Item1).GetBeforeConvertVerbCorrespondingThing(ownerType, result.Item2, result.Item3, result.Item4);
+                    result = ((CompChildNodeProccesser)result.Item1).GetBeforeConvertVerbCorrespondingThing(ownerType, result.Item2, result.Item3, result.Item4, needVerb);
                     result.Item1 = result.Item1 ?? before;
                 }
             }
@@ -813,6 +815,8 @@ namespace RW_NodeTree
             parentDef.comps.Insert(0, this);
         }
 
+        public bool VerbDirectOwnerRedictory = false;
+        public bool VerbEquipmentSourceRedictory = true;
         public bool ForceNodeIdControl = false;
         public bool NodeIdAutoInsertByRegiested = true;
         public float ExceedanceFactor = 1f;

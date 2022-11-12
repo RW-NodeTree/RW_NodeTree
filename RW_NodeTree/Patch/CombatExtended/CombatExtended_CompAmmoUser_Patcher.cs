@@ -17,9 +17,9 @@ namespace RW_NodeTree.Patch.CombatExtended
         private static MethodInfo _PostCompAmmoUser_CompEquippable = typeof(CombatExtended_CompAmmoUser_Patcher).GetMethod("PostCompAmmoUser_CompEquippable", BindingFlags.Static | BindingFlags.NonPublic);
         private static Type CombatExtended_CompAmmoUser = GenTypes.GetTypeInAnyAssembly("CombatExtended.CompAmmoUser");
 
-        private static void PostCompAmmoUser_CompEquippable(ref CompEquippable __result)
+        private static void PostCompAmmoUser_CompEquippable(ThingComp __instance, ref CompEquippable __result)
         {
-            CompChildNodeProccesser comp = __result?.parent.RootNode();
+            CompChildNodeProccesser comp = __instance.parent.RootNode();
             if (comp != null)
             {
                 __result = comp.parent.TryGetComp<CompEquippable>();
