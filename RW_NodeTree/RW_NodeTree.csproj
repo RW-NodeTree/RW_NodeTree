@@ -49,6 +49,7 @@
     <Compile Include="Patch\StatWorker_StatDrawEntry_Patcher .cs" />
     <Compile Include="Patch\StatWorker_ShouldShowForAndIsDisabledFor_Patcher .cs" />
     <Compile Include="Patch\VerbTracker_ExposeData_Patcher.cs" />
+    <Compile Include="Patch\Command_VerbTarget_Patcher.cs" />
     <Compile Include="Patch\Widgets_ThingIcon_Patcher.cs" />
     <Compile Include="Test\NodeComp_Test.cs" />
     <Compile Include="Patch\GenRecipe_Patcher.cs" />
