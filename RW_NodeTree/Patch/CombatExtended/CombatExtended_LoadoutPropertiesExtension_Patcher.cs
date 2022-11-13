@@ -45,7 +45,7 @@ namespace RW_NodeTree.Patch.CombatExtended
         private static ThingComp LoadoutPropertiesExtension_TryGetComp(Thing thing)
         {
             CompChildNodeProccesser comp = thing;
-            ThingComp result = null;
+            ThingComp result = (ThingComp)TryGetComp.Invoke(null, new object[] { thing });
             if (comp != null)
             {
                 CompEquippable equippable = thing.TryGetComp<CompEquippable>();
