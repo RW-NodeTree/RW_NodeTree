@@ -45,7 +45,6 @@ namespace RW_NodeTree.Patch.CombatExtended
         private static ThingComp LoadoutPropertiesExtension_TryGetComp(Thing thing)
         {
             CompChildNodeProccesser comp = thing;
-            ThingComp result = (ThingComp)TryGetComp.Invoke(null, new object[] { thing });
             if (comp != null)
             {
                 CompEquippable equippable = thing.TryGetComp<CompEquippable>();
@@ -53,6 +52,7 @@ namespace RW_NodeTree.Patch.CombatExtended
                 {
                     thing = comp.GetBeforeConvertVerbCorrespondingThing(equippable.GetType(), equippable.PrimaryVerb, true).Item1 as ThingWithComps;
 
+                    ThingComp
                     result = (ThingComp)TryGetComp.Invoke(null, new object[] { thing });
                     if (result != null) return result;
 
@@ -61,8 +61,9 @@ namespace RW_NodeTree.Patch.CombatExtended
                     result = (ThingComp)TryGetComp.Invoke(null, new object[] { thing });
                     if (result != null) return result;
                 }
+                thing = comp.parent;
             }
-            return result;
+            return (ThingComp)TryGetComp.Invoke(null, new object[] { thing });
         }
 
 
