@@ -51,7 +51,6 @@
     <Compile Include="Patch\VerbTracker_ExposeData_Patcher.cs" />
     <Compile Include="Patch\Command_VerbTarget_Patcher.cs" />
     <Compile Include="Patch\Widgets_ThingIcon_Patcher.cs" />
-    <Compile Include="Test\NodeComp_Test.cs" />
     <Compile Include="Patch\GenRecipe_Patcher.cs" />
     <Compile Include="Patch\Graphic_RandomRotated_Patcher.cs" />
     <Compile Include="Patch\Pawn_ApparelTracker_Patcher.cs" />
@@ -301,7 +300,6 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="PackUp\1.4\Defs\Tset.xml" />
     <Content Include="PackUp\About\About.xml" />
     <Content Include="PackUp\About\Preview.png" />
     <Content Include="PackUp\About\Preview.svg" />
