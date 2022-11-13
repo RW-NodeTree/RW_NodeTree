@@ -37,8 +37,10 @@ namespace RW_NodeTree.Patch
         {
             if(__result != null)
             {
-                __result.icon = (ownerThing?.Graphic?.MatSingleFor(ownerThing)?.mainTexture as Texture2D) ?? __result.icon;
-                __result.iconProportions = ownerThing?.Graphic?.drawSize ?? __result.iconProportions;
+                __result.icon = (ownerThing.Graphic?.MatSingleFor(ownerThing)?.mainTexture as Texture2D) ?? __result.icon;
+                __result.iconProportions = ownerThing.Graphic?.drawSize ?? __result.iconProportions;
+                Vector2 scale = (ownerThing?.Graphic?.drawSize ?? Vector2.one) / ownerThing.def.size.ToVector2();
+                __result.iconDrawScale = Math.Min(scale.x, scale.y);
             }
         }
     }

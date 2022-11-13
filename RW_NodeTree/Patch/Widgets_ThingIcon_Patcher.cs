@@ -24,7 +24,7 @@ namespace RW_NodeTree.Patch
             typeof(Rot4?),
             typeof(bool)
         )]
-        private static void PreWidgets_ThingIcon(Thing thing, ref (Vector2, IntVec2)? __state)
+        private static void PreWidgets_ThingIcon(Thing thing, ref Vector2? __state)
         {
             ThingStyleDef styleDef = thing.StyleDef;
             if (thing?.def?.graphicData != null && (styleDef == null || styleDef.UIIcon == null) && thing.def.uiIconPath.NullOrEmpty() && !(thing is Pawn || thing is Corpse))
@@ -34,10 +34,9 @@ namespace RW_NodeTree.Patch
                 {
                     Rot4 defaultPlacingRot = thing.def.defaultPlacingRot;
                     ref Vector2 drawSize = ref thing.def.graphicData.drawSize;
-                    __state = (drawSize, thing.def.size);
+                    __state = drawSize;
                     drawSize = proccesser.GetAndUpdateDrawSize(defaultPlacingRot);
                     if (defaultPlacingRot.IsHorizontal) drawSize = drawSize.Rotated();
-                    thing.def.size = new IntVec2((int)Math.Ceiling(drawSize.x), (int)Math.Ceiling(drawSize.y));
                     //Log.Message($"thing.def.graphicData.drawSize : {drawSize}; cache : {__state}");
                 }
             }
@@ -54,12 +53,11 @@ namespace RW_NodeTree.Patch
             typeof(Rot4?),
             typeof(bool)
         )]
-        private static void PostWidgets_ThingIcon(Thing thing, ref (Vector2, IntVec2)? __state)
+        private static void PostWidgets_ThingIcon(Thing thing, ref Vector2? __state)
         {
             if (thing?.def?.graphicData != null && __state.HasValue)
             {
-                thing.def.graphicData.drawSize = __state.Value.Item1;
-                thing.def.size = __state.Value.Item2;
+                thing.def.graphicData.drawSize = __state.Value;
             }
         }
     }
