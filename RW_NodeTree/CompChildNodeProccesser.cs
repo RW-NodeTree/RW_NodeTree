@@ -38,18 +38,7 @@ namespace RW_NodeTree
         /// <summary>
         /// get parent node if it is a node
         /// </summary>
-        public CompChildNodeProccesser ParentProccesser
-        {
-            get
-            {
-                CompChildNodeProccesser result = this.ParentHolder as CompChildNodeProccesser;
-                foreach (CompBasicNodeComp comp in AllNodeComp)
-                {
-                    result = comp.internal_OverrideParentProccesser(result);
-                }
-                return result;
-            }
-        }
+        public CompChildNodeProccesser ParentProccesser => this.ParentHolder as CompChildNodeProccesser;
 
         /// <summary>
         /// root of this node tree
@@ -58,6 +47,7 @@ namespace RW_NodeTree
         {
             get
             {
+                if(cachedRootNode != null) return cachedRootNode;
                 CompChildNodeProccesser proccesser = this;
                 CompChildNodeProccesser next = ParentProccesser;
                 while (next != null) 
@@ -65,7 +55,7 @@ namespace RW_NodeTree
                     proccesser = next;
                     next = next.ParentProccesser;
                 }
-
+                cachedRootNode = proccesser;
                 return proccesser;
             }
         }
@@ -588,6 +578,17 @@ namespace RW_NodeTree
         /// <returns></returns>
         public bool UpdateNode() => ChildNodes.internal_UpdateNode();
 
+
+        public void ResetCachedRootNode()
+        {
+            cachedRootNode = null;
+            foreach (Thing part in ChildNodes.Values)
+            {
+                CompChildNodeProccesser childComp = part;
+                if (childComp != null) childComp.ResetCachedRootNode();
+            }
+        }
+
         internal void internal_PerAdd(ref Thing node, ref string id)
         {
             Thing nodeCache = node;
@@ -612,6 +613,7 @@ namespace RW_NodeTree
 
         internal void internal_Added(NodeContainer container, string id)
         {
+            ResetCachedRootNode();
             foreach (CompBasicNodeComp comp in AllNodeComp)
             {
                 comp.internal_Added(container, id);
@@ -639,6 +641,7 @@ namespace RW_NodeTree
 
         internal void internal_Removed(NodeContainer container, string id)
         {
+            ResetCachedRootNode();
             foreach (CompBasicNodeComp comp in AllNodeComp)
             {
                 comp.internal_Removed(container, id);
@@ -775,6 +778,7 @@ namespace RW_NodeTree
         }
         #endregion
 
+        private CompChildNodeProccesser cachedRootNode;
 
         private NodeContainer childNodes;
 

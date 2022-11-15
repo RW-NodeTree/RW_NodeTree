@@ -163,16 +163,6 @@ namespace RW_NodeTree
         }
 
         /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="orginal"></param>
-        /// <returns></returns>
-        protected virtual CompChildNodeProccesser OverrideParentProccesser(CompChildNodeProccesser orginal)
-        {
-            return orginal;
-        }
-
-        /// <summary>
         /// Adapte draw steep of this node
         /// </summary>
         /// <param name="nodeRenderingInfos">Corresponding rendering infos with id and part</param>
@@ -194,7 +184,6 @@ namespace RW_NodeTree
         internal void internal_Added(NodeContainer container, string id) => Added(container, id);
         internal void internal_Removed(NodeContainer container, string id) => Removed(container, id);
         internal HashSet<string> internal_RegiestedNodeId(HashSet<string> regiestedNodeId) => RegiestedNodeId(regiestedNodeId);
-        internal CompChildNodeProccesser internal_OverrideParentProccesser(CompChildNodeProccesser orginal) => OverrideParentProccesser(orginal);
         internal List<(Thing, string, List<RenderInfo>)> internal_OverrideDrawSteep(List<(Thing, string, List<RenderInfo>)> nodeRenderingInfos, Rot4 rot, Graphic graphic) => OverrideDrawSteep(nodeRenderingInfos, rot, graphic);
     }
 }
