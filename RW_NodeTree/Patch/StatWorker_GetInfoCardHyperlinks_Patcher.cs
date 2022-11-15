@@ -18,8 +18,9 @@ namespace RW_NodeTree.Patch
         private static readonly Type[] StatWorker_GetInfoCardHyperlinks_ParmsType = new Type[] { typeof(StatRequest)};
 
         private static readonly Dictionary<Type, MethodInfo> MethodInfo_GetInfoCardHyperlinks_OfType = new Dictionary<Type, MethodInfo>();
+        private static readonly Dictionary<MethodInfo, Type> DeclaringType_GetInfoCardHyperlinks_OfMethod = new Dictionary<MethodInfo, Type>();
 
-        private static MethodInfo GetMethodInfo_GetInfoCardHyperlinks_OfType(Type type)
+        private static MethodInfo GetMethodInfo_GetInfoCardHyperlinks_OfType(this Type type)
         {
             MethodInfo result;
             if (!MethodInfo_GetInfoCardHyperlinks_OfType.TryGetValue(type, out result))
@@ -34,12 +35,25 @@ namespace RW_NodeTree.Patch
             return result;
         }
 
+
+        private static Type GetDeclaringType_GetInfoCardHyperlinks_OfMethod(this MethodInfo method)
+        {
+            Type result;
+            if (!DeclaringType_GetInfoCardHyperlinks_OfMethod.TryGetValue(method, out result))
+            {
+                DeclaringType_GetInfoCardHyperlinks_OfMethod.Add(method,
+                    result = method.DeclaringType
+                );
+            }
+            return result;
+        }
+
         private static void PostStatWorker_GetInfoCardHyperlinks(StatWorker __instance, MethodInfo __originalMethod, StatRequest statRequest, ref IEnumerable<Dialog_InfoCard.Hyperlink> __result)
         {
             //if (Prefs.DevMode) Log.Message("__originalMethod.GetType() : " + __originalMethod.GetType() + "; _GetInfoCardHyperlinks.GetType() : " + _GetInfoCardHyperlinks.GetType() + "; same : " + (_GetInfoCardHyperlinks == __originalMethod));
-            if (__originalMethod.DeclaringType
+            if (__originalMethod.GetDeclaringType_GetInfoCardHyperlinks_OfMethod()
                 ==
-                GetMethodInfo_GetInfoCardHyperlinks_OfType(__instance.GetType()).DeclaringType
+                __instance.GetType().GetMethodInfo_GetInfoCardHyperlinks_OfType().GetDeclaringType_GetInfoCardHyperlinks_OfMethod()
             )
             __result = statRequest.Thing.RootNode()?.PostStatWorker_GetInfoCardHyperlinks(__instance, statRequest, __result) ?? __result;
         }

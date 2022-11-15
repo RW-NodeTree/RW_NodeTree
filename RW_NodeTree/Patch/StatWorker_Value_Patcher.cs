@@ -23,8 +23,10 @@ namespace RW_NodeTree.Patch
 
         private static readonly Dictionary<Type, MethodInfo> MethodInfo_GetValueUnfinalized_OfType = new Dictionary<Type, MethodInfo>();
         private static readonly Dictionary<Type, MethodInfo> MethodInfo_FinalizeValue_OfType = new Dictionary<Type, MethodInfo>();
+        private static readonly Dictionary<MethodInfo, Type> DeclaringType_GetValueUnfinalized_OfMethod = new Dictionary<MethodInfo, Type>();
+        private static readonly Dictionary<MethodInfo, Type> DeclaringType_FinalizeValue_OfMethod = new Dictionary<MethodInfo, Type>();
 
-        private static MethodInfo GetMethodInfo_GetValueUnfinalized_OfType(Type type)
+        private static MethodInfo GetMethodInfo_GetValueUnfinalized_OfType(this Type type)
         {
             MethodInfo result;
             if (!MethodInfo_GetValueUnfinalized_OfType.TryGetValue(type, out result))
@@ -38,7 +40,7 @@ namespace RW_NodeTree.Patch
             }
             return result;
         }
-        private static MethodInfo GetMethodInfo_FinalizeValue_OfType(Type type)
+        private static MethodInfo GetMethodInfo_FinalizeValue_OfType(this Type type)
         {
             MethodInfo result;
             if (!MethodInfo_FinalizeValue_OfType.TryGetValue(type, out result))
@@ -53,11 +55,35 @@ namespace RW_NodeTree.Patch
             return result;
         }
 
+        private static Type GetDeclaringType_GetValueUnfinalized_OfMethod(this MethodInfo method)
+        {
+            Type result;
+            if (!DeclaringType_GetValueUnfinalized_OfMethod.TryGetValue(method, out result))
+            {
+                DeclaringType_GetValueUnfinalized_OfMethod.Add(method,
+                    result = method.DeclaringType
+                );
+            }
+            return result;
+        }
+
+        private static Type GetDeclaringType_FinalizeValue_OfMethod(this MethodInfo method)
+        {
+            Type result;
+            if (!DeclaringType_FinalizeValue_OfMethod.TryGetValue(method, out result))
+            {
+                DeclaringType_FinalizeValue_OfMethod.Add(method,
+                    result = method.DeclaringType
+                );
+            }
+            return result;
+        }
+
         private static void PreStatWorker_GetValueUnfinalized(StatWorker __instance, MethodInfo __originalMethod, StatRequest req, bool applyPostProcess, ref Dictionary<string, object> __state)
         {
-            if (__originalMethod.DeclaringType
+            if (__originalMethod.GetDeclaringType_GetValueUnfinalized_OfMethod()
                 ==
-                GetMethodInfo_GetValueUnfinalized_OfType(__instance.GetType()).DeclaringType
+                __instance.GetType().GetMethodInfo_GetValueUnfinalized_OfType().GetDeclaringType_GetValueUnfinalized_OfMethod()
             )
             {
                 __state = new Dictionary<string, object>();
@@ -66,10 +92,9 @@ namespace RW_NodeTree.Patch
         }
         private static void PreStatWorker_FinalizeValue(StatWorker __instance, MethodInfo __originalMethod, StatRequest req, bool applyPostProcess, ref float val, ref Dictionary<string, object> __state)
         {
-            if (
-                __originalMethod.DeclaringType
+            if (__originalMethod.GetDeclaringType_FinalizeValue_OfMethod()
                 ==
-                GetMethodInfo_FinalizeValue_OfType(__instance.GetType()).DeclaringType
+                __instance.GetType().GetMethodInfo_FinalizeValue_OfType().GetDeclaringType_FinalizeValue_OfMethod()
             )
             {
                 __state = new Dictionary<string, object>();
@@ -78,18 +103,17 @@ namespace RW_NodeTree.Patch
         }
         private static void PostStatWorker_GetValueUnfinalized(StatWorker __instance, MethodInfo __originalMethod, StatRequest req, bool applyPostProcess, ref float __result, ref Dictionary<string, object> __state)
         {
-            if (__originalMethod.DeclaringType
+            if (__originalMethod.GetDeclaringType_GetValueUnfinalized_OfMethod()
                 ==
-                GetMethodInfo_GetValueUnfinalized_OfType(__instance.GetType()).DeclaringType
+                __instance.GetType().GetMethodInfo_GetValueUnfinalized_OfType().GetDeclaringType_GetValueUnfinalized_OfMethod()
             )
                 __result = req.Thing.RootNode()?.PostStatWorker_GetValueUnfinalized(__instance, req, applyPostProcess, __result, __state) ?? __result;
         }
         private static void PostStatWorker_FinalizeValue(StatWorker __instance, MethodInfo __originalMethod, StatRequest req, bool applyPostProcess, ref float val, ref Dictionary<string, object> __state)
         {
-            if (
-                __originalMethod.DeclaringType
+            if (__originalMethod.GetDeclaringType_FinalizeValue_OfMethod()
                 ==
-                GetMethodInfo_FinalizeValue_OfType(__instance.GetType()).DeclaringType
+                __instance.GetType().GetMethodInfo_FinalizeValue_OfType().GetDeclaringType_FinalizeValue_OfMethod()
             )
                 val = req.Thing.RootNode()?.PostStatWorker_FinalizeValue(__instance, req, applyPostProcess, val, __state) ?? val;
         }

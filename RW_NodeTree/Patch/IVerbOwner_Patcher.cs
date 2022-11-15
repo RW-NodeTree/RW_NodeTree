@@ -16,8 +16,10 @@ namespace RW_NodeTree.Patch
 
         private static readonly Dictionary<Type, MethodInfo> MethodInfo_get_VerbProperties_OfType = new Dictionary<Type, MethodInfo>();
         private static readonly Dictionary<Type, MethodInfo> MethodInfo_get_Tools_OfType = new Dictionary<Type, MethodInfo>();
+        private static readonly Dictionary<MethodInfo, Type> DeclaringType_get_VerbProperties_OfMethod = new Dictionary<MethodInfo, Type>();
+        private static readonly Dictionary<MethodInfo, Type> DeclaringType_get_Tools_OfMethod = new Dictionary<MethodInfo, Type>();
 
-        private static MethodInfo GetMethodInfo_get_VerbProperties_OfType(Type type)
+        private static MethodInfo GetMethodInfo_get_VerbProperties_OfType(this Type type)
         {
             MethodInfo result;
             if (!MethodInfo_get_VerbProperties_OfType.TryGetValue(type, out result))
@@ -29,7 +31,8 @@ namespace RW_NodeTree.Patch
             }
             return result;
         }
-        private static MethodInfo GetMethodInfo_get_Tools_OfType(Type type)
+
+        private static MethodInfo GetMethodInfo_get_Tools_OfType(this Type type)
         {
             MethodInfo result;
             if (!MethodInfo_get_Tools_OfType.TryGetValue(type, out result))
@@ -43,13 +46,37 @@ namespace RW_NodeTree.Patch
         }
 
 
+        private static Type GetDeclaringType_get_VerbProperties_OfMethod(this MethodInfo method)
+        {
+            Type result;
+            if (!DeclaringType_get_VerbProperties_OfMethod.TryGetValue(method, out result))
+            {
+                DeclaringType_get_VerbProperties_OfMethod.Add(method,
+                    result = method.DeclaringType
+                );
+            }
+            return result;
+        }
+
+        private static Type GetDeclaringType_get_Tools_OfMethod(this MethodInfo method)
+        {
+            Type result;
+            if (!DeclaringType_get_Tools_OfMethod.TryGetValue(method, out result))
+            {
+                DeclaringType_get_Tools_OfMethod.Add(method,
+                    result = method.DeclaringType
+                );
+            }
+            return result;
+        }
+
 
         private static void PreIVerbOwner_GetVerbProperties(IVerbOwner __instance, MethodInfo __originalMethod, ref Dictionary<string ,object> __state)
         {
             Type type = __instance.GetType();
-            if (__originalMethod.DeclaringType
+            if (__originalMethod.GetDeclaringType_get_VerbProperties_OfMethod()
                 ==
-                GetMethodInfo_get_VerbProperties_OfType(type).DeclaringType
+                type.GetMethodInfo_get_VerbProperties_OfType().GetDeclaringType_get_VerbProperties_OfMethod()
             )
             {
                 __state = new Dictionary<string ,object>();
@@ -61,9 +88,9 @@ namespace RW_NodeTree.Patch
         private static void PreIVerbOwner_GetTools(IVerbOwner __instance, MethodInfo __originalMethod, ref Dictionary<string, object> __state)
         {
             Type type = __instance.GetType();
-            if (__originalMethod.DeclaringType
+            if (__originalMethod.GetDeclaringType_get_Tools_OfMethod()
                 ==
-                GetMethodInfo_get_Tools_OfType(type).DeclaringType
+                type.GetMethodInfo_get_Tools_OfType().GetDeclaringType_get_Tools_OfMethod()
             )
             {
                 __state = new Dictionary<string, object>();
@@ -74,9 +101,9 @@ namespace RW_NodeTree.Patch
         private static void PostIVerbOwner_GetVerbProperties(IVerbOwner __instance, MethodInfo __originalMethod, ref List<VerbProperties> __result, ref Dictionary<string, object> __state)
         {
             Type type = __instance.GetType();
-            if (__originalMethod.DeclaringType
+            if (__originalMethod.GetDeclaringType_get_VerbProperties_OfMethod()
                 ==
-                GetMethodInfo_get_VerbProperties_OfType(type).DeclaringType
+                type.GetMethodInfo_get_VerbProperties_OfType().GetDeclaringType_get_VerbProperties_OfMethod()
             )
             {
                 __result = (__result != null) ? new List<VerbProperties>(__result) : new List<VerbProperties>();
@@ -88,9 +115,9 @@ namespace RW_NodeTree.Patch
         private static void PostIVerbOwner_GetTools(IVerbOwner __instance, MethodInfo __originalMethod, ref List<Tool> __result, ref Dictionary<string, object> __state)
         {
             Type type = __instance.GetType();
-            if (__originalMethod.DeclaringType
+            if (__originalMethod.GetDeclaringType_get_Tools_OfMethod()
                 ==
-                GetMethodInfo_get_Tools_OfType(type).DeclaringType
+                type.GetMethodInfo_get_Tools_OfType().GetDeclaringType_get_Tools_OfMethod()
             )
             {
                 __result = (__result != null) ? new List<Tool>(__result) : new List<Tool>();
