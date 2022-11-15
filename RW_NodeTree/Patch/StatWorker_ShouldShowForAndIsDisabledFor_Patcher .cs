@@ -23,10 +23,8 @@ namespace RW_NodeTree.Patch
 
         private static readonly Dictionary<Type, MethodInfo> MethodInfo_ShouldShowFor_OfType = new Dictionary<Type, MethodInfo>();
         private static readonly Dictionary<Type, MethodInfo> MethodInfo_IsDisabledFor_OfType = new Dictionary<Type, MethodInfo>();
-        private static readonly Dictionary<MethodInfo, Type> DeclaringType_ShouldShowFor_OfMethod = new Dictionary<MethodInfo, Type>();
-        private static readonly Dictionary<MethodInfo, Type> DeclaringType_IsDisabledFor_OfMethod = new Dictionary<MethodInfo, Type>();
 
-        private static MethodInfo GetMethodInfo_ShouldShowFor_OfType(this Type type)
+        private static MethodInfo GetMethodInfo_ShouldShowFor_OfType(Type type)
         {
             MethodInfo result;
             if (!MethodInfo_ShouldShowFor_OfType.TryGetValue(type, out result))
@@ -40,7 +38,7 @@ namespace RW_NodeTree.Patch
             }
             return result;
         }
-        private static MethodInfo GetMethodInfo_IsDisabledFor_OfType(this Type type)
+        private static MethodInfo GetMethodInfo_IsDisabledFor_OfType(Type type)
         {
             MethodInfo result;
             if (!MethodInfo_IsDisabledFor_OfType.TryGetValue(type, out result))
@@ -55,35 +53,11 @@ namespace RW_NodeTree.Patch
             return result;
         }
 
-        private static Type GetDeclaringType_ShouldShowFor_OfMethod(this MethodInfo method)
-        {
-            Type result;
-            if (!DeclaringType_ShouldShowFor_OfMethod.TryGetValue(method, out result))
-            {
-                DeclaringType_ShouldShowFor_OfMethod.Add(method,
-                    result = method.DeclaringType
-                );
-            }
-            return result;
-        }
-
-        private static Type GetDeclaringType_IsDisabledFor_OfMethod(this MethodInfo method)
-        {
-            Type result;
-            if (!DeclaringType_IsDisabledFor_OfMethod.TryGetValue(method, out result))
-            {
-                DeclaringType_IsDisabledFor_OfMethod.Add(method,
-                    result = method.DeclaringType
-                );
-            }
-            return result;
-        }
-
         private static void PreStatWorker_ShouldShowFor(StatWorker __instance, MethodInfo __originalMethod, StatRequest req, ref Dictionary<string, object> __state)
         {
-            if (__originalMethod.GetDeclaringType_ShouldShowFor_OfMethod()
+            if (__originalMethod.DeclaringType
                 ==
-                __instance.GetType().GetMethodInfo_ShouldShowFor_OfType().GetDeclaringType_ShouldShowFor_OfMethod()
+                GetMethodInfo_ShouldShowFor_OfType(__instance.GetType()).DeclaringType
             )
             {
                 __state = new Dictionary<string, object>();
@@ -92,9 +66,10 @@ namespace RW_NodeTree.Patch
         }
         private static void PreStatWorker_IsDisabledFor(StatWorker __instance, MethodInfo __originalMethod, Thing thing, ref Dictionary<string, object> __state)
         {
-            if (__originalMethod.GetDeclaringType_IsDisabledFor_OfMethod()
+            if (
+                __originalMethod.DeclaringType
                 ==
-                __instance.GetType().GetMethodInfo_IsDisabledFor_OfType().GetDeclaringType_IsDisabledFor_OfMethod()
+                GetMethodInfo_IsDisabledFor_OfType(__instance.GetType()).DeclaringType
             )
             {
                 __state = new Dictionary<string, object>();
@@ -103,17 +78,18 @@ namespace RW_NodeTree.Patch
         }
         private static void PostStatWorker_ShouldShowFor(StatWorker __instance, MethodInfo __originalMethod, StatRequest req, ref bool __result, ref Dictionary<string, object> __state)
         {
-            if (__originalMethod.GetDeclaringType_ShouldShowFor_OfMethod()
+            if (__originalMethod.DeclaringType
                 ==
-                __instance.GetType().GetMethodInfo_ShouldShowFor_OfType().GetDeclaringType_ShouldShowFor_OfMethod()
+                GetMethodInfo_ShouldShowFor_OfType(__instance.GetType()).DeclaringType
             )
                 __result = req.Thing.RootNode()?.PostStatWorker_ShouldShowFor(__instance, req, __result, __state) ?? __result;
         }
         private static void PostStatWorker_IsDisabledFor(StatWorker __instance, MethodInfo __originalMethod, Thing thing, ref bool __result, ref Dictionary<string, object> __state)
         {
-            if (__originalMethod.GetDeclaringType_IsDisabledFor_OfMethod()
+            if (
+                __originalMethod.DeclaringType
                 ==
-                __instance.GetType().GetMethodInfo_IsDisabledFor_OfType().GetDeclaringType_IsDisabledFor_OfMethod()
+                GetMethodInfo_IsDisabledFor_OfType(__instance.GetType()).DeclaringType
             )
                 __result = thing.RootNode()?.PostStatWorker_IsDisabledFor(__instance, thing, __result, __state) ?? __result;
         }

@@ -24,10 +24,8 @@ namespace RW_NodeTree.Patch
 
         private static readonly Dictionary<Type, MethodInfo> MethodInfo_GetExplanationUnfinalized_OfType = new Dictionary<Type, MethodInfo>();
         private static readonly Dictionary<Type, MethodInfo> MethodInfo_GetExplanationFinalizePart_OfType = new Dictionary<Type, MethodInfo>();
-        private static readonly Dictionary<MethodInfo, Type> DeclaringType_GetExplanationUnfinalized_OfMethod = new Dictionary<MethodInfo, Type>();
-        private static readonly Dictionary<MethodInfo, Type> DeclaringType_GetExplanationFinalizePart_OfMethod = new Dictionary<MethodInfo, Type>();
 
-        private static MethodInfo GetMethodInfo_GetExplanationUnfinalized_OfType(this Type type)
+        private static MethodInfo GetMethodInfo_GetExplanationUnfinalized_OfType(Type type)
         {
             MethodInfo result;
             if (!MethodInfo_GetExplanationUnfinalized_OfType.TryGetValue(type, out result))
@@ -41,7 +39,7 @@ namespace RW_NodeTree.Patch
             }
             return result;
         }
-        private static MethodInfo GetMethodInfo_GetExplanationFinalizePart_OfType(this Type type)
+        private static MethodInfo GetMethodInfo_GetExplanationFinalizePart_OfType(Type type)
         {
             MethodInfo result;
             if (!MethodInfo_GetExplanationFinalizePart_OfType.TryGetValue(type, out result))
@@ -56,46 +54,22 @@ namespace RW_NodeTree.Patch
             return result;
         }
 
-        private static Type GetDeclaringType_GetExplanationUnfinalized_OfMethod(this MethodInfo method)
-        {
-            Type result;
-            if (!DeclaringType_GetExplanationUnfinalized_OfMethod.TryGetValue(method, out result))
-            {
-                DeclaringType_GetExplanationUnfinalized_OfMethod.Add(method,
-                    result = method.DeclaringType
-                );
-            }
-            return result;
-        }
-
-        private static Type GetDeclaringType_GetExplanationFinalizePart_OfMethod(this MethodInfo method)
-        {
-            Type result;
-            if (!DeclaringType_GetExplanationFinalizePart_OfMethod.TryGetValue(method, out result))
-            {
-                DeclaringType_GetExplanationFinalizePart_OfMethod.Add(method,
-                    result = method.DeclaringType
-                );
-            }
-            return result;
-        }
-
         private static void PreStatWorker_GetExplanationUnfinalized(StatWorker __instance, MethodInfo __originalMethod, StatRequest req, ToStringNumberSense numberSense, ref Dictionary<string, object> __state)
         {
-            if (__originalMethod.GetDeclaringType_GetExplanationUnfinalized_OfMethod()
+            if (__originalMethod.DeclaringType
                 ==
-                __instance.GetType().GetMethodInfo_GetExplanationUnfinalized_OfType().GetDeclaringType_GetExplanationUnfinalized_OfMethod()
+                GetMethodInfo_GetExplanationUnfinalized_OfType(__instance.GetType()).DeclaringType
             )
             {
                 __state = new Dictionary<string, object>();
                 req.Thing.RootNode()?.PreStatWorker_GetExplanationUnfinalized(__instance, req, numberSense, __state);
             }
         }
-        private static void PreStatWorker_GetExplanationFinalizePart(StatWorker __instance, MethodInfo __originalMethod, StatRequest req, ToStringNumberSense numberSense, float finalVal, ref Dictionary<string, object> __state)
+        private static void PreStatWorker_GetExplanationFinalizePart(StatWorker __instance, MethodBase __originalMethod, StatRequest req, ToStringNumberSense numberSense, float finalVal, ref Dictionary<string, object> __state)
         {
-            if (__originalMethod.GetDeclaringType_GetExplanationFinalizePart_OfMethod()
+            if (__originalMethod.DeclaringType
                 ==
-                __instance.GetType().GetMethodInfo_GetExplanationFinalizePart_OfType().GetDeclaringType_GetExplanationFinalizePart_OfMethod()
+                GetMethodInfo_GetExplanationFinalizePart_OfType(__instance.GetType()).DeclaringType
             )
             {
                 __state = new Dictionary<string, object>();
@@ -104,19 +78,19 @@ namespace RW_NodeTree.Patch
         }
         private static void PostStatWorker_GetExplanationUnfinalized(StatWorker __instance, MethodInfo __originalMethod, StatRequest req, ToStringNumberSense numberSense, ref string __result, ref Dictionary<string, object> __state)
         {
-            if (__originalMethod.GetDeclaringType_GetExplanationUnfinalized_OfMethod()
+            if (__originalMethod.DeclaringType
                 ==
-                __instance.GetType().GetMethodInfo_GetExplanationUnfinalized_OfType().GetDeclaringType_GetExplanationUnfinalized_OfMethod()
+                GetMethodInfo_GetExplanationUnfinalized_OfType(__instance.GetType()).DeclaringType
             )
             {
                 __result = req.Thing.RootNode()?.PostStatWorker_GetExplanationUnfinalized(__instance, req, numberSense, __result, __state) ?? __result;
             }
         }
-        private static void PostStatWorker_GetExplanationFinalizePart(StatWorker __instance, MethodInfo __originalMethod, StatRequest req, ToStringNumberSense numberSense, float finalVal, ref string __result, ref Dictionary<string, object> __state)
+        private static void PostStatWorker_GetExplanationFinalizePart(StatWorker __instance, MethodBase __originalMethod, StatRequest req, ToStringNumberSense numberSense, float finalVal, ref string __result, ref Dictionary<string, object> __state)
         {
-            if (__originalMethod.GetDeclaringType_GetExplanationFinalizePart_OfMethod()
+            if (__originalMethod.DeclaringType
                 ==
-                __instance.GetType().GetMethodInfo_GetExplanationFinalizePart_OfType().GetDeclaringType_GetExplanationFinalizePart_OfMethod()
+                GetMethodInfo_GetExplanationFinalizePart_OfType(__instance.GetType()).DeclaringType
             )
             {
                 __result = req.Thing.RootNode()?.PostStatWorker_GetExplanationFinalizePart(__instance, req, numberSense, finalVal, __result, __state) ?? __result;

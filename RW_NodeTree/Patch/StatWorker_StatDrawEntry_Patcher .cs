@@ -20,9 +20,8 @@ namespace RW_NodeTree.Patch
         private static readonly Type[] StatWorker_GetStatDrawEntryLabel_ParmsType = new Type[] { typeof(StatDef), typeof(float), typeof(ToStringNumberSense), typeof(StatRequest), typeof(bool)};
 
         private static readonly Dictionary<Type, MethodInfo> MethodInfo_GetStatDrawEntryLabel_OfType = new Dictionary<Type, MethodInfo>();
-        private static readonly Dictionary<MethodInfo, Type> DeclaringType_GetStatDrawEntryLabel_OfMethod = new Dictionary<MethodInfo, Type>();
 
-        private static MethodInfo GetMethodInfo_GetStatDrawEntryLabel_OfType(this Type type)
+        private static MethodInfo GetMethodInfo_GetStatDrawEntryLabel_OfType(Type type)
         {
             MethodInfo result;
             if (!MethodInfo_GetStatDrawEntryLabel_OfType.TryGetValue(type, out result))
@@ -37,23 +36,11 @@ namespace RW_NodeTree.Patch
             return result;
         }
 
-        private static Type GetDeclaringType_GetStatDrawEntryLabel_OfMethod(this MethodInfo method)
-        {
-            Type result;
-            if (!DeclaringType_GetStatDrawEntryLabel_OfMethod.TryGetValue(method, out result))
-            {
-                DeclaringType_GetStatDrawEntryLabel_OfMethod.Add(method,
-                    result = method.DeclaringType
-                );
-            }
-            return result;
-        }
-
         private static void PreStatWorker_GetStatDrawEntryLabel(StatWorker __instance, MethodInfo __originalMethod, StatDef stat, float value, ToStringNumberSense numberSense, StatRequest optionalReq, bool finalized, ref Dictionary<string, object> __state)
         {
-            if (__originalMethod.GetDeclaringType_GetStatDrawEntryLabel_OfMethod()
+            if (__originalMethod.DeclaringType
                 ==
-                __instance.GetType().GetMethodInfo_GetStatDrawEntryLabel_OfType().GetDeclaringType_GetStatDrawEntryLabel_OfMethod()
+                GetMethodInfo_GetStatDrawEntryLabel_OfType(__instance.GetType()).DeclaringType
             )
             {
                 __state = new Dictionary<string, object>();
@@ -62,9 +49,9 @@ namespace RW_NodeTree.Patch
         }
         private static void PostStatWorker_GetStatDrawEntryLabel(StatWorker __instance, MethodInfo __originalMethod, StatDef stat, float value, ToStringNumberSense numberSense, StatRequest optionalReq, bool finalized, ref string __result, ref Dictionary<string, object> __state)
         {
-            if (__originalMethod.GetDeclaringType_GetStatDrawEntryLabel_OfMethod()
+            if (__originalMethod.DeclaringType
                 ==
-                __instance.GetType().GetMethodInfo_GetStatDrawEntryLabel_OfType().GetDeclaringType_GetStatDrawEntryLabel_OfMethod()
+                GetMethodInfo_GetStatDrawEntryLabel_OfType(__instance.GetType()).DeclaringType
             )
                 __result = optionalReq.Thing.RootNode()?.PostStatWorker_GetStatDrawEntryLabel(__instance, stat, value, numberSense, optionalReq, finalized, __result, __state) ?? __result;
         }
