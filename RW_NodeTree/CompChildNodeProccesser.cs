@@ -163,7 +163,7 @@ namespace RW_NodeTree
             if (ownerType == null || !typeof(IVerbOwner).IsAssignableFrom(ownerType) || thing == null || (verb == null && tool == null && verbProperties == null)) return false;
 
             List<VerbProperties> verbsPropertiesCache = tool?.VerbsProperties.ToList();
-            List<Verb> allVerbs = GetAllOriginalVerbs(GetSameTypeVerbOwner(ownerType, thing)?.VerbTracker);
+            List<Verb> allVerbs = GetOriginalAllVerbs(GetSameTypeVerbOwner(ownerType, thing)?.VerbTracker);
 
             if (verb != null)
             {

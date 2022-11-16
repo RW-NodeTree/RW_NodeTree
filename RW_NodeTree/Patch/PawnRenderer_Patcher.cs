@@ -1,4 +1,6 @@
-﻿using HarmonyLib;
+﻿
+#if V13
+using HarmonyLib;
 using RW_NodeTree.Tools;
 using System;
 using System.Collections.Generic;
@@ -66,7 +68,7 @@ namespace RW_NodeTree.Patch
                         yield return codes[4];
                         yield return new CodeInstruction(OpCodes.Ldarg_1);
                         yield return new CodeInstruction(OpCodes.Callvirt, Thing_get_Graphic);
-                        yield return new CodeInstruction(OpCodes.Call, GraphicHelper_GetGraphic_ChildNode);
+                        //yield return new CodeInstruction(OpCodes.Call, GraphicHelper_GetGraphic_ChildNode);
                         yield return new CodeInstruction(OpCodes.Ldfld, Graphic_drawSize);
                         yield return new CodeInstruction(OpCodes.Call, PawnRenderer_internalConvert);
                         yield return new CodeInstruction(OpCodes.Call, Matrix4x4_TRS);
@@ -97,9 +99,10 @@ namespace RW_NodeTree.Patch
         private static MethodInfo Quaternion_AngleAxis = typeof(Quaternion).GetMethod("AngleAxis", AccessTools.all);
         private static MethodInfo Vector3_get_up = typeof(Vector3).GetMethod("get_up", AccessTools.all);
         private static MethodInfo Thing_get_Graphic = typeof(Thing).GetMethod("get_Graphic", AccessTools.all);
-        private static MethodInfo GraphicHelper_GetGraphic_ChildNode = typeof(NodeHelper).GetMethod("GetGraphic_ChildNode", AccessTools.all);
+        //private static MethodInfo GraphicHelper_GetGraphic_ChildNode = typeof(NodeHelper).GetMethod("GetGraphic_ChildNode", AccessTools.all);
         private static MethodInfo PawnRenderer_internalConvert = typeof(PawnRenderer_Patcher).GetMethod("internalConvert", AccessTools.all);
         private static MethodInfo Matrix4x4_TRS = typeof(Matrix4x4).GetMethod("TRS", AccessTools.all);
         private static FieldInfo Graphic_drawSize = typeof(Graphic).GetField("drawSize", AccessTools.all);
     }
 }
+#endif

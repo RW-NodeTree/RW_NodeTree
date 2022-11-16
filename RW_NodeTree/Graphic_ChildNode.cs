@@ -162,15 +162,12 @@ namespace RW_NodeTree
         {
             Graphic graphic = currentProccess.parent.Graphic;
             //if (graphic.GetGraphic_ChildNode() == this)
-            if(this.drawSize != size)
+            while (graphic != null && graphic != this)
             {
-                while (graphic != null && graphic != this)
-                {
-                    graphic.drawSize = size;
-                    graphic = graphic.SubGraphic();
-                }
-                this.drawSize = size;
+                graphic.drawSize = size;
+                graphic = graphic.SubGraphic();
             }
+            this.drawSize = size;
         }
 
         private CompChildNodeProccesser currentProccess = null;

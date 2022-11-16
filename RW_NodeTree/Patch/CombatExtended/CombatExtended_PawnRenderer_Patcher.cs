@@ -20,7 +20,13 @@ namespace RW_NodeTree.Patch.CombatExtended
         private static Type GunDrawExtension = GenTypes.GetTypeInAnyAssembly("CombatExtended.GunDrawExtension");
         private static AccessTools.FieldRef<object, Vector2> GunDrawExtension_DrawSize = null;
 
-        private static void PerHarmony_PawnRenderer_Harmony_PawnRenderer_DrawEquipmentAiming_DrawMesh(Matrix4x4 matrix, Thing eq, ref (DefModExtension, Vector2) __state)
+        private static void PerHarmony_PawnRenderer_Harmony_PawnRenderer_DrawEquipmentAiming_DrawMesh(
+#if V13
+#else
+            Matrix4x4 matrix,
+#endif
+            Thing eq,
+            ref (DefModExtension, Vector2) __state)
         {
             CompChildNodeProccesser comp = eq;
             if (comp != null)
@@ -30,17 +36,29 @@ namespace RW_NodeTree.Patch.CombatExtended
                     eq.def.modExtensions = eq.def.modExtensions ?? new List<DefModExtension>();
                     eq.def.modExtensions.Add((DefModExtension)Activator.CreateInstance(GunDrawExtension));
                 }
+                DefModExtension targetExtension = null;
                 foreach (DefModExtension extension in eq.def.modExtensions)
                 {
                     if (GunDrawExtension.IsAssignableFrom(extension.GetType()))
                     {
-                        ref Vector2 DrawSize = ref GunDrawExtension_DrawSize(extension);
-                        __state = (extension, DrawSize);
-                        Vector3 scale = matrix.lossyScale;
-                        DrawSize = new Vector2(scale.x, scale.z);
-                        return;
+                        targetExtension = extension;
+                        break;
                     }
                 }
+                if(targetExtension == null)
+                {
+                    targetExtension = (DefModExtension)Activator.CreateInstance(GunDrawExtension);
+                    eq.def.modExtensions.Add(targetExtension);
+                }
+                ref Vector2 DrawSize = ref GunDrawExtension_DrawSize(targetExtension);
+                __state = (targetExtension, DrawSize);
+#if V13
+                //Log.Message(eq.Graphic.drawSize.ToString());
+                DrawSize = eq.Graphic.drawSize;
+#else
+                Vector3 scale = matrix.lossyScale;
+                DrawSize = new Vector2(scale.x, scale.z);
+#endif
             }
         }
 

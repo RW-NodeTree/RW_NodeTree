@@ -78,7 +78,7 @@ namespace RW_NodeTree
 
         public ICollection<string> Keys => new List<string>(innerIdList);
 
-        public ICollection<Thing> Values => new List<Thing>(innerList);
+        public ICollection<Thing> Values => this;
 
         bool ICollection<KeyValuePair<string, Thing>>.IsReadOnly => ((ICollection<Thing>)this).IsReadOnly;
 

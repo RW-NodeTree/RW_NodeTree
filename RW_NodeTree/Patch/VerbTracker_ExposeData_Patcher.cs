@@ -21,7 +21,7 @@ namespace RW_NodeTree.Patch
         {
             if (Scribe.mode == LoadSaveMode.ResolvingCrossRefs)
             {
-                __state = CompChildNodeProccesser.GetAllOriginalVerbs(__instance);
+                __state = CompChildNodeProccesser.GetOriginalAllVerbs(__instance);
             }
         }
 
@@ -34,7 +34,7 @@ namespace RW_NodeTree.Patch
         {
             if(__state != null)
             {
-                CompChildNodeProccesser.GetAllOriginalVerbs(__instance)?.SortBy(x => __state.IndexOf(x));
+                CompChildNodeProccesser.GetOriginalAllVerbs(__instance)?.SortBy(x => __state.IndexOf(x));
             }
         }
     }
