@@ -23,7 +23,7 @@ namespace RW_NodeTree.Patch.CombatExtended
             if (comp != null)
             {
                 __result = comp.parent.TryGetComp<CompEquippable>();
-                Log.Message($"log {__instance}.PostCompAmmoUser_CompEquippable");
+                //Log.Message($"log {__instance}.PostCompAmmoUser_CompEquippable");
             }
         }
 

@@ -68,8 +68,9 @@ namespace RW_NodeTree
         {
             get
             {
-                foreach (ThingComp comp in parent.AllComps)
+                for (int i = 0; i < parent.AllComps.Count; i++)
                 {
+                    ThingComp comp = parent.AllComps[i];
                     CompBasicNodeComp c = comp as CompBasicNodeComp;
                     if (c != null)
                     {

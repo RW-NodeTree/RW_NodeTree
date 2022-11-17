@@ -23,6 +23,7 @@ namespace RW_NodeTree.Patch.CombatExtended
             if (comp != null)
             {
                 __result = __instance.verbProps.burstShotCount;
+                //Log.Message($"log {__instance}.ShotsPerBurst = {__result}");
             }
         }
 
