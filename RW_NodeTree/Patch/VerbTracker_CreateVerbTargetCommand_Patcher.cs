@@ -35,7 +35,8 @@ namespace RW_NodeTree.Patch
         )]
         private static void PostVerbTracker_CreateVerbTargetCommand(Thing ownerThing, ref Command_VerbTarget __result)
         {
-            if(__result != null)
+            CompChildNodeProccesser comp = ownerThing;
+            if (__result != null && comp != null)
             {
                 __result.icon = (ownerThing?.Graphic?.MatSingleFor(ownerThing)?.mainTexture as Texture2D) ?? __result.icon;
                 __result.iconProportions = ownerThing?.Graphic?.drawSize ?? __result.iconProportions;
