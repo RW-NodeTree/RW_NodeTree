@@ -21,8 +21,7 @@ namespace RW_NodeTree.Patch.CombatExtended
         private static AccessTools.FieldRef<object, Vector2> GunDrawExtension_DrawSize = null;
 
         private static void PerHarmony_PawnRenderer_Harmony_PawnRenderer_DrawEquipmentAiming_DrawMesh(
-#if V13
-#else
+#if !V13
             Matrix4x4 matrix,
 #endif
             Thing eq,
