@@ -45,7 +45,14 @@ namespace RW_NodeTree
         {
             foreach (CompBasicNodeComp comp in AllNodeComp)
             {
-                absorbed = comp.internal_PostThingWithComps_PreApplyDamage(ref dinfo, absorbed);
+                try
+                {
+                    absorbed = comp.internal_PostThingWithComps_PreApplyDamage(ref dinfo, absorbed);
+                }
+                catch (Exception ex)
+                {
+                    Log.Error(ex.ToString());
+                }
             }
             return absorbed;
         }

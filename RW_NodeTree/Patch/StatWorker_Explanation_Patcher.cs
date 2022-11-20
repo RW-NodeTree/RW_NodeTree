@@ -145,7 +145,14 @@ namespace RW_NodeTree
         {
             foreach (CompBasicNodeComp comp in AllNodeComp)
             {
-                comp.internal_PreStatWorker_GetExplanationUnfinalized(statWorker, req, numberSense, forPostRead);
+                try
+                {
+                    comp.internal_PreStatWorker_GetExplanationUnfinalized(statWorker, req, numberSense, forPostRead);
+                }
+                catch (Exception ex)
+                {
+                    Log.Error(ex.ToString());
+                }
             }
         }
 
@@ -161,7 +168,14 @@ namespace RW_NodeTree
         {
             foreach (CompBasicNodeComp comp in AllNodeComp)
             {
-                comp.internal_PreStatWorker_GetExplanationFinalizePart(statWorker, req, numberSense, finalVal, forPostRead);
+                try
+                {
+                    comp.internal_PreStatWorker_GetExplanationFinalizePart(statWorker, req, numberSense, finalVal, forPostRead);
+                }
+                catch (Exception ex)
+                {
+                    Log.Error(ex.ToString());
+                }
             }
         }
         /// <summary>
@@ -176,7 +190,14 @@ namespace RW_NodeTree
         {
             foreach (CompBasicNodeComp comp in AllNodeComp)
             {
-                result = comp.internal_PostStatWorker_GetExplanationUnfinalized(statWorker, req, numberSense, result, forPostRead) ?? result;
+                try
+                {
+                    result = comp.internal_PostStatWorker_GetExplanationUnfinalized(statWorker, req, numberSense, result, forPostRead) ?? result;
+                }
+                catch (Exception ex)
+                {
+                    Log.Error(ex.ToString());
+                }
             }
             return result;
         }
@@ -194,7 +215,14 @@ namespace RW_NodeTree
         {
             foreach (CompBasicNodeComp comp in AllNodeComp)
             {
-                result = comp.internal_PostStatWorker_GetExplanationFinalizePart(statWorker, req, numberSense, finalVal, result, forPostRead) ?? result;
+                try
+                {
+                    result = comp.internal_PostStatWorker_GetExplanationFinalizePart(statWorker, req, numberSense, finalVal, result, forPostRead) ?? result;
+                }
+                catch (Exception ex)
+                {
+                    Log.Error(ex.ToString());
+                }
             }
             return result;
         }

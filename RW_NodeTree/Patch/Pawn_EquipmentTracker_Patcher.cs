@@ -29,10 +29,17 @@ namespace RW_NodeTree.Patch
                 {
                     if ((t is IVerbOwner) || (t as ThingWithComps)?.AllComps.Find(x => x is IVerbOwner) != null || (CompChildNodeProccesser)t != null)
                     {
-                        t.Tick();
-                        if (t.Destroyed)
+                        try
                         {
-                            list.Remove(t);
+                            t.Tick();
+                            if (t.Destroyed)
+                            {
+                                list.Remove(t);
+                            }
+                        }
+                        catch(Exception ex)
+                        {
+                            Log.Error(ex.ToString());
                         }
                     }
                 }
@@ -55,10 +62,17 @@ namespace RW_NodeTree.Patch
                 {
                     if ((t is IVerbOwner) || (t as ThingWithComps)?.AllComps.Find(x => x is IVerbOwner) != null || (CompChildNodeProccesser)t != null)
                     {
-                        t.TickRare();
-                        if (t.Destroyed)
+                        try
                         {
-                            list.Remove(t);
+                            t.TickRare();
+                            if (t.Destroyed)
+                            {
+                                list.Remove(t);
+                            }
+                        }
+                        catch(Exception ex)
+                        {
+                            Log.Error(ex.ToString());
                         }
                     }
                 }
@@ -69,7 +83,7 @@ namespace RW_NodeTree.Patch
         [HarmonyPatch(typeof(Pawn_EquipmentTracker), "GetGizmos")]
         private static void PostPawn_EquipmentTracker_GetGizmosPostfix(Pawn_EquipmentTracker __instance, ref IEnumerable<Gizmo> __result)
         {
-            IEnumerable<Gizmo> forEach(Pawn_EquipmentTracker instance, IEnumerable< Gizmo> result)
+            IEnumerable<Gizmo> forEach(IEnumerable< Gizmo> result)
             {
                 foreach(Gizmo gizmo in result)
                 {
@@ -83,15 +97,21 @@ namespace RW_NodeTree.Patch
                     {
                         foreach(CompBasicNodeComp comp in proccesser.AllNodeComp)
                         {
-                            foreach(Gizmo gizmo in comp.CompGetGizmosExtra())
+                            List<Gizmo> gizmos = new List<Gizmo>();
+                            try
                             {
-                                yield return gizmo;
+                                gizmos.AddRange(comp.CompGetGizmosExtra());
                             }
+                            catch(Exception ex)
+                            {
+                                Log.Error(ex.ToString());
+                            }
+                            foreach (Gizmo gizmo in gizmos) yield return gizmo;
                         }
                     }
                 }
             }
-            __result = forEach(__instance, __result);
+            __result = forEach(__result);
         }
     }
 }

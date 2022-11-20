@@ -142,7 +142,14 @@ namespace RW_NodeTree
             {
                 foreach (CompBasicNodeComp comp in AllNodeComp)
                 {
-                    comp.internal_PreIVerbOwner_GetVerbProperties(ownerType, forPostRead);
+                    try
+                    {
+                        comp.internal_PreIVerbOwner_GetVerbProperties(ownerType, forPostRead);
+                    }
+                    catch(Exception ex)
+                    {
+                        Log.Error(ex.ToString());
+                    }
                 }
             }
             return;
@@ -160,7 +167,14 @@ namespace RW_NodeTree
             {
                 foreach (CompBasicNodeComp comp in AllNodeComp)
                 {
-                    comp.internal_PreIVerbOwner_GetTools(ownerType, forPostRead);
+                    try
+                    {
+                        comp.internal_PreIVerbOwner_GetTools(ownerType, forPostRead);
+                    }
+                    catch(Exception ex)
+                    {
+                        Log.Error(ex.ToString());
+                    }
                 }
             }
             return;
@@ -184,7 +198,14 @@ namespace RW_NodeTree
                     }
                     foreach (CompBasicNodeComp comp in AllNodeComp)
                     {
-                        verbPropertiesRegiestInfo = comp.internal_PostIVerbOwner_GetVerbProperties(ownerType, verbPropertiesRegiestInfo, forPostRead) ?? verbPropertiesRegiestInfo;
+                        try
+                        {
+                            verbPropertiesRegiestInfo = comp.internal_PostIVerbOwner_GetVerbProperties(ownerType, verbPropertiesRegiestInfo, forPostRead) ?? verbPropertiesRegiestInfo;
+                        }
+                        catch (Exception ex)
+                        {
+                            Log.Error(ex.ToString());
+                        }
                     }
                     for (int i = verbPropertiesRegiestInfo.Count - 1; i >= 0; i--)
                     {
@@ -224,7 +245,14 @@ namespace RW_NodeTree
                     }
                     foreach (CompBasicNodeComp comp in AllNodeComp)
                     {
-                        verbToolRegiestInfo = comp.internal_PostIVerbOwner_GetTools(ownerType, verbToolRegiestInfo, forPostRead) ?? verbToolRegiestInfo;
+                        try
+                        {
+                            verbToolRegiestInfo = comp.internal_PostIVerbOwner_GetTools(ownerType, verbToolRegiestInfo, forPostRead) ?? verbToolRegiestInfo;
+                        }
+                        catch (Exception ex)
+                        {
+                            Log.Error(ex.ToString());
+                        }
                     }
                     for (int i = verbToolRegiestInfo.Count - 1; i >= 0; i--)
                     {

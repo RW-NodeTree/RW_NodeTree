@@ -140,7 +140,14 @@ namespace RW_NodeTree
         {
             foreach (CompBasicNodeComp comp in AllNodeComp)
             {
-                comp.internal_PreStatWorker_ShouldShowFor(statWorker, req, forPostRead);
+                try
+                {
+                    comp.internal_PreStatWorker_ShouldShowFor(statWorker, req, forPostRead);
+                }
+                catch (Exception ex)
+                {
+                    Log.Error(ex.ToString());
+                }
             }
         }
 
@@ -156,7 +163,14 @@ namespace RW_NodeTree
         {
             foreach (CompBasicNodeComp comp in AllNodeComp)
             {
-                comp.internal_PreStatWorker_IsDisabledFor(statWorker, thing, forPostRead);
+                try
+                {
+                    comp.internal_PreStatWorker_IsDisabledFor(statWorker, thing, forPostRead);
+                }
+                catch (Exception ex)
+                {
+                    Log.Error(ex.ToString());
+                }
             }
         }
 
@@ -172,7 +186,14 @@ namespace RW_NodeTree
         {
             foreach (CompBasicNodeComp comp in AllNodeComp)
             {
-                result = comp.internal_PostStatWorker_ShouldShowFor(statWorker, req, result, forPostRead);
+                try
+                {
+                    result = comp.internal_PostStatWorker_ShouldShowFor(statWorker, req, result, forPostRead);
+                }
+                catch (Exception ex)
+                {
+                    Log.Error(ex.ToString());
+                }
             }
             return result;
         }
@@ -189,7 +210,14 @@ namespace RW_NodeTree
         {
             foreach (CompBasicNodeComp comp in AllNodeComp)
             {
-                result = comp.internal_PostStatWorker_IsDisabledFor(statWorker, thing, result, forPostRead);
+                try
+                {
+                    result = comp.internal_PostStatWorker_IsDisabledFor(statWorker, thing, result, forPostRead);
+                }
+                catch (Exception ex)
+                {
+                    Log.Error(ex.ToString());
+                }
             }
             return result;
         }

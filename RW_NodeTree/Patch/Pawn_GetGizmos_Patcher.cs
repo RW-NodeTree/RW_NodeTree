@@ -28,19 +28,27 @@ namespace RW_NodeTree.Patch
         private static IEnumerable<Gizmo> PerAndPostFixFor_Pawn_GetGizmos(Pawn instance, IEnumerable<Gizmo> result)
         {
             ThingOwner list = instance.equipment?.GetDirectlyHeldThings();
-            List<(Thing, List<VerbProperties>)> state = null;
+            List<(Thing, List<Tool>, List<VerbProperties>)> state = null;
             if (list != null)
             {
-                state = new List<(Thing, List<VerbProperties>)>(list.Count);
+                state = new List<(Thing, List<Tool>, List<VerbProperties>)>(list.Count);
                 foreach (Thing thing in list)
                 {
-                    ThingDef_verbs(thing.def) = ThingDef_verbs(thing.def) ?? new List<VerbProperties>();
-                    state.Add((thing, new List<VerbProperties>(thing.def.Verbs)));
-                    List<Verb> verbs = thing.TryGetComp<CompEquippable>().AllVerbs;
-                    thing.def.Verbs.Clear();
-                    foreach (Verb verb in verbs)
+                    state.Add((thing, thing.def.tools, ThingDef_verbs(thing.def)));
+                    try
                     {
-                        if (verb.tool == null) thing.def.Verbs.Add(verb.verbProps);
+                        List<Verb> verbs = thing.TryGetComp<CompEquippable>().AllVerbs;
+                        ThingDef_verbs(thing.def) = new List<VerbProperties>();
+                        thing.def.tools = new List<Tool>();
+                        foreach (Verb verb in verbs)
+                        {
+                            if (verb.tool == null) ThingDef_verbs(thing.def).Add(verb.verbProps);
+                            else thing.def.tools.Add(verb.tool);
+                        }
+                    }
+                    catch(Exception ex)
+                    {
+                        Log.Error(ex.ToString());
                     }
                 }
             }
@@ -49,10 +57,10 @@ namespace RW_NodeTree.Patch
 
             if(state != null)
             {
-                foreach ((Thing thing, List<VerbProperties> verbs) in state)
+                foreach ((Thing thing, List<Tool> tools, List<VerbProperties> verbs) in state)
                 {
-                    thing.def.Verbs.Clear();
-                    thing.def.Verbs.AddRange(verbs);
+                    thing.def.tools = tools;
+                    ThingDef_verbs(thing.def) = verbs;
                 }
             }
         }

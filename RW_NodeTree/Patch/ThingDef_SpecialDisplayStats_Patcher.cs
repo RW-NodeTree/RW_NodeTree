@@ -47,7 +47,14 @@ namespace RW_NodeTree
         {
             foreach (CompBasicNodeComp comp in AllNodeComp)
             {
-                result = comp.internal_PostThingDef_SpecialDisplayStats(def, req, result) ?? result;
+                try
+                {
+                    result = comp.internal_PostThingDef_SpecialDisplayStats(def, req, result) ?? result;
+                }
+                catch (Exception ex)
+                {
+                    Log.Error(ex.ToString());
+                }
             }
             return result;
         }

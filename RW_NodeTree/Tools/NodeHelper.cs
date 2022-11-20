@@ -14,25 +14,9 @@ namespace RW_NodeTree.Tools
     /// </summary>
     public static class NodeHelper
     {
-        public static CompChildNodeProccesser RootNode(this Thing thing)
-        {
-            CompChildNodeProccesser result = thing;
-            if (thing != null)
-            {
-                IThingHolder parentHolder = result ?? thing.ParentHolder;
-                while(parentHolder != null)
-                {
-                    if(parentHolder is CompChildNodeProccesser)
-                    {
-                        result = parentHolder as CompChildNodeProccesser;
-                        result = result.RootNode;
-                        parentHolder = result;
-                    }
-                    parentHolder = parentHolder.ParentHolder;
-                }
-            }
-            return result;
-        }
+        public static CompChildNodeProccesser RootNode(this Thing thing) => (thing ?? (thing?.ParentHolder as CompChildNodeProccesser))?.RootNode();
+
+
         /// <summary>
         /// if graphic has sub graphic, It will return that;
         /// </summary>

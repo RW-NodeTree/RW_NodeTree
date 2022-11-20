@@ -46,7 +46,14 @@ namespace RW_NodeTree
         {
             foreach (CompBasicNodeComp comp in AllNodeComp)
             {
-                result = comp.internal_PostStatsReportUtility_StatsToDraw(thing, result) ?? result;
+                try
+                {
+                    result = comp.internal_PostStatsReportUtility_StatsToDraw(thing, result) ?? result;
+                }
+                catch (Exception ex)
+                {
+                    Log.Error(ex.ToString());
+                }
             }
             return result;
         }

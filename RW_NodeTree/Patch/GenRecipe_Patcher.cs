@@ -47,7 +47,14 @@ namespace RW_NodeTree
         {
             foreach (CompBasicNodeComp comp in AllNodeComp)
             {
-                result = comp.internal_PostGenRecipe_MakeRecipeProducts(recipeDef, worker, ingredients, dominantIngredient1, billGiver, precept, InvokeSource, result) ?? result;
+                try
+                {
+                    result = comp.internal_PostGenRecipe_MakeRecipeProducts(recipeDef, worker, ingredients, dominantIngredient1, billGiver, precept, InvokeSource, result) ?? result;
+                }
+                catch(Exception ex)
+                {
+                    Log.Error(ex.ToString());
+                }
             }
             return result;
         }

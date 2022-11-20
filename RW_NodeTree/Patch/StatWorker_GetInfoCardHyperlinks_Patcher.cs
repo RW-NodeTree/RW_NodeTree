@@ -81,7 +81,14 @@ namespace RW_NodeTree
         {
             foreach (CompBasicNodeComp comp in AllNodeComp)
             {
-                result = comp.internal_PostStatWorker_GetInfoCardHyperlinks(statWorker, statRequest, result) ?? result;
+                try
+                {
+                    result = comp.internal_PostStatWorker_GetInfoCardHyperlinks(statWorker, statRequest, result) ?? result;
+                }
+                catch (Exception ex)
+                {
+                    Log.Error(ex.ToString());
+                }
             }
             return result;
         }

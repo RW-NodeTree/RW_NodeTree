@@ -29,10 +29,17 @@ namespace RW_NodeTree.Patch
                 {
                     if ((t is IVerbOwner) || (t as ThingWithComps)?.AllComps.Find(x => x is IVerbOwner) != null || (CompChildNodeProccesser)t != null)
                     {
-                        t.Tick();
-                        if (t.Destroyed)
+                        try
                         {
-                            list.Remove(t);
+                            t.Tick();
+                            if (t.Destroyed)
+                            {
+                                list.Remove(t);
+                            }
+                        }
+                        catch(Exception ex)
+                        {
+                            Log.Error(ex.ToString());
                         }
                     }
                 }

@@ -140,7 +140,14 @@ namespace RW_NodeTree
         {
             foreach (CompBasicNodeComp comp in AllNodeComp)
             {
-                comp.internal_PreStatWorker_GetValueUnfinalized(statWorker, req, applyPostProcess, forPostRead);
+                try
+                {
+                    comp.internal_PreStatWorker_GetValueUnfinalized(statWorker, req, applyPostProcess, forPostRead);
+                }
+                catch (Exception ex)
+                {
+                    Log.Error(ex.ToString());
+                }
             }
         }
 
@@ -156,7 +163,14 @@ namespace RW_NodeTree
         {
             foreach (CompBasicNodeComp comp in AllNodeComp)
             {
-                result = comp.internal_PreStatWorker_FinalizeValue(statWorker, req, applyPostProcess, result, forPostRead);
+                try
+                {
+                    result = comp.internal_PreStatWorker_FinalizeValue(statWorker, req, applyPostProcess, result, forPostRead);
+                }
+                catch (Exception ex)
+                {
+                    Log.Error(ex.ToString());
+                }
             }
             return result;
         }
@@ -173,7 +187,14 @@ namespace RW_NodeTree
         {
             foreach (CompBasicNodeComp comp in AllNodeComp)
             {
-                result = comp.internal_PostStatWorker_GetValueUnfinalized(statWorker, req, applyPostProcess, result, forPostRead);
+                try
+                {
+                    result = comp.internal_PostStatWorker_GetValueUnfinalized(statWorker, req, applyPostProcess, result, forPostRead);
+                }
+                catch (Exception ex)
+                {
+                    Log.Error(ex.ToString());
+                }
             }
             return result;
         }
@@ -190,7 +211,14 @@ namespace RW_NodeTree
         {
             foreach (CompBasicNodeComp comp in AllNodeComp)
             {
-                result = comp.internal_PostStatWorker_FinalizeValue(statWorker, req, applyPostProcess, result, forPostRead);
+                try
+                {
+                    result = comp.internal_PostStatWorker_FinalizeValue(statWorker, req, applyPostProcess, result, forPostRead);
+                }
+                catch (Exception ex)
+                {
+                    Log.Error(ex.ToString());
+                }
             }
             return result;
         }
