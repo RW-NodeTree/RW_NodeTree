@@ -45,6 +45,7 @@
     <Compile Include="Patch\CombatExtended\CombatExtended_CompFireModes_Patcher.cs" />
     <Compile Include="Patch\CombatExtended\CombatExtended_CompAmmoUser_Patcher.cs" />
     <Compile Include="Patch\CombatExtended\CombatExtended_PawnRenderer_Patcher.cs" />
+    <Compile Include="Patch\StatWorker_Patcher.cs" />
     <Compile Include="Patch\Pawn_GetGizmos_Patcher.cs" />
     <Compile Include="Patch\PawnRenderer_Patcher.cs" />
     <Compile Include="Patch\Pawn_MeleeVerbs_Patcher.cs" />

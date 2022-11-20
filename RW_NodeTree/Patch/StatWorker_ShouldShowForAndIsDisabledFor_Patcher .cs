@@ -55,43 +55,49 @@ namespace RW_NodeTree.Patch
 
         private static void PreStatWorker_ShouldShowFor(StatWorker __instance, MethodInfo __originalMethod, StatRequest req, ref Dictionary<string, object> __state)
         {
-            if (__originalMethod.DeclaringType
+            CompChildNodeProccesser proccesser = req.Thing.RootNode();
+            if (proccesser != null &&
+                __originalMethod.DeclaringType
                 ==
                 GetMethodInfo_ShouldShowFor_OfType(__instance.GetType()).DeclaringType
             )
             {
                 __state = new Dictionary<string, object>();
-                req.Thing.RootNode()?.PreStatWorker_ShouldShowFor(__instance, req, __state);
+                proccesser.PreStatWorker_ShouldShowFor(__instance, req, __state);
             }
         }
         private static void PreStatWorker_IsDisabledFor(StatWorker __instance, MethodInfo __originalMethod, Thing thing, ref Dictionary<string, object> __state)
         {
-            if (
+            CompChildNodeProccesser proccesser = thing.RootNode();
+            if (proccesser != null &&
                 __originalMethod.DeclaringType
                 ==
                 GetMethodInfo_IsDisabledFor_OfType(__instance.GetType()).DeclaringType
             )
             {
                 __state = new Dictionary<string, object>();
-                thing.RootNode()?.PreStatWorker_IsDisabledFor(__instance, thing, __state);
+                proccesser.PreStatWorker_IsDisabledFor(__instance, thing, __state);
             }
         }
         private static void PostStatWorker_ShouldShowFor(StatWorker __instance, MethodInfo __originalMethod, StatRequest req, ref bool __result, ref Dictionary<string, object> __state)
         {
-            if (__originalMethod.DeclaringType
+            CompChildNodeProccesser proccesser = req.Thing.RootNode();
+            if (proccesser != null &&
+                __originalMethod.DeclaringType
                 ==
                 GetMethodInfo_ShouldShowFor_OfType(__instance.GetType()).DeclaringType
             )
-                __result = req.Thing.RootNode()?.PostStatWorker_ShouldShowFor(__instance, req, __result, __state) ?? __result;
+                __result = proccesser.PostStatWorker_ShouldShowFor(__instance, req, __result, __state);
         }
         private static void PostStatWorker_IsDisabledFor(StatWorker __instance, MethodInfo __originalMethod, Thing thing, ref bool __result, ref Dictionary<string, object> __state)
         {
-            if (
+            CompChildNodeProccesser proccesser = thing.RootNode();
+            if (proccesser != null &&
                 __originalMethod.DeclaringType
                 ==
                 GetMethodInfo_IsDisabledFor_OfType(__instance.GetType()).DeclaringType
             )
-                __result = thing.RootNode()?.PostStatWorker_IsDisabledFor(__instance, thing, __result, __state) ?? __result;
+                __result = proccesser.PostStatWorker_IsDisabledFor(__instance, thing, __result, __state);
         }
 
         public static void PatchShouldShowForAndIsDisabledFor(Type type, Harmony patcher)

@@ -38,22 +38,26 @@ namespace RW_NodeTree.Patch
 
         private static void PreStatWorker_GetStatDrawEntryLabel(StatWorker __instance, MethodInfo __originalMethod, StatDef stat, float value, ToStringNumberSense numberSense, StatRequest optionalReq, bool finalized, ref Dictionary<string, object> __state)
         {
-            if (__originalMethod.DeclaringType
+            CompChildNodeProccesser proccesser = optionalReq.Thing.RootNode();
+            if (proccesser != null &&
+                __originalMethod.DeclaringType
                 ==
                 GetMethodInfo_GetStatDrawEntryLabel_OfType(__instance.GetType()).DeclaringType
             )
             {
                 __state = new Dictionary<string, object>();
-                optionalReq.Thing.RootNode()?.PreStatWorker_GetStatDrawEntryLabel(__instance, stat, value, numberSense, optionalReq, finalized, __state);
+                proccesser.PreStatWorker_GetStatDrawEntryLabel(__instance, stat, value, numberSense, optionalReq, finalized, __state);
             }
         }
         private static void PostStatWorker_GetStatDrawEntryLabel(StatWorker __instance, MethodInfo __originalMethod, StatDef stat, float value, ToStringNumberSense numberSense, StatRequest optionalReq, bool finalized, ref string __result, ref Dictionary<string, object> __state)
         {
-            if (__originalMethod.DeclaringType
+            CompChildNodeProccesser proccesser = optionalReq.Thing.RootNode();
+            if (proccesser != null &&
+                __originalMethod.DeclaringType
                 ==
                 GetMethodInfo_GetStatDrawEntryLabel_OfType(__instance.GetType()).DeclaringType
             )
-                __result = optionalReq.Thing.RootNode()?.PostStatWorker_GetStatDrawEntryLabel(__instance, stat, value, numberSense, optionalReq, finalized, __result, __state) ?? __result;
+                __result = proccesser.PostStatWorker_GetStatDrawEntryLabel(__instance, stat, value, numberSense, optionalReq, finalized, __result, __state) ?? __result;
         }
 
         public static void PatchStatDrawEntry(Type type, Harmony patcher)
