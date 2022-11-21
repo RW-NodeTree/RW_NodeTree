@@ -22,7 +22,7 @@ namespace RW_NodeTree.Patch
         private static void PostVerb_DirectOwner(Verb __instance, ref IVerbOwner __result)
         {
             Thing thing = (__result as Thing) ?? (__result as ThingComp)?.parent;
-            CompChildNodeProccesser compChild = thing ?? (thing?.ParentHolder as CompChildNodeProccesser);
+            CompChildNodeProccesser compChild = ((CompChildNodeProccesser)thing) ?? (thing?.ParentHolder as CompChildNodeProccesser);
             if (compChild != null && compChild.Props.VerbDirectOwnerRedictory)
             {
                 thing = compChild.GetBeforeConvertVerbCorrespondingThing(__result.GetType(), __instance, true).Item1;
@@ -41,7 +41,7 @@ namespace RW_NodeTree.Patch
         {
             IVerbOwner directOwner = __instance.verbTracker.directOwner;
             Thing thing = (directOwner as Thing) ?? (directOwner as ThingComp)?.parent;
-            CompChildNodeProccesser compChild = thing ?? (thing?.ParentHolder as CompChildNodeProccesser);
+            CompChildNodeProccesser compChild = ((CompChildNodeProccesser)thing) ?? (thing?.ParentHolder as CompChildNodeProccesser);
             if (compChild != null && compChild.Props.VerbEquipmentSourceRedictory)
             {
                 __result = (compChild.GetBeforeConvertVerbCorrespondingThing(__instance.verbTracker.directOwner.GetType(), __instance).Item1 as ThingWithComps) ?? __result;
@@ -62,7 +62,7 @@ namespace RW_NodeTree.Patch
             {
                 IVerbOwner directOwner = __instance.verbTracker.directOwner;
                 EquipmentSource = (directOwner as Thing) ?? (directOwner as ThingComp)?.parent;
-                compChild = EquipmentSource ?? (EquipmentSource?.ParentHolder as CompChildNodeProccesser);
+                compChild = ((CompChildNodeProccesser)EquipmentSource)?? (EquipmentSource?.ParentHolder as CompChildNodeProccesser);
                 EquipmentSource = (compChild?.GetBeforeConvertVerbCorrespondingThing(__instance.verbTracker.directOwner.GetType(), __instance, compChild.Props.VerbIconVerbInstanceSource).Item1 as ThingWithComps) ?? EquipmentSource;
             }
             __result = (EquipmentSource?.Graphic?.MatSingleFor(EquipmentSource)?.mainTexture as Texture2D) ?? __result;

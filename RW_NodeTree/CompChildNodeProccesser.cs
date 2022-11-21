@@ -90,7 +90,14 @@ namespace RW_NodeTree
                     HashSet<string> cache = new HashSet<string>();
                     foreach (CompBasicNodeComp comp in AllNodeComp)
                     {
-                        cache = comp.internal_RegiestedNodeId(cache) ?? cache;
+                        try
+                        {
+                            cache = comp.internal_RegiestedNodeId(cache) ?? cache;
+                        }
+                        catch (Exception ex)
+                        {
+                            Log.Error(ex.ToString());
+                        }
                     }
                     regiestedNodeId.AddRange(cache);
                 }
@@ -513,7 +520,14 @@ namespace RW_NodeTree
 
             foreach (CompBasicNodeComp comp in AllNodeComp)
             {
-                nodeRenderingInfos = comp.internal_OverrideDrawSteep(nodeRenderingInfos, rot, subGraphic) ?? nodeRenderingInfos;
+                try
+                {
+                    nodeRenderingInfos = comp.internal_OverrideDrawSteep(nodeRenderingInfos, rot, subGraphic) ?? nodeRenderingInfos;
+                }
+                catch (Exception ex)
+                {
+                    Log.Error(ex.ToString());
+                }
             }
 
             List<RenderInfo> final = new List<RenderInfo>();
@@ -568,7 +582,14 @@ namespace RW_NodeTree
             if (Props.ForceNodeIdControl && !RegiestedNodeId.Contains(id)) return false;
             foreach (CompBasicNodeComp comp in AllNodeComp)
             {
-                if (!comp.internal_AllowNode(node, id)) return false;
+                try
+                {
+                    if (!comp.internal_AllowNode(node, id)) return false;
+                }
+                catch (Exception ex)
+                {
+                    Log.Error(ex.ToString());
+                }
             }
             return true;
         }
@@ -596,7 +617,14 @@ namespace RW_NodeTree
             string idCache = id;
             foreach(CompBasicNodeComp comp in AllNodeComp)
             {
-                comp.internal_PerAdd(ref nodeCache, ref idCache);
+                try
+                {
+                    comp.internal_PerAdd(ref nodeCache, ref idCache);
+                }
+                catch (Exception ex)
+                {
+                    Log.Error(ex.ToString());
+                }
                 nodeCache = nodeCache ?? node;
                 idCache = idCache ?? id;
             }
@@ -608,7 +636,14 @@ namespace RW_NodeTree
         {
             foreach (CompBasicNodeComp comp in AllNodeComp)
             {
-                comp.internal_PostAdd(node, id, success);
+                try
+                {
+                    comp.internal_PostAdd(node, id, success);
+                }
+                catch (Exception ex)
+                {
+                    Log.Error(ex.ToString());
+                }
             }
         }
 
@@ -617,7 +652,14 @@ namespace RW_NodeTree
             ResetCachedRootNode();
             foreach (CompBasicNodeComp comp in AllNodeComp)
             {
-                comp.internal_Added(container, id);
+                try
+                {
+                    comp.internal_Added(container, id);
+                }
+                catch (Exception ex)
+                {
+                    Log.Error(ex.ToString());
+                }
             }
         }
 
@@ -626,7 +668,14 @@ namespace RW_NodeTree
             Thing nodeCache = node;
             foreach (CompBasicNodeComp comp in AllNodeComp)
             {
-                comp.internal_PerRemove(ref nodeCache);
+                try
+                {
+                    comp.internal_PerRemove(ref nodeCache);
+                }
+                catch (Exception ex)
+                {
+                    Log.Error(ex.ToString());
+                }
                 nodeCache = nodeCache ?? node;
             }
             node = nodeCache;
@@ -636,7 +685,14 @@ namespace RW_NodeTree
         {
             foreach (CompBasicNodeComp comp in AllNodeComp)
             {
-                comp.internal_PostRemove(node, id, success);
+                try
+                {
+                    comp.internal_PostRemove(node, id, success);
+                }
+                catch (Exception ex)
+                {
+                    Log.Error(ex.ToString());
+                }
             }
         }
 
@@ -645,7 +701,14 @@ namespace RW_NodeTree
             ResetCachedRootNode();
             foreach (CompBasicNodeComp comp in AllNodeComp)
             {
-                comp.internal_Removed(container, id);
+                try
+                {
+                    comp.internal_Removed(container, id);
+                }
+                catch (Exception ex)
+                {
+                    Log.Error(ex.ToString());
+                }
             }
         }
 

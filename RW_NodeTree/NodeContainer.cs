@@ -205,8 +205,9 @@ namespace RW_NodeTree
                 else if (NeedUpdate)
                 {
                     bool reset = true;
-                    foreach (Thing node in this.innerList)
+                    for (int i = 0; i < innerList.Count; i++)
                     {
+                        Thing node = this.innerList[i];
                         NodeContainer container = ((CompChildNodeProccesser)node)?.ChildNodes;
                         if (container != null && container.NeedUpdate)
                         {
@@ -218,7 +219,14 @@ namespace RW_NodeTree
                     {
                         foreach (CompBasicNodeComp comp in proccess.AllNodeComp)
                         {
-                            StopEventBubble = comp.internal_UpdateNode(actionNode) || StopEventBubble;
+                            try
+                            {
+                                StopEventBubble = comp.internal_UpdateNode(actionNode) || StopEventBubble;
+                            }
+                            catch(Exception ex)
+                            {
+                                Log.Error(ex.ToString());
+                            }
                         }
                     }
                     if (reset)
