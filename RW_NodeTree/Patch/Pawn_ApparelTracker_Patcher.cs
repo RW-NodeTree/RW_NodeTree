@@ -21,7 +21,7 @@ namespace RW_NodeTree.Patch
         )]
         private static void PostPawn_ApparelTracker_ApparelTrackerTick(Pawn_ApparelTracker __instance)
         {
-            ThingOwner<Apparel> list = Pawn_ApparelTracker_wornApparel(__instance);
+            ThingOwner list = __instance.GetDirectlyHeldThings();
             for (int i = list.Count - 1; i >= 0; i--)
             {
                 Thing t = list[i];
@@ -46,6 +46,5 @@ namespace RW_NodeTree.Patch
             }
         }
 
-        private static AccessTools.FieldRef<Pawn_ApparelTracker, ThingOwner<Apparel>> Pawn_ApparelTracker_wornApparel = AccessTools.FieldRefAccess<ThingOwner<Apparel>>(typeof(Pawn_ApparelTracker), "wornApparel");
     }
 }

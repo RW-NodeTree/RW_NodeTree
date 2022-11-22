@@ -36,7 +36,7 @@ namespace RW_NodeTree.Patch
             return result;
         }
 
-        private static void PreStatWorker_GetStatDrawEntryLabel(StatWorker __instance, MethodInfo __originalMethod, StatDef stat, float value, ToStringNumberSense numberSense, StatRequest optionalReq, bool finalized, ref Dictionary<string, object> __state)
+        private static void PreStatWorker_GetStatDrawEntryLabel(StatWorker __instance, MethodInfo __originalMethod, StatDef stat, float value, ToStringNumberSense numberSense, StatRequest optionalReq, bool finalized, ref (Dictionary<string, object>, CompChildNodeProccesser) __state)
         {
             CompChildNodeProccesser proccesser = optionalReq.Thing.RootNode();
             if (proccesser != null &&
@@ -45,19 +45,18 @@ namespace RW_NodeTree.Patch
                 GetMethodInfo_GetStatDrawEntryLabel_OfType(__instance.GetType()).DeclaringType
             )
             {
-                __state = new Dictionary<string, object>();
-                proccesser.PreStatWorker_GetStatDrawEntryLabel(__instance, stat, value, numberSense, optionalReq, finalized, __state);
+                __state.Item1 = new Dictionary<string, object>();
+                __state.Item2 = proccesser;
+                proccesser.PreStatWorker_GetStatDrawEntryLabel(__instance, stat, value, numberSense, optionalReq, finalized, __state.Item1);
             }
         }
-        private static void PostStatWorker_GetStatDrawEntryLabel(StatWorker __instance, MethodInfo __originalMethod, StatDef stat, float value, ToStringNumberSense numberSense, StatRequest optionalReq, bool finalized, ref string __result, ref Dictionary<string, object> __state)
+        private static void PostStatWorker_GetStatDrawEntryLabel(StatWorker __instance, StatDef stat, float value, ToStringNumberSense numberSense, StatRequest optionalReq, bool finalized, ref string __result, (Dictionary<string, object>, CompChildNodeProccesser) __state)
         {
-            CompChildNodeProccesser proccesser = optionalReq.Thing.RootNode();
-            if (proccesser != null &&
-                __originalMethod.DeclaringType
-                ==
-                GetMethodInfo_GetStatDrawEntryLabel_OfType(__instance.GetType()).DeclaringType
+            (Dictionary<string, object> forPostRead, CompChildNodeProccesser proccesser) = __state;
+            if (forPostRead != null &&
+                proccesser != null
             )
-                __result = proccesser.PostStatWorker_GetStatDrawEntryLabel(__instance, stat, value, numberSense, optionalReq, finalized, __result, __state) ?? __result;
+                __result = proccesser.PostStatWorker_GetStatDrawEntryLabel(__instance, stat, value, numberSense, optionalReq, finalized, __result, forPostRead) ?? __result;
         }
 
         public static void PatchStatDrawEntry(Type type, Harmony patcher)

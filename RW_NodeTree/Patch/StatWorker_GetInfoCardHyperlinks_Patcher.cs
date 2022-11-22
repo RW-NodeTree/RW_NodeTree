@@ -43,7 +43,7 @@ namespace RW_NodeTree.Patch
                 ==
                 GetMethodInfo_GetInfoCardHyperlinks_OfType(__instance.GetType()).DeclaringType
             )
-            __result = proccesser.PostStatWorker_GetInfoCardHyperlinks(__instance, statRequest, __result) ?? __result;
+                __result = proccesser.PostStatWorker_GetInfoCardHyperlinks(__instance, statRequest, __result) ?? __result;
         }
 
         public static void PatchGetInfoCardHyperlinks(Type type, Harmony patcher)

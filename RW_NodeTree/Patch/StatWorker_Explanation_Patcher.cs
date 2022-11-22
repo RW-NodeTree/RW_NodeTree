@@ -54,7 +54,7 @@ namespace RW_NodeTree.Patch
             return result;
         }
 
-        private static void PreStatWorker_GetExplanationUnfinalized(StatWorker __instance, MethodInfo __originalMethod, StatRequest req, ToStringNumberSense numberSense, ref Dictionary<string, object> __state)
+        private static void PreStatWorker_GetExplanationUnfinalized(StatWorker __instance, MethodInfo __originalMethod, StatRequest req, ToStringNumberSense numberSense, ref (Dictionary<string, object>, CompChildNodeProccesser) __state)
         {
             CompChildNodeProccesser proccesser = req.Thing.RootNode();
             if (proccesser != null &&
@@ -63,11 +63,12 @@ namespace RW_NodeTree.Patch
                 GetMethodInfo_GetExplanationUnfinalized_OfType(__instance.GetType()).DeclaringType
             )
             {
-                __state = new Dictionary<string, object>();
-                proccesser.PreStatWorker_GetExplanationUnfinalized(__instance, req, numberSense, __state);
+                __state.Item1 = new Dictionary<string, object>();
+                __state.Item2 = proccesser;
+                proccesser.PreStatWorker_GetExplanationUnfinalized(__instance, req, numberSense, __state.Item1);
             }
         }
-        private static void PreStatWorker_GetExplanationFinalizePart(StatWorker __instance, MethodBase __originalMethod, StatRequest req, ToStringNumberSense numberSense, float finalVal, ref Dictionary<string, object> __state)
+        private static void PreStatWorker_GetExplanationFinalizePart(StatWorker __instance, MethodBase __originalMethod, StatRequest req, ToStringNumberSense numberSense, float finalVal, ref (Dictionary<string, object>, CompChildNodeProccesser) __state)
         {
             CompChildNodeProccesser proccesser = req.Thing.RootNode();
             if (proccesser != null &&
@@ -76,32 +77,29 @@ namespace RW_NodeTree.Patch
                 GetMethodInfo_GetExplanationFinalizePart_OfType(__instance.GetType()).DeclaringType
             )
             {
-                __state = new Dictionary<string, object>();
-                proccesser.PreStatWorker_GetExplanationFinalizePart(__instance, req, numberSense, finalVal, __state);
+                __state.Item1 = new Dictionary<string, object>();
+                __state.Item2 = proccesser;
+                proccesser.PreStatWorker_GetExplanationFinalizePart(__instance, req, numberSense, finalVal, __state.Item1);
             }
         }
-        private static void PostStatWorker_GetExplanationUnfinalized(StatWorker __instance, MethodInfo __originalMethod, StatRequest req, ToStringNumberSense numberSense, ref string __result, ref Dictionary<string, object> __state)
+        private static void PostStatWorker_GetExplanationUnfinalized(StatWorker __instance,  StatRequest req, ToStringNumberSense numberSense, ref string __result, (Dictionary<string, object>, CompChildNodeProccesser) __state)
         {
-            CompChildNodeProccesser proccesser = req.Thing.RootNode();
-            if (proccesser != null &&
-                __originalMethod.DeclaringType
-                ==
-                GetMethodInfo_GetExplanationUnfinalized_OfType(__instance.GetType()).DeclaringType
+            (Dictionary<string, object> forPostRead, CompChildNodeProccesser proccesser) = __state;
+            if (forPostRead != null &&
+                proccesser != null
             )
             {
-                __result = proccesser.PostStatWorker_GetExplanationUnfinalized(__instance, req, numberSense, __result, __state) ?? __result;
+                __result = proccesser.PostStatWorker_GetExplanationUnfinalized(__instance, req, numberSense, __result, forPostRead) ?? __result;
             }
         }
-        private static void PostStatWorker_GetExplanationFinalizePart(StatWorker __instance, MethodBase __originalMethod, StatRequest req, ToStringNumberSense numberSense, float finalVal, ref string __result, ref Dictionary<string, object> __state)
+        private static void PostStatWorker_GetExplanationFinalizePart(StatWorker __instance, StatRequest req, ToStringNumberSense numberSense, float finalVal, ref string __result, (Dictionary<string, object>, CompChildNodeProccesser) __state)
         {
-            CompChildNodeProccesser proccesser = req.Thing.RootNode();
-            if (proccesser != null &&
-                __originalMethod.DeclaringType
-                ==
-                GetMethodInfo_GetExplanationFinalizePart_OfType(__instance.GetType()).DeclaringType
+            (Dictionary<string, object> forPostRead, CompChildNodeProccesser proccesser) = __state;
+            if (forPostRead != null &&
+                proccesser != null
             )
             {
-                __result = proccesser.PostStatWorker_GetExplanationFinalizePart(__instance, req, numberSense, finalVal, __result, __state) ?? __result;
+                __result = proccesser.PostStatWorker_GetExplanationFinalizePart(__instance, req, numberSense, finalVal, __result, forPostRead) ?? __result;
             }
         }
 

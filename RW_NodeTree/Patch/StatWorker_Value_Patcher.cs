@@ -3,6 +3,7 @@ using RimWorld;
 using RW_NodeTree.Tools;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
@@ -53,7 +54,7 @@ namespace RW_NodeTree.Patch
             return result;
         }
 
-        private static void PreStatWorker_GetValueUnfinalized(StatWorker __instance, MethodInfo __originalMethod, StatRequest req, bool applyPostProcess, ref Dictionary<string, object> __state)
+        private static void PreStatWorker_GetValueUnfinalized(StatWorker __instance, MethodInfo __originalMethod, StatRequest req, bool applyPostProcess, ref (Dictionary<string, object>, CompChildNodeProccesser) __state)
         {
             CompChildNodeProccesser proccesser = req.Thing.RootNode();
             if (proccesser != null &&
@@ -62,11 +63,12 @@ namespace RW_NodeTree.Patch
                 GetMethodInfo_GetValueUnfinalized_OfType(__instance.GetType()).DeclaringType
             )
             {
-                __state = new Dictionary<string, object>();
-                proccesser.PreStatWorker_GetValueUnfinalized(__instance, req, applyPostProcess, __state);
+                __state.Item1 = new Dictionary<string, object>();
+                __state.Item2 = proccesser;
+                proccesser.PreStatWorker_GetValueUnfinalized(__instance, req, applyPostProcess, __state.Item1);
             }
         }
-        private static void PreStatWorker_FinalizeValue(StatWorker __instance, MethodInfo __originalMethod, StatRequest req, bool applyPostProcess, ref float val, ref Dictionary<string, object> __state)
+        private static void PreStatWorker_FinalizeValue(StatWorker __instance, MethodInfo __originalMethod, StatRequest req, bool applyPostProcess, ref float val, ref (Dictionary<string, object>, CompChildNodeProccesser) __state)
         {
             CompChildNodeProccesser proccesser = req.Thing.RootNode();
             if (proccesser != null &&
@@ -75,29 +77,26 @@ namespace RW_NodeTree.Patch
                 GetMethodInfo_FinalizeValue_OfType(__instance.GetType()).DeclaringType
             )
             {
-                __state = new Dictionary<string, object>();
-                val = proccesser.PreStatWorker_FinalizeValue(__instance, req, applyPostProcess, val, __state);
+                __state.Item1 = new Dictionary<string, object>();
+                __state.Item2 = proccesser;
+                val = proccesser.PreStatWorker_FinalizeValue(__instance, req, applyPostProcess, val, __state.Item1);
             }
         }
-        private static void PostStatWorker_GetValueUnfinalized(StatWorker __instance, MethodInfo __originalMethod, StatRequest req, bool applyPostProcess, ref float __result, ref Dictionary<string, object> __state)
+        private static void PostStatWorker_GetValueUnfinalized(StatWorker __instance, StatRequest req, bool applyPostProcess, ref float __result, (Dictionary<string, object>, CompChildNodeProccesser) __state)
         {
-            CompChildNodeProccesser proccesser = req.Thing.RootNode();
-            if (proccesser != null &&
-                __originalMethod.DeclaringType
-                ==
-                GetMethodInfo_GetValueUnfinalized_OfType(__instance.GetType()).DeclaringType
+            (Dictionary<string, object> forPostRead, CompChildNodeProccesser proccesser) = __state;
+            if (forPostRead != null &&
+                proccesser != null
             )
-                __result = proccesser.PostStatWorker_GetValueUnfinalized(__instance, req, applyPostProcess, __result, __state);
+                __result = proccesser.PostStatWorker_GetValueUnfinalized(__instance, req, applyPostProcess, __result, __state.Item1);
         }
-        private static void PostStatWorker_FinalizeValue(StatWorker __instance, MethodInfo __originalMethod, StatRequest req, bool applyPostProcess, ref float val, ref Dictionary<string, object> __state)
+        private static void PostStatWorker_FinalizeValue(StatWorker __instance, StatRequest req, bool applyPostProcess, ref float val, (Dictionary<string, object>, CompChildNodeProccesser) __state)
         {
-            CompChildNodeProccesser proccesser = req.Thing.RootNode();
-            if (proccesser != null &&
-                __originalMethod.DeclaringType
-                ==
-                GetMethodInfo_FinalizeValue_OfType(__instance.GetType()).DeclaringType
+            (Dictionary<string, object> forPostRead, CompChildNodeProccesser proccesser) = __state;
+            if (forPostRead != null &&
+                proccesser != null
             )
-                val = proccesser.PostStatWorker_FinalizeValue(__instance, req, applyPostProcess, val, __state);
+                val = proccesser.PostStatWorker_FinalizeValue(__instance, req, applyPostProcess, val, __state.Item1);
         }
 
         public static void PatchValue(Type type, Harmony patcher)

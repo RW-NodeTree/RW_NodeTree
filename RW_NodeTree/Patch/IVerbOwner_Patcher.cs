@@ -44,58 +44,62 @@ namespace RW_NodeTree.Patch
 
 
 
-        private static void PreIVerbOwner_GetVerbProperties(IVerbOwner __instance, MethodInfo __originalMethod, ref Dictionary<string ,object> __state)
+        private static void PreIVerbOwner_GetVerbProperties(IVerbOwner __instance, MethodInfo __originalMethod, ref (Dictionary<string ,object>, CompChildNodeProccesser, Type) __state)
         {
             Type type = __instance.GetType();
-            if (__originalMethod.DeclaringType
+            CompChildNodeProccesser proccesser = (((__instance) as ThingComp)?.parent) ?? ((__instance) as Thing);
+            if (proccesser!= null &&
+                __originalMethod.DeclaringType
                 ==
                 GetMethodInfo_get_VerbProperties_OfType(type).DeclaringType
             )
             {
-                __state = new Dictionary<string ,object>();
-                CompChildNodeProccesser proccess = (((__instance) as ThingComp)?.parent) ?? ((__instance) as Thing);
-                proccess?.PreIVerbOwner_GetVerbProperties(type, __state);
+                __state.Item1 = new Dictionary<string ,object>();
+                __state.Item2 = proccesser;
+                __state.Item3 = type;
+                proccesser.PreIVerbOwner_GetVerbProperties(type, __state.Item1);
             }
         }
 
-        private static void PreIVerbOwner_GetTools(IVerbOwner __instance, MethodInfo __originalMethod, ref Dictionary<string, object> __state)
+        private static void PreIVerbOwner_GetTools(IVerbOwner __instance, MethodInfo __originalMethod, ref (Dictionary<string, object>, CompChildNodeProccesser, Type) __state)
         {
             Type type = __instance.GetType();
-            if (__originalMethod.DeclaringType
+            CompChildNodeProccesser proccesser = (((__instance) as ThingComp)?.parent) ?? ((__instance) as Thing);
+            if (proccesser != null &&
+                __originalMethod.DeclaringType
                 ==
                 GetMethodInfo_get_Tools_OfType(type).DeclaringType
             )
             {
-                __state = new Dictionary<string, object>();
-                CompChildNodeProccesser proccess = (((__instance) as ThingComp)?.parent) ?? ((__instance) as Thing);
-                proccess?.PreIVerbOwner_GetTools(type, __state);
+                __state.Item1 = new Dictionary<string, object>();
+                __state.Item2 = proccesser;
+                __state.Item3 = type;
+                proccesser.PreIVerbOwner_GetTools(type, __state.Item1);
             }
         }
-        private static void PostIVerbOwner_GetVerbProperties(IVerbOwner __instance, MethodInfo __originalMethod, ref List<VerbProperties> __result, ref Dictionary<string, object> __state)
+        private static void PostIVerbOwner_GetVerbProperties(ref List<VerbProperties> __result, (Dictionary<string, object>, CompChildNodeProccesser, Type) __state)
         {
-            Type type = __instance.GetType();
-            if (__originalMethod.DeclaringType
-                ==
-                GetMethodInfo_get_VerbProperties_OfType(type).DeclaringType
+            (Dictionary<string, object> forPostRead, CompChildNodeProccesser proccess, Type type) = __state;
+            if (forPostRead != null &&
+                proccess != null &&
+                type != null
             )
             {
                 __result = (__result != null) ? new List<VerbProperties>(__result) : new List<VerbProperties>();
-                CompChildNodeProccesser proccess = (((__instance) as ThingComp)?.parent) ?? ((__instance) as Thing);
-                __result = proccess?.PostIVerbOwner_GetVerbProperties(type, __result, __state) ?? __result;
+                __result = proccess.PostIVerbOwner_GetVerbProperties(type, __result, forPostRead) ?? __result;
             }
         }
 
-        private static void PostIVerbOwner_GetTools(IVerbOwner __instance, MethodInfo __originalMethod, ref List<Tool> __result, ref Dictionary<string, object> __state)
+        private static void PostIVerbOwner_GetTools(ref List<Tool> __result, (Dictionary<string, object>, CompChildNodeProccesser, Type) __state)
         {
-            Type type = __instance.GetType();
-            if (__originalMethod.DeclaringType
-                ==
-                GetMethodInfo_get_Tools_OfType(type).DeclaringType
+            (Dictionary<string, object> forPostRead, CompChildNodeProccesser proccesser, Type type) = __state;
+            if (forPostRead != null &&
+                proccesser != null &&
+                type != null
             )
             {
                 __result = (__result != null) ? new List<Tool>(__result) : new List<Tool>();
-                CompChildNodeProccesser proccess = (((__instance) as ThingComp)?.parent) ?? ((__instance) as Thing);
-                __result = proccess?.PostIVerbOwner_GetTools(type, __result, __state) ?? __result;
+                __result = proccesser.PostIVerbOwner_GetTools(type, __result, forPostRead) ?? __result;
             }
         }
 
