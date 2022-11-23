@@ -21,7 +21,7 @@ namespace RW_NodeTree.Patch
         )]
         private static bool PreVerb_DirectOwner(Command_VerbTarget __instance, ref Color __result)
         {
-            CompChildNodeProccesser proccess = ((__instance.verb?.verbTracker.directOwner as ThingComp)?.parent) ?? ((__instance.verb?.verbTracker.directOwner) as Thing);
+            CompChildNodeProccesser proccess = ((__instance.verb?.verbTracker?.directOwner as ThingComp)?.parent) ?? ((__instance.verb?.verbTracker?.directOwner) as Thing);
             if(proccess != null)
             {
                 Thing part = proccess.GetBeforeConvertVerbCorrespondingThing(__instance.verb.verbTracker.directOwner.GetType(), __instance.verb, proccess.Props.VerbIconVerbInstanceSource).Item1;

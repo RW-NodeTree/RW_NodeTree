@@ -19,7 +19,7 @@ namespace RW_NodeTree.Patch.CombatExtended
 
         private static void PostVerb_LaunchProjectileCE_ShotsPerBurst(Verb __instance, ref int __result)
         {
-            CompChildNodeProccesser comp = (__instance.verbTracker.directOwner as ThingComp)?.parent;
+            CompChildNodeProccesser comp = (__instance.verbTracker?.directOwner as ThingComp)?.parent;
             if (comp != null)
             {
                 __result = __instance.verbProps.burstShotCount;
