@@ -39,6 +39,7 @@
   <ItemGroup>
     <Compile Include="DataStructure\LinnerNode.cs" />
     <Compile Include="Patch\CombatExtended\0HarmonyInjector_CombatExtended.cs" />
+    <Compile Include="Patch\CombatExtended\CombatExtended_BipodComp_Patcher.cs" />
     <Compile Include="Patch\CombatExtended\CombatExtended_LoadoutPropertiesExtension_Patcher.cs" />
     <Compile Include="Patch\CombatExtended\CombatExtended_Verb_LaunchProjectileCE_Patcher.cs" />
     <Compile Include="Patch\CombatExtended\CombatExtended_JobDriver_Reload_Patcher.cs" />

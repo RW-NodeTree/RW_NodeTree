@@ -25,8 +25,8 @@ namespace RW_NodeTree.Patch
             CompChildNodeProccesser compChild = ((CompChildNodeProccesser)thing) ?? (thing?.ParentHolder as CompChildNodeProccesser);
             if (compChild != null && compChild.Props.VerbDirectOwnerRedictory)
             {
-                thing = compChild.GetBeforeConvertVerbCorrespondingThing(__result.GetType(), __instance, true).Item1;
-                __result = CompChildNodeProccesser.GetSameTypeVerbOwner(__result.GetType(), thing);
+                thing = compChild.GetBeforeConvertVerbCorrespondingThing(__result.GetType(), __instance, true).Item1 ?? thing;
+                __result = CompChildNodeProccesser.GetSameTypeVerbOwner(__result.GetType(), thing) ?? __result;
             }
         }
 

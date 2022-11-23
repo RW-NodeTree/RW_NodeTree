@@ -19,6 +19,7 @@ namespace RW_NodeTree.Patch.CombatExtended
             CombatExtended_JobDriver_Reload_Patcher.PatchJobDriver_Reload(patcher);
             CombatExtended_Verb_LaunchProjectileCE_Patcher.PatchVerb_LaunchProjectileCE(patcher);
             CombatExtended_LoadoutPropertiesExtension_Patcher.PatchLoadoutPropertiesExtension(patcher);
+            CombatExtended_BipodComp_Patcher.PatchCompResetVerbProps(patcher);
         }
 
         public static Harmony patcher = new Harmony("RW_NodeTree.Patch.CombatExtended");
