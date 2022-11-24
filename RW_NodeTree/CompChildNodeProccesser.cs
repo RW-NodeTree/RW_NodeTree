@@ -99,6 +99,7 @@ namespace RW_NodeTree
                             Log.Error(ex.ToString());
                         }
                     }
+                    cache.RemoveWhere(x => !x.IsVaildityKeyFormat());
                     regiestedNodeId.AddRange(cache);
                 }
                 return new HashSet<string>(regiestedNodeId);
@@ -533,7 +534,7 @@ namespace RW_NodeTree
             List<RenderInfo> final = new List<RenderInfo>();
             foreach((Thing, string, List<RenderInfo>) infos in nodeRenderingInfos)
             {
-                final.AddRange(infos.Item3);
+                if(!infos.Item3.NullOrEmpty()) final.AddRange(infos.Item3);
             }
 
             RenderingTools.RenderToTarget(final, ref cachedRenderTarget, ref texture, default(Vector2Int), Props.TextureSizeFactor, Props.ExceedanceFactor, Props.ExceedanceOffset);

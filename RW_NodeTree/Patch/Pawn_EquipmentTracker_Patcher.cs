@@ -106,7 +106,7 @@ namespace RW_NodeTree.Patch
                             {
                                 Log.Error(ex.ToString());
                             }
-                            foreach (Gizmo gizmo in gizmos) yield return gizmo;
+                            foreach (Gizmo gizmo in gizmos) if(gizmo != null) yield return gizmo;
                         }
                     }
                 }

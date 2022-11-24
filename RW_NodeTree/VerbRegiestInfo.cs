@@ -1,4 +1,5 @@
-﻿using System;
+﻿using RW_NodeTree.Tools;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -16,7 +17,7 @@ namespace RW_NodeTree
             this.afterCobvertTool = afterCobvertTool;
         }
 
-        public bool Vaildity => berforConvertTool != null && afterCobvertTool != null;
+        public bool Vaildity => berforConvertTool != null && afterCobvertTool != null && (id == null || id.IsVaildityKeyFormat());
 
         public override string ToString()
         {
@@ -35,7 +36,7 @@ namespace RW_NodeTree
             this.berforConvertProperties = berforConvertProperties;
             this.afterConvertProperties = afterConvertProperties;
         }
-        public bool Vaildity => berforConvertProperties != null && afterConvertProperties != null;
+        public bool Vaildity => berforConvertProperties != null && afterConvertProperties != null && (id == null || id.IsVaildityKeyFormat());
 
         public override string ToString()
         {

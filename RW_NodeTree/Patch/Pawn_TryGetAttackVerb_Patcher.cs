@@ -29,7 +29,7 @@ namespace RW_NodeTree.Patch
                     if(job != null && typeof(JobDriver_AttackStatic).IsAssignableFrom(job.def.driverClass) && job.verbToUse?.Caster == __instance)
                     {
                         CompEquippable equippable = __instance.equipment.PrimaryEq;
-                        List<Verb> verbList = CompChildNodeProccesser.GetOriginalAllVerbs(equippable.verbTracker);
+                        List<Verb> verbList = CompChildNodeProccesser.GetOriginalAllVerbs(equippable.VerbTracker);
                         if (verbList.Remove(__instance.CurJob.verbToUse))
                         {
                             verbList.Insert(0, __instance.CurJob.verbToUse);

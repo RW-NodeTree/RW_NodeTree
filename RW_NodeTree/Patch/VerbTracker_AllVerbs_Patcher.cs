@@ -128,8 +128,9 @@ namespace RW_NodeTree
             {
                 for (int i = 0; i < result.Count; i++)
                 {
-                    result[i] = GetAfterConvertVerbCorrespondingThing(ownerType, result[i]).Item2;
+                    result[i] = GetAfterConvertVerbCorrespondingThing(ownerType, result[i]).Item2 ?? result[i];
                 }
+                result.RemoveAll(x => x == null || x.verbProps == null);
                 return result;
             }
             return null;
