@@ -140,7 +140,7 @@ namespace RW_NodeTree
         /// </summary>
         /// <param name="owner">IVerbOwner source</param>
         /// <param name="verbProperties">result of IVerbOwner.VerbProperties</param>
-        internal void PreIVerbOwner_GetVerbProperties(Type ownerType, Dictionary<string, object> forPostRead)
+        public void PreIVerbOwner_GetVerbProperties(Type ownerType, Dictionary<string, object> forPostRead)
         {
             if (ownerType != null && typeof(IVerbOwner).IsAssignableFrom(ownerType))
             {
@@ -165,7 +165,7 @@ namespace RW_NodeTree
         /// </summary>
         /// <param name="owner">IVerbOwner source</param>
         /// <param name="verbProperties">result of IVerbOwner.Tools</param>
-        internal void PreIVerbOwner_GetTools(Type ownerType, Dictionary<string, object> forPostRead)
+        public void PreIVerbOwner_GetTools(Type ownerType, Dictionary<string, object> forPostRead)
         {
             if (ownerType != null && typeof(IVerbOwner).IsAssignableFrom(ownerType))
             {
@@ -188,7 +188,7 @@ namespace RW_NodeTree
         /// </summary>
         /// <param name="owner">IVerbOwner source</param>
         /// <param name="verbProperties">result of IVerbOwner.VerbProperties</param>
-        internal List<VerbProperties> PostIVerbOwner_GetVerbProperties(Type ownerType, List<VerbProperties> verbProperties, Dictionary<string, object> forPostRead)
+        public List<VerbProperties> PostIVerbOwner_GetVerbProperties(Type ownerType, List<VerbProperties> verbProperties, Dictionary<string, object> forPostRead)
         {
             if (ownerType != null && typeof(IVerbOwner).IsAssignableFrom(ownerType))
             {
@@ -235,7 +235,7 @@ namespace RW_NodeTree
         /// </summary>
         /// <param name="owner">IVerbOwner source</param>
         /// <param name="verbProperties">result of IVerbOwner.Tools</param>
-        internal List<Tool> PostIVerbOwner_GetTools(Type ownerType, List<Tool> tools, Dictionary<string, object> forPostRead)
+        public List<Tool> PostIVerbOwner_GetTools(Type ownerType, List<Tool> tools, Dictionary<string, object> forPostRead)
         {
             if (ownerType != null && typeof(IVerbOwner).IsAssignableFrom(ownerType))
             {
