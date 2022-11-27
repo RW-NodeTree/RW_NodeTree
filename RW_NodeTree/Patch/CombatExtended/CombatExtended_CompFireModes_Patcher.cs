@@ -17,7 +17,7 @@ namespace RW_NodeTree.Patch.CombatExtended
 {
     internal static class CombatExtended_CompFireModes_Patcher
     {
-        private static MethodInfo _PostCompFireModes_Verb = typeof(CombatExtended_CompFireModes_Patcher).GetMethod("PostCompFireModes_Verb", BindingFlags.Static | BindingFlags.NonPublic);
+        private static MethodInfo _PreCompFireModes_Verb = typeof(CombatExtended_CompFireModes_Patcher).GetMethod("PreCompFireModes_Verb", BindingFlags.Static | BindingFlags.NonPublic);
         //private static MethodInfo _CompFireModes_Verb_Transpiler = typeof(CombatExtended_CompFireModes_Patcher).GetMethod("CompFireModes_Verb_Transpiler", BindingFlags.Static | BindingFlags.NonPublic);
         //private static MethodInfo _CompFireModes_TryGetComp = typeof(CombatExtended_CompFireModes_Patcher).GetMethod("CompFireModes_TryGetComp", BindingFlags.Static | BindingFlags.NonPublic);
         private static Type CombatExtended_CompFireModes = GenTypes.GetTypeInAnyAssembly("CombatExtended.CompFireModes");
@@ -25,34 +25,31 @@ namespace RW_NodeTree.Patch.CombatExtended
 
         //private static MethodInfo ThingCompUtility_TryGetComp = typeof(ThingCompUtility).GetMethod("TryGetComp", BindingFlags.Static | BindingFlags.Public).MakeGenericMethod(new Type[] { typeof(CompEquippable) });
 
-        private static AccessTools.FieldRef<object, Verb> CompFireModes_verbInt = null;
+        //private static AccessTools.FieldRef<object, Verb> CompFireModes_verbInt = null;
 
-        private static void PostCompFireModes_Verb(ThingComp __instance, ref Verb __result)
+        private static bool PreCompFireModes_Verb(ThingComp __instance, ref Verb __result)
         {
-            if(__result == null)
+            CompChildNodeProccesser comp = ((CompChildNodeProccesser)__instance.parent) ?? (__instance.ParentHolder as CompChildNodeProccesser);
+            if (comp != null)
             {
-                CompChildNodeProccesser comp = ((CompChildNodeProccesser)__instance.parent) ?? (__instance.ParentHolder as CompChildNodeProccesser);
-                if (comp != null)
+                while (comp != null)
                 {
-                    CompFireModes_verbInt(__instance) = null;
-                    while(__result == null && comp != null)
+                    List<Verb> verbs = comp.parent.TryGetComp<CompEquippable>()?.AllVerbs;
+                    if (verbs != null)
                     {
-                        List<Verb> verbs = comp.parent.TryGetComp<CompEquippable>()?.AllVerbs;
-                        if (verbs != null)
+                        foreach (Verb verb in verbs)
                         {
-                            foreach (Verb verb in verbs)
+                            if (verb.EquipmentSource == __instance.parent && verb.verbProps.isPrimary)
                             {
-                                if (comp.GetBeforeConvertVerbCorrespondingThing(typeof(CompEquippable), verb).Item1 == __instance.parent && verb.verbProps.isPrimary)
-                                {
-                                    __result = verb;
-                                    break;
-                                }
+                                __result = verb;
+                                return false;
                             }
                         }
-                        comp = comp.ParentProccesser;
                     }
+                    comp = comp.ParentProccesser;
                 }
             }
+            return true;
         }
 
 
@@ -76,11 +73,11 @@ namespace RW_NodeTree.Patch.CombatExtended
         {
             if (CombatExtended_CompFireModes != null)
             {
-                CompFireModes_verbInt = AccessTools.FieldRefAccess<Verb>(CombatExtended_CompFireModes, "verbInt");
+                //CompFireModes_verbInt = AccessTools.FieldRefAccess<Verb>(CombatExtended_CompFireModes, "verbInt");
                 MethodInfo target = CombatExtended_CompFireModes.GetMethod("get_Verb", BindingFlags.Instance | BindingFlags.NonPublic);
                 patcher.Patch(
                     target,
-                    postfix: new HarmonyMethod(_PostCompFireModes_Verb)
+                    prefix: new HarmonyMethod(_PreCompFireModes_Verb)
                     //,
                     //transpiler: new HarmonyMethod(_CompFireModes_Verb_Transpiler)
                     );

@@ -21,9 +21,6 @@ namespace RW_NodeTree.Patch.CombatExtended
         private static AccessTools.FieldRef<object, Vector2> GunDrawExtension_DrawSize = null;
 
         private static void PerHarmony_PawnRenderer_Harmony_PawnRenderer_DrawEquipmentAiming_DrawMesh(
-#if !V13
-            Matrix4x4 matrix,
-#endif
             Thing eq,
             ref (DefModExtension, Vector2) __state)
         {
@@ -51,13 +48,7 @@ namespace RW_NodeTree.Patch.CombatExtended
                 }
                 ref Vector2 DrawSize = ref GunDrawExtension_DrawSize(targetExtension);
                 __state = (targetExtension, DrawSize);
-#if V13
-                //Log.Message(eq.Graphic.drawSize.ToString());
                 DrawSize = eq.Graphic.drawSize;
-#else
-                Vector3 scale = matrix.lossyScale;
-                DrawSize = new Vector2(scale.x, scale.z);
-#endif
             }
         }
 

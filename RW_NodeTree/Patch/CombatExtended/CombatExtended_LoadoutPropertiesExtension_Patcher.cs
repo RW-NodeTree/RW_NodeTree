@@ -50,13 +50,13 @@ namespace RW_NodeTree.Patch.CombatExtended
                 CompEquippable equippable = thing.TryGetComp<CompEquippable>();
                 if (equippable != null)
                 {
-                    thing = comp.GetBeforeConvertVerbCorrespondingThing(equippable.GetType(), equippable.PrimaryVerb, true).Item1 as ThingWithComps;
+                    thing = comp.GetBeforeConvertVerbCorrespondingThing(typeof(CompEquippable), equippable.PrimaryVerb, true).Item1 as ThingWithComps;
 
                     ThingComp
                     result = (ThingComp)TryGetComp.Invoke(null, new object[] { thing });
                     if (result != null) return result;
 
-                    thing = comp.GetBeforeConvertVerbCorrespondingThing(equippable.GetType(), equippable.PrimaryVerb).Item1 as ThingWithComps;
+                    thing = comp.GetBeforeConvertVerbCorrespondingThing(typeof(CompEquippable), equippable.PrimaryVerb).Item1 as ThingWithComps;
 
                     result = (ThingComp)TryGetComp.Invoke(null, new object[] { thing });
                     if (result != null) return result;
