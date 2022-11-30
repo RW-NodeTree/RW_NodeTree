@@ -33,7 +33,7 @@ namespace RW_NodeTree.Patch
             typeof(Thing),
             typeof(Verb)
         )]
-        private static void PostVerbTracker_CreateVerbTargetCommand(Thing ownerThing, ref Command_VerbTarget __result)
+        private static void PostVerbTracker_CreateVerbTargetCommand(VerbTracker __instance, Thing ownerThing, Verb verb, ref Command_VerbTarget __result)
         {
             CompChildNodeProccesser comp = ownerThing;
             if (__result != null && comp != null)
@@ -42,6 +42,7 @@ namespace RW_NodeTree.Patch
                 __result.iconProportions = ownerThing?.Graphic?.drawSize ?? __result.iconProportions;
                 Vector2 scale = (ownerThing?.Graphic?.drawSize ?? Vector2.one) / ownerThing.def.size.ToVector2();
                 __result.iconDrawScale = Math.Max(scale.x, scale.y);
+                __result.shrinkable = verb != __instance.PrimaryVerb;
             }
         }
     }
