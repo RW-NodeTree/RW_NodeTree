@@ -21,7 +21,6 @@ namespace RW_NodeTree.Patch
         )]
         private static void PostVerbTracker_PrimaryVerb(VerbTracker __instance, ref Verb __result)
         {
-            CompChildNodeProccesser proccess = ((__instance.directOwner as ThingComp)?.parent) ?? ((__instance.directOwner) as Thing);
             foreach (Verb verb in __instance.AllVerbs)
             {
                 if (verb.verbProps.isPrimary)

@@ -22,7 +22,14 @@ namespace RW_NodeTree.Patch
             )]
         public static void PostStatsReportUtility_StatsToDraw(Thing thing, ref IEnumerable<StatDrawEntry> __result)
         {
-            __result = thing.RootNode()?.PostStatsReportUtility_StatsToDraw(thing, __result) ?? __result;
+            try
+            {
+                __result = thing.RootNode()?.PostStatsReportUtility_StatsToDraw(thing, __result)?.ToList() ?? __result;
+            }
+            catch(Exception ex)
+            {
+                Log.Message(ex.ToString());
+            }
         }
     }
 }

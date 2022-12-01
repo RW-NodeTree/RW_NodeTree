@@ -26,10 +26,17 @@ namespace RW_NodeTree.Patch
                 __result = ((CompChildNodeProccesser)thing)?.PostGenRecipe_MakeRecipeProducts(recipeDef, worker, ingredients, dominantIngredient, billGiver, precept, RecipeInvokeSource.ingredients, __result) ?? __result;
             }
             __result = ((CompChildNodeProccesser)worker)?.PostGenRecipe_MakeRecipeProducts(recipeDef, worker, ingredients, dominantIngredient, billGiver, precept, RecipeInvokeSource.worker, __result) ?? __result;
-            __result = new List<Thing>(__result);
-            foreach(Thing thing in __result)
+            try
             {
-                __result = ((CompChildNodeProccesser)thing)?.PostGenRecipe_MakeRecipeProducts(recipeDef, worker, ingredients, dominantIngredient, billGiver, precept, RecipeInvokeSource.products, __result) ?? __result;
+                __result = new List<Thing>(__result);
+                foreach (Thing thing in __result)
+                {
+                    __result = ((CompChildNodeProccesser)thing)?.PostGenRecipe_MakeRecipeProducts(recipeDef, worker, ingredients, dominantIngredient, billGiver, precept, RecipeInvokeSource.products, __result) ?? __result;
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Message(ex.ToString());
             }
         }
 

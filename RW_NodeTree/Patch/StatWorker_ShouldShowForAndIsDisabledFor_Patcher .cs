@@ -18,6 +18,8 @@ namespace RW_NodeTree.Patch
         private static readonly MethodInfo _PreStatWorker_IsDisabledFor = typeof(StatWorker_Patcher).GetMethod("PreStatWorker_IsDisabledFor", BindingFlags.NonPublic | BindingFlags.Static);
         private static readonly MethodInfo _PostStatWorker_ShouldShowFor = typeof(StatWorker_Patcher).GetMethod("PostStatWorker_ShouldShowFor", BindingFlags.NonPublic | BindingFlags.Static);
         private static readonly MethodInfo _PostStatWorker_IsDisabledFor = typeof(StatWorker_Patcher).GetMethod("PostStatWorker_IsDisabledFor", BindingFlags.NonPublic | BindingFlags.Static);
+        private static readonly MethodInfo _FinalStatWorker_ShouldShowFor = typeof(StatWorker_Patcher).GetMethod("FinalStatWorker_ShouldShowFor", BindingFlags.NonPublic | BindingFlags.Static);
+        private static readonly MethodInfo _FinalStatWorker_IsDisabledFor = typeof(StatWorker_Patcher).GetMethod("FinalStatWorker_IsDisabledFor", BindingFlags.NonPublic | BindingFlags.Static);
         private static readonly Type[] StatWorker_ShouldShowFor_ParmsType = new Type[] { typeof(StatRequest)};
         private static readonly Type[] StatWorker_IsDisabledFor_ParmsType = new Type[] { typeof(Thing) };
 
@@ -53,7 +55,7 @@ namespace RW_NodeTree.Patch
             return result;
         }
 
-        private static void PreStatWorker_ShouldShowFor(StatWorker __instance, MethodInfo __originalMethod, StatRequest req, ref (Dictionary<string, object>, CompChildNodeProccesser) __state)
+        private static bool PreStatWorker_ShouldShowFor(StatWorker __instance, MethodInfo __originalMethod, StatRequest req, ref (Dictionary<string, object>, CompChildNodeProccesser) __state)
         {
             CompChildNodeProccesser proccesser = req.Thing.RootNode();
             if (proccesser != null &&
@@ -64,10 +66,11 @@ namespace RW_NodeTree.Patch
             {
                 __state.Item1 = new Dictionary<string, object>();
                 __state.Item2 = proccesser;
-                proccesser.PreStatWorker_ShouldShowFor(__instance, req, __state.Item1);
+                return proccesser.PreStatWorker_ShouldShowFor(__instance, req, __state.Item1);
             }
+            return true;
         }
-        private static void PreStatWorker_IsDisabledFor(StatWorker __instance, MethodInfo __originalMethod, Thing thing, ref (Dictionary<string, object>, CompChildNodeProccesser) __state)
+        private static bool PreStatWorker_IsDisabledFor(StatWorker __instance, MethodInfo __originalMethod, Thing thing, ref (Dictionary<string, object>, CompChildNodeProccesser) __state)
         {
             CompChildNodeProccesser proccesser = thing.RootNode();
             if (proccesser != null &&
@@ -78,24 +81,41 @@ namespace RW_NodeTree.Patch
             {
                 __state.Item1 = new Dictionary<string, object>();
                 __state.Item2 = proccesser;
-                proccesser.PreStatWorker_IsDisabledFor(__instance, thing, __state.Item1);
+                return proccesser.PreStatWorker_IsDisabledFor(__instance, thing, __state.Item1);
             }
+            return true;
         }
         private static void PostStatWorker_ShouldShowFor(StatWorker __instance, StatRequest req, ref bool __result, (Dictionary<string, object>, CompChildNodeProccesser) __state)
         {
-            (Dictionary<string, object> forPostRead, CompChildNodeProccesser proccesser) = __state;
-            if (forPostRead != null &&
+            (Dictionary<string, object> stats, CompChildNodeProccesser proccesser) = __state;
+            if (stats != null &&
                 proccesser != null
             )
-                __result = proccesser.PostStatWorker_ShouldShowFor(__instance, req, __result, forPostRead);
+                __result = proccesser.PostStatWorker_ShouldShowFor(__instance, req, __result, stats);
         }
         private static void PostStatWorker_IsDisabledFor(StatWorker __instance, Thing thing, ref bool __result, (Dictionary<string, object>, CompChildNodeProccesser) __state)
         {
-            (Dictionary<string, object> forPostRead, CompChildNodeProccesser proccesser) = __state;
-            if (forPostRead != null &&
+            (Dictionary<string, object> stats, CompChildNodeProccesser proccesser) = __state;
+            if (stats != null &&
                 proccesser != null
             )
-                __result = proccesser.PostStatWorker_IsDisabledFor(__instance, thing, __result, forPostRead);
+                __result = proccesser.PostStatWorker_IsDisabledFor(__instance, thing, __result, stats);
+        }
+        private static void FinalStatWorker_ShouldShowFor(StatWorker __instance, StatRequest req, ref bool __result, (Dictionary<string, object>, CompChildNodeProccesser) __state, Exception __exception)
+        {
+            (Dictionary<string, object> stats, CompChildNodeProccesser proccesser) = __state;
+            if (stats != null &&
+                proccesser != null
+            )
+                __result = proccesser.FinalStatWorker_ShouldShowFor(__instance, req, __result, stats, __exception);
+        }
+        private static void FinalStatWorker_IsDisabledFor(StatWorker __instance, Thing thing, ref bool __result, (Dictionary<string, object>, CompChildNodeProccesser) __state, Exception __exception)
+        {
+            (Dictionary<string, object> stats, CompChildNodeProccesser proccesser) = __state;
+            if (stats != null &&
+                proccesser != null
+            )
+                __result = proccesser.FinalStatWorker_IsDisabledFor(__instance, thing, __result, stats, __exception);
         }
 
         public static void PatchShouldShowForAndIsDisabledFor(Type type, Harmony patcher)
@@ -105,13 +125,25 @@ namespace RW_NodeTree.Patch
                 MethodInfo _ShouldShowFor = GetMethodInfo_ShouldShowFor_OfType(type);
                 if (_ShouldShowFor?.DeclaringType == type && _ShouldShowFor.HasMethodBody())
                 {
-                    patcher.Patch(_ShouldShowFor, new HarmonyMethod(_PreStatWorker_ShouldShowFor), new HarmonyMethod(_PostStatWorker_ShouldShowFor));
+                    patcher.Patch(
+                        _ShouldShowFor, 
+                        new HarmonyMethod(_PreStatWorker_ShouldShowFor), 
+                        new HarmonyMethod(_PostStatWorker_ShouldShowFor),
+                        null,
+                        new HarmonyMethod(_FinalStatWorker_ShouldShowFor)
+                        );
                     //if(Prefs.DevMode) Log.Message(type + "::" + _ShouldShowFor + " PatchSuccess\n");
                 }
                 MethodInfo _IsDisabledFor = GetMethodInfo_IsDisabledFor_OfType(type);
                 if (_IsDisabledFor?.DeclaringType == type && _IsDisabledFor.HasMethodBody())
                 {
-                    patcher.Patch(_IsDisabledFor, new HarmonyMethod(_PreStatWorker_IsDisabledFor), new HarmonyMethod(_PostStatWorker_IsDisabledFor));
+                    patcher.Patch(
+                        _IsDisabledFor, 
+                        new HarmonyMethod(_PreStatWorker_IsDisabledFor), 
+                        new HarmonyMethod(_PostStatWorker_IsDisabledFor),
+                        null,
+                        new HarmonyMethod(_FinalStatWorker_IsDisabledFor)
+                        );
                     //if (Prefs.DevMode) Log.Message(type + "::" + _IsDisabledFor + " PatchSuccess\n");
                 }
             }
@@ -134,19 +166,21 @@ namespace RW_NodeTree
         /// <param name="statWorker">StatWorker</param>
         /// <param name="req">parm 'req' of StatWorker.ShouldShowFor()</param>
         /// <param name="applyPostProcess">parm 'applyPostProcess' of StatWorker.ShouldShowFor()</param>
-        public void PreStatWorker_ShouldShowFor(StatWorker statWorker, StatRequest req, Dictionary<string, object> forPostRead)
+        public bool PreStatWorker_ShouldShowFor(StatWorker statWorker, StatRequest req, Dictionary<string, object> stats)
         {
+            bool result = true;
             foreach (CompBasicNodeComp comp in AllNodeComp)
             {
                 try
                 {
-                    comp.internal_PreStatWorker_ShouldShowFor(statWorker, req, forPostRead);
+                    result = comp.internal_PreStatWorker_ShouldShowFor(statWorker, req, stats) && result;
                 }
                 catch (Exception ex)
                 {
                     Log.Error(ex.ToString());
                 }
             }
+            return result;
         }
 
         /// <summary>
@@ -157,19 +191,21 @@ namespace RW_NodeTree
         /// <param name="statWorker">StatWorker</param>
         /// <param name="req">parm 'req' of StatWorker.IsDisabledFor()</param>
         /// <param name="applyPostProcess">parm 'applyPostProcess' of StatWorker.IsDisabledFor()</param>
-        public void PreStatWorker_IsDisabledFor(StatWorker statWorker, Thing thing, Dictionary<string, object> forPostRead)
+        public bool PreStatWorker_IsDisabledFor(StatWorker statWorker, Thing thing, Dictionary<string, object> stats)
         {
+            bool result = true;
             foreach (CompBasicNodeComp comp in AllNodeComp)
             {
                 try
                 {
-                    comp.internal_PreStatWorker_IsDisabledFor(statWorker, thing, forPostRead);
+                    result = comp.internal_PreStatWorker_IsDisabledFor(statWorker, thing, stats) && result;
                 }
                 catch (Exception ex)
                 {
                     Log.Error(ex.ToString());
                 }
             }
+            return result;
         }
 
         /// <summary>
@@ -180,13 +216,13 @@ namespace RW_NodeTree
         /// <param name="statWorker">StatWorker</param>
         /// <param name="req">parm 'req' of StatWorker.ShouldShowFor()</param>
         /// <param name="applyPostProcess">parm 'applyPostProcess' of StatWorker.ShouldShowFor()</param>
-        public bool PostStatWorker_ShouldShowFor(StatWorker statWorker, StatRequest req, bool result, Dictionary<string, object> forPostRead)
+        public bool PostStatWorker_ShouldShowFor(StatWorker statWorker, StatRequest req, bool result, Dictionary<string, object> stats)
         {
             foreach (CompBasicNodeComp comp in AllNodeComp)
             {
                 try
                 {
-                    result = comp.internal_PostStatWorker_ShouldShowFor(statWorker, req, result, forPostRead);
+                    result = comp.internal_PostStatWorker_ShouldShowFor(statWorker, req, result, stats);
                 }
                 catch (Exception ex)
                 {
@@ -204,13 +240,61 @@ namespace RW_NodeTree
         /// <param name="statWorker">StatWorker</param>
         /// <param name="req">parm 'req' of StatWorker.IsDisabledFor()</param>
         /// <param name="applyPostProcess">parm 'applyPostProcess' of StatWorker.IsDisabledFor()</param>
-        public bool PostStatWorker_IsDisabledFor(StatWorker statWorker, Thing thing, bool result, Dictionary<string, object> forPostRead)
+        public bool PostStatWorker_IsDisabledFor(StatWorker statWorker, Thing thing, bool result, Dictionary<string, object> stats)
         {
             foreach (CompBasicNodeComp comp in AllNodeComp)
             {
                 try
                 {
-                    result = comp.internal_PostStatWorker_IsDisabledFor(statWorker, thing, result, forPostRead);
+                    result = comp.internal_PostStatWorker_IsDisabledFor(statWorker, thing, result, stats);
+                }
+                catch (Exception ex)
+                {
+                    Log.Error(ex.ToString());
+                }
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// event proccesser after StatWorker.ShouldShowFor()
+        /// (WARRING!!!: Don't invoke any method if that will invoke StatWorker.ShouldShowFor)
+        /// </summary>
+        /// <param name="result">result of StatWorker.ShouldShowFor(), modifiable</param>
+        /// <param name="statWorker">StatWorker</param>
+        /// <param name="req">parm 'req' of StatWorker.ShouldShowFor()</param>
+        /// <param name="applyFinalProcess">parm 'applyFinalProcess' of StatWorker.ShouldShowFor()</param>
+        public bool FinalStatWorker_ShouldShowFor(StatWorker statWorker, StatRequest req, bool result, Dictionary<string, object> stats, Exception exception)
+        {
+            foreach (CompBasicNodeComp comp in AllNodeComp)
+            {
+                try
+                {
+                    result = comp.internal_FinalStatWorker_ShouldShowFor(statWorker, req, result, stats, exception);
+                }
+                catch (Exception ex)
+                {
+                    Log.Error(ex.ToString());
+                }
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// event proccesser after StatWorker.IsDisabledFor()
+        /// (WARRING!!!: Don't invoke any method if thet will invoke StatWorker.IsDisabledFor)
+        /// </summary>
+        /// <param name="result">result of StatWorker.IsDisabledFor(), modifiable</param>
+        /// <param name="statWorker">StatWorker</param>
+        /// <param name="req">parm 'req' of StatWorker.IsDisabledFor()</param>
+        /// <param name="applyFinalProcess">parm 'applyFinalProcess' of StatWorker.IsDisabledFor()</param>
+        public bool FinalStatWorker_IsDisabledFor(StatWorker statWorker, Thing thing, bool result, Dictionary<string, object> stats, Exception exception)
+        {
+            foreach (CompBasicNodeComp comp in AllNodeComp)
+            {
+                try
+                {
+                    result = comp.internal_FinalStatWorker_IsDisabledFor(statWorker, thing, result, stats, exception);
                 }
                 catch (Exception ex)
                 {
@@ -222,30 +306,42 @@ namespace RW_NodeTree
     }
     public abstract partial class CompBasicNodeComp : ThingComp
     {
-        protected virtual void PreStatWorker_ShouldShowFor(StatWorker statWorker, StatRequest req, Dictionary<string, object> forPostRead)
+        protected virtual bool PreStatWorker_ShouldShowFor(StatWorker statWorker, StatRequest req, Dictionary<string, object> stats)
         {
-            return;
+            return true;
         }
-        protected virtual void PreStatWorker_IsDisabledFor(StatWorker statWorker, Thing thing, Dictionary<string, object> forPostRead)
+        protected virtual bool PreStatWorker_IsDisabledFor(StatWorker statWorker, Thing thing, Dictionary<string, object> stats)
         {
-            return;
+            return true;
         }
-        protected virtual bool PostStatWorker_ShouldShowFor(StatWorker statWorker, StatRequest req, bool result, Dictionary<string, object> forPostRead)
-        {
-            return result;
-        }
-        protected virtual bool PostStatWorker_IsDisabledFor(StatWorker statWorker, Thing thing, bool result, Dictionary<string, object> forPostRead)
+        protected virtual bool PostStatWorker_ShouldShowFor(StatWorker statWorker, StatRequest req, bool result, Dictionary<string, object> stats)
         {
             return result;
         }
-        internal void internal_PreStatWorker_ShouldShowFor(StatWorker statWorker, StatRequest req, Dictionary<string, object> forPostRead)
-            => PreStatWorker_ShouldShowFor(statWorker, req, forPostRead);
-        internal void internal_PreStatWorker_IsDisabledFor(StatWorker statWorker, Thing thing, Dictionary<string, object> forPostRead)
-            => PreStatWorker_IsDisabledFor(statWorker, thing, forPostRead);
-        internal bool internal_PostStatWorker_ShouldShowFor(StatWorker statWorker, StatRequest req, bool result, Dictionary<string, object> forPostRead)
-            => PostStatWorker_ShouldShowFor(statWorker, req, result, forPostRead);
-        internal bool internal_PostStatWorker_IsDisabledFor(StatWorker statWorker, Thing thing, bool result, Dictionary<string, object> forPostRead)
-            => PostStatWorker_IsDisabledFor(statWorker, thing, result, forPostRead);
+        protected virtual bool PostStatWorker_IsDisabledFor(StatWorker statWorker, Thing thing, bool result, Dictionary<string, object> stats)
+        {
+            return result;
+        }
+        protected virtual bool FinalStatWorker_ShouldShowFor(StatWorker statWorker, StatRequest req, bool result, Dictionary<string, object> stats, Exception exception)
+        {
+            return result;
+        }
+        protected virtual bool FinalStatWorker_IsDisabledFor(StatWorker statWorker, Thing thing, bool result, Dictionary<string, object> stats, Exception exception)
+        {
+            return result;
+        }
+        internal bool internal_PreStatWorker_ShouldShowFor(StatWorker statWorker, StatRequest req, Dictionary<string, object> stats)
+            => PreStatWorker_ShouldShowFor(statWorker, req, stats);
+        internal bool internal_PreStatWorker_IsDisabledFor(StatWorker statWorker, Thing thing, Dictionary<string, object> stats)
+            => PreStatWorker_IsDisabledFor(statWorker, thing, stats);
+        internal bool internal_PostStatWorker_ShouldShowFor(StatWorker statWorker, StatRequest req, bool result, Dictionary<string, object> stats)
+            => PostStatWorker_ShouldShowFor(statWorker, req, result, stats);
+        internal bool internal_PostStatWorker_IsDisabledFor(StatWorker statWorker, Thing thing, bool result, Dictionary<string, object> stats)
+            => PostStatWorker_IsDisabledFor(statWorker, thing, result, stats);
+        internal bool internal_FinalStatWorker_ShouldShowFor(StatWorker statWorker, StatRequest req, bool result, Dictionary<string, object> stats, Exception exception)
+            => FinalStatWorker_ShouldShowFor(statWorker, req, result, stats, exception);
+        internal bool internal_FinalStatWorker_IsDisabledFor(StatWorker statWorker, Thing thing, bool result, Dictionary<string, object> stats, Exception exception)
+            => FinalStatWorker_IsDisabledFor(statWorker, thing, result, stats, exception);
 
     }
 }

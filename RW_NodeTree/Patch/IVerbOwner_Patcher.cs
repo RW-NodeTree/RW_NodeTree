@@ -13,6 +13,8 @@ namespace RW_NodeTree.Patch
         private static readonly MethodInfo _PreIVerbOwner_GetTools = typeof(IVerbOwner_Patcher).GetMethod("PreIVerbOwner_GetTools", BindingFlags.NonPublic | BindingFlags.Static);
         private static readonly MethodInfo _PostIVerbOwner_GetVerbProperties = typeof(IVerbOwner_Patcher).GetMethod("PostIVerbOwner_GetVerbProperties", BindingFlags.NonPublic | BindingFlags.Static);
         private static readonly MethodInfo _PostIVerbOwner_GetTools = typeof(IVerbOwner_Patcher).GetMethod("PostIVerbOwner_GetTools", BindingFlags.NonPublic | BindingFlags.Static);
+        private static readonly MethodInfo _FinalIVerbOwner_GetVerbProperties = typeof(IVerbOwner_Patcher).GetMethod("FinalIVerbOwner_GetVerbProperties", BindingFlags.NonPublic | BindingFlags.Static);
+        private static readonly MethodInfo _FinalIVerbOwner_GetTools = typeof(IVerbOwner_Patcher).GetMethod("FinalIVerbOwner_GetTools", BindingFlags.NonPublic | BindingFlags.Static);
 
         private static readonly Dictionary<Type, MethodInfo> MethodInfo_get_VerbProperties_OfType = new Dictionary<Type, MethodInfo>();
         private static readonly Dictionary<Type, MethodInfo> MethodInfo_get_Tools_OfType = new Dictionary<Type, MethodInfo>();
@@ -44,7 +46,7 @@ namespace RW_NodeTree.Patch
 
 
 
-        private static void PreIVerbOwner_GetVerbProperties(IVerbOwner __instance, MethodInfo __originalMethod, ref (Dictionary<string ,object>, CompChildNodeProccesser, Type) __state)
+        private static bool PreIVerbOwner_GetVerbProperties(IVerbOwner __instance, MethodInfo __originalMethod, ref (Dictionary<string ,object>, CompChildNodeProccesser, Type) __state)
         {
             Type type = __instance.GetType();
             CompChildNodeProccesser proccesser = (((__instance) as ThingComp)?.parent) ?? ((__instance) as Thing);
@@ -57,11 +59,11 @@ namespace RW_NodeTree.Patch
                 __state.Item1 = new Dictionary<string ,object>();
                 __state.Item2 = proccesser;
                 __state.Item3 = type;
-                proccesser.PreIVerbOwner_GetVerbProperties(type, __state.Item1);
+                return proccesser.PreIVerbOwner_GetVerbProperties(type, __state.Item1);
             }
+            return true;
         }
-
-        private static void PreIVerbOwner_GetTools(IVerbOwner __instance, MethodInfo __originalMethod, ref (Dictionary<string, object>, CompChildNodeProccesser, Type) __state)
+        private static bool PreIVerbOwner_GetTools(IVerbOwner __instance, MethodInfo __originalMethod, ref (Dictionary<string, object>, CompChildNodeProccesser, Type) __state)
         {
             Type type = __instance.GetType();
             CompChildNodeProccesser proccesser = (((__instance) as ThingComp)?.parent) ?? ((__instance) as Thing);
@@ -74,35 +76,58 @@ namespace RW_NodeTree.Patch
                 __state.Item1 = new Dictionary<string, object>();
                 __state.Item2 = proccesser;
                 __state.Item3 = type;
-                proccesser.PreIVerbOwner_GetTools(type, __state.Item1);
+                return proccesser.PreIVerbOwner_GetTools(type, __state.Item1);
             }
+            return true;
         }
         private static void PostIVerbOwner_GetVerbProperties(ref List<VerbProperties> __result, (Dictionary<string, object>, CompChildNodeProccesser, Type) __state)
         {
-            (Dictionary<string, object> forPostRead, CompChildNodeProccesser proccess, Type type) = __state;
-            if (forPostRead != null &&
+            (Dictionary<string, object> stats, CompChildNodeProccesser proccess, Type type) = __state;
+            if (stats != null &&
                 proccess != null &&
                 type != null
             )
             {
                 __result = (__result != null) ? new List<VerbProperties>(__result) : new List<VerbProperties>();
-                __result = proccess.PostIVerbOwner_GetVerbProperties(type, __result, forPostRead) ?? __result;
+                __result = proccess.PostIVerbOwner_GetVerbProperties(type, __result, stats) ?? __result;
             }
         }
-
         private static void PostIVerbOwner_GetTools(ref List<Tool> __result, (Dictionary<string, object>, CompChildNodeProccesser, Type) __state)
         {
-            (Dictionary<string, object> forPostRead, CompChildNodeProccesser proccesser, Type type) = __state;
-            if (forPostRead != null &&
+            (Dictionary<string, object> stats, CompChildNodeProccesser proccesser, Type type) = __state;
+            if (stats != null &&
                 proccesser != null &&
                 type != null
             )
             {
                 __result = (__result != null) ? new List<Tool>(__result) : new List<Tool>();
-                __result = proccesser.PostIVerbOwner_GetTools(type, __result, forPostRead) ?? __result;
+                __result = proccesser.PostIVerbOwner_GetTools(type, __result, stats) ?? __result;
             }
         }
-
+        private static void FinalIVerbOwner_GetVerbProperties(ref List<VerbProperties> __result, (Dictionary<string, object>, CompChildNodeProccesser, Type) __state, Exception __exception)
+        {
+            (Dictionary<string, object> stats, CompChildNodeProccesser proccess, Type type) = __state;
+            if (stats != null &&
+                proccess != null &&
+                type != null
+            )
+            {
+                __result = (__result != null) ? new List<VerbProperties>(__result) : new List<VerbProperties>();
+                __result = proccess.FinalIVerbOwner_GetVerbProperties(type, __result, stats, __exception) ?? __result;
+            }
+        }
+        private static void FinalIVerbOwner_GetTools(ref List<Tool> __result, (Dictionary<string, object>, CompChildNodeProccesser, Type) __state, Exception __exception)
+        {
+            (Dictionary<string, object> stats, CompChildNodeProccesser proccesser, Type type) = __state;
+            if (stats != null &&
+                proccesser != null &&
+                type != null
+            )
+            {
+                __result = (__result != null) ? new List<Tool>(__result) : new List<Tool>();
+                __result = proccesser.FinalIVerbOwner_GetTools(type, __result, stats, __exception) ?? __result;
+            }
+        }
         public static void PatchIVerbOwner(Type type, Harmony patcher)
         {
             if (typeof(IVerbOwner).IsAssignableFrom(type))
@@ -110,14 +135,26 @@ namespace RW_NodeTree.Patch
                 MethodInfo _get_VerbProperties = GetMethodInfo_get_VerbProperties_OfType(type);
                 if (_get_VerbProperties?.DeclaringType == type && _get_VerbProperties.HasMethodBody())
                 {
-                    patcher.Patch(_get_VerbProperties, new HarmonyMethod(_PreIVerbOwner_GetVerbProperties), new HarmonyMethod(_PostIVerbOwner_GetVerbProperties));
+                    patcher.Patch(
+                        _get_VerbProperties, 
+                        new HarmonyMethod(_PreIVerbOwner_GetVerbProperties), 
+                        new HarmonyMethod(_PostIVerbOwner_GetVerbProperties),
+                        null,
+                        new HarmonyMethod(_FinalIVerbOwner_GetVerbProperties)
+                        );
                     //if (Prefs.DevMode) Log.Message(type + "::" + _get_VerbProperties + " PatchSuccess\n");
                 }
 
                 MethodInfo _get_Tools = GetMethodInfo_get_Tools_OfType(type);
                 if (_get_Tools?.DeclaringType == type && _get_Tools.HasMethodBody())
                 {
-                    patcher.Patch(_get_Tools, new HarmonyMethod(_PreIVerbOwner_GetTools), new HarmonyMethod(_PostIVerbOwner_GetTools));
+                    patcher.Patch(
+                        _get_Tools, 
+                        new HarmonyMethod(_PreIVerbOwner_GetTools), 
+                        new HarmonyMethod(_PostIVerbOwner_GetTools), 
+                        null,
+                        new HarmonyMethod(_FinalIVerbOwner_GetTools)
+                        );
                     //if (Prefs.DevMode) Log.Message(type + "::" + _get_Tools + " PatchSuccess\n");
                 }
             }
@@ -140,23 +177,24 @@ namespace RW_NodeTree
         /// </summary>
         /// <param name="owner">IVerbOwner source</param>
         /// <param name="verbProperties">result of IVerbOwner.VerbProperties</param>
-        public void PreIVerbOwner_GetVerbProperties(Type ownerType, Dictionary<string, object> forPostRead)
+        public bool PreIVerbOwner_GetVerbProperties(Type ownerType, Dictionary<string, object> stats)
         {
+            bool result = true;
             if (ownerType != null && typeof(IVerbOwner).IsAssignableFrom(ownerType))
             {
                 foreach (CompBasicNodeComp comp in AllNodeComp)
                 {
                     try
                     {
-                        comp.internal_PreIVerbOwner_GetVerbProperties(ownerType, forPostRead);
+                        result = comp.internal_PreIVerbOwner_GetVerbProperties(ownerType, stats) && result;
                     }
-                    catch(Exception ex)
+                    catch (Exception ex)
                     {
                         Log.Error(ex.ToString());
                     }
                 }
             }
-            return;
+            return result;
         }
 
         /// <summary>
@@ -165,7 +203,34 @@ namespace RW_NodeTree
         /// </summary>
         /// <param name="owner">IVerbOwner source</param>
         /// <param name="verbProperties">result of IVerbOwner.Tools</param>
-        public void PreIVerbOwner_GetTools(Type ownerType, Dictionary<string, object> forPostRead)
+        public bool PreIVerbOwner_GetTools(Type ownerType, Dictionary<string, object> stats)
+        {
+            bool result = true;
+            if (ownerType != null && typeof(IVerbOwner).IsAssignableFrom(ownerType))
+            {
+                foreach (CompBasicNodeComp comp in AllNodeComp)
+                {
+                    try
+                    {
+                        result = comp.internal_PreIVerbOwner_GetTools(ownerType, stats) && result;
+                    }
+                    catch (Exception ex)
+                    {
+                        Log.Error(ex.ToString());
+                    }
+                }
+            }
+            return result;
+        }
+
+
+        /// <summary>
+        /// event proccesser before IVerbOwner.VerbProperties
+        /// (WARRING!!!: Don't invoke any method if thet will invoke IVerbOwner.VerbProperties)
+        /// </summary>
+        /// <param name="owner">IVerbOwner source</param>
+        /// <param name="verbProperties">result of IVerbOwner.VerbProperties</param>
+        public List<VerbProperties> PostIVerbOwner_GetVerbProperties(Type ownerType, List<VerbProperties> verbProperties, Dictionary<string, object> stats)
         {
             if (ownerType != null && typeof(IVerbOwner).IsAssignableFrom(ownerType))
             {
@@ -173,22 +238,47 @@ namespace RW_NodeTree
                 {
                     try
                     {
-                        comp.internal_PreIVerbOwner_GetTools(ownerType, forPostRead);
+                        comp.internal_PostIVerbOwner_GetVerbProperties(ownerType, verbProperties, stats);
                     }
-                    catch(Exception ex)
+                    catch (Exception ex)
                     {
                         Log.Error(ex.ToString());
                     }
                 }
             }
-            return;
+            return verbProperties;
+        }
+
+        /// <summary>
+        /// event proccesser before IVerbOwner.VerbProperties
+        /// (WARRING!!!: Don't invoke any method if thet will invoke IVerbOwner.Tools)
+        /// </summary>
+        /// <param name="owner">IVerbOwner source</param>
+        /// <param name="verbProperties">result of IVerbOwner.Tools</param>
+        public List<Tool> PostIVerbOwner_GetTools(Type ownerType, List<Tool> tools, Dictionary<string, object> stats)
+        {
+            if (ownerType != null && typeof(IVerbOwner).IsAssignableFrom(ownerType))
+            {
+                foreach (CompBasicNodeComp comp in AllNodeComp)
+                {
+                    try
+                    {
+                        comp.internal_PostIVerbOwner_GetTools(ownerType, tools, stats);
+                    }
+                    catch (Exception ex)
+                    {
+                        Log.Error(ex.ToString());
+                    }
+                }
+            }
+            return tools;
         }
         /// event proccesser after IVerbOwner.VerbProperties
         /// (WARRING!!!: Don't invoke any method if thet will invoke IVerbOwner.VerbProperties)
         /// </summary>
         /// <param name="owner">IVerbOwner source</param>
         /// <param name="verbProperties">result of IVerbOwner.VerbProperties</param>
-        public List<VerbProperties> PostIVerbOwner_GetVerbProperties(Type ownerType, List<VerbProperties> verbProperties, Dictionary<string, object> forPostRead)
+        public List<VerbProperties> FinalIVerbOwner_GetVerbProperties(Type ownerType, List<VerbProperties> verbProperties, Dictionary<string, object> stats, Exception exception)
         {
             if (ownerType != null && typeof(IVerbOwner).IsAssignableFrom(ownerType))
             {
@@ -204,7 +294,7 @@ namespace RW_NodeTree
                     {
                         try
                         {
-                            verbPropertiesRegiestInfo = comp.internal_PostIVerbOwner_GetVerbProperties(ownerType, verbPropertiesRegiestInfo, forPostRead) ?? verbPropertiesRegiestInfo;
+                            verbPropertiesRegiestInfo = comp.internal_FinalIVerbOwner_GetVerbProperties(ownerType, verbPropertiesRegiestInfo, stats, exception) ?? verbPropertiesRegiestInfo;
                         }
                         catch (Exception ex)
                         {
@@ -235,7 +325,7 @@ namespace RW_NodeTree
         /// </summary>
         /// <param name="owner">IVerbOwner source</param>
         /// <param name="verbProperties">result of IVerbOwner.Tools</param>
-        public List<Tool> PostIVerbOwner_GetTools(Type ownerType, List<Tool> tools, Dictionary<string, object> forPostRead)
+        public List<Tool> FinalIVerbOwner_GetTools(Type ownerType, List<Tool> tools, Dictionary<string, object> stats, Exception exception)
         {
             if (ownerType != null && typeof(IVerbOwner).IsAssignableFrom(ownerType))
             {
@@ -251,7 +341,7 @@ namespace RW_NodeTree
                     {
                         try
                         {
-                            verbToolRegiestInfo = comp.internal_PostIVerbOwner_GetTools(ownerType, verbToolRegiestInfo, forPostRead) ?? verbToolRegiestInfo;
+                            verbToolRegiestInfo = comp.internal_FinalIVerbOwner_GetTools(ownerType, verbToolRegiestInfo, stats, exception) ?? verbToolRegiestInfo;
                         }
                         catch (Exception ex)
                         {
@@ -285,29 +375,41 @@ namespace RW_NodeTree
     }
     public abstract partial class CompBasicNodeComp : ThingComp
     {
-        protected virtual void PreIVerbOwner_GetVerbProperties(Type ownerType, Dictionary<string, object> forPostRead)
+        protected virtual bool PreIVerbOwner_GetVerbProperties(Type ownerType, Dictionary<string, object> stats)
         {
-            return;
+            return true;
         }
-        protected virtual void PreIVerbOwner_GetTools(Type ownerType, Dictionary<string, object> forPostRead)
+        protected virtual bool PreIVerbOwner_GetTools(Type ownerType, Dictionary<string, object> stats)
         {
-            return;
+            return true;
         }
-        protected virtual List<VerbPropertiesRegiestInfo> PostIVerbOwner_GetVerbProperties(Type ownerType, List<VerbPropertiesRegiestInfo> result, Dictionary<string, object> forPostRead)
+        protected virtual List<VerbProperties> PostIVerbOwner_GetVerbProperties(Type ownerType, List<VerbProperties> verbProperties, Dictionary<string, object> stats)
+        {
+            return verbProperties;
+        }
+        protected virtual List<Tool> PostIVerbOwner_GetTools(Type ownerType, List<Tool> tools, Dictionary<string, object> stats)
+        {
+            return tools;
+        }
+        protected virtual List<VerbPropertiesRegiestInfo> FinalIVerbOwner_GetVerbProperties(Type ownerType, List<VerbPropertiesRegiestInfo> result, Dictionary<string, object> stats, Exception exception)
         {
             return result;
         }
-        protected virtual List<VerbToolRegiestInfo> PostIVerbOwner_GetTools(Type ownerType, List<VerbToolRegiestInfo> result, Dictionary<string, object> forPostRead)
+        protected virtual List<VerbToolRegiestInfo> FinalIVerbOwner_GetTools(Type ownerType, List<VerbToolRegiestInfo> result, Dictionary<string, object> stats, Exception exception)
         {
             return result;
         }
-        internal void internal_PreIVerbOwner_GetVerbProperties(Type ownerType, Dictionary<string, object> forPostRead)
-            => PreIVerbOwner_GetVerbProperties(ownerType, forPostRead);
-        internal void internal_PreIVerbOwner_GetTools(Type ownerType, Dictionary<string, object> forPostRead)
-            => PreIVerbOwner_GetTools(ownerType, forPostRead);
-        internal List<VerbPropertiesRegiestInfo> internal_PostIVerbOwner_GetVerbProperties(Type ownerType, List<VerbPropertiesRegiestInfo> result, Dictionary<string, object> forPostRead)
-            => PostIVerbOwner_GetVerbProperties(ownerType, result, forPostRead);
-        internal List<VerbToolRegiestInfo> internal_PostIVerbOwner_GetTools(Type ownerType, List<VerbToolRegiestInfo> result, Dictionary<string, object> forPostRead)
-            => PostIVerbOwner_GetTools(ownerType, result, forPostRead);
+        internal bool internal_PreIVerbOwner_GetVerbProperties(Type ownerType, Dictionary<string, object> stats)
+            => PreIVerbOwner_GetVerbProperties(ownerType, stats);
+        internal bool internal_PreIVerbOwner_GetTools(Type ownerType, Dictionary<string, object> stats)
+            => PreIVerbOwner_GetTools(ownerType, stats);
+        internal List<VerbProperties> internal_PostIVerbOwner_GetVerbProperties(Type ownerType, List<VerbProperties> verbProperties, Dictionary<string, object> stats)
+            => PostIVerbOwner_GetVerbProperties(ownerType, verbProperties, stats);
+        internal List<Tool> internal_PostIVerbOwner_GetTools(Type ownerType, List<Tool> tools, Dictionary<string, object> stats)
+            => PostIVerbOwner_GetTools(ownerType, tools, stats);
+        internal List<VerbPropertiesRegiestInfo> internal_FinalIVerbOwner_GetVerbProperties(Type ownerType, List<VerbPropertiesRegiestInfo> result, Dictionary<string, object> stats, Exception exception)
+            => FinalIVerbOwner_GetVerbProperties(ownerType, result, stats, exception);
+        internal List<VerbToolRegiestInfo> internal_FinalIVerbOwner_GetTools(Type ownerType, List<VerbToolRegiestInfo> result, Dictionary<string, object> stats, Exception exception)
+            => FinalIVerbOwner_GetTools(ownerType, result, stats, exception);
     }
 }

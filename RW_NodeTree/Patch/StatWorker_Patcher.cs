@@ -20,14 +20,15 @@ namespace RW_NodeTree.Patch
             typeof(StatWorker),
             "GearHasCompsThatAffectStat"
             )]
-        public static void PreStatWorker_GearHasCompsThatAffectStat(Thing gear, StatDef stat, ref Dictionary<string, object> __state)
+        public static bool PreStatWorker_GearHasCompsThatAffectStat(Thing gear, StatDef stat, ref Dictionary<string, object> __state)
         {
             CompChildNodeProccesser comp = gear.RootNode();
             if (comp != null)
             {
                 __state = new Dictionary<string, object>();
-                comp.PreStatWorker_GearHasCompsThatAffectStat(gear, stat, __state);
+                return comp.PreStatWorker_GearHasCompsThatAffectStat(gear, stat, __state);
             }
+            return true;
         }
 
         [HarmonyPrefix]
@@ -35,14 +36,15 @@ namespace RW_NodeTree.Patch
             typeof(StatWorker),
             "StatOffsetFromGear"
             )]
-        public static void PreStatWorker_StatOffsetFromGear(Thing gear, StatDef stat, ref Dictionary<string, object> __state)
+        public static bool PreStatWorker_StatOffsetFromGear(Thing gear, StatDef stat, ref Dictionary<string, object> __state)
         {
             CompChildNodeProccesser comp = gear.RootNode();
             if (comp != null)
             {
                 __state = new Dictionary<string, object>();
-                comp.PreStatWorker_StatOffsetFromGear(gear, stat, __state);
+                return comp.PreStatWorker_StatOffsetFromGear(gear, stat, __state);
             }
+            return true;
         }
 
         [HarmonyPrefix]
@@ -50,14 +52,15 @@ namespace RW_NodeTree.Patch
             typeof(StatWorker),
             "InfoTextLineFromGear"
             )]
-        public static void PreStatWorker_InfoTextLineFromGear(Thing gear, StatDef stat, ref Dictionary<string, object> __state)
+        public static bool PreStatWorker_InfoTextLineFromGear(Thing gear, StatDef stat, ref Dictionary<string, object> __state)
         {
             CompChildNodeProccesser comp = gear.RootNode();
             if (comp != null)
             {
                 __state = new Dictionary<string, object>();
-                comp.PreStatWorker_InfoTextLineFromGear(gear, stat, __state);
+                return comp.PreStatWorker_InfoTextLineFromGear(gear, stat, __state);
             }
+            return true;
         }
 
         [HarmonyPostfix]
@@ -116,6 +119,37 @@ namespace RW_NodeTree.Patch
                 }
             }
         }
+
+        [HarmonyFinalizer]
+        [HarmonyPatch(
+            typeof(StatWorker),
+            "GearHasCompsThatAffectStat"
+            )]
+        public static void FinalStatWorker_GearHasCompsThatAffectStat(Thing gear, StatDef stat, ref bool __result, Dictionary<string, object> __state, Exception __exception)
+        {
+            __result = gear.RootNode()?.FinalStatWorker_GearHasCompsThatAffectStat(gear, stat, __result, __state, __exception) ?? __result;
+        }
+
+        [HarmonyFinalizer]
+        [HarmonyPatch(
+            typeof(StatWorker),
+            "StatOffsetFromGear"
+            )]
+        public static void FinalStatWorker_StatOffsetFromGear(Thing gear, StatDef stat, ref float __result, Dictionary<string, object> __state, Exception __exception)
+        {
+            __result = gear.RootNode()?.FinalStatWorker_StatOffsetFromGear(gear, stat, __result, __state, __exception) ?? __result;
+        }
+
+
+        [HarmonyFinalizer]
+        [HarmonyPatch(
+            typeof(StatWorker),
+            "InfoTextLineFromGear"
+            )]
+        public static void FinalStatWorker_InfoTextLineFromGear(Thing gear, StatDef stat, ref string __result, Dictionary<string, object> __state, Exception __exception)
+        {
+            __result = gear.RootNode()?.FinalStatWorker_InfoTextLineFromGear(gear, stat, __result, __state, __exception) ?? __result;
+        }
     }
 }
 
@@ -126,57 +160,14 @@ namespace RW_NodeTree
     /// </summary>
     public partial class CompChildNodeProccesser : ThingComp, IThingHolder
     {
-        public virtual void PreStatWorker_GearHasCompsThatAffectStat(Thing gear, StatDef stat, Dictionary<string, object> forPostRead)
+        public virtual bool PreStatWorker_GearHasCompsThatAffectStat(Thing gear, StatDef stat, Dictionary<string, object> stats)
         {
+            bool result = true;
             foreach (CompBasicNodeComp comp in AllNodeComp)
             {
                 try
                 {
-                    comp.internal_PreStatWorker_GearHasCompsThatAffectStat(gear, stat, forPostRead);
-                }
-                catch (Exception ex)
-                {
-                    Log.Error(ex.ToString());
-                }
-            }
-        }
-
-        public virtual void PreStatWorker_StatOffsetFromGear(Thing gear, StatDef stat, Dictionary<string, object> forPostRead)
-        {
-            foreach (CompBasicNodeComp comp in AllNodeComp)
-            {
-                try
-                {
-                    comp.internal_PreStatWorker_StatOffsetFromGear(gear, stat, forPostRead);
-                }
-                catch (Exception ex)
-                {
-                    Log.Error(ex.ToString());
-                }
-            }
-        }
-        public virtual void PreStatWorker_InfoTextLineFromGear(Thing gear, StatDef stat, Dictionary<string, object> forPostRead)
-        {
-            foreach (CompBasicNodeComp comp in AllNodeComp)
-            {
-                try
-                {
-                    comp.internal_PreStatWorker_InfoTextLineFromGear(gear, stat, forPostRead);
-                }
-                catch (Exception ex)
-                {
-                    Log.Error(ex.ToString());
-                }
-            }
-        }
-
-        public virtual bool PostStatWorker_GearHasCompsThatAffectStat(Thing gear, StatDef stat, bool result, Dictionary<string, object> forPostRead)
-        {
-            foreach (CompBasicNodeComp comp in AllNodeComp)
-            {
-                try
-                {
-                    result = comp.internal_PostStatWorker_GearHasCompsThatAffectStat(gear, stat, result, forPostRead);
+                    result = comp.internal_PreStatWorker_GearHasCompsThatAffectStat(gear, stat, stats) && result;
                 }
                 catch (Exception ex)
                 {
@@ -186,13 +177,31 @@ namespace RW_NodeTree
             return result;
         }
 
-        public virtual float PostStatWorker_StatOffsetFromGear(Thing gear, StatDef stat, float result, Dictionary<string, object> forPostRead)
+        public virtual bool PreStatWorker_StatOffsetFromGear(Thing gear, StatDef stat, Dictionary<string, object> stats)
         {
+            bool result = true;
             foreach (CompBasicNodeComp comp in AllNodeComp)
             {
                 try
                 {
-                    result = comp.internal_PostStatWorker_StatOffsetFromGear(gear, stat, result, forPostRead);
+                    result = comp.internal_PreStatWorker_StatOffsetFromGear(gear, stat, stats) && result;
+                }
+                catch (Exception ex)
+                {
+                    Log.Error(ex.ToString());
+                }
+            }
+            return result;
+        }
+        
+        public virtual bool PreStatWorker_InfoTextLineFromGear(Thing gear, StatDef stat, Dictionary<string, object> stats)
+        {
+            bool result = true;
+            foreach (CompBasicNodeComp comp in AllNodeComp)
+            {
+                try
+                {
+                    result = comp.internal_PreStatWorker_InfoTextLineFromGear(gear, stat, stats) && result;
                 }
                 catch (Exception ex)
                 {
@@ -202,13 +211,45 @@ namespace RW_NodeTree
             return result;
         }
 
-        public virtual string PostStatWorker_InfoTextLineFromGear(Thing gear, StatDef stat, string result, Dictionary<string, object> forPostRead)
+        public virtual bool PostStatWorker_GearHasCompsThatAffectStat(Thing gear, StatDef stat, bool result, Dictionary<string, object> stats)
         {
             foreach (CompBasicNodeComp comp in AllNodeComp)
             {
                 try
                 {
-                    result = comp.internal_PostStatWorker_InfoTextLineFromGear(gear, stat, result, forPostRead) ?? result;
+                    result = comp.internal_PostStatWorker_GearHasCompsThatAffectStat(gear, stat, result, stats);
+                }
+                catch (Exception ex)
+                {
+                    Log.Error(ex.ToString());
+                }
+            }
+            return result;
+        }
+
+        public virtual float PostStatWorker_StatOffsetFromGear(Thing gear, StatDef stat, float result, Dictionary<string, object> stats)
+        {
+            foreach (CompBasicNodeComp comp in AllNodeComp)
+            {
+                try
+                {
+                    result = comp.internal_PostStatWorker_StatOffsetFromGear(gear, stat, result, stats);
+                }
+                catch (Exception ex)
+                {
+                    Log.Error(ex.ToString());
+                }
+            }
+            return result;
+        }
+
+        public virtual string PostStatWorker_InfoTextLineFromGear(Thing gear, StatDef stat, string result, Dictionary<string, object> stats)
+        {
+            foreach (CompBasicNodeComp comp in AllNodeComp)
+            {
+                try
+                {
+                    result = comp.internal_PostStatWorker_InfoTextLineFromGear(gear, stat, result, stats) ?? result;
                 }
                 catch (Exception ex)
                 {
@@ -233,30 +274,79 @@ namespace RW_NodeTree
             }
             return result;
         }
+
+        public virtual bool FinalStatWorker_GearHasCompsThatAffectStat(Thing gear, StatDef stat, bool result, Dictionary<string, object> stats, Exception exception)
+        {
+            foreach (CompBasicNodeComp comp in AllNodeComp)
+            {
+                try
+                {
+                    result = comp.internal_FinalStatWorker_GearHasCompsThatAffectStat(gear, stat, result, stats, exception);
+                }
+                catch (Exception ex)
+                {
+                    Log.Error(ex.ToString());
+                }
+            }
+            return result;
+        }
+
+        public virtual float FinalStatWorker_StatOffsetFromGear(Thing gear, StatDef stat, float result, Dictionary<string, object> stats, Exception exception)
+        {
+            foreach (CompBasicNodeComp comp in AllNodeComp)
+            {
+                try
+                {
+                    result = comp.internal_FinalStatWorker_StatOffsetFromGear(gear, stat, result, stats, exception);
+                }
+                catch (Exception ex)
+                {
+                    Log.Error(ex.ToString());
+                }
+            }
+            return result;
+        }
+
+        public virtual string FinalStatWorker_InfoTextLineFromGear(Thing gear, StatDef stat, string result, Dictionary<string, object> stats, Exception exception)
+        {
+            foreach (CompBasicNodeComp comp in AllNodeComp)
+            {
+                try
+                {
+                    result = comp.internal_FinalStatWorker_InfoTextLineFromGear(gear, stat, result, stats, exception) ?? result;
+                }
+                catch (Exception ex)
+                {
+                    Log.Error(ex.ToString());
+                }
+            }
+            return result;
+        }
+
     }
     public abstract partial class CompBasicNodeComp : ThingComp
     {
-        protected virtual void PreStatWorker_GearHasCompsThatAffectStat(Thing gear, StatDef stat, Dictionary<string, object> forPostRead)
+        protected virtual bool PreStatWorker_GearHasCompsThatAffectStat(Thing gear, StatDef stat, Dictionary<string, object> stats)
         {
-            return;
+            return true;
         }
-        protected virtual void PreStatWorker_StatOffsetFromGear(Thing gear, StatDef stat, Dictionary<string, object> forPostRead)
+        protected virtual bool PreStatWorker_StatOffsetFromGear(Thing gear, StatDef stat, Dictionary<string, object> stats)
         {
-            return;
+            return true;
         }
-        protected virtual void PreStatWorker_InfoTextLineFromGear(Thing gear, StatDef stat, Dictionary<string, object> forPostRead)
+        protected virtual bool PreStatWorker_InfoTextLineFromGear(Thing gear, StatDef stat, Dictionary<string, object> stats)
         {
-            return;
+            return true;
         }
-        protected virtual bool PostStatWorker_GearHasCompsThatAffectStat(Thing gear, StatDef stat, bool result, Dictionary<string, object> forPostRead)
-        {
-            return result;
-        }
-        protected virtual float PostStatWorker_StatOffsetFromGear(Thing gear, StatDef stat, float result, Dictionary<string, object> forPostRead)
+        protected virtual bool PostStatWorker_GearHasCompsThatAffectStat(Thing gear, StatDef stat, bool result, Dictionary<string, object> stats)
         {
             return result;
         }
-        protected virtual string PostStatWorker_InfoTextLineFromGear(Thing gear, StatDef stat, string result, Dictionary<string, object> forPostRead)
+        protected virtual float PostStatWorker_StatOffsetFromGear(Thing gear, StatDef stat, float result, Dictionary<string, object> stats)
+        {
+            return result;
+        }
+        protected virtual string PostStatWorker_InfoTextLineFromGear(Thing gear, StatDef stat, string result, Dictionary<string, object> stats)
         {
             return result;
         }
@@ -264,20 +354,38 @@ namespace RW_NodeTree
         {
             return result;
         }
+        protected virtual bool FinalStatWorker_GearHasCompsThatAffectStat(Thing gear, StatDef stat, bool result, Dictionary<string, object> stats, Exception exception)
+        {
+            return result;
+        }
+        protected virtual float FinalStatWorker_StatOffsetFromGear(Thing gear, StatDef stat, float result, Dictionary<string, object> stats, Exception exception)
+        {
+            return result;
+        }
+        protected virtual string FinalStatWorker_InfoTextLineFromGear(Thing gear, StatDef stat, string result, Dictionary<string, object> stats, Exception exception)
+        {
+            return result;
+        }
 
-        internal void internal_PreStatWorker_GearHasCompsThatAffectStat(Thing gear, StatDef stat, Dictionary<string, object> forPostRead)
-            => PreStatWorker_GearHasCompsThatAffectStat(gear, stat, forPostRead);
-        internal void internal_PreStatWorker_StatOffsetFromGear(Thing gear, StatDef stat, Dictionary<string, object> forPostRead)
-            => PreStatWorker_StatOffsetFromGear(gear, stat, forPostRead);
-        internal void internal_PreStatWorker_InfoTextLineFromGear(Thing gear, StatDef stat, Dictionary<string, object> forPostRead)
-            => PreStatWorker_InfoTextLineFromGear(gear, stat, forPostRead);
-        internal bool internal_PostStatWorker_GearHasCompsThatAffectStat(Thing gear, StatDef stat, bool result, Dictionary<string, object> forPostRead)
-            => PostStatWorker_GearHasCompsThatAffectStat(gear, stat, result, forPostRead);
-        internal float internal_PostStatWorker_StatOffsetFromGear(Thing gear, StatDef stat, float result, Dictionary<string, object> forPostRead)
-            => PostStatWorker_StatOffsetFromGear(gear, stat, result, forPostRead);
-        internal string internal_PostStatWorker_InfoTextLineFromGear(Thing gear, StatDef stat, string result, Dictionary<string, object> forPostRead)
-            => PostStatWorker_InfoTextLineFromGear(gear, stat, result, forPostRead);
+        internal bool internal_PreStatWorker_GearHasCompsThatAffectStat(Thing gear, StatDef stat, Dictionary<string, object> stats)
+            => PreStatWorker_GearHasCompsThatAffectStat(gear, stat, stats);
+        internal bool internal_PreStatWorker_StatOffsetFromGear(Thing gear, StatDef stat, Dictionary<string, object> stats)
+            => PreStatWorker_StatOffsetFromGear(gear, stat, stats);
+        internal bool internal_PreStatWorker_InfoTextLineFromGear(Thing gear, StatDef stat, Dictionary<string, object> stats)
+            => PreStatWorker_InfoTextLineFromGear(gear, stat, stats);
+        internal bool internal_PostStatWorker_GearHasCompsThatAffectStat(Thing gear, StatDef stat, bool result, Dictionary<string, object> stats)
+            => PostStatWorker_GearHasCompsThatAffectStat(gear, stat, result, stats);
+        internal float internal_PostStatWorker_StatOffsetFromGear(Thing gear, StatDef stat, float result, Dictionary<string, object> stats)
+            => PostStatWorker_StatOffsetFromGear(gear, stat, result, stats);
+        internal string internal_PostStatWorker_InfoTextLineFromGear(Thing gear, StatDef stat, string result, Dictionary<string, object> stats)
+            => PostStatWorker_InfoTextLineFromGear(gear, stat, result, stats);
         internal IEnumerable<Thing> internal_PostStatWorker_RelevantGear(Thing gear, StatDef stat, IEnumerable<Thing> result)
             => PostStatWorker_RelevantGear(gear, stat, result);
+        internal bool internal_FinalStatWorker_GearHasCompsThatAffectStat(Thing gear, StatDef stat, bool result, Dictionary<string, object> stats, Exception exception)
+            => FinalStatWorker_GearHasCompsThatAffectStat(gear, stat, result, stats, exception);
+        internal float internal_FinalStatWorker_StatOffsetFromGear(Thing gear, StatDef stat, float result, Dictionary<string, object> stats, Exception exception)
+            => FinalStatWorker_StatOffsetFromGear(gear, stat, result, stats, exception);
+        internal string internal_FinalStatWorker_InfoTextLineFromGear(Thing gear, StatDef stat, string result, Dictionary<string, object> stats, Exception exception)
+            => FinalStatWorker_InfoTextLineFromGear(gear, stat, result, stats, exception);
     }
 }
