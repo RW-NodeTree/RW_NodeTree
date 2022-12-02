@@ -56,7 +56,7 @@ namespace RW_NodeTree.Patch
         }
 
 
-        [HarmonyPostfix]
+        [HarmonyFinalizer]
         [HarmonyPatch(
             typeof(Widgets),
             "ThingIcon",
@@ -68,7 +68,7 @@ namespace RW_NodeTree.Patch
             ,typeof(bool)
 #endif
         )]
-        private static void PostWidgets_ThingIcon(Thing thing, (Vector2, float)? __state)
+        private static void FinalWidgets_ThingIcon(Thing thing, (Vector2, float)? __state)
         {
             if (thing?.def?.graphicData != null && __state.HasValue)
             {

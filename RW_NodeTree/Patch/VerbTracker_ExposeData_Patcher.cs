@@ -25,12 +25,12 @@ namespace RW_NodeTree.Patch
             }
         }
 
-        [HarmonyPostfix]
+        [HarmonyFinalizer]
         [HarmonyPatch(
             typeof(VerbTracker),
             "ExposeData"
         )]
-        private static void PostVerbTracker_ExposeData(VerbTracker __instance, List<Verb> __state)
+        private static void FinalVerbTracker_ExposeData(VerbTracker __instance, List<Verb> __state)
         {
             if(__state != null)
             {

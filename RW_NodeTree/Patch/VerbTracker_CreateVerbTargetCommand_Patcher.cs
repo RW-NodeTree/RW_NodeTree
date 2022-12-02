@@ -19,10 +19,10 @@ namespace RW_NodeTree.Patch
             typeof(Thing),
             typeof(Verb)
         )]
-        private static void PreVerbTracker_CreateVerbTargetCommand(VerbTracker __instance,ref Thing ownerThing, Verb verb)
+        private static void PreVerbTracker_CreateVerbTargetCommand(VerbTracker __instance,ref Thing ownerThing, Verb verb, ref CompChildNodeProccesser __state)
         {
-            CompChildNodeProccesser comp = ownerThing;
-            ownerThing = comp?.GetBeforeConvertVerbCorrespondingThing(__instance.directOwner.GetType(), verb, comp.Props.VerbIconVerbInstanceSource).Item1 ?? ownerThing;
+            __state = ownerThing;
+            ownerThing = __state?.GetBeforeConvertVerbCorrespondingThing(__instance.directOwner.GetType(), verb, __state.Props.VerbIconVerbInstanceSource).Item1 ?? ownerThing;
             //if (Prefs.DevMode) Log.Message(verb + " : " + ownerThing + " : " + comp.Props.VerbIconVerbInstanceSource);
         }
 
@@ -33,10 +33,9 @@ namespace RW_NodeTree.Patch
             typeof(Thing),
             typeof(Verb)
         )]
-        private static void PostVerbTracker_CreateVerbTargetCommand(VerbTracker __instance, Thing ownerThing, Verb verb, ref Command_VerbTarget __result)
+        private static void PostVerbTracker_CreateVerbTargetCommand(VerbTracker __instance, Thing ownerThing, Verb verb, ref Command_VerbTarget __result, CompChildNodeProccesser __state)
         {
-            CompChildNodeProccesser comp = ownerThing;
-            if (__result != null && comp != null)
+            if (__result != null && __state != null)
             {
                 __result.icon = (ownerThing?.Graphic?.MatSingleFor(ownerThing)?.mainTexture as Texture2D) ?? __result.icon;
                 __result.iconProportions = ownerThing?.Graphic?.drawSize ?? __result.iconProportions;

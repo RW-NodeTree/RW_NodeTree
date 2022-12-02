@@ -15,7 +15,7 @@ namespace RW_NodeTree.Patch.CombatExtended
     internal static class CombatExtended_PawnRenderer_Patcher
     {
         private static MethodInfo _PerHarmony_PawnRenderer_Harmony_PawnRenderer_DrawEquipmentAiming_DrawMesh = typeof(CombatExtended_PawnRenderer_Patcher).GetMethod("PerHarmony_PawnRenderer_Harmony_PawnRenderer_DrawEquipmentAiming_DrawMesh", BindingFlags.Static | BindingFlags.NonPublic);
-        private static MethodInfo _PostHarmony_PawnRenderer_Harmony_PawnRenderer_DrawEquipmentAiming_DrawMesh = typeof(CombatExtended_PawnRenderer_Patcher).GetMethod("PostHarmony_PawnRenderer_Harmony_PawnRenderer_DrawEquipmentAiming_DrawMesh", BindingFlags.Static | BindingFlags.NonPublic);
+        private static MethodInfo _FinalHarmony_PawnRenderer_Harmony_PawnRenderer_DrawEquipmentAiming_DrawMesh = typeof(CombatExtended_PawnRenderer_Patcher).GetMethod("FinalHarmony_PawnRenderer_Harmony_PawnRenderer_DrawEquipmentAiming_DrawMesh", BindingFlags.Static | BindingFlags.NonPublic);
         private static Type Harmony_PawnRenderer_DrawEquipmentAiming = GenTypes.GetTypeInAnyAssembly("CombatExtended.HarmonyCE.Harmony_PawnRenderer")?.GetNestedType("Harmony_PawnRenderer_DrawEquipmentAiming", BindingFlags.Static | BindingFlags.NonPublic);
         private static Type GunDrawExtension = GenTypes.GetTypeInAnyAssembly("CombatExtended.GunDrawExtension");
         private static AccessTools.FieldRef<object, Vector2> GunDrawExtension_DrawSize = null;
@@ -52,7 +52,7 @@ namespace RW_NodeTree.Patch.CombatExtended
             }
         }
 
-        private static void PostHarmony_PawnRenderer_Harmony_PawnRenderer_DrawEquipmentAiming_DrawMesh((DefModExtension, Vector2) __state)
+        private static void FinalHarmony_PawnRenderer_Harmony_PawnRenderer_DrawEquipmentAiming_DrawMesh((DefModExtension, Vector2) __state)
         {
             (DefModExtension extension, Vector2 drawSize) = __state;
             if (extension != null)
@@ -73,7 +73,9 @@ namespace RW_NodeTree.Patch.CombatExtended
                 patcher.Patch(
                     target,
                     new HarmonyMethod(_PerHarmony_PawnRenderer_Harmony_PawnRenderer_DrawEquipmentAiming_DrawMesh),
-                    new HarmonyMethod(_PostHarmony_PawnRenderer_Harmony_PawnRenderer_DrawEquipmentAiming_DrawMesh)
+                    null,
+                    null,
+                    new HarmonyMethod(_FinalHarmony_PawnRenderer_Harmony_PawnRenderer_DrawEquipmentAiming_DrawMesh)
                     );
             }
         }
