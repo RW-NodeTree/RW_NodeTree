@@ -25,7 +25,7 @@ namespace RW_NodeTree.Patch
             for (int i = list.Count - 1; i >= 0; i--)
             {
                 Thing t = list[i];
-                if (t.def.tickerType == TickerType.Never)
+                if (t.def.tickerType != TickerType.Normal)
                 {
                     if ((t is IVerbOwner) || (t as ThingWithComps)?.AllComps.Find(x => x is IVerbOwner) != null || (CompChildNodeProccesser)t != null)
                     {
@@ -58,7 +58,7 @@ namespace RW_NodeTree.Patch
             for (int i = list.Count - 1; i >= 0; i--)
             {
                 Thing t = list[i];
-                if (t.def.tickerType == TickerType.Never)
+                if (t.def.tickerType != TickerType.Rare)
                 {
                     if ((t is IVerbOwner) || (t as ThingWithComps)?.AllComps.Find(x => x is IVerbOwner) != null || (CompChildNodeProccesser)t != null)
                     {
