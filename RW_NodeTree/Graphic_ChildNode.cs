@@ -1,12 +1,17 @@
 ﻿using HarmonyLib;
+using Mono.Unix.Native;
+using RimWorld;
+using RW_NodeTree.Rendering;
 using RW_NodeTree.Tools;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.NetworkInformation;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
 using Verse;
+using static HarmonyLib.Code;
 
 namespace RW_NodeTree
 {
@@ -115,7 +120,7 @@ namespace RW_NodeTree
         public override Mesh MeshAt(Rot4 rot)
         {
             if (currentProccess == null) return SubGraphic?.MeshAt(rot);
-            UpdateDrawSize(currentProccess.GetAndUpdateDrawSize(rot, this));
+            MatAt(rot);
             //if (Prefs.DevMode) Log.Message(" DrawSize: currentProccess=" + currentProccess + "; Rot4=" + rot + "; size=" + base.drawSize + ";\n");
             return base.MeshAt(rot);
         }
@@ -124,23 +129,83 @@ namespace RW_NodeTree
         {
             CompChildNodeProccesser comp_ChildNodeProccesser = ((CompChildNodeProccesser)thing) ?? currentProccess;
             if (comp_ChildNodeProccesser != currentProccess) return SubGraphic?.MatAt(rot, thing);
-            UpdateDrawSize(comp_ChildNodeProccesser.GetAndUpdateDrawSize(rot, this));
-            return comp_ChildNodeProccesser.GetAndUpdateChildTexture(rot, this);
+
+
+            (Material material, Texture2D texture, RenderTexture cachedRenderTarget) = renderingCache[rot];
+
+            List<(string, Thing, List<RenderInfo>)> commands = comp_ChildNodeProccesser.GetNodeRenderingInfos(rot, out bool needUpdate, subGraphic);
+            if (!needUpdate && material != null) goto ret;
+
+            List<RenderInfo> final = new List<RenderInfo>();
+            foreach ((string, Thing, List<RenderInfo>) infos in commands)
+            {
+                if (!infos.Item3.NullOrEmpty()) final.AddRange(infos.Item3);
+            }
+            RenderingTools.RenderToTarget(final, ref cachedRenderTarget, ref texture, default(Vector2Int), comp_ChildNodeProccesser.Props.TextureSizeFactor, comp_ChildNodeProccesser.Props.ExceedanceFactor, comp_ChildNodeProccesser.Props.ExceedanceOffset, comp_ChildNodeProccesser.HasPostFX ? comp_ChildNodeProccesser.PostFX : default(Action<RenderTexture>));
+            Shader shader = subGraphic.Shader;
+            texture.wrapMode = TextureWrapMode.Clamp;
+            texture.filterMode = comp_ChildNodeProccesser.Props.TextureFilterMode;
+
+            if (material == null)
+            {
+                material = new Material(shader);
+            }
+            else if (shader != null)
+            {
+                material.shader = shader;
+            }
+            material.mainTexture = texture;
+            renderingCache[rot] = (material, texture, cachedRenderTarget);
+
+            ret:;
+
+            Vector2 size = new Vector2(texture.width, texture.height) / comp_ChildNodeProccesser.Props.TextureSizeFactor;
+
+            Graphic graphic = comp_ChildNodeProccesser.parent.Graphic;
+            //if (graphic.GetGraphic_ChildNode() == this)
+            while (graphic != null && graphic != this)
+            {
+                graphic.drawSize = size;
+                graphic = graphic.SubGraphic();
+            }
+            this.drawSize = size;
+
+            return material;
         }
 
         public override Material MatSingleFor(Thing thing)
         {
             CompChildNodeProccesser comp_ChildNodeProccesser = ((CompChildNodeProccesser)thing) ?? currentProccess;
             if (comp_ChildNodeProccesser != currentProccess) return SubGraphic?.MatSingleFor(thing);
-            UpdateDrawSize(comp_ChildNodeProccesser.GetAndUpdateDrawSize(thing.Rotation, this));
-            return comp_ChildNodeProccesser.GetAndUpdateChildTexture(thing.Rotation, this);
+            return MatAt(thing.Rotation, thing);
         }
 
         public override void DrawWorker(Vector3 loc, Rot4 rot, ThingDef thingDef, Thing thing, float extraRotation)
         {
             CompChildNodeProccesser comp_ChildNodeProccesser = ((CompChildNodeProccesser)thing) ?? currentProccess;
             if (comp_ChildNodeProccesser != currentProccess) SubGraphic?.DrawWorker(loc, rot, thingDef, thing, extraRotation);
-            else base.DrawWorker(loc, Rot4.North, thingDef, thing, extraRotation);
+            else if(!RenderingTools.StartOrEndDrawCatchingBlock || comp_ChildNodeProccesser.HasPostFX) base.DrawWorker(loc, rot, thingDef, thing, extraRotation);
+            else
+            {
+                MatAt(rot, thing);
+                List<RenderInfo> final = new List<RenderInfo>();
+                foreach ((string, Thing, List<RenderInfo>) infos in currentProccess.GetNodeRenderingInfos(rot, out _, subGraphic))
+                {
+                    if (!infos.Item3.NullOrEmpty()) final.AddRange(infos.Item3);
+                }
+                Matrix4x4 matrix = Matrix4x4.TRS(loc, Quaternion.AngleAxis(extraRotation, Vector3.up), Vector3.one);
+                for (int i = 0; i < final.Count; i++)
+                {
+                    RenderInfo info = final[i];
+                    Matrix4x4[] matrices = new Matrix4x4[info.matrices.Length];
+                    for (int j = 0; j < info.matrices.Length; j++)
+                    {
+                        matrices[j] = matrix * info.matrices[j];
+                    }
+                    info.matrices = matrices;
+                    info.DrawInfo(null);
+                }
+            }
         }
 
         public override void Print(SectionLayer layer, Thing thing, float extraRotation)
@@ -149,27 +214,84 @@ namespace RW_NodeTree
             if (comp_ChildNodeProccesser != currentProccess) SubGraphic?.Print(layer, thing, extraRotation);
             else
             {
-                UpdateDrawSize(comp_ChildNodeProccesser.GetAndUpdateDrawSize(thing.Rotation, this));
+                MatAt(thing.Rotation);
                 base.Print(layer, thing, extraRotation);
             }
         }
 
-        /// <summary>
-        /// update all draw size of the parent graphic of this graphic and itself
-        /// </summary>
-        /// <param name="size">size for update</param>
-        private void UpdateDrawSize(Vector2 size)
+
+        private class OffScreenRenderingCache
         {
-            Graphic graphic = currentProccess.parent.Graphic;
-            //if (graphic.GetGraphic_ChildNode() == this)
-            while (graphic != null && graphic != this)
+            ~OffScreenRenderingCache()
             {
-                graphic.drawSize = size;
-                graphic = graphic.SubGraphic();
+                GameObject.Destroy(materialNorth);
+                GameObject.Destroy(materialEast);
+                GameObject.Destroy(materialSouth);
+                GameObject.Destroy(materialWest);
+                GameObject.Destroy(textureNorth);
+                GameObject.Destroy(textureEast);
+                GameObject.Destroy(textureSouth);
+                GameObject.Destroy(textureWest);
+                GameObject.Destroy(cachedRenderTargetNorth);
+                GameObject.Destroy(cachedRenderTargetEast);
+                GameObject.Destroy(cachedRenderTargetSouth);
+                GameObject.Destroy(cachedRenderTargetWest);
             }
-            this.drawSize = size;
+            public (Material, Texture2D, RenderTexture) this[Rot4 index]
+            {
+                get
+                {
+                    switch (index.AsByte)
+                    {
+                        case 0: return (materialNorth, textureNorth, cachedRenderTargetNorth);
+                        case 1: return (materialEast, textureEast, cachedRenderTargetEast);
+                        case 2: return (materialSouth, textureSouth, cachedRenderTargetSouth);
+                        case 3: return (materialWest, textureWest, cachedRenderTargetWest);
+                        default: return (materialNorth, textureNorth, cachedRenderTargetNorth);
+                    }
+                }
+                set
+                {
+                    switch (index.AsByte)
+                    {
+                        case 0:
+                            materialNorth = value.Item1;
+                            textureNorth = value.Item2;
+                            cachedRenderTargetNorth = value.Item3;
+                            break;
+                        case 1:
+                            materialEast = value.Item1;
+                            textureEast = value.Item2;
+                            cachedRenderTargetEast = value.Item3;
+                            break;
+                        case 2:
+                            materialSouth = value.Item1;
+                            textureSouth = value.Item2;
+                            cachedRenderTargetSouth = value.Item3;
+                            break;
+                        case 3:
+                            materialWest = value.Item1;
+                            textureWest = value.Item2;
+                            cachedRenderTargetWest = value.Item3;
+                            break;
+                        default:
+                            materialNorth = value.Item1;
+                            textureNorth = value.Item2;
+                            cachedRenderTargetNorth = value.Item3;
+                            break;
+                    }
+
+                }
+            }
+
+            public Material materialNorth, materialEast, materialSouth, materialWest;
+
+            public Texture2D textureNorth, textureEast, textureSouth, textureWest;
+
+            public RenderTexture cachedRenderTargetNorth, cachedRenderTargetEast, cachedRenderTargetSouth, cachedRenderTargetWest;
         }
 
+        private readonly OffScreenRenderingCache renderingCache = new OffScreenRenderingCache();
         private CompChildNodeProccesser currentProccess = null;
         private Graphic subGraphic = null;
     }

@@ -69,7 +69,7 @@ namespace RW_NodeTree.Rendering
         /// disable fast mode
         /// recommand disable when rendering many same thing, when is true, It will rendered by unity camera.
         /// </summary>
-        public bool disableFastMode;
+        private bool disableFastMode;
 
         public RenderInfo(Mesh mesh, int submeshIndex, Matrix4x4 matrix, Material material, int layer, bool DrawMeshInstanced = false)
         {
@@ -133,7 +133,7 @@ namespace RW_NodeTree.Rendering
             }
             set
             {
-                if (disableFastMode = value)
+                if (!(disableFastMode = !value))
                 {
                     properties = null;
                     probeAnchor = null;
@@ -186,33 +186,19 @@ namespace RW_NodeTree.Rendering
             }
         }
 
-        public void DrawInfoFast(RenderTexture target, Matrix4x4 ProjectionMatrix, Color backgroundColor, bool clearDepth, bool clearColor)
+        public void DrawInfoFast(CommandBuffer buffer)
         {
-            if (target != null && CanUseFastDrawingMode)
+            if (buffer != null && CanUseFastDrawingMode)
             {
-                RenderTexture backUp = RenderTexture.active;
-                int passCount = material.passCount;
-
-                RenderTexture.active = target;
-
-                GL.PushMatrix();
-
-                Camera camera = Camera.current;
-                GL.LoadProjectionMatrix(ProjectionMatrix * (camera != null ? camera.cameraToWorldMatrix : Matrix4x4.identity));
-                GL.Clear(clearDepth, clearColor, backgroundColor);
-
-                //GL.LoadIdentity();
-                for (int i = 0; i < passCount; ++i)
+                if (probeAnchor != null || !DrawMeshInstanced)
                 {
-                    material.SetPass(i);
                     for (int j = 0; j < matrices.Length && j < count; ++j)
-                    {
-                        Graphics.DrawMeshNow(mesh, matrices[j], submeshIndex);
-                    }
+                        buffer.DrawMesh(mesh, matrices[j], material, submeshIndex, -1, properties);
                 }
-
-                GL.PopMatrix();
-                RenderTexture.active = backUp;
+                else
+                {
+                    buffer.DrawMeshInstanced(mesh, submeshIndex, material, -1, matrices, count, properties);
+                }
 
             }
         }

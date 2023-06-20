@@ -37,13 +37,13 @@ namespace RW_NodeTree.Patch
         private static void PostStatWorker_GetInfoCardHyperlinks(StatWorker __instance, MethodInfo __originalMethod, StatRequest statRequest, ref IEnumerable<Dialog_InfoCard.Hyperlink> __result)
         {
             //if (Prefs.DevMode) Log.Message("__originalMethod.GetType() : " + __originalMethod.GetType() + "; _GetInfoCardHyperlinks.GetType() : " + _GetInfoCardHyperlinks.GetType() + "; same : " + (_GetInfoCardHyperlinks == __originalMethod));
-            CompChildNodeProccesser proccesser = statRequest.Thing.RootNode();
-            if (proccesser != null &&
-                __originalMethod.DeclaringType
+            if (__originalMethod.MethodHandle
                 ==
-                GetMethodInfo_GetInfoCardHyperlinks_OfType(__instance.GetType()).DeclaringType
+                GetMethodInfo_GetInfoCardHyperlinks_OfType(__instance.GetType()).MethodHandle
             )
-                __result = proccesser.PostStatWorker_GetInfoCardHyperlinks(__instance, statRequest, __result) ?? __result;
+            {
+                __result = statRequest.Thing.RootNode()?.PostStatWorker_GetInfoCardHyperlinks(__instance, statRequest, __result) ?? __result;
+            }
         }
 
         public static void PatchGetInfoCardHyperlinks(Type type, Harmony patcher)
@@ -79,6 +79,7 @@ namespace RW_NodeTree
         /// <param name="reqstatRequest">parm 'reqstatRequest' of StatWorker.GetInfoCardHyperlinks()</param>
         public IEnumerable<Dialog_InfoCard.Hyperlink> PostStatWorker_GetInfoCardHyperlinks(StatWorker statWorker, StatRequest statRequest, IEnumerable<Dialog_InfoCard.Hyperlink> result)
         {
+            UpdateNode();
             foreach (CompBasicNodeComp comp in AllNodeComp)
             {
                 try

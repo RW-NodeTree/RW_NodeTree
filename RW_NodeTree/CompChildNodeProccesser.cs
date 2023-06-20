@@ -11,6 +11,8 @@ using RW_NodeTree.Rendering;
 using RW_NodeTree.Tools;
 using System.Diagnostics;
 using System.Reflection;
+using Verse.Noise;
+using static UnityEngine.GraphicsBuffer;
 
 namespace RW_NodeTree
 {
@@ -27,6 +29,26 @@ namespace RW_NodeTree
         {
             get => ChildNodes.NeedUpdate;
             set => ChildNodes.NeedUpdate = value;
+        }
+
+
+        public bool HasPostFX
+        {
+            get
+            {
+                foreach (CompBasicNodeComp comp in AllNodeComp)
+                {
+                    try
+                    {
+                        if(comp.HasPostFX) return true;
+                    }
+                    catch (Exception ex)
+                    {
+                        Log.Error(ex.ToString());
+                    }
+                }
+                return false;
+            }
         }
 
         /// <summary>
@@ -237,6 +259,8 @@ namespace RW_NodeTree
         /// <returns>Verb infos before convert</returns>
         public (Thing, Verb, Tool, VerbProperties) GetBeforeConvertVerbCorrespondingThing(Type ownerType, Verb verbAfterConvert, Tool toolAfterConvert, VerbProperties verbPropertiesAfterConvert, bool needVerb = false)
         {
+            UpdateNode();
+
             (Thing, Verb, Tool, VerbProperties) result = default((Thing, Verb, Tool, VerbProperties));
 
             if (!CheckVerbDatasVaildityAndAdapt(ownerType, parent, ref verbAfterConvert, ref toolAfterConvert, ref verbPropertiesAfterConvert)) return result;
@@ -338,6 +362,8 @@ namespace RW_NodeTree
         /// <returns>correct verb ownner</returns>
         public (Thing, Verb, Tool, VerbProperties) GetAfterConvertVerbCorrespondingThing(Type ownerType, Verb verbBeforeConvert, Tool toolBeforeConvert, VerbProperties verbPropertiesBeforeConvert)
         {
+            UpdateNode();
+
             (Thing, Verb, Tool, VerbProperties) result = default((Thing, Verb, Tool, VerbProperties));
 
             if (!CheckVerbDatasVaildityAndAdapt(ownerType, parent, ref verbBeforeConvert, ref toolBeforeConvert, ref verbPropertiesBeforeConvert)) return result;
@@ -396,8 +422,8 @@ namespace RW_NodeTree
         /// </summary>
         public void ResetRenderedTexture()
         {
-            renderingCache.ResetRenderedTexture();
-            if(parent.Spawned && parent.def.drawerType >= DrawerType.MapMeshOnly) parent.DirtyMapMesh(parent.Map);
+            for(int i = 0; i < nodeRenderingInfos.Length; i++) nodeRenderingInfos[i] = null;
+            if (parent.Spawned && parent.def.drawerType >= DrawerType.MapMeshOnly) parent.DirtyMapMesh(parent.Map);
             ParentProccesser?.ResetRenderedTexture();
         }
 
@@ -453,17 +479,30 @@ namespace RW_NodeTree
             //Scribe_Collections.Look(ref childNodes, "innerContainer", LookMode.Deep, this);
         }
 
-        /// <summary>
-        /// Render all child things
-        /// </summary>
-        /// <param name="rot">rotate</param>
-        /// <param name="subGraphic">orging Graphic of this</param>
-        /// <returns>result of rendering</returns>
-        public Material GetAndUpdateChildTexture(Rot4 rot, Graphic subGraphic = null)
+
+        public void PostFX(RenderTexture tar)
         {
-            (Material material, Texture2D texture, RenderTexture cachedRenderTarget, bool IsRandered) = renderingCache[rot];
-            if (IsRandered && material != null) return material;
-            List<(Thing, string, List<RenderInfo>)> nodeRenderingInfos = new List<(Thing, string, List<RenderInfo>)>(ChildNodes.Count + 1);
+
+            foreach (CompBasicNodeComp comp in AllNodeComp)
+            {
+                try
+                {
+                    if (comp.HasPostFX) comp.PostFX(tar);
+                }
+                catch (Exception ex)
+                {
+                    Log.Error(ex.ToString());
+                }
+            }
+        }
+
+
+        public List<(string, Thing, List<RenderInfo>)> GetNodeRenderingInfos(Rot4 rot, out bool updated, Graphic subGraphic = null)
+        {
+            updated = false;
+            if (this.nodeRenderingInfos[rot.AsInt] != null) return this.nodeRenderingInfos[rot.AsInt];
+            updated = true;
+            List<(string, Thing, List<RenderInfo>)> nodeRenderingInfos = new List<(string, Thing, List<RenderInfo>)>(ChildNodes.Count + 1);
 
             //if (Prefs.DevMode)
             //{
@@ -487,7 +526,7 @@ namespace RW_NodeTree
                 try
                 {
                     subGraphic.Draw(Vector3.zero, rot, parent);
-                    nodeRenderingInfos.Add((this, null, RenderingTools.RenderInfos));
+                    nodeRenderingInfos.Add((null, this, RenderingTools.RenderInfos));
                 }
                 catch (Exception ex)
                 {
@@ -500,23 +539,24 @@ namespace RW_NodeTree
             for (int i = 0; i < container.Count; i++)
             {
                 Thing child = container[i];
-                RenderingTools.StartOrEndDrawCatchingBlock = true;
-                try
+
+                if (child != null)
                 {
-                    if (child != null)
+                    RenderingTools.StartOrEndDrawCatchingBlock = true;
+                    try
                     {
                         Rot4 rotCache = child.Rotation;
                         child.Rotation = new Rot4((rot.AsInt + rotCache.AsInt) & 3);
                         child.DrawAt(Vector3.zero);
                         child.Rotation = rotCache;
-                        nodeRenderingInfos.Add((child, container[(uint)i], RenderingTools.RenderInfos));
+                        nodeRenderingInfos.Add((container[(uint)i], child, RenderingTools.RenderInfos));
                     }
+                    catch (Exception ex)
+                    {
+                        Log.Error(ex.ToString());
+                    }
+                    RenderingTools.StartOrEndDrawCatchingBlock = false;
                 }
-                catch (Exception ex)
-                {
-                    Log.Error(ex.ToString());
-                }
-                RenderingTools.StartOrEndDrawCatchingBlock = false;
             }
 
             foreach (CompBasicNodeComp comp in AllNodeComp)
@@ -530,45 +570,8 @@ namespace RW_NodeTree
                     Log.Error(ex.ToString());
                 }
             }
-
-            List<RenderInfo> final = new List<RenderInfo>();
-            foreach((Thing, string, List<RenderInfo>) infos in nodeRenderingInfos)
-            {
-                if(!infos.Item3.NullOrEmpty()) final.AddRange(infos.Item3);
-            }
-
-            RenderingTools.RenderToTarget(final, ref cachedRenderTarget, ref texture, default(Vector2Int), Props.TextureSizeFactor, Props.ExceedanceFactor, Props.ExceedanceOffset);
-
-
-            Shader shader = subGraphic.Shader;
-
-            texture.wrapMode = TextureWrapMode.Clamp;
-            texture.filterMode = Props.TextureFilterMode;
-
-            if (material == null)
-            {
-                material = new Material(shader);
-            }
-            else if(shader != null)
-            {
-                material.shader = shader;
-            }
-            material.mainTexture = texture;
-            IsRandered = true;
-            renderingCache[rot] = (material, texture, cachedRenderTarget, IsRandered);
-            return material;
-        }
-
-
-        public Vector2 GetAndUpdateDrawSize(Rot4 rot, Graphic subGraphic = null)
-        {
-            (Material material, Texture2D texture, RenderTexture cachedRenderTarget, bool IsRandered) = renderingCache[rot];
-            if (!IsRandered || texture == null) GetAndUpdateChildTexture(rot, subGraphic);
-            (material, texture, cachedRenderTarget, IsRandered) = renderingCache[rot];
-            Vector2 result = new Vector2(texture.width, texture.height) / Props.TextureSizeFactor;
-            //if (Prefs.DevMode) Log.Message(" DrawSize: thing=" + parent + "; Rot4=" + rot + "; textureWidth=" + textures[rot_int].width + "; result=" + result + ";\n");
-            renderingCache[rot] = (material, texture, cachedRenderTarget, IsRandered);
-            return result;
+            this.nodeRenderingInfos[rot.AsInt] = nodeRenderingInfos;
+            return nodeRenderingInfos;
         }
 
         /// <summary>
@@ -754,75 +757,6 @@ namespace RW_NodeTree
         }
 
 
-        private class OffScreenRenderingCache
-        {
-            ~OffScreenRenderingCache()
-            {
-                GameObject.Destroy(materialNorth);
-                GameObject.Destroy(materialEast);
-                GameObject.Destroy(materialSouth);
-                GameObject.Destroy(materialWest);
-                GameObject.Destroy(textureNorth);
-                GameObject.Destroy(textureEast);
-                GameObject.Destroy(textureSouth);
-                GameObject.Destroy(textureWest);
-                GameObject.Destroy(cachedRenderTargetNorth);
-                GameObject.Destroy(cachedRenderTargetEast);
-                GameObject.Destroy(cachedRenderTargetSouth);
-                GameObject.Destroy(cachedRenderTargetWest);
-            }
-            public (Material, Texture2D, RenderTexture, bool) this[Rot4 index]
-            {
-                get
-                {
-                    switch(index.AsByte)
-                    {
-                        case 0: return (materialNorth, textureNorth, cachedRenderTargetNorth, (IsRandereds & 1) == 1);
-                        case 1: return (materialEast, textureEast, cachedRenderTargetEast, ((IsRandereds >> 1) & 1) == 1);
-                        case 2: return (materialSouth, textureSouth, cachedRenderTargetSouth, ((IsRandereds >> 2) & 1) == 1);
-                        case 3: return (materialWest, textureWest, cachedRenderTargetWest, ((IsRandereds >> 3) & 1) == 1);
-                        default: return (materialNorth, textureNorth, cachedRenderTargetNorth, (IsRandereds & 1) == 1);
-                    }
-                } 
-                set
-                {
-                    switch (index.AsByte)
-                    {
-                        case 0:
-                            materialNorth = value.Item1;
-                            textureNorth = value.Item2;
-                            cachedRenderTargetNorth = value.Item3;
-                            break;
-                        case 1:
-                            materialEast = value.Item1;
-                            textureEast = value.Item2;
-                            cachedRenderTargetEast = value.Item3;
-                            break;
-                        case 2:
-                            materialSouth = value.Item1;
-                            textureSouth = value.Item2;
-                            cachedRenderTargetSouth = value.Item3;
-                            break;
-                        case 3:
-                            materialWest = value.Item1;
-                            textureWest = value.Item2;
-                            cachedRenderTargetWest = value.Item3;
-                            break;
-                        default:
-                            materialNorth = value.Item1;
-                            textureNorth = value.Item2;
-                            cachedRenderTargetNorth = value.Item3;
-                            break;
-                    }
-                    if (value.Item4) IsRandereds |= (byte)(1 << index.AsByte);
-                    else IsRandereds &= (byte)~(1 << index.AsByte);
-
-                }
-            }
-
-            public void ResetRenderedTexture() => IsRandereds = 0;
-
-            public Material materialNorth, materialEast, materialSouth, materialWest;
 
         #region operator
         public static implicit operator Thing(CompChildNodeProccesser node)
@@ -840,7 +774,7 @@ namespace RW_NodeTree
 
         private NodeContainer childNodes;
 
-        private readonly OffScreenRenderingCache renderingCache = new OffScreenRenderingCache();
+        private readonly List<(string, Thing, List<RenderInfo>)>[] nodeRenderingInfos = new List<(string, Thing, List<RenderInfo>)>[4];
 
         private readonly HashSet<string> regiestedNodeId = new HashSet<string>();
 
@@ -875,6 +809,16 @@ namespace RW_NodeTree
         {
             parentDef.comps.Remove(this);
             parentDef.comps.Insert(0, this);
+            for(int i = parentDef.comps.Count - 1; i >= 1; i--)
+            {
+                for (int j = i - 1; j >= 1; j--)
+                {
+                    if(parentDef.comps[i].compClass == parentDef.comps[j].compClass)
+                    {
+                        parentDef.comps.RemoveAt(j);
+                    }
+                }
+            }
         }
 
         public bool VerbDirectOwnerRedictory = false;

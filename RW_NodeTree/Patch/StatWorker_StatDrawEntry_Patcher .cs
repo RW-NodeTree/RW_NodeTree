@@ -39,16 +39,18 @@ namespace RW_NodeTree.Patch
 
         private static bool PreStatWorker_GetStatDrawEntryLabel(StatWorker __instance, MethodInfo __originalMethod, StatDef stat, float value, ToStringNumberSense numberSense, StatRequest optionalReq, bool finalized, ref (Dictionary<string, object>, CompChildNodeProccesser) __state)
         {
-            CompChildNodeProccesser proccesser = optionalReq.Thing.RootNode();
-            if (proccesser != null &&
-                __originalMethod.DeclaringType
+            if (__originalMethod.MethodHandle
                 ==
-                GetMethodInfo_GetStatDrawEntryLabel_OfType(__instance.GetType()).DeclaringType
+                GetMethodInfo_GetStatDrawEntryLabel_OfType(__instance.GetType()).MethodHandle
             )
             {
-                __state.Item1 = new Dictionary<string, object>();
-                __state.Item2 = proccesser;
-                return proccesser.PreStatWorker_GetStatDrawEntryLabel(__instance, stat, value, numberSense, optionalReq, finalized, __state.Item1);
+                CompChildNodeProccesser proccesser = optionalReq.Thing.RootNode();
+                if (proccesser != null)
+                {
+                    __state.Item1 = new Dictionary<string, object>();
+                    __state.Item2 = proccesser;
+                    return proccesser.PreStatWorker_GetStatDrawEntryLabel(__instance, stat, value, numberSense, optionalReq, finalized, __state.Item1);
+                }
             }
             return true;
         }
@@ -107,6 +109,7 @@ namespace RW_NodeTree
         /// <param name="applyPostProcess">parm 'applyPostProcess' of StatWorker.GetStatDrawEntryLabel()</param>
         public bool PreStatWorker_GetStatDrawEntryLabel(StatWorker statWorker, StatDef stat, float value, ToStringNumberSense numberSense, StatRequest optionalReq, bool finalized, Dictionary<string, object> stats)
         {
+            UpdateNode();
             bool result = true;
             foreach (CompBasicNodeComp comp in AllNodeComp)
             {
@@ -132,6 +135,7 @@ namespace RW_NodeTree
         /// <param name="applyPostProcess">parm 'applyPostProcess' of StatWorker.GetStatDrawEntryLabel()</param>
         public string PostStatWorker_GetStatDrawEntryLabel(StatWorker statWorker, StatDef stat, float value, ToStringNumberSense numberSense, StatRequest optionalReq, bool finalized, string result, Dictionary<string, object> stats)
         {
+            UpdateNode();
             foreach (CompBasicNodeComp comp in AllNodeComp)
             {
                 try
@@ -156,6 +160,7 @@ namespace RW_NodeTree
         /// <param name="applyFinalProcess">parm 'applyFinalProcess' of StatWorker.GetStatDrawEntryLabel()</param>
         public string FinalStatWorker_GetStatDrawEntryLabel(StatWorker statWorker, StatDef stat, float value, ToStringNumberSense numberSense, StatRequest optionalReq, bool finalized, string result, Dictionary<string, object> stats, Exception exception)
         {
+            UpdateNode();
             foreach (CompBasicNodeComp comp in AllNodeComp)
             {
                 try

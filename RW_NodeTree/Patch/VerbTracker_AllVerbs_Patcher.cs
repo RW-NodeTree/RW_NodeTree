@@ -31,15 +31,25 @@ namespace RW_NodeTree.Patch
             }
         }
 
+        [HarmonyPrefix]
+        [HarmonyPatch(
+            typeof(VerbTracker),
+            "get_AllVerbs"
+        )]
+        private static void PreVerbTracker_AllVerbs(VerbTracker __instance, ref CompChildNodeProccesser __state)
+        {
+            __state = ((__instance.directOwner as ThingComp)?.parent) ?? ((__instance.directOwner) as Thing);
+            __state?.UpdateNode();
+        }
+
         [HarmonyPostfix]
         [HarmonyPatch(
             typeof(VerbTracker),
             "get_AllVerbs"
         )]
-        private static void PostVerbTracker_AllVerbs(VerbTracker __instance, ref List<Verb> __result)
+        private static void PostVerbTracker_AllVerbs(VerbTracker __instance, ref List<Verb> __result, ref CompChildNodeProccesser __state)
         {
-            CompChildNodeProccesser proccess = ((__instance.directOwner as ThingComp)?.parent) ?? ((__instance.directOwner) as Thing);
-            __result = proccess?.PostVerbTracker_AllVerbs(__instance.directOwner?.GetType(), new List<Verb>(__result)) ?? __result;
+            __result = __state?.PostVerbTracker_AllVerbs(__instance.directOwner?.GetType(), new List<Verb>(__result)) ?? __result;
         }
     }
 }

@@ -22,7 +22,7 @@ namespace RW_NodeTree
             get
             {
                 NodeContainer ChildNodes = this.ChildNodes;
-                return (ChildNodes != null) ? ChildNodes.NeedUpdate: false;
+                return (ChildNodes != null) ? ChildNodes.NeedUpdate : false;
             }
             set
             {
@@ -71,6 +71,12 @@ namespace RW_NodeTree
                 yield break;
             }
         }
+
+
+        public virtual bool HasPostFX { get => false; }
+
+
+        public virtual void PostFX(RenderTexture tar) { }
 
         /// <summary>
         /// update event
@@ -169,7 +175,7 @@ namespace RW_NodeTree
         /// <param name="rot">rotation</param>
         /// <param name="graphic">original graphic</param>
         /// <returns></returns>
-        protected virtual List<(Thing, string, List<RenderInfo>)> OverrideDrawSteep(List<(Thing, string, List<RenderInfo>)> nodeRenderingInfos, Rot4 rot, Graphic graphic)
+        protected virtual List<(string, Thing, List<RenderInfo>)> OverrideDrawSteep(List<(string, Thing, List<RenderInfo>)> nodeRenderingInfos, Rot4 rot, Graphic graphic)
         {
             return nodeRenderingInfos;
         }
@@ -184,6 +190,6 @@ namespace RW_NodeTree
         internal void internal_Added(NodeContainer container, string id) => Added(container, id);
         internal void internal_Removed(NodeContainer container, string id) => Removed(container, id);
         internal HashSet<string> internal_RegiestedNodeId(HashSet<string> regiestedNodeId) => RegiestedNodeId(regiestedNodeId);
-        internal List<(Thing, string, List<RenderInfo>)> internal_OverrideDrawSteep(List<(Thing, string, List<RenderInfo>)> nodeRenderingInfos, Rot4 rot, Graphic graphic) => OverrideDrawSteep(nodeRenderingInfos, rot, graphic);
+        internal List<(string, Thing, List<RenderInfo>)> internal_OverrideDrawSteep(List<(string, Thing, List<RenderInfo>)> nodeRenderingInfos, Rot4 rot, Graphic graphic) => OverrideDrawSteep(nodeRenderingInfos, rot, graphic);
     }
 }

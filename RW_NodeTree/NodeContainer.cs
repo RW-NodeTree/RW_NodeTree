@@ -204,6 +204,7 @@ namespace RW_NodeTree
                 }
                 else if (NeedUpdate)
                 {
+                    NeedUpdate = false;
                     bool reset = true;
                     for (int i = 0; i < innerList.Count; i++)
                     {
@@ -237,7 +238,6 @@ namespace RW_NodeTree
                     }
                 }
             }
-            NeedUpdate = false;
             return StopEventBubble;
         }
 

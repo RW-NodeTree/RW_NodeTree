@@ -179,6 +179,7 @@ namespace RW_NodeTree
         /// <param name="verbProperties">result of IVerbOwner.VerbProperties</param>
         public bool PreIVerbOwner_GetVerbProperties(Type ownerType, Dictionary<string, object> stats)
         {
+            UpdateNode();
             bool result = true;
             if (ownerType != null && typeof(IVerbOwner).IsAssignableFrom(ownerType))
             {
@@ -205,6 +206,7 @@ namespace RW_NodeTree
         /// <param name="verbProperties">result of IVerbOwner.Tools</param>
         public bool PreIVerbOwner_GetTools(Type ownerType, Dictionary<string, object> stats)
         {
+            UpdateNode();
             bool result = true;
             if (ownerType != null && typeof(IVerbOwner).IsAssignableFrom(ownerType))
             {
@@ -232,6 +234,7 @@ namespace RW_NodeTree
         /// <param name="verbProperties">result of IVerbOwner.VerbProperties</param>
         public List<VerbProperties> PostIVerbOwner_GetVerbProperties(Type ownerType, List<VerbProperties> verbProperties, Dictionary<string, object> stats)
         {
+            UpdateNode();
             if (ownerType != null && typeof(IVerbOwner).IsAssignableFrom(ownerType))
             {
                 foreach (CompBasicNodeComp comp in AllNodeComp)
@@ -257,6 +260,7 @@ namespace RW_NodeTree
         /// <param name="verbProperties">result of IVerbOwner.Tools</param>
         public List<Tool> PostIVerbOwner_GetTools(Type ownerType, List<Tool> tools, Dictionary<string, object> stats)
         {
+            UpdateNode();
             if (ownerType != null && typeof(IVerbOwner).IsAssignableFrom(ownerType))
             {
                 foreach (CompBasicNodeComp comp in AllNodeComp)
@@ -280,6 +284,7 @@ namespace RW_NodeTree
         /// <param name="verbProperties">result of IVerbOwner.VerbProperties</param>
         public List<VerbProperties> FinalIVerbOwner_GetVerbProperties(Type ownerType, List<VerbProperties> verbProperties, Dictionary<string, object> stats, Exception exception)
         {
+            UpdateNode();
             if (ownerType != null && typeof(IVerbOwner).IsAssignableFrom(ownerType))
             {
                 List<VerbPropertiesRegiestInfo> verbPropertiesRegiestInfo;
@@ -327,6 +332,7 @@ namespace RW_NodeTree
         /// <param name="verbProperties">result of IVerbOwner.Tools</param>
         public List<Tool> FinalIVerbOwner_GetTools(Type ownerType, List<Tool> tools, Dictionary<string, object> stats, Exception exception)
         {
+            UpdateNode();
             if (ownerType != null && typeof(IVerbOwner).IsAssignableFrom(ownerType))
             {
                 List<VerbToolRegiestInfo> verbToolRegiestInfo;

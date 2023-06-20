@@ -43,6 +43,7 @@ namespace RW_NodeTree
         /// <param name="result">result of ThingDef.SpecialDisplayStats</param>
         public bool PostThingWithComps_PreApplyDamage(ref DamageInfo dinfo, bool absorbed)
         {
+            UpdateNode();
             foreach (CompBasicNodeComp comp in AllNodeComp)
             {
                 try

@@ -38,7 +38,7 @@ namespace RW_NodeTree.Patch
                     ref Vector2 drawSize = ref thing.def.graphicData.drawSize;
                     ref float scale = ref thing.def.uiIconScale;
                     __state = (drawSize, scale);
-                    drawSize = proccesser.GetAndUpdateDrawSize(defaultPlacingRot);
+                    drawSize = proccesser.parent.Graphic.drawSize;
                     if (defaultPlacingRot.IsHorizontal)
                     {
                         drawSize = drawSize.Rotated();

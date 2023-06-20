@@ -52,6 +52,7 @@ namespace RW_NodeTree
     {
         public IEnumerable<Thing> PostGenRecipe_MakeRecipeProducts(RecipeDef recipeDef, Pawn worker, List<Thing> ingredients, Thing dominantIngredient1, IBillGiver billGiver, Precept_ThingStyle precept, RecipeInvokeSource InvokeSource, IEnumerable<Thing> result)
         {
+            UpdateNode();
             foreach (CompBasicNodeComp comp in AllNodeComp)
             {
                 try

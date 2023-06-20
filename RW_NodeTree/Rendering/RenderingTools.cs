@@ -30,13 +30,13 @@ namespace RW_NodeTree.Rendering
             {
                 if (camera == null)
                 {
-                    GameObject gameObject = new GameObject("Off_Screen_Rendering_Camera");
+                    GameObject gameObject = new GameObject("RW_NodeTree_Camera");
                     camera = gameObject.AddComponent<Camera>();
                     camera.orthographic = true;
                     camera.orthographicSize = 1;
                     camera.nearClipPlane = 0;
                     camera.farClipPlane = 71.5f;
-                    camera.transform.position = new Vector3(0, CanvasHeight + 65, 0);
+                    camera.transform.position = new Vector3(0, 65 + CanvasHeight, 0);
                     camera.transform.rotation = Quaternion.Euler(90, 0, 0);
                     camera.backgroundColor = Color.clear;
                     camera.clearFlags = CameraClearFlags.SolidColor;
@@ -44,6 +44,20 @@ namespace RW_NodeTree.Rendering
                     camera.enabled = false;
                 }
                 return camera;
+            }
+        }
+
+
+        internal static CommandBuffer CommandBuffer
+        {
+            get
+            {
+                if (commandBuffer == null)
+                {
+                    commandBuffer = new CommandBuffer();
+                    commandBuffer.name = "RW_NodeTree_Renderer";
+                }
+                return commandBuffer;
             }
         }
 
@@ -140,9 +154,10 @@ namespace RW_NodeTree.Rendering
         /// <param name="target"></param>
         /// <param name="size">force render texture size</param>
         /// <param name="TextureSizeFactor"></param>
-        public static void RenderToTarget(List<RenderInfo> infos, ref RenderTexture cachedRenderTarget, ref Texture2D target, Vector2Int size = default(Vector2Int), int TextureSizeFactor = (int)DefaultTextureSizeFactor, float ExceedanceFactor = 1f, float ExceedanceOffset = 1f)
+        public static void RenderToTarget(List<RenderInfo> infos, ref RenderTexture cachedRenderTarget, ref Texture2D target, Vector2Int size = default(Vector2Int), int TextureSizeFactor = (int)DefaultTextureSizeFactor, float ExceedanceFactor = 1f, float ExceedanceOffset = 1f, Action<RenderTexture> PostFX = null)
         {
             RenderToTarget(infos, ref cachedRenderTarget, size, TextureSizeFactor, ExceedanceFactor, ExceedanceOffset);
+            PostFX?.Invoke(cachedRenderTarget);
             if (target == null || target.width != cachedRenderTarget.width || target.height != cachedRenderTarget.height)
             {
                 if (target != null) GameObject.Destroy(target);
@@ -171,14 +186,6 @@ namespace RW_NodeTree.Rendering
         /// <param name="TextureSizeFactor"></param>
         public static void RenderToTarget(List<RenderInfo> infos, ref RenderTexture cachedRenderTarget, Vector2Int size = default(Vector2Int), int TextureSizeFactor = (int)DefaultTextureSizeFactor, float ExceedanceFactor = 1f, float ExceedanceOffset = 1f)
         {
-            for (int i = 0; i < infos.Count; i++)
-            {
-                RenderInfo info = infos[i];
-                for (int j = 0; j < info.matrices.Length; ++j)
-                {
-                    info.matrices[j].m13 += RenderingTools.CanvasHeight;
-                }
-            }
 
             if (size.x <= 0 || size.y <= 0)
             {
@@ -195,27 +202,50 @@ namespace RW_NodeTree.Rendering
             //if (Prefs.DevMode) Log.Message("RenderToTarget size:" + size);
             //Debug.Log("RenderToTarget size:" + size);
 
-            Camera.targetTexture = cachedRenderTarget;
-            Camera.orthographicSize = size.y / (float)(TextureSizeFactor << 1);
             if(CanUseFastDraw(infos))
             {
-                bool clear = AutoClear;
+                CommandBuffer.Clear();
+
+                float TowTimesTextureSizeFactor = TextureSizeFactor << 1;
+                float hw = size.x / TowTimesTextureSizeFactor, hh = size.y / TowTimesTextureSizeFactor;
+
+                Matrix4x4 view = Matrix4x4.TRS(new Vector3(0, 65, 0), Quaternion.Euler(90, 0, 0), Vector3.one);
+                Matrix4x4.Inverse3DAffine(view, ref view);
+
+                Matrix4x4 perspective = Matrix4x4.Ortho(-hw, hw, -hh, hh, 0, 71.5f);
+                //perspective.m32 *= -1;
+                perspective.m23 *= -1;
+
+                CommandBuffer.SetViewProjectionMatrices(view, perspective);
+                CommandBuffer.SetRenderTarget(cachedRenderTarget);
+
+                if (AutoClear) CommandBuffer.ClearRenderTarget(true, true, BackgroundColor);
                 for (int i = 0; i < infos.Count; i++)
                 {
-                    infos[i].DrawInfoFast(cachedRenderTarget, Camera.projectionMatrix * Camera.worldToCameraMatrix, BackgroundColor, clear, clear);
-                    clear = false;
+                    infos[i].DrawInfoFast(CommandBuffer);
                 }
+                Graphics.ExecuteCommandBuffer(CommandBuffer);
             }
             else
             {
-                //Camera.Render();
+                Camera.targetTexture = cachedRenderTarget;
+                Camera.orthographicSize = size.y / (float)(TextureSizeFactor << 1);
                 for (int i = 0; i < infos.Count; i++)
                 {
-                    infos[i].DrawInfo(Camera);
+                    RenderInfo info = infos[i];
+                    Matrix4x4[] matrices = new Matrix4x4[info.matrices.Length];
+                    Array.Copy(info.matrices, matrices, matrices.Length);
+                    info.matrices = matrices;
+                    for (int j = 0; j < info.matrices.Length; ++j)
+                    {
+                        info.matrices[j].m13 += RenderingTools.CanvasHeight;
+                    }
+                    info.DrawInfo(Camera);
                 }
+                //Camera.Render();
                 Camera.Render();
+                Camera.targetTexture = empty;
             }
-            Camera.targetTexture = empty;
         }
 
 
@@ -255,7 +285,8 @@ namespace RW_NodeTree.Rendering
         /// <returns>standard size of texture</returns>
         public static Vector2Int DrawSize(List<RenderInfo> infos, int TextureSizeFactor = (int)DefaultTextureSizeFactor)
         {
-            Matrix4x4 camearMatrix = Camera.transform.worldToLocalMatrix;
+            Matrix4x4 camearMatrix = Matrix4x4.TRS(new Vector3(0, 65, 0), Quaternion.Euler(90, 0, 0), Vector3.one);
+            Matrix4x4.Inverse3DAffine(camearMatrix, ref camearMatrix);
             Vector2Int result = default(Vector2Int);
             float TowTimesTextureSizeFactor = TextureSizeFactor << 1;
             //camearMatrix.m13 += CanvasHeight;
@@ -339,15 +370,17 @@ namespace RW_NodeTree.Rendering
         {
             foreach (var info in infos)
             {
+                //Log.Message(info.ToString());
                 if (!info.CanUseFastDrawingMode) return false;
             }
             return true;
         }
 
         private static Camera camera = null;
+        private static CommandBuffer commandBuffer = null;
         internal static RenderTexture empty = new RenderTexture(1, 1, 0, RenderTextureFormat.ARGB32);
         private static readonly Dictionary<int, LinkStack<List<RenderInfo>>> renderInfos = new Dictionary<int, LinkStack<List<RenderInfo>>>();
-        public const int CanvasHeight = 4096;
+        public const float CanvasHeight = 4096;
         public const int MaxTexSize = 4096;
         public const int DefaultTextureSizeFactor = 128;
     }

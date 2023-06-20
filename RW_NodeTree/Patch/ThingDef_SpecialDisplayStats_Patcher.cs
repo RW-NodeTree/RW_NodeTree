@@ -45,6 +45,7 @@ namespace RW_NodeTree
         /// <param name="result">result of ThingDef.SpecialDisplayStats</param>
         public IEnumerable<StatDrawEntry> PostThingDef_SpecialDisplayStats(ThingDef def, StatRequest req, IEnumerable<StatDrawEntry> result)
         {
+            UpdateNode();
             foreach (CompBasicNodeComp comp in AllNodeComp)
             {
                 try

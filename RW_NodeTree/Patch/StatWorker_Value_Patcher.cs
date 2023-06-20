@@ -58,31 +58,35 @@ namespace RW_NodeTree.Patch
 
         private static bool PreStatWorker_GetValueUnfinalized(StatWorker __instance, MethodInfo __originalMethod, StatRequest req, bool applyPostProcess, ref (Dictionary<string, object>, CompChildNodeProccesser) __state)
         {
-            CompChildNodeProccesser proccesser = req.Thing.RootNode();
-            if (proccesser != null &&
-                __originalMethod.DeclaringType
+            if (__originalMethod.MethodHandle
                 ==
-                GetMethodInfo_GetValueUnfinalized_OfType(__instance.GetType()).DeclaringType
+                GetMethodInfo_GetValueUnfinalized_OfType(__instance.GetType()).MethodHandle
             )
             {
-                __state.Item1 = new Dictionary<string, object>();
-                __state.Item2 = proccesser;
-                return proccesser.PreStatWorker_GetValueUnfinalized(__instance, req, applyPostProcess, __state.Item1);
+                CompChildNodeProccesser proccesser = req.Thing.RootNode();
+                if (proccesser != null)
+                {
+                    __state.Item1 = new Dictionary<string, object>();
+                    __state.Item2 = proccesser;
+                    return proccesser.PreStatWorker_GetValueUnfinalized(__instance, req, applyPostProcess, __state.Item1);
+                }
             }
             return true;
         }
         private static bool PreStatWorker_FinalizeValue(StatWorker __instance, MethodInfo __originalMethod, StatRequest req, bool applyPostProcess, ref float val, ref (Dictionary<string, object>, CompChildNodeProccesser) __state)
         {
-            CompChildNodeProccesser proccesser = req.Thing.RootNode();
-            if (proccesser != null &&
-                __originalMethod.DeclaringType
+            if (__originalMethod.MethodHandle
                 ==
-                GetMethodInfo_FinalizeValue_OfType(__instance.GetType()).DeclaringType
+                GetMethodInfo_FinalizeValue_OfType(__instance.GetType()).MethodHandle
             )
             {
-                __state.Item1 = new Dictionary<string, object>();
-                __state.Item2 = proccesser;
-                return proccesser.PreStatWorker_FinalizeValue(__instance, req, applyPostProcess, ref val, __state.Item1);
+                CompChildNodeProccesser proccesser = req.Thing.RootNode();
+                if (proccesser != null)
+                {
+                    __state.Item1 = new Dictionary<string, object>();
+                    __state.Item2 = proccesser;
+                    return proccesser.PreStatWorker_FinalizeValue(__instance, req, applyPostProcess, ref val, __state.Item1);
+                }
             }
             return true;
         }
@@ -169,6 +173,7 @@ namespace RW_NodeTree
         /// <param name="applyPostProcess">parm 'applyPostProcess' of StatWorker.GetValueUnfinalized()</param>
         public bool PreStatWorker_GetValueUnfinalized(StatWorker statWorker, StatRequest req, bool applyPostProcess, Dictionary<string, object> stats)
         {
+            UpdateNode();
             bool result = true;
             foreach (CompBasicNodeComp comp in AllNodeComp)
             {
@@ -194,6 +199,7 @@ namespace RW_NodeTree
         /// <param name="applyPostProcess">parm 'applyPostProcess' of StatWorker.FinalizeValue()</param>
         public bool PreStatWorker_FinalizeValue(StatWorker statWorker, StatRequest req, bool applyPostProcess, ref float value, Dictionary<string, object> stats)
         {
+            UpdateNode();
             bool result = true;
             foreach (CompBasicNodeComp comp in AllNodeComp)
             {
@@ -219,6 +225,7 @@ namespace RW_NodeTree
         /// <param name="applyPostProcess">parm 'applyPostProcess' of StatWorker.GetValueUnfinalized()</param>
         public float PostStatWorker_GetValueUnfinalized(StatWorker statWorker, StatRequest req, bool applyPostProcess, float result, Dictionary<string, object> stats)
         {
+            UpdateNode();
             foreach (CompBasicNodeComp comp in AllNodeComp)
             {
                 try
@@ -243,6 +250,7 @@ namespace RW_NodeTree
         /// <param name="applyPostProcess">parm 'applyPostProcess' of StatWorker.FinalizeValue()</param>
         public float PostStatWorker_FinalizeValue(StatWorker statWorker, StatRequest req, bool applyPostProcess, float result, Dictionary<string, object> stats)
         {
+            UpdateNode();
             foreach (CompBasicNodeComp comp in AllNodeComp)
             {
                 try
@@ -267,6 +275,7 @@ namespace RW_NodeTree
         /// <param name="applyFinalProcess">parm 'applyFinalProcess' of StatWorker.GetValueUnfinalized()</param>
         public float FinalStatWorker_GetValueUnfinalized(StatWorker statWorker, StatRequest req, bool applyPostProcess, float result, Dictionary<string, object> stats, Exception exception)
         {
+            UpdateNode();
             foreach (CompBasicNodeComp comp in AllNodeComp)
             {
                 try
@@ -291,6 +300,7 @@ namespace RW_NodeTree
         /// <param name="applyFinalProcess">parm 'applyFinalProcess' of StatWorker.FinalizeValue()</param>
         public float FinalStatWorker_FinalizeValue(StatWorker statWorker, StatRequest req, bool applyPostProcess, float result, Dictionary<string, object> stats, Exception exception)
         {
+            UpdateNode();
             foreach (CompBasicNodeComp comp in AllNodeComp)
             {
                 try

@@ -57,31 +57,35 @@ namespace RW_NodeTree.Patch
 
         private static bool PreStatWorker_ShouldShowFor(StatWorker __instance, MethodInfo __originalMethod, StatRequest req, ref (Dictionary<string, object>, CompChildNodeProccesser) __state)
         {
-            CompChildNodeProccesser proccesser = req.Thing.RootNode();
-            if (proccesser != null &&
-                __originalMethod.DeclaringType
+            if (__originalMethod.MethodHandle
                 ==
-                GetMethodInfo_ShouldShowFor_OfType(__instance.GetType()).DeclaringType
+                GetMethodInfo_ShouldShowFor_OfType(__instance.GetType()).MethodHandle
             )
             {
-                __state.Item1 = new Dictionary<string, object>();
-                __state.Item2 = proccesser;
-                return proccesser.PreStatWorker_ShouldShowFor(__instance, req, __state.Item1);
+                CompChildNodeProccesser proccesser = req.Thing.RootNode();
+                if (proccesser != null)
+                {
+                    __state.Item1 = new Dictionary<string, object>();
+                    __state.Item2 = proccesser;
+                    return proccesser.PreStatWorker_ShouldShowFor(__instance, req, __state.Item1);
+                }
             }
             return true;
         }
         private static bool PreStatWorker_IsDisabledFor(StatWorker __instance, MethodInfo __originalMethod, Thing thing, ref (Dictionary<string, object>, CompChildNodeProccesser) __state)
         {
-            CompChildNodeProccesser proccesser = thing.RootNode();
-            if (proccesser != null &&
-                __originalMethod.DeclaringType
+            if (__originalMethod.MethodHandle
                 ==
-                GetMethodInfo_IsDisabledFor_OfType(__instance.GetType()).DeclaringType
+                GetMethodInfo_IsDisabledFor_OfType(__instance.GetType()).MethodHandle
             )
             {
-                __state.Item1 = new Dictionary<string, object>();
-                __state.Item2 = proccesser;
-                return proccesser.PreStatWorker_IsDisabledFor(__instance, thing, __state.Item1);
+                CompChildNodeProccesser proccesser = thing.RootNode();
+                if (proccesser != null)
+                {
+                    __state.Item1 = new Dictionary<string, object>();
+                    __state.Item2 = proccesser;
+                    return proccesser.PreStatWorker_IsDisabledFor(__instance, thing, __state.Item1);
+                }
             }
             return true;
         }
@@ -168,6 +172,7 @@ namespace RW_NodeTree
         /// <param name="applyPostProcess">parm 'applyPostProcess' of StatWorker.ShouldShowFor()</param>
         public bool PreStatWorker_ShouldShowFor(StatWorker statWorker, StatRequest req, Dictionary<string, object> stats)
         {
+            UpdateNode();
             bool result = true;
             foreach (CompBasicNodeComp comp in AllNodeComp)
             {
@@ -193,6 +198,7 @@ namespace RW_NodeTree
         /// <param name="applyPostProcess">parm 'applyPostProcess' of StatWorker.IsDisabledFor()</param>
         public bool PreStatWorker_IsDisabledFor(StatWorker statWorker, Thing thing, Dictionary<string, object> stats)
         {
+            UpdateNode();
             bool result = true;
             foreach (CompBasicNodeComp comp in AllNodeComp)
             {
@@ -218,6 +224,7 @@ namespace RW_NodeTree
         /// <param name="applyPostProcess">parm 'applyPostProcess' of StatWorker.ShouldShowFor()</param>
         public bool PostStatWorker_ShouldShowFor(StatWorker statWorker, StatRequest req, bool result, Dictionary<string, object> stats)
         {
+            UpdateNode();
             foreach (CompBasicNodeComp comp in AllNodeComp)
             {
                 try
@@ -242,6 +249,7 @@ namespace RW_NodeTree
         /// <param name="applyPostProcess">parm 'applyPostProcess' of StatWorker.IsDisabledFor()</param>
         public bool PostStatWorker_IsDisabledFor(StatWorker statWorker, Thing thing, bool result, Dictionary<string, object> stats)
         {
+            UpdateNode();
             foreach (CompBasicNodeComp comp in AllNodeComp)
             {
                 try
@@ -266,6 +274,7 @@ namespace RW_NodeTree
         /// <param name="applyFinalProcess">parm 'applyFinalProcess' of StatWorker.ShouldShowFor()</param>
         public bool FinalStatWorker_ShouldShowFor(StatWorker statWorker, StatRequest req, bool result, Dictionary<string, object> stats, Exception exception)
         {
+            UpdateNode();
             foreach (CompBasicNodeComp comp in AllNodeComp)
             {
                 try
@@ -290,6 +299,7 @@ namespace RW_NodeTree
         /// <param name="applyFinalProcess">parm 'applyFinalProcess' of StatWorker.IsDisabledFor()</param>
         public bool FinalStatWorker_IsDisabledFor(StatWorker statWorker, Thing thing, bool result, Dictionary<string, object> stats, Exception exception)
         {
+            UpdateNode();
             foreach (CompBasicNodeComp comp in AllNodeComp)
             {
                 try

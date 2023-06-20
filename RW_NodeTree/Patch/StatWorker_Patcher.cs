@@ -162,6 +162,7 @@ namespace RW_NodeTree
     {
         public virtual bool PreStatWorker_GearHasCompsThatAffectStat(Thing gear, StatDef stat, Dictionary<string, object> stats)
         {
+            UpdateNode();
             bool result = true;
             foreach (CompBasicNodeComp comp in AllNodeComp)
             {
@@ -179,6 +180,7 @@ namespace RW_NodeTree
 
         public virtual bool PreStatWorker_StatOffsetFromGear(Thing gear, StatDef stat, Dictionary<string, object> stats)
         {
+            UpdateNode();
             bool result = true;
             foreach (CompBasicNodeComp comp in AllNodeComp)
             {
@@ -196,6 +198,7 @@ namespace RW_NodeTree
         
         public virtual bool PreStatWorker_InfoTextLineFromGear(Thing gear, StatDef stat, Dictionary<string, object> stats)
         {
+            UpdateNode();
             bool result = true;
             foreach (CompBasicNodeComp comp in AllNodeComp)
             {
@@ -213,6 +216,7 @@ namespace RW_NodeTree
 
         public virtual bool PostStatWorker_GearHasCompsThatAffectStat(Thing gear, StatDef stat, bool result, Dictionary<string, object> stats)
         {
+            UpdateNode();
             foreach (CompBasicNodeComp comp in AllNodeComp)
             {
                 try
@@ -229,6 +233,7 @@ namespace RW_NodeTree
 
         public virtual float PostStatWorker_StatOffsetFromGear(Thing gear, StatDef stat, float result, Dictionary<string, object> stats)
         {
+            UpdateNode();
             foreach (CompBasicNodeComp comp in AllNodeComp)
             {
                 try
@@ -245,6 +250,7 @@ namespace RW_NodeTree
 
         public virtual string PostStatWorker_InfoTextLineFromGear(Thing gear, StatDef stat, string result, Dictionary<string, object> stats)
         {
+            UpdateNode();
             foreach (CompBasicNodeComp comp in AllNodeComp)
             {
                 try
@@ -261,6 +267,7 @@ namespace RW_NodeTree
 
         public virtual IEnumerable<Thing> PostStatWorker_RelevantGear(Thing gear, StatDef stat, IEnumerable<Thing> result)
         {
+            UpdateNode();
             foreach (CompBasicNodeComp comp in AllNodeComp)
             {
                 try
@@ -277,6 +284,7 @@ namespace RW_NodeTree
 
         public virtual bool FinalStatWorker_GearHasCompsThatAffectStat(Thing gear, StatDef stat, bool result, Dictionary<string, object> stats, Exception exception)
         {
+            UpdateNode();
             foreach (CompBasicNodeComp comp in AllNodeComp)
             {
                 try
@@ -293,6 +301,7 @@ namespace RW_NodeTree
 
         public virtual float FinalStatWorker_StatOffsetFromGear(Thing gear, StatDef stat, float result, Dictionary<string, object> stats, Exception exception)
         {
+            UpdateNode();
             foreach (CompBasicNodeComp comp in AllNodeComp)
             {
                 try
@@ -309,6 +318,7 @@ namespace RW_NodeTree
 
         public virtual string FinalStatWorker_InfoTextLineFromGear(Thing gear, StatDef stat, string result, Dictionary<string, object> stats, Exception exception)
         {
+            UpdateNode();
             foreach (CompBasicNodeComp comp in AllNodeComp)
             {
                 try
