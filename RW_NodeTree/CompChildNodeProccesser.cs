@@ -824,13 +824,6 @@ namespace RW_NodeTree
 
             public Material materialNorth, materialEast, materialSouth, materialWest;
 
-            public Texture2D textureNorth, textureEast, textureSouth, textureWest;
-
-            public RenderTexture cachedRenderTargetNorth, cachedRenderTargetEast, cachedRenderTargetSouth, cachedRenderTargetWest;
-
-            public byte IsRandereds;
-        }
-
         #region operator
         public static implicit operator Thing(CompChildNodeProccesser node)
         {
