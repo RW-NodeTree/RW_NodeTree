@@ -214,7 +214,7 @@ namespace RW_NodeTree.Rendering
 
                 Matrix4x4 perspective = Matrix4x4.Ortho(-hw, hw, -hh, hh, 0, 71.5f);
                 //perspective.m32 *= -1;
-                perspective.m23 *= -1;
+                perspective.m22 *= -1;
 
                 CommandBuffer.SetViewProjectionMatrices(view, perspective);
                 CommandBuffer.SetRenderTarget(cachedRenderTarget);
