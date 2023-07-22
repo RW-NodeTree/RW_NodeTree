@@ -58,35 +58,27 @@ namespace RW_NodeTree.Patch
 
         private static bool PreStatWorker_GetValueUnfinalized(StatWorker __instance, MethodInfo __originalMethod, StatRequest req, bool applyPostProcess, ref (Dictionary<string, object>, CompChildNodeProccesser) __state)
         {
-            if (__originalMethod.MethodHandle
-                ==
-                GetMethodInfo_GetValueUnfinalized_OfType(__instance.GetType()).MethodHandle
+            CompChildNodeProccesser proccesser = req.Thing.RootNode();
+            if (proccesser != null &&
+                __originalMethod.MethodHandle == GetMethodInfo_GetValueUnfinalized_OfType(__instance.GetType()).MethodHandle
             )
             {
-                CompChildNodeProccesser proccesser = req.Thing.RootNode();
-                if (proccesser != null)
-                {
-                    __state.Item1 = new Dictionary<string, object>();
-                    __state.Item2 = proccesser;
-                    return proccesser.PreStatWorker_GetValueUnfinalized(__instance, req, applyPostProcess, __state.Item1);
-                }
+                __state.Item1 = new Dictionary<string, object>();
+                __state.Item2 = proccesser;
+                return proccesser.PreStatWorker_GetValueUnfinalized(__instance, req, applyPostProcess, __state.Item1);
             }
             return true;
         }
         private static bool PreStatWorker_FinalizeValue(StatWorker __instance, MethodInfo __originalMethod, StatRequest req, bool applyPostProcess, ref float val, ref (Dictionary<string, object>, CompChildNodeProccesser) __state)
         {
-            if (__originalMethod.MethodHandle
-                ==
-                GetMethodInfo_FinalizeValue_OfType(__instance.GetType()).MethodHandle
+            CompChildNodeProccesser proccesser = req.Thing.RootNode();
+            if (proccesser != null &&
+                __originalMethod.MethodHandle == GetMethodInfo_FinalizeValue_OfType(__instance.GetType()).MethodHandle
             )
             {
-                CompChildNodeProccesser proccesser = req.Thing.RootNode();
-                if (proccesser != null)
-                {
-                    __state.Item1 = new Dictionary<string, object>();
-                    __state.Item2 = proccesser;
-                    return proccesser.PreStatWorker_FinalizeValue(__instance, req, applyPostProcess, ref val, __state.Item1);
-                }
+                __state.Item1 = new Dictionary<string, object>();
+                __state.Item2 = proccesser;
+                return proccesser.PreStatWorker_FinalizeValue(__instance, req, applyPostProcess, ref val, __state.Item1);
             }
             return true;
         }

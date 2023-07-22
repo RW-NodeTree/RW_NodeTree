@@ -57,35 +57,27 @@ namespace RW_NodeTree.Patch
 
         private static bool PreStatWorker_ShouldShowFor(StatWorker __instance, MethodInfo __originalMethod, StatRequest req, ref (Dictionary<string, object>, CompChildNodeProccesser) __state)
         {
-            if (__originalMethod.MethodHandle
-                ==
-                GetMethodInfo_ShouldShowFor_OfType(__instance.GetType()).MethodHandle
+            CompChildNodeProccesser proccesser = req.Thing.RootNode();
+            if (proccesser != null &&
+                __originalMethod.MethodHandle == GetMethodInfo_ShouldShowFor_OfType(__instance.GetType()).MethodHandle
             )
             {
-                CompChildNodeProccesser proccesser = req.Thing.RootNode();
-                if (proccesser != null)
-                {
-                    __state.Item1 = new Dictionary<string, object>();
-                    __state.Item2 = proccesser;
-                    return proccesser.PreStatWorker_ShouldShowFor(__instance, req, __state.Item1);
-                }
+                __state.Item1 = new Dictionary<string, object>();
+                __state.Item2 = proccesser;
+                return proccesser.PreStatWorker_ShouldShowFor(__instance, req, __state.Item1);
             }
             return true;
         }
         private static bool PreStatWorker_IsDisabledFor(StatWorker __instance, MethodInfo __originalMethod, Thing thing, ref (Dictionary<string, object>, CompChildNodeProccesser) __state)
         {
-            if (__originalMethod.MethodHandle
-                ==
-                GetMethodInfo_IsDisabledFor_OfType(__instance.GetType()).MethodHandle
+            CompChildNodeProccesser proccesser = thing.RootNode();
+            if (proccesser != null &&
+                __originalMethod.MethodHandle == GetMethodInfo_IsDisabledFor_OfType(__instance.GetType()).MethodHandle
             )
             {
-                CompChildNodeProccesser proccesser = thing.RootNode();
-                if (proccesser != null)
-                {
-                    __state.Item1 = new Dictionary<string, object>();
-                    __state.Item2 = proccesser;
-                    return proccesser.PreStatWorker_IsDisabledFor(__instance, thing, __state.Item1);
-                }
+                __state.Item1 = new Dictionary<string, object>();
+                __state.Item2 = proccesser;
+                return proccesser.PreStatWorker_IsDisabledFor(__instance, thing, __state.Item1);
             }
             return true;
         }

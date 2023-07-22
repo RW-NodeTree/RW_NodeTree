@@ -118,23 +118,19 @@ namespace RW_NodeTree
                         {
                             try
                             {
-                                if (innerList.Count <= i) innerList.Add(null);
-                                if (innerIdList.Count <= i) innerIdList.Add(null);
-                                innerIdList[i] = xmlNode.Name;
+                                Thing thing = null;
+                                innerList.Add(thing);
+                                innerIdList.Add(xmlNode.Name);
                                 if (xmlNode.ChildNodes.Count == 1 && xmlNode.FirstChild.NodeType == XmlNodeType.Text)
                                 {
-                                    Thing thing = innerList[i];
                                     Scribe_References.Look(ref thing, innerIdList[i]);
-                                    innerList[i] = thing;
                                     innerIdList[i] += " !ref";
                                 }
                                 else
                                 {
-                                    Thing thing = innerList[i];
                                     Scribe_Deep.Look(ref thing, innerIdList[i]);
-                                    innerList[i] = thing;
-                                    if (innerList[i] != null) innerList[i].holdingOwner = this;
                                 }
+                                innerList[i] = thing;
                             }
                             catch (Exception e)
                             {
@@ -187,12 +183,16 @@ namespace RW_NodeTree
                 {
                     innerIdList.RemoveAt(i);
                 }
+                foreach(Thing thing in innerList)
+                {
+                    thing.holdingOwner = this;
+                }
             }
             Scribe_Values.Look<bool>(ref this.needUpdate, "needUpdate");
             //if (Scribe.mode == LoadSaveMode.PostLoadInit) needUpdate = false;
         }
 
-        internal bool internal_UpdateNode(CompChildNodeProccesser actionNode = null)
+        internal bool internal_UpdateNode(string eventName = null, object costomEventInfo = null, CompChildNodeProccesser actionNode = null)
         {
             bool StopEventBubble = false;
             CompChildNodeProccesser proccess = this.Comp;
@@ -200,33 +200,48 @@ namespace RW_NodeTree
             {
                 if (actionNode == null)
                 {
-                    return proccess.RootNode.ChildNodes.internal_UpdateNode(proccess);
+                    return proccess.RootNode.ChildNodes.internal_UpdateNode(eventName, costomEventInfo, proccess);
                 }
-                else if (NeedUpdate)
+                else if (NeedUpdate || eventName != null)
                 {
-                    NeedUpdate = false;
-                    bool reset = true;
-                    for (int i = 0; i < innerList.Count; i++)
+                    if(eventName == null) NeedUpdate = false;
+                    Dictionary<string,object> cachingData = new Dictionary<string, object>();
+                    foreach (CompBasicNodeComp comp in proccess.AllNodeComp)
                     {
-                        Thing node = this.innerList[i];
-                        NodeContainer container = ((CompChildNodeProccesser)node)?.ChildNodes;
-                        if (container != null && container.NeedUpdate)
+                        try
                         {
-                            StopEventBubble = container.internal_UpdateNode(actionNode) || StopEventBubble;
-                            reset = false;
+                            StopEventBubble = comp.internal_PreUpdateNode(eventName, costomEventInfo, actionNode, cachingData) || StopEventBubble;
+                        }
+                        catch (Exception ex)
+                        {
+                            Log.Error(ex.ToString());
                         }
                     }
-                    if (!StopEventBubble)
+                    bool reset = true;
+                    if(!StopEventBubble)
                     {
-                        foreach (CompBasicNodeComp comp in proccess.AllNodeComp)
+                        for (int i = 0; i < innerList.Count; i++)
                         {
-                            try
+                            Thing node = this.innerList[i];
+                            NodeContainer container = ((CompChildNodeProccesser)node)?.ChildNodes;
+                            if (eventName != null || (container != null && container.NeedUpdate))
                             {
-                                StopEventBubble = comp.internal_UpdateNode(actionNode) || StopEventBubble;
+                                StopEventBubble = container.internal_UpdateNode(eventName, costomEventInfo, actionNode) || StopEventBubble;
+                                reset = false;
                             }
-                            catch(Exception ex)
+                        }
+                        if (!StopEventBubble)
+                        {
+                            foreach (CompBasicNodeComp comp in proccess.AllNodeComp)
                             {
-                                Log.Error(ex.ToString());
+                                try
+                                {
+                                    StopEventBubble = comp.internal_PostUpdateNode(eventName, costomEventInfo, actionNode, cachingData) || StopEventBubble;
+                                }
+                                catch (Exception ex)
+                                {
+                                    Log.Error(ex.ToString());
+                                }
                             }
                         }
                     }
@@ -318,7 +333,8 @@ namespace RW_NodeTree
                     innerList.RemoveAt(i);
                 }
             }
-            Comp.internal_PerAdd(ref item, ref id);
+            Dictionary<string,object> cachedData = new Dictionary<string,object>();
+            Comp.internal_PerAdd(ref item, ref id, cachedData);
             if(!innerList.Contains(item))
             {
                 if(id.IsVaildityKeyFormat())
@@ -343,14 +359,15 @@ namespace RW_NodeTree
             if (Count >= maxStacks) goto fail;
 
             innerList.Add(item);
-            if(item.holdingOwner == null) item.holdingOwner = this;
-            NeedUpdate = true;
 
-            Comp.internal_PostAdd(item, id, true);
-            ((CompChildNodeProccesser)item)?.internal_Added(this, id);
+            Comp.internal_PostAdd(item, id, true, cachedData);
+            ((CompChildNodeProccesser)item)?.internal_Added(this, id, cachedData);
+            item.holdingOwner?.Remove(item);
+            item.holdingOwner = this;
+            NeedUpdate = true;
             return true;
             fail:
-            Comp.internal_PostAdd(item, id, false);
+            Comp.internal_PostAdd(item, id, false, cachedData);
             return false;
         }
 
@@ -366,26 +383,26 @@ namespace RW_NodeTree
                 innerIdList.RemoveAt(i);
             }
 
-            Comp.internal_PerRemove(ref item);
+            Dictionary<string, object> cachedData = new Dictionary<string, object>();
+            Comp.internal_PerRemove(ref item, cachedData);
 
             int index = innerList.LastIndexOf(item);
             string id = (index >= 0 && index < Count) ? innerIdList[index] : null;
 
             if (index < 0 || index >= Count)
             {
-                Comp.internal_PostRemove(item, id, false);
+                Comp.internal_PostRemove(item, id, false, cachedData);
                 return false;
             }
 
             innerList.RemoveAt(index);
             innerIdList.RemoveAt(index);
 
-            if(item.holdingOwner == this) item.holdingOwner = null;
 
+            Comp.internal_PostRemove(item, id, true, cachedData);
+            ((CompChildNodeProccesser)item)?.internal_Removed(this, id, cachedData);
+            item.holdingOwner = null;
             NeedUpdate = true;
-
-            Comp.internal_PostRemove(item, id, true);
-            ((CompChildNodeProccesser)item)?.internal_Removed(this, id);
             return true;
         }
 
@@ -424,12 +441,14 @@ namespace RW_NodeTree
             if (key.IsVaildityKeyFormat())
             {
                 Thing t = this[key];
+                ThingOwner owner = value?.holdingOwner;
                 if ((t != null ? Remove(t) : true) && value != null)
                 {
                     innerIdList.Add(key);
-                    if (!TryAdd(value) && (t == null || !TryAdd(t)))
+                    if (!TryAdd(value))
                     {
-                        innerIdList.RemoveAt(Count);
+                        owner?.TryAdd(value,false);
+                        if (t == null || !TryAdd(t)) innerIdList.RemoveAt(Count);
                     }
                 }
             }

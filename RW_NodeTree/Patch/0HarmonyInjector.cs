@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using Verse;
@@ -26,5 +27,6 @@ namespace RW_NodeTree.Patch
         }
 
         public static Harmony patcher = new Harmony("RW_NodeTree.Patch");
+        public static Assembly coreAssembly = typeof(Thing).Assembly;
     }
 }

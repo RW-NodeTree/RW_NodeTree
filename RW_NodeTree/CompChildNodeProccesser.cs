@@ -13,6 +13,8 @@ using System.Diagnostics;
 using System.Reflection;
 using Verse.Noise;
 using static UnityEngine.GraphicsBuffer;
+using TMPro;
+using RW_NodeTree.Patch;
 
 namespace RW_NodeTree
 {
@@ -542,6 +544,31 @@ namespace RW_NodeTree
 
                 if (child != null)
                 {
+                    nodeRenderingInfos.Add((container[(uint)i], child, new List<RenderInfo>()));
+                }
+            }
+
+            Dictionary<string, object> cachingData = new Dictionary<string, object>();
+
+            foreach (CompBasicNodeComp comp in AllNodeComp)
+            {
+                try
+                {
+                    nodeRenderingInfos = comp.internal_PreDrawSteep(nodeRenderingInfos, rot, subGraphic, cachingData) ?? nodeRenderingInfos;
+                }
+                catch (Exception ex)
+                {
+                    Log.Error(ex.ToString());
+                }
+            }
+
+            for (int i = 0; i < nodeRenderingInfos.Count; i++)
+            {
+                string id = nodeRenderingInfos[i].Item1;
+                Thing child = nodeRenderingInfos[i].Item2;
+                List<RenderInfo> infos = nodeRenderingInfos[i].Item3 ?? new List<RenderInfo>();
+                if (child != null && id != null)
+                {
                     RenderingTools.StartOrEndDrawCatchingBlock = true;
                     try
                     {
@@ -549,7 +576,7 @@ namespace RW_NodeTree
                         child.Rotation = new Rot4((rot.AsInt + rotCache.AsInt) & 3);
                         child.DrawAt(Vector3.zero);
                         child.Rotation = rotCache;
-                        nodeRenderingInfos.Add((container[(uint)i], child, RenderingTools.RenderInfos));
+                        infos.AddRange(RenderingTools.RenderInfos);
                     }
                     catch (Exception ex)
                     {
@@ -557,13 +584,14 @@ namespace RW_NodeTree
                     }
                     RenderingTools.StartOrEndDrawCatchingBlock = false;
                 }
+                nodeRenderingInfos[i] = (id, child, infos);
             }
 
             foreach (CompBasicNodeComp comp in AllNodeComp)
             {
                 try
                 {
-                    nodeRenderingInfos = comp.internal_OverrideDrawSteep(nodeRenderingInfos, rot, subGraphic) ?? nodeRenderingInfos;
+                    nodeRenderingInfos = comp.internal_PostDrawSteep(nodeRenderingInfos, rot, subGraphic, cachingData) ?? nodeRenderingInfos;
                 }
                 catch (Exception ex)
                 {
@@ -582,6 +610,9 @@ namespace RW_NodeTree
         /// <returns></returns>
         public bool AllowNode(Thing node, string id = null)
         {
+            ThingOwner targetOwner = node?.holdingOwner;
+            Type type = targetOwner?.GetType();
+            if (type != null && type.Assembly != HarmonyInjector.coreAssembly) return false;
             if (id.NullOrEmpty() || ChildNodes.IsChildOf(node)) return false;
             if (Props.ForceNodeIdControl && !RegiestedNodeId.Contains(id)) return false;
             foreach (CompBasicNodeComp comp in AllNodeComp)
@@ -602,7 +633,7 @@ namespace RW_NodeTree
         /// Update node tree
         /// </summary>
         /// <returns></returns>
-        public bool UpdateNode() => ChildNodes.internal_UpdateNode();
+        public bool UpdateNode(string eventName = null, object costomEventInfo = null) => ChildNodes.internal_UpdateNode(eventName, costomEventInfo);
 
 
         public void ResetCachedRootNode()
@@ -615,7 +646,7 @@ namespace RW_NodeTree
             }
         }
 
-        internal void internal_PerAdd(ref Thing node, ref string id)
+        internal void internal_PerAdd(ref Thing node, ref string id, Dictionary<string, object> cachedData)
         {
             Thing nodeCache = node;
             string idCache = id;
@@ -623,7 +654,7 @@ namespace RW_NodeTree
             {
                 try
                 {
-                    comp.internal_PerAdd(ref nodeCache, ref idCache);
+                    comp.internal_PerAdd(ref nodeCache, ref idCache, cachedData);
                 }
                 catch (Exception ex)
                 {
@@ -636,13 +667,13 @@ namespace RW_NodeTree
             id = idCache;
         }
 
-        internal void internal_PostAdd(Thing node, string id, bool success)
+        internal void internal_PostAdd(Thing node, string id, bool success, Dictionary<string, object> cachedData)
         {
             foreach (CompBasicNodeComp comp in AllNodeComp)
             {
                 try
                 {
-                    comp.internal_PostAdd(node, id, success);
+                    comp.internal_PostAdd(node, id, success, cachedData);
                 }
                 catch (Exception ex)
                 {
@@ -651,14 +682,14 @@ namespace RW_NodeTree
             }
         }
 
-        internal void internal_Added(NodeContainer container, string id)
+        internal void internal_Added(NodeContainer container, string id, Dictionary<string, object> cachedData)
         {
             ResetCachedRootNode();
             foreach (CompBasicNodeComp comp in AllNodeComp)
             {
                 try
                 {
-                    comp.internal_Added(container, id);
+                    comp.internal_Added(container, id, cachedData);
                 }
                 catch (Exception ex)
                 {
@@ -667,14 +698,14 @@ namespace RW_NodeTree
             }
         }
 
-        internal void internal_PerRemove(ref Thing node)
+        internal void internal_PerRemove(ref Thing node, Dictionary<string, object> cachedData)
         {
             Thing nodeCache = node;
             foreach (CompBasicNodeComp comp in AllNodeComp)
             {
                 try
                 {
-                    comp.internal_PerRemove(ref nodeCache);
+                    comp.internal_PerRemove(ref nodeCache, cachedData);
                 }
                 catch (Exception ex)
                 {
@@ -685,13 +716,13 @@ namespace RW_NodeTree
             node = nodeCache;
         }
 
-        internal void internal_PostRemove(Thing node, string id, bool success)
+        internal void internal_PostRemove(Thing node, string id, bool success, Dictionary<string, object> cachedData)
         {
             foreach (CompBasicNodeComp comp in AllNodeComp)
             {
                 try
                 {
-                    comp.internal_PostRemove(node, id, success);
+                    comp.internal_PostRemove(node, id, success, cachedData);
                 }
                 catch (Exception ex)
                 {
@@ -700,14 +731,14 @@ namespace RW_NodeTree
             }
         }
 
-        internal void internal_Removed(NodeContainer container, string id)
+        internal void internal_Removed(NodeContainer container, string id, Dictionary<string, object> cachedData)
         {
             ResetCachedRootNode();
             foreach (CompBasicNodeComp comp in AllNodeComp)
             {
                 try
                 {
-                    comp.internal_Removed(container, id);
+                    comp.internal_Removed(container, id, cachedData);
                 }
                 catch (Exception ex)
                 {
@@ -784,7 +815,7 @@ namespace RW_NodeTree
 
         private readonly Dictionary<Type, Dictionary<(Thing, Verb, Tool, VerbProperties, bool), (Thing, Verb, Tool, VerbProperties)>> BeforeConvertVerbCorrespondingThingCache = new Dictionary<Type, Dictionary<(Thing, Verb, Tool, VerbProperties, bool), (Thing, Verb, Tool, VerbProperties)>>();
 
-
+        
         /*
         private static Matrix4x4 matrix =
                             new Matrix4x4(

@@ -78,12 +78,22 @@ namespace RW_NodeTree
 
         public virtual void PostFX(RenderTexture tar) { }
 
+
+        /// <summary>
+        /// update event
+        /// </summary>
+        /// <param name="actionNode">update event action node</param>
+        protected virtual bool PreUpdateNode(string eventName, object costomEventInfo, CompChildNodeProccesser actionNode, Dictionary<string, object> cachedDataToPostUpatde)
+        {
+            return false;
+        }
+
         /// <summary>
         /// update event
         /// </summary>
         /// <param name="actionNode">update event action node</param>
         /// <returns>stope bubble</returns>
-        protected virtual bool UpdateNode(CompChildNodeProccesser actionNode)
+        protected virtual bool PostUpdateNode(string eventName, object costomEventInfo, CompChildNodeProccesser actionNode, Dictionary<string, object> cachedDataFromPerUpdate)
         {
             return false;
         }
@@ -104,7 +114,7 @@ namespace RW_NodeTree
         /// </summary>
         /// <param name="node"></param>
         /// <param name="id"></param>
-        protected virtual void PerAdd(ref Thing node, ref string id)
+        protected virtual void PerAdd(ref Thing node, ref string id, Dictionary<string, object> cachedData)
         {
             return;
         }
@@ -114,7 +124,7 @@ namespace RW_NodeTree
         /// </summary>
         /// <param name="node"></param>
         /// <param name="id"></param>
-        protected virtual void PostAdd(Thing node, string id, bool success)
+        protected virtual void PostAdd(Thing node, string id, bool success, Dictionary<string, object> cachedData)
         {
             return;
         }
@@ -124,7 +134,7 @@ namespace RW_NodeTree
         /// </summary>
         /// <param name="node"></param>
         /// <param name="id"></param>
-        protected virtual void PerRemove(ref Thing node)
+        protected virtual void PerRemove(ref Thing node, Dictionary<string, object> cachedData)
         {
             return;
         }
@@ -134,7 +144,7 @@ namespace RW_NodeTree
         /// </summary>
         /// <param name="node"></param>
         /// <param name="id"></param>
-        protected virtual void PostRemove(Thing node, string id, bool success)
+        protected virtual void PostRemove(Thing node, string id, bool success, Dictionary<string, object> cachedData)
         {
             return;
         }
@@ -144,7 +154,7 @@ namespace RW_NodeTree
         /// </summary>
         /// <param name="container"></param>
         /// <param name="id"></param>
-        protected virtual void Added(NodeContainer container, string id)
+        protected virtual void Added(NodeContainer container, string id, Dictionary<string, object> cachedData)
         {
             return;
         }
@@ -154,7 +164,7 @@ namespace RW_NodeTree
         /// </summary>
         /// <param name="container"></param>
         /// <param name="id"></param>
-        protected virtual void Removed(NodeContainer container, string id)
+        protected virtual void Removed(NodeContainer container, string id, Dictionary<string, object> cachedData)
         {
             return;
         }
@@ -175,21 +185,35 @@ namespace RW_NodeTree
         /// <param name="rot">rotation</param>
         /// <param name="graphic">original graphic</param>
         /// <returns></returns>
-        protected virtual List<(string, Thing, List<RenderInfo>)> OverrideDrawSteep(List<(string, Thing, List<RenderInfo>)> nodeRenderingInfos, Rot4 rot, Graphic graphic)
+        protected virtual List<(string, Thing, List<RenderInfo>)> PreDrawSteep(List<(string, Thing, List<RenderInfo>)> nodeRenderingInfos, Rot4 rot, Graphic graphic, Dictionary<string, object> cachedDataToPostDrawSteep)
+        {
+            return nodeRenderingInfos;
+        }
+
+        /// <summary>
+        /// Adapte draw steep of this node
+        /// </summary>
+        /// <param name="nodeRenderingInfos">Corresponding rendering infos with id and part</param>
+        /// <param name="rot">rotation</param>
+        /// <param name="graphic">original graphic</param>
+        /// <returns></returns>
+        protected virtual List<(string, Thing, List<RenderInfo>)> PostDrawSteep(List<(string, Thing, List<RenderInfo>)> nodeRenderingInfos, Rot4 rot, Graphic graphic, Dictionary<string, object> cachedDataFromPerDrawSteep)
         {
             return nodeRenderingInfos;
         }
 
 
-        internal bool internal_UpdateNode(CompChildNodeProccesser actionNode) => UpdateNode(actionNode);
+        internal bool internal_PreUpdateNode(string eventName, object costomEventInfo, CompChildNodeProccesser actionNode, Dictionary<string, object> cachedDataToPostUpatde) => PreUpdateNode(eventName, costomEventInfo, actionNode, cachedDataToPostUpatde);
+        internal bool internal_PostUpdateNode(string eventName, object costomEventInfo, CompChildNodeProccesser actionNode, Dictionary<string, object> cachedDataFromPerUpdate) => PostUpdateNode(eventName, costomEventInfo, actionNode, cachedDataFromPerUpdate);
         internal bool internal_AllowNode(Thing node, string id = null) => AllowNode(node, id);
-        internal void internal_PerAdd(ref Thing node, ref string id) => PerAdd(ref node, ref id);
-        internal void internal_PostAdd(Thing node, string id, bool success) => PostAdd(node, id, success);
-        internal void internal_PerRemove(ref Thing node) => PerRemove(ref node);
-        internal void internal_PostRemove(Thing node, string id, bool success) => PostRemove(node, id, success);
-        internal void internal_Added(NodeContainer container, string id) => Added(container, id);
-        internal void internal_Removed(NodeContainer container, string id) => Removed(container, id);
+        internal void internal_PerAdd(ref Thing node, ref string id, Dictionary<string, object> cachedData) => PerAdd(ref node, ref id, cachedData);
+        internal void internal_PostAdd(Thing node, string id, bool success, Dictionary<string, object> cachedData) => PostAdd(node, id, success, cachedData);
+        internal void internal_PerRemove(ref Thing node, Dictionary<string, object> cachedData) => PerRemove(ref node, cachedData);
+        internal void internal_PostRemove(Thing node, string id, bool success, Dictionary<string, object> cachedData) => PostRemove(node, id, success, cachedData);
+        internal void internal_Added(NodeContainer container, string id, Dictionary<string, object> cachedData) => Added(container, id, cachedData);
+        internal void internal_Removed(NodeContainer container, string id, Dictionary<string, object> cachedData) => Removed(container, id, cachedData);
         internal HashSet<string> internal_RegiestedNodeId(HashSet<string> regiestedNodeId) => RegiestedNodeId(regiestedNodeId);
-        internal List<(string, Thing, List<RenderInfo>)> internal_OverrideDrawSteep(List<(string, Thing, List<RenderInfo>)> nodeRenderingInfos, Rot4 rot, Graphic graphic) => OverrideDrawSteep(nodeRenderingInfos, rot, graphic);
+        internal List<(string, Thing, List<RenderInfo>)> internal_PreDrawSteep(List<(string, Thing, List<RenderInfo>)> nodeRenderingInfos, Rot4 rot, Graphic graphic, Dictionary<string, object> cachedDataToPostDrawSteep) => PreDrawSteep(nodeRenderingInfos, rot, graphic, cachedDataToPostDrawSteep);
+        internal List<(string, Thing, List<RenderInfo>)> internal_PostDrawSteep(List<(string, Thing, List<RenderInfo>)> nodeRenderingInfos, Rot4 rot, Graphic graphic, Dictionary<string, object> cachedDataFromPerDrawSteep) => PostDrawSteep(nodeRenderingInfos, rot, graphic, cachedDataFromPerDrawSteep);
     }
 }

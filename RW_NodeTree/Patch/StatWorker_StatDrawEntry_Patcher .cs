@@ -39,18 +39,14 @@ namespace RW_NodeTree.Patch
 
         private static bool PreStatWorker_GetStatDrawEntryLabel(StatWorker __instance, MethodInfo __originalMethod, StatDef stat, float value, ToStringNumberSense numberSense, StatRequest optionalReq, bool finalized, ref (Dictionary<string, object>, CompChildNodeProccesser) __state)
         {
-            if (__originalMethod.MethodHandle
-                ==
-                GetMethodInfo_GetStatDrawEntryLabel_OfType(__instance.GetType()).MethodHandle
+            CompChildNodeProccesser proccesser = optionalReq.Thing.RootNode();
+            if (proccesser != null &&
+                __originalMethod.MethodHandle == GetMethodInfo_GetStatDrawEntryLabel_OfType(__instance.GetType()).MethodHandle
             )
             {
-                CompChildNodeProccesser proccesser = optionalReq.Thing.RootNode();
-                if (proccesser != null)
-                {
-                    __state.Item1 = new Dictionary<string, object>();
-                    __state.Item2 = proccesser;
-                    return proccesser.PreStatWorker_GetStatDrawEntryLabel(__instance, stat, value, numberSense, optionalReq, finalized, __state.Item1);
-                }
+                __state.Item1 = new Dictionary<string, object>();
+                __state.Item2 = proccesser;
+                return proccesser.PreStatWorker_GetStatDrawEntryLabel(__instance, stat, value, numberSense, optionalReq, finalized, __state.Item1);
             }
             return true;
         }
