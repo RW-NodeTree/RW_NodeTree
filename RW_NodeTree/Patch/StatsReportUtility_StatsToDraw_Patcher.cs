@@ -49,7 +49,7 @@ namespace RW_NodeTree
         /// </summary>
         /// <param name="thing">parm 'thing' of StatsReportUtility.StatsToDraw()</param>
         /// <param name="result">result of ThingDef.SpecialDisplayStats</param>
-        public IEnumerable<StatDrawEntry> PostStatsReportUtility_StatsToDraw(Thing thing, IEnumerable<StatDrawEntry> result)
+        internal IEnumerable<StatDrawEntry> PostStatsReportUtility_StatsToDraw(Thing thing, IEnumerable<StatDrawEntry> result)
         {
             UpdateNode();
             foreach (CompBasicNodeComp comp in AllNodeComp)

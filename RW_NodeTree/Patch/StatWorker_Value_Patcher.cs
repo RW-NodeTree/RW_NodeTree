@@ -163,7 +163,7 @@ namespace RW_NodeTree
         /// <param name="statWorker">StatWorker</param>
         /// <param name="req">parm 'req' of StatWorker.GetValueUnfinalized()</param>
         /// <param name="applyPostProcess">parm 'applyPostProcess' of StatWorker.GetValueUnfinalized()</param>
-        public bool PreStatWorker_GetValueUnfinalized(StatWorker statWorker, StatRequest req, bool applyPostProcess, Dictionary<string, object> stats)
+        internal bool PreStatWorker_GetValueUnfinalized(StatWorker statWorker, StatRequest req, bool applyPostProcess, Dictionary<string, object> stats)
         {
             UpdateNode();
             bool result = true;
@@ -189,7 +189,7 @@ namespace RW_NodeTree
         /// <param name="statWorker">StatWorker</param>
         /// <param name="req">parm 'req' of StatWorker.FinalizeValue()</param>
         /// <param name="applyPostProcess">parm 'applyPostProcess' of StatWorker.FinalizeValue()</param>
-        public bool PreStatWorker_FinalizeValue(StatWorker statWorker, StatRequest req, bool applyPostProcess, ref float value, Dictionary<string, object> stats)
+        internal bool PreStatWorker_FinalizeValue(StatWorker statWorker, StatRequest req, bool applyPostProcess, ref float value, Dictionary<string, object> stats)
         {
             UpdateNode();
             bool result = true;
@@ -215,9 +215,8 @@ namespace RW_NodeTree
         /// <param name="statWorker">StatWorker</param>
         /// <param name="req">parm 'req' of StatWorker.GetValueUnfinalized()</param>
         /// <param name="applyPostProcess">parm 'applyPostProcess' of StatWorker.GetValueUnfinalized()</param>
-        public float PostStatWorker_GetValueUnfinalized(StatWorker statWorker, StatRequest req, bool applyPostProcess, float result, Dictionary<string, object> stats)
+        internal float PostStatWorker_GetValueUnfinalized(StatWorker statWorker, StatRequest req, bool applyPostProcess, float result, Dictionary<string, object> stats)
         {
-            UpdateNode();
             foreach (CompBasicNodeComp comp in AllNodeComp)
             {
                 try
@@ -240,9 +239,8 @@ namespace RW_NodeTree
         /// <param name="statWorker">StatWorker</param>
         /// <param name="req">parm 'req' of StatWorker.FinalizeValue()</param>
         /// <param name="applyPostProcess">parm 'applyPostProcess' of StatWorker.FinalizeValue()</param>
-        public float PostStatWorker_FinalizeValue(StatWorker statWorker, StatRequest req, bool applyPostProcess, float result, Dictionary<string, object> stats)
+        internal float PostStatWorker_FinalizeValue(StatWorker statWorker, StatRequest req, bool applyPostProcess, float result, Dictionary<string, object> stats)
         {
-            UpdateNode();
             foreach (CompBasicNodeComp comp in AllNodeComp)
             {
                 try
@@ -265,9 +263,8 @@ namespace RW_NodeTree
         /// <param name="statWorker">StatWorker</param>
         /// <param name="req">parm 'req' of StatWorker.GetValueUnfinalized()</param>
         /// <param name="applyFinalProcess">parm 'applyFinalProcess' of StatWorker.GetValueUnfinalized()</param>
-        public float FinalStatWorker_GetValueUnfinalized(StatWorker statWorker, StatRequest req, bool applyPostProcess, float result, Dictionary<string, object> stats, Exception exception)
+        internal float FinalStatWorker_GetValueUnfinalized(StatWorker statWorker, StatRequest req, bool applyPostProcess, float result, Dictionary<string, object> stats, Exception exception)
         {
-            UpdateNode();
             foreach (CompBasicNodeComp comp in AllNodeComp)
             {
                 try
@@ -290,9 +287,8 @@ namespace RW_NodeTree
         /// <param name="statWorker">StatWorker</param>
         /// <param name="req">parm 'req' of StatWorker.FinalizeValue()</param>
         /// <param name="applyFinalProcess">parm 'applyFinalProcess' of StatWorker.FinalizeValue()</param>
-        public float FinalStatWorker_FinalizeValue(StatWorker statWorker, StatRequest req, bool applyPostProcess, float result, Dictionary<string, object> stats, Exception exception)
+        internal float FinalStatWorker_FinalizeValue(StatWorker statWorker, StatRequest req, bool applyPostProcess, float result, Dictionary<string, object> stats, Exception exception)
         {
-            UpdateNode();
             foreach (CompBasicNodeComp comp in AllNodeComp)
             {
                 try

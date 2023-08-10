@@ -162,7 +162,7 @@ namespace RW_NodeTree
         /// <param name="statWorker">StatWorker</param>
         /// <param name="req">parm 'req' of StatWorker.ShouldShowFor()</param>
         /// <param name="applyPostProcess">parm 'applyPostProcess' of StatWorker.ShouldShowFor()</param>
-        public bool PreStatWorker_ShouldShowFor(StatWorker statWorker, StatRequest req, Dictionary<string, object> stats)
+        internal bool PreStatWorker_ShouldShowFor(StatWorker statWorker, StatRequest req, Dictionary<string, object> stats)
         {
             UpdateNode();
             bool result = true;
@@ -188,7 +188,7 @@ namespace RW_NodeTree
         /// <param name="statWorker">StatWorker</param>
         /// <param name="req">parm 'req' of StatWorker.IsDisabledFor()</param>
         /// <param name="applyPostProcess">parm 'applyPostProcess' of StatWorker.IsDisabledFor()</param>
-        public bool PreStatWorker_IsDisabledFor(StatWorker statWorker, Thing thing, Dictionary<string, object> stats)
+        internal bool PreStatWorker_IsDisabledFor(StatWorker statWorker, Thing thing, Dictionary<string, object> stats)
         {
             UpdateNode();
             bool result = true;
@@ -214,9 +214,8 @@ namespace RW_NodeTree
         /// <param name="statWorker">StatWorker</param>
         /// <param name="req">parm 'req' of StatWorker.ShouldShowFor()</param>
         /// <param name="applyPostProcess">parm 'applyPostProcess' of StatWorker.ShouldShowFor()</param>
-        public bool PostStatWorker_ShouldShowFor(StatWorker statWorker, StatRequest req, bool result, Dictionary<string, object> stats)
+        internal bool PostStatWorker_ShouldShowFor(StatWorker statWorker, StatRequest req, bool result, Dictionary<string, object> stats)
         {
-            UpdateNode();
             foreach (CompBasicNodeComp comp in AllNodeComp)
             {
                 try
@@ -239,9 +238,8 @@ namespace RW_NodeTree
         /// <param name="statWorker">StatWorker</param>
         /// <param name="req">parm 'req' of StatWorker.IsDisabledFor()</param>
         /// <param name="applyPostProcess">parm 'applyPostProcess' of StatWorker.IsDisabledFor()</param>
-        public bool PostStatWorker_IsDisabledFor(StatWorker statWorker, Thing thing, bool result, Dictionary<string, object> stats)
+        internal bool PostStatWorker_IsDisabledFor(StatWorker statWorker, Thing thing, bool result, Dictionary<string, object> stats)
         {
-            UpdateNode();
             foreach (CompBasicNodeComp comp in AllNodeComp)
             {
                 try
@@ -264,9 +262,8 @@ namespace RW_NodeTree
         /// <param name="statWorker">StatWorker</param>
         /// <param name="req">parm 'req' of StatWorker.ShouldShowFor()</param>
         /// <param name="applyFinalProcess">parm 'applyFinalProcess' of StatWorker.ShouldShowFor()</param>
-        public bool FinalStatWorker_ShouldShowFor(StatWorker statWorker, StatRequest req, bool result, Dictionary<string, object> stats, Exception exception)
+        internal bool FinalStatWorker_ShouldShowFor(StatWorker statWorker, StatRequest req, bool result, Dictionary<string, object> stats, Exception exception)
         {
-            UpdateNode();
             foreach (CompBasicNodeComp comp in AllNodeComp)
             {
                 try
@@ -289,9 +286,8 @@ namespace RW_NodeTree
         /// <param name="statWorker">StatWorker</param>
         /// <param name="req">parm 'req' of StatWorker.IsDisabledFor()</param>
         /// <param name="applyFinalProcess">parm 'applyFinalProcess' of StatWorker.IsDisabledFor()</param>
-        public bool FinalStatWorker_IsDisabledFor(StatWorker statWorker, Thing thing, bool result, Dictionary<string, object> stats, Exception exception)
+        internal bool FinalStatWorker_IsDisabledFor(StatWorker statWorker, Thing thing, bool result, Dictionary<string, object> stats, Exception exception)
         {
-            UpdateNode();
             foreach (CompBasicNodeComp comp in AllNodeComp)
             {
                 try

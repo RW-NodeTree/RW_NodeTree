@@ -11,9 +11,6 @@ using RW_NodeTree.Rendering;
 using RW_NodeTree.Tools;
 using System.Diagnostics;
 using System.Reflection;
-using Verse.Noise;
-using static UnityEngine.GraphicsBuffer;
-using TMPro;
 using RW_NodeTree.Patch;
 
 namespace RW_NodeTree
@@ -34,23 +31,20 @@ namespace RW_NodeTree
         }
 
 
-        public bool HasPostFX
+        public bool HasPostFX(bool textureMode)
         {
-            get
+            foreach (CompBasicNodeComp comp in AllNodeComp)
             {
-                foreach (CompBasicNodeComp comp in AllNodeComp)
+                try
                 {
-                    try
-                    {
-                        if(comp.HasPostFX) return true;
-                    }
-                    catch (Exception ex)
-                    {
-                        Log.Error(ex.ToString());
-                    }
+                    if (comp.HasPostFX(textureMode)) return true;
                 }
-                return false;
+                catch (Exception ex)
+                {
+                    Log.Error(ex.ToString());
+                }
             }
+            return false;
         }
 
         /// <summary>
@@ -71,10 +65,10 @@ namespace RW_NodeTree
         {
             get
             {
-                if(cachedRootNode != null) return cachedRootNode;
+                if (cachedRootNode != null) return cachedRootNode;
                 CompChildNodeProccesser proccesser = this;
                 CompChildNodeProccesser next = ParentProccesser;
-                while (next != null) 
+                while (next != null)
                 {
                     proccesser = next;
                     next = next.ParentProccesser;
@@ -105,35 +99,10 @@ namespace RW_NodeTree
             }
         }
 
-        public HashSet<string> RegiestedNodeId
-        {
-            get
-            {
-                if (regiestedNodeId.Count <= 0)
-                {
-                    HashSet<string> cache = new HashSet<string>();
-                    foreach (CompBasicNodeComp comp in AllNodeComp)
-                    {
-                        try
-                        {
-                            cache = comp.internal_RegiestedNodeId(cache) ?? cache;
-                        }
-                        catch (Exception ex)
-                        {
-                            Log.Error(ex.ToString());
-                        }
-                    }
-                    cache.RemoveWhere(x => !x.IsVaildityKeyFormat());
-                    regiestedNodeId.AddRange(cache);
-                }
-                return new HashSet<string>(regiestedNodeId);
-            }
-        }
-
         public override bool AllowStackWith(Thing other)
         {
             CompChildNodeProccesser comp = other;
-            if(comp != null)
+            if (comp != null)
             {
                 return comp.ChildNodes.Count == 0 && ChildNodes.Count == 0;
             }
@@ -142,7 +111,6 @@ namespace RW_NodeTree
 
         public override void CompTick()
         {
-            if(parent.def.tickerType == TickerType.Normal) UpdateNode();
             ChildNodes.ThingOwnerTick();
             IList<Thing> list = ChildNodes;
             for (int i = list.Count - 1; i >= 0; i--)
@@ -150,16 +118,17 @@ namespace RW_NodeTree
                 Thing t = list[i];
                 if (t.def.tickerType == TickerType.Never)
                 {
-                    if((t is IVerbOwner) || (t as ThingWithComps)?.AllComps.Find(x => x is IVerbOwner) != null || (CompChildNodeProccesser)t != null)
+                    if ((t is IVerbOwner) || (t as ThingWithComps)?.AllComps.Find(x => x is IVerbOwner) != null || (CompChildNodeProccesser)t != null)
                     {
                         t.Tick();
                         if (t.Destroyed)
                         {
-                            list.Remove(t);
+                            NeedUpdate = true;
                         }
                     }
                 }
             }
+            UpdateNode();
             if (Find.TickManager.TicksGame % 250 == 0)
             {
                 CompTickRare();
@@ -168,8 +137,24 @@ namespace RW_NodeTree
 
         public override void CompTickRare()
         {
-            if (parent.def.tickerType == TickerType.Rare) UpdateNode();
             ChildNodes.ThingOwnerTickRare();
+            IList<Thing> list = ChildNodes;
+            for (int i = list.Count - 1; i >= 0; i--)
+            {
+                Thing t = list[i];
+                if (t.def.tickerType == TickerType.Never)
+                {
+                    if ((t is IVerbOwner) || (t as ThingWithComps)?.AllComps.Find(x => x is IVerbOwner) != null || (CompChildNodeProccesser)t != null)
+                    {
+                        t.TickRare();
+                        if (t.Destroyed)
+                        {
+                            NeedUpdate = true;
+                        }
+                    }
+                }
+            }
+            UpdateNode();
             if (Find.TickManager.TicksGame % 2000 < 250)
             {
                 CompTickLong();
@@ -178,8 +163,24 @@ namespace RW_NodeTree
 
         public override void CompTickLong()
         {
-            if (parent.def.tickerType == TickerType.Long) UpdateNode();
             ChildNodes.ThingOwnerTickLong();
+            IList<Thing> list = ChildNodes;
+            for (int i = list.Count - 1; i >= 0; i--)
+            {
+                Thing t = list[i];
+                if (t.def.tickerType == TickerType.Never)
+                {
+                    if ((t is IVerbOwner) || (t as ThingWithComps)?.AllComps.Find(x => x is IVerbOwner) != null || (CompChildNodeProccesser)t != null)
+                    {
+                        t.TickLong();
+                        if (t.Destroyed)
+                        {
+                            NeedUpdate = true;
+                        }
+                    }
+                }
+            }
+            UpdateNode();
         }
 
         /// <summary>
@@ -280,9 +281,9 @@ namespace RW_NodeTree
             if (ownerType != null && typeof(IVerbOwner).IsAssignableFrom(ownerType) && verbPropertiesAfterConvert != null)
             {
                 (Thing, Verb, Tool, VerbProperties) cache = result;
-                if(toolAfterConvert != null)
+                if (toolAfterConvert != null)
                 {
-                    List<VerbToolRegiestInfo> Registed = GetRegiestedNodeVerbToolInfos(ownerType);
+                    List<VerbToolRegiestInfo> Registed = internal_GetRegiestedNodeVerbToolInfos(ownerType);
                     for (int i = 0; i < Registed.Count; i++)
                     {
                         VerbToolRegiestInfo regiestInfo = Registed[i];
@@ -295,7 +296,7 @@ namespace RW_NodeTree
                 }
                 else
                 {
-                    List<VerbPropertiesRegiestInfo> Registed = GetRegiestedNodeVerbPropertiesInfos(ownerType);
+                    List<VerbPropertiesRegiestInfo> Registed = internal_GetRegiestedNodeVerbPropertiesInfos(ownerType);
                     for (int i = 0; i < Registed.Count; i++)
                     {
                         VerbPropertiesRegiestInfo regiestInfo = Registed[i];
@@ -310,16 +311,17 @@ namespace RW_NodeTree
 
                 if (!CheckVerbDatasVaildityAndAdapt(ownerType, cache.Item1, ref cache.Item2, ref cache.Item3, ref cache.Item4)) return result;
 
+
+                if (cache.Item1 != null && cache.Item1 != parent && ((CompChildNodeProccesser)cache.Item1) != null)
+                {
+                    Thing before = cache.Item1;
+                    cache = ((CompChildNodeProccesser)cache.Item1).GetBeforeConvertVerbCorrespondingThing(ownerType, cache.Item2, cache.Item3, cache.Item4, needVerb);
+                    cache.Item1 = cache.Item1 ?? before;
+                }
+
                 if (needVerb && cache.Item2 == null) return result;
 
                 result = cache;
-
-                if (result.Item1 != null && result.Item1 != parent && ((CompChildNodeProccesser)result.Item1) != null)
-                {
-                    Thing before = result.Item1;
-                    result = ((CompChildNodeProccesser)result.Item1).GetBeforeConvertVerbCorrespondingThing(ownerType, result.Item2, result.Item3, result.Item4, needVerb);
-                    result.Item1 = result.Item1 ?? before;
-                }
             }
             caches.Add((parent, verbAfterConvert, toolAfterConvert, verbPropertiesAfterConvert, needVerb), result);
             return result;
@@ -362,7 +364,7 @@ namespace RW_NodeTree
         /// <param name="verbPropertiesBeforeConvert">verbProperties of verbBeforeConvert</param>
         /// <param name="toolBeforeConvert">tool of verbBeforeConvert</param>
         /// <returns>correct verb ownner</returns>
-        public (Thing, Verb, Tool, VerbProperties) GetAfterConvertVerbCorrespondingThing(Type ownerType, Verb verbBeforeConvert, Tool toolBeforeConvert, VerbProperties verbPropertiesBeforeConvert)
+        public (Thing, Verb, Tool, VerbProperties) GetAfterConvertVerbCorrespondingThing(Type ownerType, Verb verbBeforeConvert, Tool toolBeforeConvert, VerbProperties verbPropertiesBeforeConvert, bool needVerb = false)
         {
             UpdateNode();
 
@@ -375,11 +377,11 @@ namespace RW_NodeTree
             if (ownerType != null && typeof(IVerbOwner).IsAssignableFrom(ownerType) && verbPropertiesBeforeConvert != null)
             {
                 (Thing, Verb, Tool, VerbProperties) cache = result;
-                if(ParentProccesser != null)
+                if (ParentProccesser != null)
                 {
                     if (toolBeforeConvert != null)
                     {
-                        List<VerbToolRegiestInfo> Registed = GetRegiestedNodeVerbToolInfos(ownerType);
+                        List<VerbToolRegiestInfo> Registed = internal_GetRegiestedNodeVerbToolInfos(ownerType);
                         for (int i = 0; i < Registed.Count; i++)
                         {
                             VerbToolRegiestInfo regiestInfo = Registed[i];
@@ -392,7 +394,7 @@ namespace RW_NodeTree
                     }
                     else
                     {
-                        List<VerbPropertiesRegiestInfo> Registed = GetRegiestedNodeVerbPropertiesInfos(ownerType);
+                        List<VerbPropertiesRegiestInfo> Registed = internal_GetRegiestedNodeVerbPropertiesInfos(ownerType);
                         for (int i = 0; i < Registed.Count; i++)
                         {
                             VerbPropertiesRegiestInfo regiestInfo = Registed[i];
@@ -407,14 +409,16 @@ namespace RW_NodeTree
 
                 if (!CheckVerbDatasVaildityAndAdapt(ownerType, cache.Item1, ref cache.Item2, ref cache.Item3, ref cache.Item4)) return result;
 
-                result = cache;
-
-                if (result.Item1 != null && result.Item1 != parent && ((CompChildNodeProccesser)result.Item1) != null)
+                if (cache.Item1 != null && cache.Item1 != parent && ((CompChildNodeProccesser)cache.Item1) != null)
                 {
-                    Thing before = result.Item1;
-                    result = ((CompChildNodeProccesser)result.Item1).GetAfterConvertVerbCorrespondingThing(ownerType, result.Item2, result.Item3, result.Item4);
-                    result.Item1 = result.Item1 ?? before;
+                    Thing before = cache.Item1;
+                    cache = ((CompChildNodeProccesser)cache.Item1).GetAfterConvertVerbCorrespondingThing(ownerType, cache.Item2, cache.Item3, cache.Item4);
+                    cache.Item1 = cache.Item1 ?? before;
                 }
+                
+                if (needVerb && cache.Item2 == null) return result;
+
+                result = cache;
             }
             return result;
         }
@@ -424,7 +428,7 @@ namespace RW_NodeTree
         /// </summary>
         public void ResetRenderedTexture()
         {
-            for(int i = 0; i < nodeRenderingInfos.Length; i++) nodeRenderingInfos[i] = null;
+            for (int i = 0; i < nodeRenderingInfos.Length; i++) nodeRenderingInfos[i] = null;
             if (parent.Spawned && parent.def.drawerType >= DrawerType.MapMeshOnly) parent.DirtyMapMesh(parent.Map);
             ParentProccesser?.ResetRenderedTexture();
         }
@@ -445,32 +449,100 @@ namespace RW_NodeTree
             ParentProccesser?.ResetVerbs();
         }
 
+        public List<VerbPropertiesRegiestInfo> GetRegiestedNodeVerbPropertiesInfos(Type ownerType) => internal_GetRegiestedNodeVerbPropertiesInfos(ownerType);
 
-        public void ResetRegiestedNodeId()
+        internal List<VerbPropertiesRegiestInfo> internal_GetRegiestedNodeVerbPropertiesInfos(Type ownerType, List<VerbProperties> verbProperties = null)
         {
-            regiestedNodeId.Clear();
-            ParentProccesser?.ResetRegiestedNodeId();
-        }
-
-
-        public List<VerbToolRegiestInfo> GetRegiestedNodeVerbToolInfos(Type ownerType)
-        {
-            if (ownerType != null && typeof(IVerbOwner).IsAssignableFrom(ownerType))
+            verbProperties = verbProperties ?? GetSameTypeVerbOwner(ownerType, parent)?.VerbProperties ?? new List<VerbProperties>();
+            if (!regiestedNodeVerbPropertiesInfos.TryGetValue(ownerType, out List<VerbPropertiesRegiestInfo> info))
             {
-                return regiestedNodeVerbToolInfos.TryGetValue(ownerType) ?? new List<VerbToolRegiestInfo>();
+                info = new List<VerbPropertiesRegiestInfo>(verbProperties.Count);
+                foreach (VerbProperties verbProperty in verbProperties)
+                {
+                    info.Add(new VerbPropertiesRegiestInfo(null, verbProperty, verbProperty));
+                }
+
+                foreach (CompBasicNodeComp comp in AllNodeComp)
+                {
+                    try
+                    {
+                        info = comp.internal_VerbPropertiesRegiestInfoUpadte(ownerType, info) ?? info;
+                    }
+                    catch (Exception ex)
+                    {
+                        Log.Error(ex.ToString());
+                    }
+                }
+
+                for (int i = info.Count - 1; i >= 0; i--)
+                {
+                    VerbPropertiesRegiestInfo regiestInfo = info[i];
+                    List<VerbPropertiesRegiestInfo> childInfo = ((CompChildNodeProccesser)ChildNodes[regiestInfo.id])?.internal_GetRegiestedNodeVerbPropertiesInfos(ownerType);
+                    if (regiestInfo.Vaildity && (regiestInfo.id.NullOrEmpty() || ChildNodes.ContainsKey(regiestInfo.id)) && ((childInfo != null && childInfo.Find(x => x.afterConvertProperties == regiestInfo.berforConvertProperties).Vaildity) || childInfo == null))
+                    {
+                        regiestInfo.afterConvertProperties = Gen.MemberwiseClone(regiestInfo.afterConvertProperties);
+                        info[i] = regiestInfo;
+                    }
+                    else
+                    {
+                        Log.Warning($"Invaildity regiest info: {info[i]}; removeing...");
+                        info.RemoveAt(i);
+                    }
+                }
+                regiestedNodeVerbPropertiesInfos.Add(ownerType, info);
             }
-            return new List<VerbToolRegiestInfo>();
+            return info ?? new List<VerbPropertiesRegiestInfo>();
         }
 
 
-        public List<VerbPropertiesRegiestInfo> GetRegiestedNodeVerbPropertiesInfos(Type ownerType)
+        public List<VerbToolRegiestInfo> GetRegiestedNodeVerbToolInfos(Type ownerType) => internal_GetRegiestedNodeVerbToolInfos(ownerType);
+
+        internal List<VerbToolRegiestInfo> internal_GetRegiestedNodeVerbToolInfos(Type ownerType, List<Tool> tools = null)
         {
-            if(ownerType != null && typeof(IVerbOwner).IsAssignableFrom(ownerType))
+            tools = tools ?? GetSameTypeVerbOwner(ownerType, parent)?.Tools ?? new List<Tool>();
+            if (!regiestedNodeVerbToolInfos.TryGetValue(ownerType, out List<VerbToolRegiestInfo> info))
             {
-                return regiestedNodeVerbPropertiesInfos.TryGetValue(ownerType) ?? new List<VerbPropertiesRegiestInfo>();
+                info = new List<VerbToolRegiestInfo>(tools.Count);
+                foreach (Tool tool in tools)
+                {
+                    info.Add(new VerbToolRegiestInfo(null, tool, tool));
+                }
+                
+                foreach (CompBasicNodeComp comp in AllNodeComp)
+                {
+                    try
+                    {
+                        info = comp.internal_VerbToolRegiestInfoUpdate(ownerType, info) ?? info;
+                    }
+                    catch (Exception ex)
+                    {
+                        Log.Error(ex.ToString());
+                    }
+                }
+
+                
+                for (int i = info.Count - 1; i >= 0; i--)
+                {
+                    VerbToolRegiestInfo regiestInfo = info[i];
+                    List<VerbToolRegiestInfo> childInfo = ((CompChildNodeProccesser)ChildNodes[regiestInfo.id])?.internal_GetRegiestedNodeVerbToolInfos(ownerType);
+                    if (info[i].Vaildity && (regiestInfo.id.NullOrEmpty() || ChildNodes.ContainsKey(regiestInfo.id)) && ((childInfo != null && childInfo.Find(x => x.afterCobvertTool == regiestInfo.berforConvertTool).Vaildity) || childInfo == null))
+                    {
+                        regiestInfo.afterCobvertTool = Gen.MemberwiseClone(regiestInfo.afterCobvertTool);
+                        regiestInfo.afterCobvertTool.id = i.ToString();
+                        info[i] = regiestInfo;
+                    }
+                    else
+                    {
+                        Log.Warning($"Invaildity regiest info: {info[i]}; removeing...");
+                        info.RemoveAt(i);
+                    }
+                }
+                regiestedNodeVerbToolInfos.Add(ownerType, info);
             }
-            return new List<VerbPropertiesRegiestInfo>();
+            return info ?? new List<VerbToolRegiestInfo>();
         }
+
+
 
         /// <summary>
         /// Rimworld Defined method, used for load and save game saves.
@@ -478,18 +550,19 @@ namespace RW_NodeTree
         public override void PostExposeData()
         {
             Scribe_Deep.Look(ref this.childNodes, "innerContainer", this);
+            //if (Scribe.mode == LoadSaveMode.PostLoadInit) UpdateNode();
             //Scribe_Collections.Look(ref childNodes, "innerContainer", LookMode.Deep, this);
         }
 
 
-        public void PostFX(RenderTexture tar)
+        internal void PostFX(RenderTexture tar)
         {
 
             foreach (CompBasicNodeComp comp in AllNodeComp)
             {
                 try
                 {
-                    if (comp.HasPostFX) comp.PostFX(tar);
+                    if (comp.HasPostFX(true)) comp.PostFX(tar);
                 }
                 catch (Exception ex)
                 {
@@ -501,6 +574,8 @@ namespace RW_NodeTree
 
         public List<(string, Thing, List<RenderInfo>)> GetNodeRenderingInfos(Rot4 rot, out bool updated, Graphic subGraphic = null)
         {
+
+            UpdateNode();
             updated = false;
             if (this.nodeRenderingInfos[rot.AsInt] != null) return this.nodeRenderingInfos[rot.AsInt];
             updated = true;
@@ -610,11 +685,11 @@ namespace RW_NodeTree
         /// <returns></returns>
         public bool AllowNode(Thing node, string id = null)
         {
+            if(node?.Destroyed ?? false) return false;
             ThingOwner targetOwner = node?.holdingOwner;
             Type type = targetOwner?.GetType();
             if (type != null && type.Assembly != HarmonyInjector.coreAssembly) return false;
             if (id.NullOrEmpty() || ChildNodes.IsChildOf(node)) return false;
-            if (Props.ForceNodeIdControl && !RegiestedNodeId.Contains(id)) return false;
             foreach (CompBasicNodeComp comp in AllNodeComp)
             {
                 try
@@ -633,7 +708,7 @@ namespace RW_NodeTree
         /// Update node tree
         /// </summary>
         /// <returns></returns>
-        public bool UpdateNode(string eventName = null, object costomEventInfo = null) => ChildNodes.internal_UpdateNode(eventName, costomEventInfo);
+        public bool UpdateNode() => ChildNodes.internal_UpdateNode();
 
 
         public void ResetCachedRootNode()
@@ -646,50 +721,14 @@ namespace RW_NodeTree
             }
         }
 
-        internal void internal_PerAdd(ref Thing node, ref string id, Dictionary<string, object> cachedData)
-        {
-            Thing nodeCache = node;
-            string idCache = id;
-            foreach(CompBasicNodeComp comp in AllNodeComp)
-            {
-                try
-                {
-                    comp.internal_PerAdd(ref nodeCache, ref idCache, cachedData);
-                }
-                catch (Exception ex)
-                {
-                    Log.Error(ex.ToString());
-                }
-                nodeCache = nodeCache ?? node;
-                idCache = idCache ?? id;
-            }
-            node = nodeCache;
-            id = idCache;
-        }
-
-        internal void internal_PostAdd(Thing node, string id, bool success, Dictionary<string, object> cachedData)
-        {
-            foreach (CompBasicNodeComp comp in AllNodeComp)
-            {
-                try
-                {
-                    comp.internal_PostAdd(node, id, success, cachedData);
-                }
-                catch (Exception ex)
-                {
-                    Log.Error(ex.ToString());
-                }
-            }
-        }
-
-        internal void internal_Added(NodeContainer container, string id, Dictionary<string, object> cachedData)
+        internal void internal_Added(NodeContainer container, string id, bool success, Dictionary<string, object> cachedData)
         {
             ResetCachedRootNode();
             foreach (CompBasicNodeComp comp in AllNodeComp)
             {
                 try
                 {
-                    comp.internal_Added(container, id, cachedData);
+                    comp.internal_Added(container, id, success, cachedData);
                 }
                 catch (Exception ex)
                 {
@@ -698,47 +737,14 @@ namespace RW_NodeTree
             }
         }
 
-        internal void internal_PerRemove(ref Thing node, Dictionary<string, object> cachedData)
-        {
-            Thing nodeCache = node;
-            foreach (CompBasicNodeComp comp in AllNodeComp)
-            {
-                try
-                {
-                    comp.internal_PerRemove(ref nodeCache, cachedData);
-                }
-                catch (Exception ex)
-                {
-                    Log.Error(ex.ToString());
-                }
-                nodeCache = nodeCache ?? node;
-            }
-            node = nodeCache;
-        }
-
-        internal void internal_PostRemove(Thing node, string id, bool success, Dictionary<string, object> cachedData)
-        {
-            foreach (CompBasicNodeComp comp in AllNodeComp)
-            {
-                try
-                {
-                    comp.internal_PostRemove(node, id, success, cachedData);
-                }
-                catch (Exception ex)
-                {
-                    Log.Error(ex.ToString());
-                }
-            }
-        }
-
-        internal void internal_Removed(NodeContainer container, string id, Dictionary<string, object> cachedData)
+        internal void internal_Removed(NodeContainer container, string id, bool success, Dictionary<string, object> cachedData)
         {
             ResetCachedRootNode();
             foreach (CompBasicNodeComp comp in AllNodeComp)
             {
                 try
                 {
-                    comp.internal_Removed(container, id, cachedData);
+                    comp.internal_Removed(container, id, success, cachedData);
                 }
                 catch (Exception ex)
                 {
@@ -763,7 +769,7 @@ namespace RW_NodeTree
 
         public static IVerbOwner GetSameTypeVerbOwner(Type ownerType, Thing thing)
         {
-            if(thing != null && ownerType != null && typeof(IVerbOwner).IsAssignableFrom(ownerType))
+            if (thing != null && ownerType != null && typeof(IVerbOwner).IsAssignableFrom(ownerType))
             {
                 IVerbOwner verbOwner = null;
                 ThingWithComps t = thing as ThingWithComps;
@@ -807,15 +813,13 @@ namespace RW_NodeTree
 
         private readonly List<(string, Thing, List<RenderInfo>)>[] nodeRenderingInfos = new List<(string, Thing, List<RenderInfo>)>[4];
 
-        private readonly HashSet<string> regiestedNodeId = new HashSet<string>();
-
         private readonly Dictionary<Type, List<VerbToolRegiestInfo>> regiestedNodeVerbToolInfos = new Dictionary<Type, List<VerbToolRegiestInfo>>();
 
         private readonly Dictionary<Type, List<VerbPropertiesRegiestInfo>> regiestedNodeVerbPropertiesInfos = new Dictionary<Type, List<VerbPropertiesRegiestInfo>>();
 
         private readonly Dictionary<Type, Dictionary<(Thing, Verb, Tool, VerbProperties, bool), (Thing, Verb, Tool, VerbProperties)>> BeforeConvertVerbCorrespondingThingCache = new Dictionary<Type, Dictionary<(Thing, Verb, Tool, VerbProperties, bool), (Thing, Verb, Tool, VerbProperties)>>();
 
-        
+
         /*
         private static Matrix4x4 matrix =
                             new Matrix4x4(
@@ -840,11 +844,11 @@ namespace RW_NodeTree
         {
             parentDef.comps.Remove(this);
             parentDef.comps.Insert(0, this);
-            for(int i = parentDef.comps.Count - 1; i >= 1; i--)
+            for (int i = parentDef.comps.Count - 1; i >= 1; i--)
             {
                 for (int j = i - 1; j >= 1; j--)
                 {
-                    if(parentDef.comps[i].compClass == parentDef.comps[j].compClass)
+                    if (parentDef.comps[i].compClass == parentDef.comps[j].compClass)
                     {
                         parentDef.comps.RemoveAt(j);
                     }
@@ -855,7 +859,6 @@ namespace RW_NodeTree
         public bool VerbDirectOwnerRedictory = false;
         public bool VerbEquipmentSourceRedictory = true;
         public bool VerbIconVerbInstanceSource = false;
-        public bool ForceNodeIdControl = false;
         public bool NodeIdAutoInsertByRegiested = true;
         public float ExceedanceFactor = 1f;
         public float ExceedanceOffset = 1f;

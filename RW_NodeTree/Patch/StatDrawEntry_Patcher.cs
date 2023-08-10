@@ -12,7 +12,7 @@ namespace RW_NodeTree.Patch
 	{
 		[HarmonyPostfix]
 		[HarmonyPatch(typeof(StatDrawEntry), "get_ValueString")]
-        internal static void PostStatDrawEntry_ValueString(StatDrawEntry __instance, string __result)
+        private static void PostStatDrawEntry_ValueString(StatDrawEntry __instance, string __result)
 		{
 			if(__instance.hasOptionalReq)
             {
@@ -26,7 +26,7 @@ namespace RW_NodeTree.Patch
 
 		[HarmonyPrefix]
 		[HarmonyPatch(typeof(StatDrawEntry), "GetExplanationText")]
-        internal static bool PreStatDrawEntry_GetExplanationText(StatDrawEntry __instance, ref string __result)
+        private static bool PreStatDrawEntry_GetExplanationText(StatDrawEntry __instance, ref string __result)
 		{
 			ref string explanationText = ref StatDrawEntry_explanationText(__instance);
 			if (!explanationText.NullOrEmpty())
@@ -39,14 +39,14 @@ namespace RW_NodeTree.Patch
 
         [HarmonyPostfix]
         [HarmonyPatch(typeof(StatDrawEntry), "GetExplanationText")]
-        internal static void PostStatDrawEntry_GetExplanationText(StatDrawEntry __instance, string __result)
+        private static void PostStatDrawEntry_GetExplanationText(StatDrawEntry __instance, string __result)
         {
             StatDrawEntry_explanationText(__instance) = __result;
         }
 
         [HarmonyPostfix]
         [HarmonyPatch(typeof(StatDrawEntry), "GetHyperlinks")]
-        internal static void PostStatDrawEntry_GetHyperlinks(StatDrawEntry __instance, IEnumerable<Dialog_InfoCard.Hyperlink> __result)
+        private static void PostStatDrawEntry_GetHyperlinks(StatDrawEntry __instance, IEnumerable<Dialog_InfoCard.Hyperlink> __result)
         {
             StatDrawEntry_hyperlinks(__instance) = __result;
         }

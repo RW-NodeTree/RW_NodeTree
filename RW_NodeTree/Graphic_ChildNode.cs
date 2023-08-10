@@ -141,7 +141,7 @@ namespace RW_NodeTree
             {
                 if (!infos.Item3.NullOrEmpty()) final.AddRange(infos.Item3);
             }
-            RenderingTools.RenderToTarget(final, ref cachedRenderTarget, ref texture, default(Vector2Int), comp_ChildNodeProccesser.Props.TextureSizeFactor, comp_ChildNodeProccesser.Props.ExceedanceFactor, comp_ChildNodeProccesser.Props.ExceedanceOffset, comp_ChildNodeProccesser.HasPostFX ? comp_ChildNodeProccesser.PostFX : default(Action<RenderTexture>));
+            RenderingTools.RenderToTarget(final, ref cachedRenderTarget, ref texture, default(Vector2Int), comp_ChildNodeProccesser.Props.TextureSizeFactor, comp_ChildNodeProccesser.Props.ExceedanceFactor, comp_ChildNodeProccesser.Props.ExceedanceOffset, comp_ChildNodeProccesser.HasPostFX(true) ? comp_ChildNodeProccesser.PostFX : default(Action<RenderTexture>));
             Shader shader = subGraphic.Shader;
             texture.wrapMode = TextureWrapMode.Clamp;
             texture.filterMode = comp_ChildNodeProccesser.Props.TextureFilterMode;
@@ -184,7 +184,7 @@ namespace RW_NodeTree
         {
             CompChildNodeProccesser comp_ChildNodeProccesser = ((CompChildNodeProccesser)thing) ?? currentProccess;
             if (comp_ChildNodeProccesser != currentProccess) SubGraphic?.DrawWorker(loc, rot, thingDef, thing, extraRotation);
-            else if(!RenderingTools.StartOrEndDrawCatchingBlock || comp_ChildNodeProccesser.HasPostFX) base.DrawWorker(loc, rot, thingDef, thing, extraRotation);
+            else if(!RenderingTools.StartOrEndDrawCatchingBlock || comp_ChildNodeProccesser.HasPostFX(false)) base.DrawWorker(loc, rot, thingDef, thing, extraRotation);
             else
             {
                 MatAt(rot, thing);

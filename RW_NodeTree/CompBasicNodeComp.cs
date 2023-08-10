@@ -73,7 +73,8 @@ namespace RW_NodeTree
         }
 
 
-        public virtual bool HasPostFX { get => false; }
+        public virtual bool HasPostFX(bool textureMode) => false;
+        
 
 
         public virtual void PostFX(RenderTexture tar) { }
@@ -83,7 +84,7 @@ namespace RW_NodeTree
         /// update event
         /// </summary>
         /// <param name="actionNode">update event action node</param>
-        protected virtual bool PreUpdateNode(string eventName, object costomEventInfo, CompChildNodeProccesser actionNode, Dictionary<string, object> cachedDataToPostUpatde)
+        protected virtual bool PreUpdateNode(CompChildNodeProccesser actionNode, Dictionary<string, object> cachedDataToPostUpatde, Dictionary<string, Thing> prveChilds)
         {
             return false;
         }
@@ -93,7 +94,7 @@ namespace RW_NodeTree
         /// </summary>
         /// <param name="actionNode">update event action node</param>
         /// <returns>stope bubble</returns>
-        protected virtual bool PostUpdateNode(string eventName, object costomEventInfo, CompChildNodeProccesser actionNode, Dictionary<string, object> cachedDataFromPerUpdate)
+        protected virtual bool PostUpdateNode(CompChildNodeProccesser actionNode, Dictionary<string, object> cachedDataFromPerUpdate, Dictionary<string, Thing> prveChilds)
         {
             return false;
         }
@@ -110,51 +111,11 @@ namespace RW_NodeTree
         }
 
         /// <summary>
-        /// adapt the node info before you add node in to continer
-        /// </summary>
-        /// <param name="node"></param>
-        /// <param name="id"></param>
-        protected virtual void PerAdd(ref Thing node, ref string id, Dictionary<string, object> cachedData)
-        {
-            return;
-        }
-
-        /// <summary>
-        /// adapt the node info after you add node in to continer
-        /// </summary>
-        /// <param name="node"></param>
-        /// <param name="id"></param>
-        protected virtual void PostAdd(Thing node, string id, bool success, Dictionary<string, object> cachedData)
-        {
-            return;
-        }
-
-        /// <summary>
-        /// adapt the node info before you remove node from continer
-        /// </summary>
-        /// <param name="node"></param>
-        /// <param name="id"></param>
-        protected virtual void PerRemove(ref Thing node, Dictionary<string, object> cachedData)
-        {
-            return;
-        }
-
-        /// <summary>
-        /// adapt the node info after you add remove from continer
-        /// </summary>
-        /// <param name="node"></param>
-        /// <param name="id"></param>
-        protected virtual void PostRemove(Thing node, string id, bool success, Dictionary<string, object> cachedData)
-        {
-            return;
-        }
-
-        /// <summary>
         /// Invoke when this item added in to container
         /// </summary>
         /// <param name="container"></param>
         /// <param name="id"></param>
-        protected virtual void Added(NodeContainer container, string id, Dictionary<string, object> cachedData)
+        protected virtual void Added(NodeContainer container, string id, bool success, Dictionary<string, object> cachedData)
         {
             return;
         }
@@ -164,18 +125,9 @@ namespace RW_NodeTree
         /// </summary>
         /// <param name="container"></param>
         /// <param name="id"></param>
-        protected virtual void Removed(NodeContainer container, string id, Dictionary<string, object> cachedData)
+        protected virtual void Removed(NodeContainer container, string id, bool success, Dictionary<string, object> cachedData)
         {
             return;
-        }
-
-        /// <summary>
-        /// call when registed node id
-        /// </summary>
-        /// <param name="regiestedNodeId">registed id</param>
-        protected virtual HashSet<string> RegiestedNodeId(HashSet<string> regiestedNodeId)
-        {
-            return regiestedNodeId;
         }
 
         /// <summary>
@@ -202,18 +154,25 @@ namespace RW_NodeTree
             return nodeRenderingInfos;
         }
 
+        
+        protected virtual List<VerbPropertiesRegiestInfo> VerbPropertiesRegiestInfoUpadte(Type ownerType, List<VerbPropertiesRegiestInfo> result)
+        {
+            return result;
+        }
 
-        internal bool internal_PreUpdateNode(string eventName, object costomEventInfo, CompChildNodeProccesser actionNode, Dictionary<string, object> cachedDataToPostUpatde) => PreUpdateNode(eventName, costomEventInfo, actionNode, cachedDataToPostUpatde);
-        internal bool internal_PostUpdateNode(string eventName, object costomEventInfo, CompChildNodeProccesser actionNode, Dictionary<string, object> cachedDataFromPerUpdate) => PostUpdateNode(eventName, costomEventInfo, actionNode, cachedDataFromPerUpdate);
+        protected virtual List<VerbToolRegiestInfo> VerbToolRegiestInfoUpdate(Type ownerType, List<VerbToolRegiestInfo> result)
+        {
+            return result;
+        }
+
+        internal bool internal_PreUpdateNode(CompChildNodeProccesser actionNode, Dictionary<string, object> cachedDataToPostUpatde, Dictionary<string, Thing> prveChilds) => PreUpdateNode(actionNode, cachedDataToPostUpatde, prveChilds);
+        internal bool internal_PostUpdateNode(CompChildNodeProccesser actionNode, Dictionary<string, object> cachedDataFromPerUpdate, Dictionary<string, Thing> prveChilds) => PostUpdateNode(actionNode, cachedDataFromPerUpdate, prveChilds);
         internal bool internal_AllowNode(Thing node, string id = null) => AllowNode(node, id);
-        internal void internal_PerAdd(ref Thing node, ref string id, Dictionary<string, object> cachedData) => PerAdd(ref node, ref id, cachedData);
-        internal void internal_PostAdd(Thing node, string id, bool success, Dictionary<string, object> cachedData) => PostAdd(node, id, success, cachedData);
-        internal void internal_PerRemove(ref Thing node, Dictionary<string, object> cachedData) => PerRemove(ref node, cachedData);
-        internal void internal_PostRemove(Thing node, string id, bool success, Dictionary<string, object> cachedData) => PostRemove(node, id, success, cachedData);
-        internal void internal_Added(NodeContainer container, string id, Dictionary<string, object> cachedData) => Added(container, id, cachedData);
-        internal void internal_Removed(NodeContainer container, string id, Dictionary<string, object> cachedData) => Removed(container, id, cachedData);
-        internal HashSet<string> internal_RegiestedNodeId(HashSet<string> regiestedNodeId) => RegiestedNodeId(regiestedNodeId);
+        internal void internal_Added(NodeContainer container, string id, bool success, Dictionary<string, object> cachedData) => Added(container, id, success, cachedData);
+        internal void internal_Removed(NodeContainer container, string id, bool success, Dictionary<string, object> cachedData) => Removed(container, id, success, cachedData);
         internal List<(string, Thing, List<RenderInfo>)> internal_PreDrawSteep(List<(string, Thing, List<RenderInfo>)> nodeRenderingInfos, Rot4 rot, Graphic graphic, Dictionary<string, object> cachedDataToPostDrawSteep) => PreDrawSteep(nodeRenderingInfos, rot, graphic, cachedDataToPostDrawSteep);
         internal List<(string, Thing, List<RenderInfo>)> internal_PostDrawSteep(List<(string, Thing, List<RenderInfo>)> nodeRenderingInfos, Rot4 rot, Graphic graphic, Dictionary<string, object> cachedDataFromPerDrawSteep) => PostDrawSteep(nodeRenderingInfos, rot, graphic, cachedDataFromPerDrawSteep);
+        internal List<VerbPropertiesRegiestInfo> internal_VerbPropertiesRegiestInfoUpadte(Type ownerType, List<VerbPropertiesRegiestInfo> result) => VerbPropertiesRegiestInfoUpadte(ownerType, result);
+        internal List<VerbToolRegiestInfo> internal_VerbToolRegiestInfoUpdate(Type ownerType, List<VerbToolRegiestInfo> result) => VerbToolRegiestInfoUpdate(ownerType, result);
     }
 }

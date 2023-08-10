@@ -17,7 +17,7 @@ namespace RW_NodeTree.Patch
             typeof(ThingWithComps),
             "PreApplyDamage"
         )]
-        public static void PostThingWithComps_PreApplyDamage(ThingWithComps __instance, ref DamageInfo dinfo, ref bool absorbed)
+        private static void PostThingWithComps_PreApplyDamage(ThingWithComps __instance, ref DamageInfo dinfo, ref bool absorbed)
         {
             if (absorbed)
             {
@@ -41,7 +41,7 @@ namespace RW_NodeTree
         /// <param name="def">ThingDef instance</param>
         /// <param name="req">parm 'req' of ThingDef.SpecialDisplayStats()</param>
         /// <param name="result">result of ThingDef.SpecialDisplayStats</param>
-        public bool PostThingWithComps_PreApplyDamage(ref DamageInfo dinfo, bool absorbed)
+        internal bool PostThingWithComps_PreApplyDamage(ref DamageInfo dinfo, bool absorbed)
         {
             UpdateNode();
             foreach (CompBasicNodeComp comp in AllNodeComp)

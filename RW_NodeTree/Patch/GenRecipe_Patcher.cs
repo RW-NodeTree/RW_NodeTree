@@ -18,7 +18,7 @@ namespace RW_NodeTree.Patch
             typeof(GenRecipe),
             "MakeRecipeProducts"
             )]
-        public static void PostGenRecipe_MakeRecipeProducts(RecipeDef recipeDef, Pawn worker, List<Thing> ingredients, Thing dominantIngredient, IBillGiver billGiver, Precept_ThingStyle precept, ref IEnumerable<Thing> __result)
+        private static void PostGenRecipe_MakeRecipeProducts(RecipeDef recipeDef, Pawn worker, List<Thing> ingredients, Thing dominantIngredient, IBillGiver billGiver, Precept_ThingStyle precept, ref IEnumerable<Thing> __result)
         {
             __result = ((CompChildNodeProccesser)dominantIngredient)?.PostGenRecipe_MakeRecipeProducts(recipeDef, worker, ingredients, dominantIngredient, billGiver, precept, RecipeInvokeSource.dominantIngredient, __result) ?? __result;
             foreach(Thing thing in ingredients)
@@ -50,7 +50,7 @@ namespace RW_NodeTree
     /// </summary>
     public partial class CompChildNodeProccesser : ThingComp, IThingHolder
     {
-        public IEnumerable<Thing> PostGenRecipe_MakeRecipeProducts(RecipeDef recipeDef, Pawn worker, List<Thing> ingredients, Thing dominantIngredient1, IBillGiver billGiver, Precept_ThingStyle precept, RecipeInvokeSource InvokeSource, IEnumerable<Thing> result)
+        internal IEnumerable<Thing> PostGenRecipe_MakeRecipeProducts(RecipeDef recipeDef, Pawn worker, List<Thing> ingredients, Thing dominantIngredient1, IBillGiver billGiver, Precept_ThingStyle precept, RecipeInvokeSource InvokeSource, IEnumerable<Thing> result)
         {
             UpdateNode();
             foreach (CompBasicNodeComp comp in AllNodeComp)

@@ -20,7 +20,7 @@ namespace RW_NodeTree.Patch
             typeof(StatWorker),
             "GearHasCompsThatAffectStat"
             )]
-        public static bool PreStatWorker_GearHasCompsThatAffectStat(Thing gear, StatDef stat, ref Dictionary<string, object> __state)
+        private static bool PreStatWorker_GearHasCompsThatAffectStat(Thing gear, StatDef stat, ref Dictionary<string, object> __state)
         {
             CompChildNodeProccesser comp = gear.RootNode();
             if (comp != null)
@@ -36,7 +36,7 @@ namespace RW_NodeTree.Patch
             typeof(StatWorker),
             "StatOffsetFromGear"
             )]
-        public static bool PreStatWorker_StatOffsetFromGear(Thing gear, StatDef stat, ref Dictionary<string, object> __state)
+        private static bool PreStatWorker_StatOffsetFromGear(Thing gear, StatDef stat, ref Dictionary<string, object> __state)
         {
             CompChildNodeProccesser comp = gear.RootNode();
             if (comp != null)
@@ -52,7 +52,7 @@ namespace RW_NodeTree.Patch
             typeof(StatWorker),
             "InfoTextLineFromGear"
             )]
-        public static bool PreStatWorker_InfoTextLineFromGear(Thing gear, StatDef stat, ref Dictionary<string, object> __state)
+        private static bool PreStatWorker_InfoTextLineFromGear(Thing gear, StatDef stat, ref Dictionary<string, object> __state)
         {
             CompChildNodeProccesser comp = gear.RootNode();
             if (comp != null)
@@ -68,7 +68,7 @@ namespace RW_NodeTree.Patch
             typeof(StatWorker),
             "GearHasCompsThatAffectStat"
             )]
-        public static void PostStatWorker_GearHasCompsThatAffectStat(Thing gear, StatDef stat, ref bool __result, Dictionary<string, object> __state)
+        private static void PostStatWorker_GearHasCompsThatAffectStat(Thing gear, StatDef stat, ref bool __result, Dictionary<string, object> __state)
         {
             __result = gear.RootNode()?.PostStatWorker_GearHasCompsThatAffectStat(gear, stat, __result, __state) ?? __result;
         }
@@ -78,7 +78,7 @@ namespace RW_NodeTree.Patch
             typeof(StatWorker),
             "StatOffsetFromGear"
             )]
-        public static void PostStatWorker_StatOffsetFromGear(Thing gear, StatDef stat, ref float __result, Dictionary<string, object> __state)
+        private static void PostStatWorker_StatOffsetFromGear(Thing gear, StatDef stat, ref float __result, Dictionary<string, object> __state)
         {
             __result = gear.RootNode()?.PostStatWorker_StatOffsetFromGear(gear, stat, __result, __state) ?? __result;
         }
@@ -89,7 +89,7 @@ namespace RW_NodeTree.Patch
             typeof(StatWorker),
             "InfoTextLineFromGear"
             )]
-        public static void PostStatWorker_InfoTextLineFromGear(Thing gear, StatDef stat, ref string __result, Dictionary<string, object> __state)
+        private static void PostStatWorker_InfoTextLineFromGear(Thing gear, StatDef stat, ref string __result, Dictionary<string, object> __state)
         {
             __result = gear.RootNode()?.PostStatWorker_InfoTextLineFromGear(gear, stat, __result, __state) ?? __result;
         }
@@ -99,7 +99,7 @@ namespace RW_NodeTree.Patch
             typeof(StatWorker),
             "RelevantGear"
             )]
-        public static void PostStatWorker_RelevantGear(Pawn pawn, StatDef stat, ref IEnumerable<Thing> __result)
+        private static void PostStatWorker_RelevantGear(Pawn pawn, StatDef stat, ref IEnumerable<Thing> __result)
         {
             __result = pawn.RootNode()?.PostStatWorker_RelevantGear(pawn, stat, __result) ?? __result;
 
@@ -125,7 +125,7 @@ namespace RW_NodeTree.Patch
             typeof(StatWorker),
             "GearHasCompsThatAffectStat"
             )]
-        public static void FinalStatWorker_GearHasCompsThatAffectStat(Thing gear, StatDef stat, ref bool __result, Dictionary<string, object> __state, Exception __exception)
+        private static void FinalStatWorker_GearHasCompsThatAffectStat(Thing gear, StatDef stat, ref bool __result, Dictionary<string, object> __state, Exception __exception)
         {
             __result = gear.RootNode()?.FinalStatWorker_GearHasCompsThatAffectStat(gear, stat, __result, __state, __exception) ?? __result;
         }
@@ -135,7 +135,7 @@ namespace RW_NodeTree.Patch
             typeof(StatWorker),
             "StatOffsetFromGear"
             )]
-        public static void FinalStatWorker_StatOffsetFromGear(Thing gear, StatDef stat, ref float __result, Dictionary<string, object> __state, Exception __exception)
+        private static void FinalStatWorker_StatOffsetFromGear(Thing gear, StatDef stat, ref float __result, Dictionary<string, object> __state, Exception __exception)
         {
             __result = gear.RootNode()?.FinalStatWorker_StatOffsetFromGear(gear, stat, __result, __state, __exception) ?? __result;
         }
@@ -146,7 +146,7 @@ namespace RW_NodeTree.Patch
             typeof(StatWorker),
             "InfoTextLineFromGear"
             )]
-        public static void FinalStatWorker_InfoTextLineFromGear(Thing gear, StatDef stat, ref string __result, Dictionary<string, object> __state, Exception __exception)
+        private static void FinalStatWorker_InfoTextLineFromGear(Thing gear, StatDef stat, ref string __result, Dictionary<string, object> __state, Exception __exception)
         {
             __result = gear.RootNode()?.FinalStatWorker_InfoTextLineFromGear(gear, stat, __result, __state, __exception) ?? __result;
         }
@@ -160,7 +160,7 @@ namespace RW_NodeTree
     /// </summary>
     public partial class CompChildNodeProccesser : ThingComp, IThingHolder
     {
-        public virtual bool PreStatWorker_GearHasCompsThatAffectStat(Thing gear, StatDef stat, Dictionary<string, object> stats)
+        internal bool PreStatWorker_GearHasCompsThatAffectStat(Thing gear, StatDef stat, Dictionary<string, object> stats)
         {
             UpdateNode();
             bool result = true;
@@ -178,7 +178,7 @@ namespace RW_NodeTree
             return result;
         }
 
-        public virtual bool PreStatWorker_StatOffsetFromGear(Thing gear, StatDef stat, Dictionary<string, object> stats)
+        internal bool PreStatWorker_StatOffsetFromGear(Thing gear, StatDef stat, Dictionary<string, object> stats)
         {
             UpdateNode();
             bool result = true;
@@ -196,7 +196,7 @@ namespace RW_NodeTree
             return result;
         }
         
-        public virtual bool PreStatWorker_InfoTextLineFromGear(Thing gear, StatDef stat, Dictionary<string, object> stats)
+        internal bool PreStatWorker_InfoTextLineFromGear(Thing gear, StatDef stat, Dictionary<string, object> stats)
         {
             UpdateNode();
             bool result = true;
@@ -214,9 +214,8 @@ namespace RW_NodeTree
             return result;
         }
 
-        public virtual bool PostStatWorker_GearHasCompsThatAffectStat(Thing gear, StatDef stat, bool result, Dictionary<string, object> stats)
+        internal bool PostStatWorker_GearHasCompsThatAffectStat(Thing gear, StatDef stat, bool result, Dictionary<string, object> stats)
         {
-            UpdateNode();
             foreach (CompBasicNodeComp comp in AllNodeComp)
             {
                 try
@@ -231,9 +230,8 @@ namespace RW_NodeTree
             return result;
         }
 
-        public virtual float PostStatWorker_StatOffsetFromGear(Thing gear, StatDef stat, float result, Dictionary<string, object> stats)
+        internal float PostStatWorker_StatOffsetFromGear(Thing gear, StatDef stat, float result, Dictionary<string, object> stats)
         {
-            UpdateNode();
             foreach (CompBasicNodeComp comp in AllNodeComp)
             {
                 try
@@ -248,9 +246,8 @@ namespace RW_NodeTree
             return result;
         }
 
-        public virtual string PostStatWorker_InfoTextLineFromGear(Thing gear, StatDef stat, string result, Dictionary<string, object> stats)
+        internal string PostStatWorker_InfoTextLineFromGear(Thing gear, StatDef stat, string result, Dictionary<string, object> stats)
         {
-            UpdateNode();
             foreach (CompBasicNodeComp comp in AllNodeComp)
             {
                 try
@@ -265,7 +262,7 @@ namespace RW_NodeTree
             return result;
         }
 
-        public virtual IEnumerable<Thing> PostStatWorker_RelevantGear(Thing gear, StatDef stat, IEnumerable<Thing> result)
+        internal IEnumerable<Thing> PostStatWorker_RelevantGear(Thing gear, StatDef stat, IEnumerable<Thing> result)
         {
             UpdateNode();
             foreach (CompBasicNodeComp comp in AllNodeComp)
@@ -282,9 +279,8 @@ namespace RW_NodeTree
             return result;
         }
 
-        public virtual bool FinalStatWorker_GearHasCompsThatAffectStat(Thing gear, StatDef stat, bool result, Dictionary<string, object> stats, Exception exception)
+        internal bool FinalStatWorker_GearHasCompsThatAffectStat(Thing gear, StatDef stat, bool result, Dictionary<string, object> stats, Exception exception)
         {
-            UpdateNode();
             foreach (CompBasicNodeComp comp in AllNodeComp)
             {
                 try
@@ -299,9 +295,8 @@ namespace RW_NodeTree
             return result;
         }
 
-        public virtual float FinalStatWorker_StatOffsetFromGear(Thing gear, StatDef stat, float result, Dictionary<string, object> stats, Exception exception)
+        internal float FinalStatWorker_StatOffsetFromGear(Thing gear, StatDef stat, float result, Dictionary<string, object> stats, Exception exception)
         {
-            UpdateNode();
             foreach (CompBasicNodeComp comp in AllNodeComp)
             {
                 try
@@ -316,9 +311,8 @@ namespace RW_NodeTree
             return result;
         }
 
-        public virtual string FinalStatWorker_InfoTextLineFromGear(Thing gear, StatDef stat, string result, Dictionary<string, object> stats, Exception exception)
+        internal string FinalStatWorker_InfoTextLineFromGear(Thing gear, StatDef stat, string result, Dictionary<string, object> stats, Exception exception)
         {
-            UpdateNode();
             foreach (CompBasicNodeComp comp in AllNodeComp)
             {
                 try

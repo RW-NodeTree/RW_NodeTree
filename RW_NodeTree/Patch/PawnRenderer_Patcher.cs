@@ -23,7 +23,7 @@ namespace RW_NodeTree.Patch
             typeof(PawnRenderer),
             "DrawEquipmentAiming"
         )]
-        public static IEnumerable<CodeInstruction> TranspilPawnRenderer_DrawEquipmentAiming(IEnumerable<CodeInstruction> instructions)
+        private static IEnumerable<CodeInstruction> TranspilPawnRenderer_DrawEquipmentAiming(IEnumerable<CodeInstruction> instructions)
         {
             int count = 0;
             CodeInstruction[] codes = new CodeInstruction[8];

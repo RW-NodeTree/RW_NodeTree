@@ -20,7 +20,7 @@ namespace RW_NodeTree.Patch
             "SpecialDisplayStats",
             typeof(StatRequest)
             )]
-        public static void PostThingDef_SpecialDisplayStats(ThingDef __instance, StatRequest req, ref IEnumerable<StatDrawEntry> __result)
+        private static void PostThingDef_SpecialDisplayStats(ThingDef __instance, StatRequest req, ref IEnumerable<StatDrawEntry> __result)
         {
             __result = req.Thing.RootNode()?.PostThingDef_SpecialDisplayStats(__instance, req, __result) ?? __result;
         }
@@ -43,7 +43,7 @@ namespace RW_NodeTree
         /// <param name="def">ThingDef instance</param>
         /// <param name="req">parm 'req' of ThingDef.SpecialDisplayStats()</param>
         /// <param name="result">result of ThingDef.SpecialDisplayStats</param>
-        public IEnumerable<StatDrawEntry> PostThingDef_SpecialDisplayStats(ThingDef def, StatRequest req, IEnumerable<StatDrawEntry> result)
+        internal IEnumerable<StatDrawEntry> PostThingDef_SpecialDisplayStats(ThingDef def, StatRequest req, IEnumerable<StatDrawEntry> result)
         {
             UpdateNode();
             foreach (CompBasicNodeComp comp in AllNodeComp)

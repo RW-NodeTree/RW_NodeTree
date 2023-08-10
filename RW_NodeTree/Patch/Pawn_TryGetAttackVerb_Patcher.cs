@@ -18,7 +18,7 @@ namespace RW_NodeTree.Patch
             typeof(Pawn),
             "TryGetAttackVerb"
         )]
-        public static void PrePawn_TryGetAttackVerb(Pawn __instance)
+        private static void PrePawn_TryGetAttackVerb(Pawn __instance)
         {
             try
             {
