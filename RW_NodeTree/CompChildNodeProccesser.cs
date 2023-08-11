@@ -708,8 +708,16 @@ namespace RW_NodeTree
         /// Update node tree
         /// </summary>
         /// <returns></returns>
-        public bool UpdateNode() => ChildNodes.internal_UpdateNode();
+        public bool UpdateNode()
+        {
+            if(blockUpdate) return false;
+            blockUpdate = true;
+            bool result = ChildNodes.internal_UpdateNode();
+            blockUpdate = false;
+            return result;
+        }
 
+        
 
         public void ResetCachedRootNode()
         {
@@ -819,6 +827,7 @@ namespace RW_NodeTree
 
         private readonly Dictionary<Type, Dictionary<(Thing, Verb, Tool, VerbProperties, bool), (Thing, Verb, Tool, VerbProperties)>> BeforeConvertVerbCorrespondingThingCache = new Dictionary<Type, Dictionary<(Thing, Verb, Tool, VerbProperties, bool), (Thing, Verb, Tool, VerbProperties)>>();
 
+        private static bool blockUpdate = false;
 
         /*
         private static Matrix4x4 matrix =

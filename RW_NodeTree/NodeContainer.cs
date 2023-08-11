@@ -67,7 +67,6 @@ namespace RW_NodeTree
             get => needUpdate;
             set
             {
-                if (lockNeedUpdate) return;
                 if (needUpdate != value && (needUpdate = value))
                 {
                     NodeContainer parent = ParentContainer;
@@ -197,7 +196,6 @@ namespace RW_NodeTree
         internal bool internal_UpdateNode(CompChildNodeProccesser actionNode = null)
         {
             bool StopEventBubble = false;
-            if (lockNeedUpdate || lockUpdate) return StopEventBubble;
 
             CompChildNodeProccesser proccess = this.Comp;
             if(proccess == null) return StopEventBubble;
@@ -205,8 +203,7 @@ namespace RW_NodeTree
             if (actionNode == null) return proccess.RootNode.ChildNodes.internal_UpdateNode(proccess);
             if (!NeedUpdate) return StopEventBubble;
 
-            lockUpdate = true;
-            lockNeedUpdate = true;
+            NeedUpdate = false;
 
 
             state = stateCode.rw;
@@ -222,18 +219,18 @@ namespace RW_NodeTree
                     RemoveAt(i);
                 }
             }
-            lockUpdate = true;
-            lockNeedUpdate = true;
+            //lockUpdate = true;
             state = stateCode.rt;
+            //Log.Message("1:"+state.ToString());
             Dictionary<string, object> cachingData = new Dictionary<string, object>();
             Dictionary<string, Thing> prveChilds = new Dictionary<string, Thing>(this);
+            //Log.Message("2:" + state.ToString());
             this.Clear();
+            //Log.Message("3:" + state.ToString());
             foreach (CompBasicNodeComp comp in proccess.AllNodeComp)
             {
                 try
                 {
-                    lockUpdate = true;
-                    lockNeedUpdate = true;
                     StopEventBubble = comp.internal_PreUpdateNode(actionNode, cachingData, new Dictionary<string, Thing>(prveChilds)) || StopEventBubble;
                 }
                 catch (Exception ex)
@@ -241,18 +238,22 @@ namespace RW_NodeTree
                     Log.Error(ex.ToString());
                 }
             }
+            //Log.Message("4:" + state.ToString());
             Dictionary<string, Thing> diff = new Dictionary<string, Thing>(Math.Max(prveChilds.Count, Count));
             foreach (KeyValuePair<string, Thing> pair in this)
             {
                 if (!prveChilds.TryGetValue(pair.Key, out Thing prveNode) || pair.Value != prveNode) diff.Add(pair.Key, pair.Value);
             }
+            //Log.Message("5:" + state.ToString());
             foreach (KeyValuePair<string, Thing> pair in prveChilds)
             {
                 if (diff.ContainsKey(pair.Key)) continue;
                 if (!this.TryGetValue(pair.Key, out Thing currentNode) || pair.Value != currentNode) diff.Add(pair.Key, currentNode);
             }
+            //Log.Message("6:" + state.ToString());
             this.Clear();
 
+            //Log.Message("7:" + state.ToString());
             foreach (KeyValuePair<string, Thing> pair in prveChilds)
             {
                 this[pair.Key] = pair.Value;
@@ -262,8 +263,6 @@ namespace RW_NodeTree
 
             foreach (KeyValuePair<string, Thing> pair in diff)
             {
-                lockUpdate = true;
-                lockNeedUpdate = true;
                 this[pair.Key] = pair.Value;
             }
 
@@ -275,8 +274,6 @@ namespace RW_NodeTree
                 NodeContainer container = ((CompChildNodeProccesser)node)?.ChildNodes;
                 if (container != null && container.NeedUpdate)
                 {
-                    lockUpdate = false;
-                    lockNeedUpdate = true;
                     StopEventBubble = container.internal_UpdateNode(actionNode) || StopEventBubble;
                     reset = false;
                 }
@@ -287,8 +284,6 @@ namespace RW_NodeTree
                 NodeContainer container = ((CompChildNodeProccesser)node)?.ChildNodes;
                 if (container != null && container.NeedUpdate)
                 {
-                    lockUpdate = false;
-                    lockNeedUpdate = true;
                     StopEventBubble = container.internal_UpdateNode(actionNode) || StopEventBubble;
                     //reset = false;
                 }
@@ -299,8 +294,6 @@ namespace RW_NodeTree
             {
                 try
                 {
-                    lockUpdate = true;
-                    lockNeedUpdate = true;
                     StopEventBubble = comp.internal_PostUpdateNode(actionNode, cachingData, new Dictionary<string, Thing>(prveChilds)) || StopEventBubble;
                 }
                 catch (Exception ex)
@@ -314,9 +307,6 @@ namespace RW_NodeTree
                 proccess.ResetVerbs();
                 proccess.ResetRenderedTexture();
             }
-            lockUpdate = false;
-            lockNeedUpdate = false;
-            NeedUpdate = false;
             return StopEventBubble;
         }
 
@@ -468,7 +458,6 @@ namespace RW_NodeTree
 
             if (state == stateCode.r)
             {
-
                 if (item.Destroyed && Contains(item)) NeedUpdate = true;
                 else Log.Warning("Tried to remove item out side of preUpdate. Blocked...");
                 return false;
@@ -608,18 +597,14 @@ namespace RW_NodeTree
 
         private List<string> innerIdList = new List<string>();
 
-        internal bool lockNeedUpdate = false;
+        private stateCode state = 0;
 
-        internal stateCode state = 0;
-
-        internal enum stateCode : byte
+        private enum stateCode : byte
         {
             r  = 0,
             rt = 1,
             rw = 2
         }
-
-        internal static bool lockUpdate = false;
 
         private static readonly AccessTools.FieldRef<DebugLoadIDsSavingErrorsChecker,HashSet<string>> DebugLoadIDsSavingErrorsChecker_deepSaved = AccessTools.FieldRefAccess<DebugLoadIDsSavingErrorsChecker,HashSet<string>>( "deepSaved");
 
