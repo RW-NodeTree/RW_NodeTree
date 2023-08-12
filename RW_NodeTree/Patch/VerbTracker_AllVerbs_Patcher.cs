@@ -133,7 +133,7 @@ namespace RW_NodeTree
             //StackTrace stackTrace = new StackTrace();
             //StackFrame[] stackFrame = stackTrace.GetFrames();
             //if (Prefs.DevMode) Log.Message($"{stackFrame[0].GetMethod()}\n{stackFrame[1].GetMethod()}\n{stackFrame[2].GetMethod()}\n{stackFrame[3].GetMethod()}\n{stackFrame[4].GetMethod()}\n{stackFrame[5].GetMethod()}\n{stackFrame[6].GetMethod()}\n");
-            if (ownerType != null && typeof(IVerbOwner).IsAssignableFrom(ownerType) && !GetOriginalVerb)
+            if (Props.VerbTrackerAllVerbRedictory && ownerType != null && typeof(IVerbOwner).IsAssignableFrom(ownerType) && !GetOriginalVerb)
             {
                 for (int i = 0; i < result.Count; i++)
                 {

@@ -1,4 +1,5 @@
 ﻿using HarmonyLib;
+using Mono.Unix.Native;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,63 +21,8 @@ namespace RW_NodeTree.Patch
         )]
         private static bool PrePawn_EquipmentTracker_EquipmentTrackerTick(Pawn_EquipmentTracker __instance)
         {
-            ThingOwner list = __instance.GetDirectlyHeldThings();
-            list.ThingOwnerTick();
-            for (int i = list.Count - 1; i >= 0; i--)
-            {
-                Thing t = list[i];
-                if (t.def.tickerType != TickerType.Normal)
-                {
-                    if ((t is IVerbOwner) || (t as ThingWithComps)?.AllComps.Find(x => x is IVerbOwner) != null || (CompChildNodeProccesser)t != null)
-                    {
-                        try
-                        {
-                            t.Tick();
-                            if (t.Destroyed)
-                            {
-                                list.Remove(t);
-                            }
-                        }
-                        catch(Exception ex)
-                        {
-                            Log.Error(ex.ToString());
-                        }
-                    }
-                }
-            }
+            __instance.GetDirectlyHeldThings()?.ThingOwnerTick();
             return false;
-        }
-
-        [HarmonyPostfix]
-        [HarmonyPatch(
-            typeof(Pawn_EquipmentTracker),
-            "EquipmentTrackerTickRare"
-        )]
-        private static void PostPawn_EquipmentTracker_EquipmentTrackerTickRare(Pawn_EquipmentTracker __instance)
-        {
-            ThingOwner list = __instance.GetDirectlyHeldThings();
-            for (int i = list.Count - 1; i >= 0; i--)
-            {
-                Thing t = list[i];
-                if (t.def.tickerType != TickerType.Rare)
-                {
-                    if ((t is IVerbOwner) || (t as ThingWithComps)?.AllComps.Find(x => x is IVerbOwner) != null || (CompChildNodeProccesser)t != null)
-                    {
-                        try
-                        {
-                            t.TickRare();
-                            if (t.Destroyed)
-                            {
-                                list.Remove(t);
-                            }
-                        }
-                        catch(Exception ex)
-                        {
-                            Log.Error(ex.ToString());
-                        }
-                    }
-                }
-            }
         }
 
         [HarmonyPostfix]

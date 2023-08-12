@@ -112,74 +112,6 @@ namespace RW_NodeTree
         public override void CompTick()
         {
             ChildNodes.ThingOwnerTick();
-            IList<Thing> list = ChildNodes;
-            for (int i = list.Count - 1; i >= 0; i--)
-            {
-                Thing t = list[i];
-                if (t.def.tickerType == TickerType.Never)
-                {
-                    if ((t is IVerbOwner) || (t as ThingWithComps)?.AllComps.Find(x => x is IVerbOwner) != null || (CompChildNodeProccesser)t != null)
-                    {
-                        t.Tick();
-                        if (t.Destroyed)
-                        {
-                            NeedUpdate = true;
-                        }
-                    }
-                }
-            }
-            UpdateNode();
-            if (Find.TickManager.TicksGame % 250 == 0)
-            {
-                CompTickRare();
-            }
-        }
-
-        public override void CompTickRare()
-        {
-            ChildNodes.ThingOwnerTickRare();
-            IList<Thing> list = ChildNodes;
-            for (int i = list.Count - 1; i >= 0; i--)
-            {
-                Thing t = list[i];
-                if (t.def.tickerType == TickerType.Never)
-                {
-                    if ((t is IVerbOwner) || (t as ThingWithComps)?.AllComps.Find(x => x is IVerbOwner) != null || (CompChildNodeProccesser)t != null)
-                    {
-                        t.TickRare();
-                        if (t.Destroyed)
-                        {
-                            NeedUpdate = true;
-                        }
-                    }
-                }
-            }
-            UpdateNode();
-            if (Find.TickManager.TicksGame % 2000 < 250)
-            {
-                CompTickLong();
-            }
-        }
-
-        public override void CompTickLong()
-        {
-            ChildNodes.ThingOwnerTickLong();
-            IList<Thing> list = ChildNodes;
-            for (int i = list.Count - 1; i >= 0; i--)
-            {
-                Thing t = list[i];
-                if (t.def.tickerType == TickerType.Never)
-                {
-                    if ((t is IVerbOwner) || (t as ThingWithComps)?.AllComps.Find(x => x is IVerbOwner) != null || (CompChildNodeProccesser)t != null)
-                    {
-                        t.TickLong();
-                        if (t.Destroyed)
-                        {
-                            NeedUpdate = true;
-                        }
-                    }
-                }
-            }
             UpdateNode();
         }
 
@@ -867,6 +799,7 @@ namespace RW_NodeTree
 
         public bool VerbDirectOwnerRedictory = false;
         public bool VerbEquipmentSourceRedictory = true;
+        public bool VerbTrackerAllVerbRedictory = false;
         public bool VerbIconVerbInstanceSource = false;
         public bool NodeIdAutoInsertByRegiested = true;
         public float ExceedanceFactor = 1f;

@@ -57,7 +57,7 @@
     <Compile Include="Patch\Widgets_ThingIcon_Patcher.cs" />
     <Compile Include="Patch\GenRecipe_Patcher.cs" />
     <Compile Include="Patch\Graphic_RandomRotated_Patcher.cs" />
-    <Compile Include="Patch\Pawn_ApparelTracker_Patcher.cs" />
+    <Compile Include="Patch\ThingOwner_Patcher.cs" />
     <Compile Include="Patch\StatDrawEntry_Patcher.cs" />
     <Compile Include="Patch\Pawn_EquipmentTracker_Patcher.cs" />
     <Compile Include="Patch\Pawn_TryGetAttackVerb_Patcher.cs" />
