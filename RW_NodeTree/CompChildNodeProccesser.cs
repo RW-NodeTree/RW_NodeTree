@@ -361,7 +361,14 @@ namespace RW_NodeTree
         public void ResetRenderedTexture()
         {
             for (int i = 0; i < nodeRenderingInfos.Length; i++) nodeRenderingInfos[i] = null;
-            if (parent.Spawned && parent.def.drawerType >= DrawerType.MapMeshOnly) parent.DirtyMapMesh(parent.Map);
+            try
+            {
+                if (parent.Spawned && parent.def.drawerType >= DrawerType.MapMeshOnly) parent.DirtyMapMesh(parent.Map);
+            }
+            catch (Exception ex)
+            {
+                Log.Warning(ex.ToString());
+            }
             ParentProccesser?.ResetRenderedTexture();
         }
 
@@ -743,7 +750,27 @@ namespace RW_NodeTree
 
         public static implicit operator CompChildNodeProccesser(Thing thing)
         {
-            return thing?.TryGetComp<CompChildNodeProccesser>();
+            List<ThingComp> comps = (thing as ThingWithComps)?.AllComps;
+            if (comps != null && comps.Count > 0)
+            {
+                CompChildNodeProccesser result = comps[0] as CompChildNodeProccesser;
+                if (result == null)
+                {
+                    int i = 1;
+                    for (; i < comps.Count; i++)
+                    {
+                        result = comps[i] as CompChildNodeProccesser;
+                        if (result != null) break;
+                    }
+                    if (result != null)
+                    {
+                        comps.RemoveAt(i);
+                        comps.Insert(0, result);
+                    }
+                }
+                return result;
+            }
+            return null;
         }
         #endregion
 
