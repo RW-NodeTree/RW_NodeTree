@@ -751,26 +751,51 @@ namespace RW_NodeTree
         public static implicit operator CompChildNodeProccesser(Thing thing)
         {
             List<ThingComp> comps = (thing as ThingWithComps)?.AllComps;
-            if (comps != null && comps.Count > 0)
+            if (comps.NullOrEmpty()) return null;
+
+            CompNoCompMarker marker = comps[0] as CompNoCompMarker;
+            if (marker != null) return null;
+            CompChildNodeProccesser result = comps[0] as CompChildNodeProccesser;
+            int i = 1;
+            if (result != null) return result;
+            else
             {
-                CompChildNodeProccesser result = comps[0] as CompChildNodeProccesser;
-                if (result == null)
+                for (; i < comps.Count; i++)
                 {
-                    int i = 1;
-                    for (; i < comps.Count; i++)
-                    {
-                        result = comps[i] as CompChildNodeProccesser;
-                        if (result != null) break;
-                    }
-                    if (result != null)
-                    {
-                        comps.RemoveAt(i);
-                        comps.Insert(0, result);
-                    }
+                    result = comps[i] as CompChildNodeProccesser;
+                    if (result != null) break;
                 }
-                return result;
             }
-            return null;
+            if (result != null)
+            {
+                comps.RemoveAt(i);
+                comps.Insert(0, result);
+            }
+            else
+            {
+                i = 1;
+                for (; i < comps.Count; i++)
+                {
+                    marker = comps[i] as CompNoCompMarker;
+                    if (marker != null) break;
+                }
+                if (marker != null)
+                {
+                    comps.RemoveAt(i);
+                    comps.Insert(0, marker);
+                }
+                else
+                {
+                    marker = new CompNoCompMarker();
+                    comps.Insert(0, marker);
+                }
+            }
+            return result;
+        }
+
+        internal class CompNoCompMarker : ThingComp
+        {
+
         }
         #endregion
 
