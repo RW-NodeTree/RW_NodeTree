@@ -624,10 +624,8 @@ namespace RW_NodeTree
         /// <returns></returns>
         public bool AllowNode(Thing node, string id = null)
         {
-            if(node?.Destroyed ?? false) return false;
-            ThingOwner targetOwner = node?.holdingOwner;
-            Type type = targetOwner?.GetType();
-            if (type != null && type.Assembly != HarmonyInjector.coreAssembly) return false;
+            if (node?.holdingOwner != null) return false;
+            if (node?.Destroyed ?? false) return false;
             if (id.NullOrEmpty() || ChildNodes.IsChildOf(node)) return false;
             foreach (CompBasicNodeComp comp in AllNodeComp)
             {

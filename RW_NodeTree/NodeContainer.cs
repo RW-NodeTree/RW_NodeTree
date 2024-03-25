@@ -101,7 +101,7 @@ namespace RW_NodeTree
                         string id = innerIdList[i];
                         try
                         {
-                            if (UsedIds.Contains(thing.GetUniqueLoadID()) || (thing.holdingOwner != null && thing.holdingOwner != this)) Scribe_References.Look(ref thing, id);
+                            if (UsedIds.Contains(thing.GetUniqueLoadID())) Scribe_References.Look(ref thing, id);
                             else Scribe_Deep.Look(ref thing, id);
                         }
                         catch(Exception e)
@@ -269,7 +269,7 @@ namespace RW_NodeTree
             state = stateCode.r;
             bool reset = true;
             if (StopEventBubble) return StopEventBubble;
-            foreach (Thing node in this.Values)
+            foreach (Thing node in prveChilds.Values)
             {
                 NodeContainer container = ((CompChildNodeProccesser)node)?.ChildNodes;
                 if (container != null && container.NeedUpdate)
@@ -438,7 +438,6 @@ namespace RW_NodeTree
 
             innerList.Add(item);
             if (state == stateCode.rw) ((CompChildNodeProccesser)item)?.internal_Added(this, id, true, cachedData);
-            item.holdingOwner?.Remove(item);
             item.holdingOwner = this;
             //NeedUpdate = true;
             return true;
