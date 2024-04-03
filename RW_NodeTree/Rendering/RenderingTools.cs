@@ -154,7 +154,7 @@ namespace RW_NodeTree.Rendering
         /// <param name="target"></param>
         /// <param name="size">force render texture size</param>
         /// <param name="TextureSizeFactor"></param>
-        public static void RenderToTarget(List<RenderInfo> infos, ref RenderTexture cachedRenderTarget, ref Texture2D target, Vector2Int size = default(Vector2Int), int TextureSizeFactor = (int)DefaultTextureSizeFactor, float ExceedanceFactor = 1f, float ExceedanceOffset = 1f, Action<RenderTexture> PostFX = null)
+        public static void RenderToTarget(List<RenderInfo> infos, ref RenderTexture cachedRenderTarget, ref Texture2D target, Vector2Int size = default(Vector2Int), uint TextureSizeFactor = DefaultTextureSizeFactor, float ExceedanceFactor = 1f, float ExceedanceOffset = 1f, Action<RenderTexture> PostFX = null)
         {
             RenderToTarget(infos, ref cachedRenderTarget, size, TextureSizeFactor, ExceedanceFactor, ExceedanceOffset);
             PostFX?.Invoke(cachedRenderTarget);
@@ -184,7 +184,7 @@ namespace RW_NodeTree.Rendering
         /// <param name="cachedRenderTarget"></param>
         /// <param name="size">force render texture size</param>
         /// <param name="TextureSizeFactor"></param>
-        public static void RenderToTarget(List<RenderInfo> infos, ref RenderTexture cachedRenderTarget, Vector2Int size = default(Vector2Int), int TextureSizeFactor = (int)DefaultTextureSizeFactor, float ExceedanceFactor = 1f, float ExceedanceOffset = 1f)
+        public static void RenderToTarget(List<RenderInfo> infos, ref RenderTexture cachedRenderTarget, Vector2Int size = default(Vector2Int), uint TextureSizeFactor = DefaultTextureSizeFactor, float ExceedanceFactor = 1f, float ExceedanceOffset = 1f)
         {
 
             if (size.x <= 0 || size.y <= 0)
@@ -249,7 +249,7 @@ namespace RW_NodeTree.Rendering
         }
 
 
-        public static Vector2Int CheckAndResizeRenderTexture(ref RenderTexture renderTexture, Vector2Int size, int TextureSizeFactor = (int)DefaultTextureSizeFactor, float ExceedanceFactor = 1f, float ExceedanceOffset = 1f)
+        public static Vector2Int CheckAndResizeRenderTexture(ref RenderTexture renderTexture, Vector2Int size, uint TextureSizeFactor = DefaultTextureSizeFactor, float ExceedanceFactor = 1f, float ExceedanceOffset = 1f)
         {
             if (renderTexture != null)
             {
@@ -283,7 +283,7 @@ namespace RW_NodeTree.Rendering
         /// <param name="infos">all arranged render infos</param>
         /// <param name="TextureSizeFactor"></param>
         /// <returns>standard size of texture</returns>
-        public static Vector2Int DrawSize(List<RenderInfo> infos, int TextureSizeFactor = (int)DefaultTextureSizeFactor)
+        public static Vector2Int DrawSize(List<RenderInfo> infos, uint TextureSizeFactor = DefaultTextureSizeFactor)
         {
             Matrix4x4 camearMatrix = Matrix4x4.TRS(new Vector3(0, 65, 0), Quaternion.Euler(90, 0, 0), Vector3.one);
             Matrix4x4.Inverse3DAffine(camearMatrix, ref camearMatrix);
@@ -382,6 +382,6 @@ namespace RW_NodeTree.Rendering
         private static readonly Dictionary<int, LinkStack<List<RenderInfo>>> renderInfos = new Dictionary<int, LinkStack<List<RenderInfo>>>();
         public const float CanvasHeight = 4096;
         public const int MaxTexSize = 4096;
-        public const int DefaultTextureSizeFactor = 128;
+        public const uint DefaultTextureSizeFactor = 128;
     }
 }

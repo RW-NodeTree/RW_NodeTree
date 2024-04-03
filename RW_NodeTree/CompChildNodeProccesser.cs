@@ -854,7 +854,7 @@ namespace RW_NodeTree
         public bool NodeIdAutoInsertByRegiested = true;
         public float ExceedanceFactor = 1f;
         public float ExceedanceOffset = 1f;
-        public int TextureSizeFactor = (int)RenderingTools.DefaultTextureSizeFactor;
+        public uint TextureSizeFactor = RenderingTools.DefaultTextureSizeFactor;
         public FilterMode TextureFilterMode = FilterMode.Bilinear;
     }
 }
