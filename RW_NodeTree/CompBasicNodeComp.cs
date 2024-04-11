@@ -1,10 +1,6 @@
-﻿using RimWorld;
-using RW_NodeTree.Rendering;
+﻿using RW_NodeTree.Rendering;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
 using Verse;
 

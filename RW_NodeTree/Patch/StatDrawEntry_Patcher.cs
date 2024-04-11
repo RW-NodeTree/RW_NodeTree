@@ -1,14 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using HarmonyLib;
 using RimWorld;
-using UnityEngine;
 using Verse;
 
 namespace RW_NodeTree.Patch
 {
 	[HarmonyPatch(typeof(StatDrawEntry))]
-    public static class StatDrawEntry_Patcher
+    internal static class StatDrawEntry_Patcher
 	{
 		[HarmonyPostfix]
 		[HarmonyPatch(typeof(StatDrawEntry), "get_ValueString")]
