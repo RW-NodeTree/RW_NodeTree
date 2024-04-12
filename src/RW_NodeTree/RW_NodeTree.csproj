@@ -1,0 +1,56 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>RW_NodeTree</RootNamespace>
+    <AssemblyName>RW_NodeTree</AssemblyName>
+		<TargetFramework>net48</TargetFramework>
+		<!-- <LangVersion>8.0</LangVersion> -->
+		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+		<!-- <DefineConstants>$(DefineConstants);$(Configuration)</DefineConstants> -->
+		<Configurations>DebugV13;ReleaseV13;DebugV14;ReleaseV14;DebugV15;ReleaseV15</Configurations>
+		<!-- <Platform>v13;v14;v15;</Platform> -->
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'DebugV13' or '$(Configuration)' == 'DebugV14' or '$(Configuration)' == 'DebugV15' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>portable</DebugType>
+    <Optimize>false</Optimize>
+		<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'ReleaseV13' or '$(Configuration)' == 'ReleaseV14' or '$(Configuration)' == 'ReleaseV15' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+		<DebugType>none</DebugType>
+		<DebugSymbols>false</DebugSymbols>
+		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'DebugV13' or '$(Configuration)' == 'ReleaseV13'">
+    <OutputPath>../../1.3/Assemblies</OutputPath>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'DebugV14' or '$(Configuration)' == 'ReleaseV14'">
+    <OutputPath>../../1.4/Assemblies</OutputPath>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'DebugV15' or '$(Configuration)' == 'ReleaseV15'">
+    <OutputPath>../../1.5/Assemblies</OutputPath>
+  </PropertyGroup>
+	<ItemGroup>
+		<PackageReference Condition=" '$(Configuration)' == 'DebugV13' or '$(Configuration)' == 'ReleaseV13'" Include="Krafs.Rimworld.Ref" Version="1.3.*" GeneratePathProperty="true" />
+		<PackageReference Condition=" '$(Configuration)' == 'DebugV14' or '$(Configuration)' == 'ReleaseV14'" Include="Krafs.Rimworld.Ref" Version="1.4.*" GeneratePathProperty="true" />
+		<PackageReference Condition=" '$(Configuration)' == 'DebugV15' or '$(Configuration)' == 'ReleaseV15'" Include="Krafs.Rimworld.Ref" Version="1.5.*" GeneratePathProperty="true" />
+		<PackageReference Include="Lib.Harmony" Version="2.*" ExcludeAssets="runtime" />
+	</ItemGroup>
+  <!-- <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" /> -->
+  <PropertyGroup>
+    <!-- <PostBuildEvent>
+set ver=1.5
+rmdir "%25RW_HOME%25\Mods\$(ProjectName)\%25ver%25" /s/q
+mkdir "%25RW_HOME%25\Mods\$(ProjectName)\%25ver%25"
+xcopy "$(ProjectDir)\PackUp" "%25RW_HOME%25\Mods\$(ProjectName)" /e/s/q/y
+mkdir "%25RW_HOME%25\Mods\$(ProjectName)\%25ver%25\Assemblies"
+copy "$(TargetDir)$(TargetName).*" "%25RW_HOME%25\Mods\$(ProjectName)\%25ver%25\Assemblies"
+    </PostBuildEvent> -->
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='V13|AnyCPU'" />
+</Project>

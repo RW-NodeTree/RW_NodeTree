@@ -18,8 +18,8 @@ namespace RW_NodeTree.Patch
             typeof(Thing),
             typeof(float),
             typeof(Rot4?)
-#if !V13
-            ,typeof(bool)
+#if !DEBUGV13 && !RELEASEV13
+            , typeof(bool)
 #endif
         )]
         private static void PreWidgets_ThingIcon(Thing thing, ref (Vector2, float)? __state)
@@ -60,8 +60,8 @@ namespace RW_NodeTree.Patch
             typeof(Thing),
             typeof(float),
             typeof(Rot4?)
-#if !V13
-            ,typeof(bool)
+#if !DEBUGV13 && !RELEASEV13
+            , typeof(bool)
 #endif
         )]
         private static void FinalWidgets_ThingIcon(Thing thing, (Vector2, float)? __state)
