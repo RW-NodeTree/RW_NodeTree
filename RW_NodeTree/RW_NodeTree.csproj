@@ -312,7 +312,7 @@
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>set ver=1.4
+    <PostBuildEvent>set ver=1.5
 rmdir "%25RW_HOME%25\Mods\$(ProjectName)\%25ver%25" /s/q
 mkdir "%25RW_HOME%25\Mods\$(ProjectName)\%25ver%25"
 xcopy "$(ProjectDir)\PackUp" "%25RW_HOME%25\Mods\$(ProjectName)" /e/s/q/y

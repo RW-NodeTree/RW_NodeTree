@@ -581,7 +581,11 @@ namespace RW_NodeTree
                     {
                         Rot4 rotCache = child.Rotation;
                         child.Rotation = new Rot4((rot.AsInt + rotCache.AsInt) & 3);
+#if V14 || V13
                         child.DrawAt(Vector3.zero);
+#else
+                        child.DrawNowAt(Vector3.zero);
+#endif
                         child.Rotation = rotCache;
                         infos.AddRange(RenderingTools.RenderInfos);
                     }

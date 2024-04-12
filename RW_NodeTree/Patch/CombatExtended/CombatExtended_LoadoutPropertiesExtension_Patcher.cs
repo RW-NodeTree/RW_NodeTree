@@ -65,7 +65,7 @@ namespace RW_NodeTree.Patch.CombatExtended
         {
             if(CombatExtended_CompAmmoUser != null)
             {
-                TryGetComp = typeof(ThingCompUtility).GetMethod("TryGetComp", BindingFlags.Static | BindingFlags.Public).MakeGenericMethod(new Type[] { CombatExtended_CompAmmoUser });
+                TryGetComp = typeof(ThingCompUtility).GetMethod("TryGetComp", BindingFlags.Static | BindingFlags.Public,null,new Type[] {typeof(Thing)},null).MakeGenericMethod(new Type[] { CombatExtended_CompAmmoUser });
             }
             if (CombatExtended_LoadoutPropertiesExtension != null)
             {
