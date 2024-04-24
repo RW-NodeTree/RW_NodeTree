@@ -1,4 +1,5 @@
 using HarmonyLib;
+using RimWorld;
 using System;
 using System.Collections.Generic;
 using System.Xml;
@@ -11,6 +12,16 @@ namespace RW_NodeTree
         public QueryGroup(){}
 
         public QueryGroup(string queryStr) => UpdateByQueryString(queryStr);
+
+        public uint ConditionCount
+        {
+            get
+            {
+                uint result = 0;
+                foreach (QueryLevel level in levels) result += level.ConditionCount;
+                return result;
+            }
+        }
 
         public IEnumerable<string> AllAnnouncedTargetId
         {
@@ -60,9 +71,9 @@ namespace RW_NodeTree
             }
         }
 
-        public int Mach(Thing node)
+        public uint Mach(Thing node)
         {
-            int result = 0;
+            uint result = 0;
             foreach(QueryLevel level in levels)
             {
                 result = Math.Max(result,level.Mach(node));
@@ -88,6 +99,16 @@ namespace RW_NodeTree
         public QueryLevel(){}
 
         public QueryLevel(string queryStr) => UpdateByQueryString(queryStr);
+
+        public uint ConditionCount
+        {
+            get
+            {
+                uint result = 0;
+                foreach (QuerySelecter selecter in selecters) result += selecter.ConditionCount;
+                return result;
+            }
+        }
 
         public string TargetId => selecters.NullOrEmpty() ? null : selecters[selecters.Count - 1].TargetId;
 
@@ -130,13 +151,13 @@ namespace RW_NodeTree
             }
         }
 
-        public int Mach(Thing node)
+        public uint Mach(Thing node)
         {
-            int result = 0;
+            uint result = 0;
             for(int i = selecters.Count - 1; i >= 0; i--)
             {
                 if (node == null) return 0;
-                int mach = selecters[i].Mach(node);
+                uint mach = selecters[i].Mach(node);
                 if (mach == 0) return 0;
                 result += mach;
                 node = node.ParentHolder as CompChildNodeProccesser;
@@ -161,6 +182,19 @@ namespace RW_NodeTree
     {
         public QuerySelecter(){}
         public QuerySelecter(string queryStr) => UpdateByQueryString(queryStr);
+
+        public uint ConditionCount
+        {
+            get
+            {
+                uint result = 0;
+                if (notFlag) result++;
+                if (id != null) result++;
+                if (defName != null) result++;
+                foreach (QueryGroup group in childenGroups) result += group.ConditionCount;
+                return result;
+            }
+        }
 
         public string TargetId => id;
 
@@ -237,10 +271,10 @@ namespace RW_NodeTree
             }
         }
 
-        public int Mach(Thing node)
+        public uint Mach(Thing node)
         {
             if(node == null) return 0;
-            int result = 0;
+            uint result = notFlag ? 1u : 0;
             if(id != null)
             {
                 CompChildNodeProccesser parent = node.ParentHolder as CompChildNodeProccesser;
@@ -256,7 +290,7 @@ namespace RW_NodeTree
             foreach(QueryGroup group in childenGroups)
             {
                 if(nodeProccesser == null) return 0;
-                int mach = 0;
+                uint mach = 0;
                 foreach(Thing child in nodeProccesser.ChildNodes.Values)
                 {
                     mach = Math.Max(mach,group.Mach(child));
@@ -264,7 +298,7 @@ namespace RW_NodeTree
                 if (notFlag)
                 {
                     if(mach > 0) return 0;
-                    else mach++;
+                    else mach = group.ConditionCount;
                 }
                 else if(mach == 0) return 0;
                 result += mach;
