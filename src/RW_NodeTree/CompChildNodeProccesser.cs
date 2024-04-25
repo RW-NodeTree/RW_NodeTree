@@ -747,50 +747,30 @@ namespace RW_NodeTree
         {
             List<ThingComp> comps = (thing as ThingWithComps)?.AllComps;
             if (comps.NullOrEmpty()) return null;
-
-            CompNoCompMarker marker = comps[0] as CompNoCompMarker;
-            if (marker != null) return null;
-            CompChildNodeProccesser result = comps[0] as CompChildNodeProccesser;
-            int i = 1;
-            if (result != null) return result;
-            else
+            CompChildNodeProccesser result = null;
+            if (!compLoadingCache.TryGetValue(thing.def, out int index))
             {
+                int i = 0;
                 for (; i < comps.Count; i++)
                 {
                     result = comps[i] as CompChildNodeProccesser;
                     if (result != null) break;
                 }
-            }
-            if (result != null)
-            {
-                comps.RemoveAt(i);
-                comps.Insert(0, result);
-            }
-            else
-            {
-                i = 1;
-                for (; i < comps.Count; i++)
+                if (result != null)
                 {
-                    marker = comps[i] as CompNoCompMarker;
-                    if (marker != null) break;
-                }
-                if (marker != null)
-                {
-                    comps.RemoveAt(i);
-                    comps.Insert(0, marker);
+                    index = i;
                 }
                 else
                 {
-                    marker = new CompNoCompMarker();
-                    comps.Insert(0, marker);
+                    index = -1;
                 }
+                compLoadingCache.Add(thing.def,index);
+            }
+            else if(index >= 0)
+            {
+                result = comps[index] as CompChildNodeProccesser;
             }
             return result;
-        }
-
-        internal class CompNoCompMarker : ThingComp
-        {
-
         }
         #endregion
 
@@ -807,6 +787,8 @@ namespace RW_NodeTree
         private readonly Dictionary<Type, Dictionary<(Thing, Verb, Tool, VerbProperties, bool), (Thing, Verb, Tool, VerbProperties)>> BeforeConvertVerbCorrespondingThingCache = new Dictionary<Type, Dictionary<(Thing, Verb, Tool, VerbProperties, bool), (Thing, Verb, Tool, VerbProperties)>>();
 
         private static bool blockUpdate = false;
+
+        private readonly static Dictionary<ThingDef,int> compLoadingCache = new Dictionary<ThingDef,int>();
 
         /*
         private static Matrix4x4 matrix =
