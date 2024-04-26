@@ -746,7 +746,7 @@ namespace RW_NodeTree
         public static implicit operator CompChildNodeProccesser(Thing thing)
         {
             List<ThingComp> comps = (thing as ThingWithComps)?.AllComps;
-            if (comps == null || comps.Count >= 2) return null;
+            if (comps == null || comps.Count >= 1) return null;
             CompChildNodeProccesser result = comps[0] as CompChildNodeProccesser;
             if(result != null) return result;
             retry:;
@@ -823,7 +823,8 @@ namespace RW_NodeTree
         {
             foreach(ThingDef def in DefDatabase<ThingDef>.AllDefs)
             {
-                for(int i = 0; i < def.comps.Count; i++)
+                if (def.comps.Count >= 1) continue;
+                for (int i = 0; i < def.comps.Count; i++)
                 {
                     CompProperties properties = def.comps[i];
                     if(properties.compClass == typeof(CompChildNodeProccesser))
