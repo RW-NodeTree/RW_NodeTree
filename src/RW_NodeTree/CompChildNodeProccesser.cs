@@ -747,7 +747,9 @@ namespace RW_NodeTree
         {
             List<ThingComp> comps = (thing as ThingWithComps)?.AllComps;
             if (comps.NullOrEmpty()) return null;
-            CompChildNodeProccesser result = null;
+            CompChildNodeProccesser result = comps[0] as CompChildNodeProccesser;
+            if(result != null) return result;
+            retry:;
             if (!compLoadingCache.TryGetValue(thing.def, out int index))
             {
                 int i = 0;
@@ -769,6 +771,11 @@ namespace RW_NodeTree
             else if(index >= 0)
             {
                 result = comps[index] as CompChildNodeProccesser;
+                if(result == null)
+                {
+                    compLoadingCache.Remove(thing.def);
+                    goto retry;
+                }
             }
             return result;
         }
@@ -803,6 +810,7 @@ namespace RW_NodeTree
 
     }
 
+    [StaticConstructorOnStartup]
     public class CompProperties_ChildNodeProccesser : CompProperties
     {
         public CompProperties_ChildNodeProccesser()
@@ -810,6 +818,23 @@ namespace RW_NodeTree
             base.compClass = typeof(CompChildNodeProccesser);
         }
 
+
+        static CompProperties_ChildNodeProccesser()
+        {
+            foreach(ThingDef def in DefDatabase<ThingDef>.AllDefs)
+            {
+                for(int i = 0; i < def.comps.Count; i++)
+                {
+                    CompProperties properties = def.comps[i];
+                    if(properties.compClass == typeof(CompChildNodeProccesser))
+                    {
+                        def.comps.RemoveAt(i);
+                        def.comps.Insert(0,properties);
+                        break;
+                    }
+                }
+            }
+        }
         public override void ResolveReferences(ThingDef parentDef)
         {
             parentDef.comps.Remove(this);
