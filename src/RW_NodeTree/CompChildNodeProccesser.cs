@@ -746,7 +746,7 @@ namespace RW_NodeTree
         public static implicit operator CompChildNodeProccesser(Thing thing)
         {
             List<ThingComp> comps = (thing as ThingWithComps)?.AllComps;
-            if (comps.NullOrEmpty()) return null;
+            if (comps == null || comps.Count >= 2) return null;
             CompChildNodeProccesser result = comps[0] as CompChildNodeProccesser;
             if(result != null) return result;
             retry:;
