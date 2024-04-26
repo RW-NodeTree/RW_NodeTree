@@ -345,7 +345,7 @@ namespace RW_NodeTree
                 return 0;
             }
 
-            if (state != stateCode.fw && !CanAcceptAnyOf(item, canMergeWithExistingStacks))
+            if ((state != stateCode.fw && !CanAcceptAnyOf(item, canMergeWithExistingStacks)) || item.holdingOwner != null || IsChildOf(item))
             {
                 return 0;
             }
@@ -426,7 +426,7 @@ namespace RW_NodeTree
                 goto fail;
             }
 
-            if (state != stateCode.fw && !CanAcceptAnyOf(item, canMergeWithExistingStacks)) goto fail;
+            if ((state != stateCode.fw && !CanAcceptAnyOf(item, canMergeWithExistingStacks)) || item.holdingOwner != null || IsChildOf(item)) goto fail;
 
             if (Count >= maxStacks) goto fail;
 
