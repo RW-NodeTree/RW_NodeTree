@@ -247,6 +247,7 @@ namespace RW_NodeTree
             this.Clear();
 
             //Log.Message("7:" + state.ToString());
+            state = stateCode.fw;
             foreach (KeyValuePair<string, Thing> pair in prveChilds)
             {
                 this[pair.Key] = pair.Value;
@@ -344,7 +345,7 @@ namespace RW_NodeTree
                 return 0;
             }
 
-            if (!CanAcceptAnyOf(item, canMergeWithExistingStacks))
+            if (state != stateCode.fw && !CanAcceptAnyOf(item, canMergeWithExistingStacks))
             {
                 return 0;
             }
@@ -425,7 +426,7 @@ namespace RW_NodeTree
                 goto fail;
             }
 
-            if (!CanAcceptAnyOf(item, canMergeWithExistingStacks)) goto fail;
+            if (state != stateCode.fw && !CanAcceptAnyOf(item, canMergeWithExistingStacks)) goto fail;
 
             if (Count >= maxStacks) goto fail;
 
@@ -595,7 +596,8 @@ namespace RW_NodeTree
         {
             r  = 0,
             rt = 1,
-            rw = 2
+            fw = 2,
+            rw = 3
         }
 
         private static readonly AccessTools.FieldRef<DebugLoadIDsSavingErrorsChecker,HashSet<string>> DebugLoadIDsSavingErrorsChecker_deepSaved = AccessTools.FieldRefAccess<DebugLoadIDsSavingErrorsChecker,HashSet<string>>( "deepSaved");
