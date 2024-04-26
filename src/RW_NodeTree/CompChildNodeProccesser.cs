@@ -770,6 +770,11 @@ namespace RW_NodeTree
             }
             else if(index >= 0)
             {
+                if(index >= comps.Count)
+                {
+                    compLoadingCache.Remove(thing.def);
+                    goto retry;
+                }
                 result = comps[index] as CompChildNodeProccesser;
                 if(result == null)
                 {
