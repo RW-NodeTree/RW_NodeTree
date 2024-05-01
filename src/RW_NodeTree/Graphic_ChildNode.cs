@@ -123,7 +123,7 @@ namespace RW_NodeTree
             if (comp_ChildNodeProccesser != currentProccess) return SubGraphic?.MatAt(rot, thing);
 
 
-            (Material material, Texture2D texture, RenderTexture cachedRenderTarget) = renderingCache[rot];
+            (Material material, Texture2D texture, RenderTexture cachedRenderTarget) = defaultRenderingCache[rot];
 
             List<(string, Thing, List<RenderInfo>)> commands = comp_ChildNodeProccesser.GetNodeRenderingInfos(rot, out bool needUpdate, subGraphic);
             if (!needUpdate && material != null) goto ret;
@@ -147,7 +147,7 @@ namespace RW_NodeTree
                 material.shader = shader;
             }
             material.mainTexture = texture;
-            renderingCache[rot] = (material, texture, cachedRenderTarget);
+            defaultRenderingCache[rot] = (material, texture, cachedRenderTarget);
 
             ret:;
 
@@ -158,7 +158,7 @@ namespace RW_NodeTree
             while (graphic != null && graphic != this)
             {
                 graphic.drawSize = size;
-                graphic = graphic.SubGraphic();
+                graphic = graphic.GetSubGraphic();
             }
             this.drawSize = size;
 
@@ -283,7 +283,7 @@ namespace RW_NodeTree
             public RenderTexture cachedRenderTargetNorth, cachedRenderTargetEast, cachedRenderTargetSouth, cachedRenderTargetWest;
         }
 
-        private readonly OffScreenRenderingCache renderingCache = new OffScreenRenderingCache();
+        private readonly OffScreenRenderingCache defaultRenderingCache = new OffScreenRenderingCache();
         private CompChildNodeProccesser currentProccess = null;
         private Graphic subGraphic = null;
     }

@@ -189,6 +189,7 @@ namespace RW_NodeTree
         internal bool internal_UpdateNode(CompChildNodeProccesser actionNode = null)
         {
             bool StopEventBubble = false;
+            bool NotUpdateTexture = false;
 
             CompChildNodeProccesser proccess = this.Comp;
             if(proccess == null) return StopEventBubble;
@@ -224,7 +225,9 @@ namespace RW_NodeTree
             {
                 try
                 {
-                    StopEventBubble = comp.internal_PreUpdateNode(actionNode, cachingData, new Dictionary<string, Thing>(prveChilds)) || StopEventBubble;
+                    comp.internal_PreUpdateNode(actionNode, cachingData, new Dictionary<string, Thing>(prveChilds), out bool blockEvent, out bool notUpdateTexture);
+                    StopEventBubble |= blockEvent;
+                    NotUpdateTexture |= notUpdateTexture;
                 }
                 catch (Exception ex)
                 {
@@ -262,8 +265,8 @@ namespace RW_NodeTree
 
             state = stateCode.r;
             bool reset = true;
-            if (StopEventBubble) return StopEventBubble;
-            foreach (Thing node in prveChilds.Values)
+            if (StopEventBubble) goto ret;
+            foreach (Thing node in this.Values)
             {
                 NodeContainer container = ((CompChildNodeProccesser)node)?.ChildNodes;
                 if (container != null && container.NeedUpdate)
@@ -273,8 +276,9 @@ namespace RW_NodeTree
                 }
             }
 
-            foreach (Thing node in diff.Values)
+            foreach (string id in diff.Keys)
             {
+                Thing node = prveChilds.TryGetValue(id);
                 NodeContainer container = ((CompChildNodeProccesser)node)?.ChildNodes;
                 if (container != null && container.NeedUpdate)
                 {
@@ -282,24 +286,26 @@ namespace RW_NodeTree
                     //reset = false;
                 }
             }
-            if (StopEventBubble) return StopEventBubble;
+            if (StopEventBubble) goto ret;
 
             foreach (CompBasicNodeComp comp in proccess.AllNodeComp)
             {
                 try
                 {
-                    StopEventBubble = comp.internal_PostUpdateNode(actionNode, cachingData, new Dictionary<string, Thing>(prveChilds)) || StopEventBubble;
+                    comp.internal_PostUpdateNode(actionNode, cachingData, new Dictionary<string, Thing>(prveChilds), out bool blockEvent, out bool notUpdateTexture);
+                    StopEventBubble |= blockEvent;
+                    NotUpdateTexture |= notUpdateTexture;
                 }
                 catch (Exception ex)
                 {
                     Log.Error(ex.ToString());
                 }
             }
-
+            ret:;
             if (reset)
             {
                 proccess.ResetVerbs();
-                proccess.ResetRenderedTexture();
+                if (!NotUpdateTexture) proccess.ResetRenderedTexture();
             }
             return StopEventBubble;
         }

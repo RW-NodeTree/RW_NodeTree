@@ -353,7 +353,7 @@ namespace RW_NodeTree
         /// </summary>
         public void ResetRenderedTexture()
         {
-            for (int i = 0; i < nodeRenderingInfos.Length; i++) nodeRenderingInfos[i] = null;
+            nodeRenderingInfo.Reset();
             try
             {
                 if (parent.Spawned && parent.def.drawerType >= DrawerType.MapMeshOnly) parent.DirtyMapMesh(parent.Map);
@@ -509,7 +509,7 @@ namespace RW_NodeTree
 
             UpdateNode();
             updated = false;
-            if (this.nodeRenderingInfos[rot.AsInt] != null) return this.nodeRenderingInfos[rot.AsInt];
+            if (this.nodeRenderingInfo[rot] != null) return this.nodeRenderingInfo[rot];
             updated = true;
             List<(string, Thing, List<RenderInfo>)> nodeRenderingInfos = new List<(string, Thing, List<RenderInfo>)>(ChildNodes.Count + 1);
 
@@ -528,7 +528,7 @@ namespace RW_NodeTree
 
 
             //ORIGIN
-            subGraphic = ((subGraphic ?? parent.Graphic)?.GetGraphic_ChildNode() as Graphic_ChildNode)?.SubGraphic ?? subGraphic;
+            subGraphic = (subGraphic ?? parent.Graphic)?.GetGraphic_ChildNode()?.SubGraphic ?? subGraphic ?? parent.Graphic;
             if (subGraphic != null)
             {
                 RenderingTools.StartOrEndDrawCatchingBlock = true;
@@ -609,7 +609,7 @@ namespace RW_NodeTree
                     Log.Error(ex.ToString());
                 }
             }
-            this.nodeRenderingInfos[rot.AsInt] = nodeRenderingInfos;
+            this.nodeRenderingInfo[rot] = nodeRenderingInfos;
             return nodeRenderingInfos;
         }
 
@@ -786,11 +786,26 @@ namespace RW_NodeTree
         }
         #endregion
 
+
+        public class NodeRenderingInfoForRot4
+        {
+            public List<(string, Thing, List<RenderInfo>)> this[Rot4 rot]
+            {
+                get => nodeRenderingInfos[rot.AsInt];
+                set => nodeRenderingInfos[rot.AsInt] = value;
+            }
+            public void Reset()
+            {
+                for (int i = 0; i < nodeRenderingInfos.Length; i++) nodeRenderingInfos[i] = null;
+            }
+            public readonly List<(string, Thing, List<RenderInfo>)>[] nodeRenderingInfos = new List<(string, Thing, List<RenderInfo>)>[4];
+        }
+
         private CompChildNodeProccesser cachedRootNode;
 
         private NodeContainer childNodes;
 
-        private readonly List<(string, Thing, List<RenderInfo>)>[] nodeRenderingInfos = new List<(string, Thing, List<RenderInfo>)>[4];
+        private readonly NodeRenderingInfoForRot4 nodeRenderingInfo = new NodeRenderingInfoForRot4();
 
         private readonly Dictionary<Type, List<VerbToolRegiestInfo>> regiestedNodeVerbToolInfos = new Dictionary<Type, List<VerbToolRegiestInfo>>();
 
