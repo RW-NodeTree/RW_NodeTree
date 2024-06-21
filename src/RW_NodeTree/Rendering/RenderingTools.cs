@@ -26,6 +26,7 @@ namespace RW_NodeTree.Rendering
                 {
                     GameObject gameObject = new GameObject("RW_NodeTree_Camera");
                     camera = gameObject.AddComponent<Camera>();
+                    UnityEngine.Object.DontDestroyOnLoad(gameObject);
                     camera.orthographic = true;
                     camera.orthographicSize = 1;
                     camera.nearClipPlane = 0;
