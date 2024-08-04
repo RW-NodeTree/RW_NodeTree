@@ -21,11 +21,11 @@ namespace RW_NodeTree.Patch
 
         private static IEnumerable<Gizmo> PerAndPostFixFor_Pawn_GetGizmos(Pawn instance, IEnumerable<Gizmo> result)
         {
+            List<(Thing, List<Tool>, List<VerbProperties>)> state = new List<(Thing, List<Tool>, List<VerbProperties>)>();
             ThingOwner list = instance.equipment?.GetDirectlyHeldThings();
-            List<(Thing, List<Tool>, List<VerbProperties>)> state = null;
             if (list != null)
             {
-                state = new List<(Thing, List<Tool>, List<VerbProperties>)>(list.Count);
+                state.Capacity += list.Count;
                 foreach (Thing thing in list)
                 {
                     state.Add((thing, thing.def.tools, ThingDef_verbs(thing.def)));
@@ -47,16 +47,16 @@ namespace RW_NodeTree.Patch
                 }
             }
 
+            result = new List<Gizmo>(result);
+
             foreach (Gizmo gizmo in result) yield return gizmo;
 
-            if(state != null)
+            foreach ((Thing thing, List<Tool> tools, List<VerbProperties> verbs) in state)
             {
-                foreach ((Thing thing, List<Tool> tools, List<VerbProperties> verbs) in state)
-                {
-                    thing.def.tools = tools;
-                    ThingDef_verbs(thing.def) = verbs;
-                }
+                thing.def.tools = tools;
+                ThingDef_verbs(thing.def) = verbs;
             }
+            // return result;
         }
 
         private static AccessTools.FieldRef<ThingDef, List<VerbProperties>> ThingDef_verbs = AccessTools.FieldRefAccess<ThingDef, List<VerbProperties>>("verbs");

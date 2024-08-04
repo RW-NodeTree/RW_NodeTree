@@ -19,18 +19,13 @@ namespace RW_NodeTree.Patch
         {
             try
             {
-                CompChildNodeProccesser weapon = __instance.equipment?.Primary;
-                if(weapon != null)
+                Job job = __instance.CurJob;
+                if(job != null && typeof(JobDriver_AttackStatic).IsAssignableFrom(job.def.driverClass) && job.verbToUse?.Caster == __instance)
                 {
-                    Job job = __instance.CurJob;
-                    if(job != null && typeof(JobDriver_AttackStatic).IsAssignableFrom(job.def.driverClass) && job.verbToUse?.Caster == __instance)
+                    List<Verb> verbList = CompChildNodeProccesser.GetOriginalAllVerbs(__instance.CurJob.verbToUse.verbTracker);
+                    if (verbList.Remove(__instance.CurJob.verbToUse))
                     {
-                        CompEquippable equippable = __instance.equipment.PrimaryEq;
-                        List<Verb> verbList = CompChildNodeProccesser.GetOriginalAllVerbs(equippable.VerbTracker);
-                        if (verbList.Remove(__instance.CurJob.verbToUse))
-                        {
-                            verbList.Insert(0, __instance.CurJob.verbToUse);
-                        }
+                        verbList.Insert(0, __instance.CurJob.verbToUse);
                     }
                 }
             }
