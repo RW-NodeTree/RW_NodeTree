@@ -40,7 +40,7 @@ namespace RW_NodeTree.Patch
         )]
         private static bool PreProcessInput(Command_VerbTarget __instance, Event ev)
         {
-            if(ev.type == EventType.MouseUp && ev.keyCode == KeyCode.Mouse1)
+            if(ev.keyCode == KeyCode.Mouse1)
             {
                 
                 SoundDefOf.Tick_Tiny.PlayOneShotOnCamera();
