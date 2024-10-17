@@ -16,27 +16,15 @@ namespace RW_NodeTree
 
         public NodeContainer(CompChildNodeProccesser proccesser) : base(proccesser) { }
 
-        public string this[uint index]
-        {
-            get
-            {
-                lock (this)
-                {
-                    return this[index];
-                }
-            } 
-        }
+        public string this[uint index] => this[index];
 
         public Thing this[string key]
         {
             get
             {
-                lock (this)
-                {
-                    Thing result;
-                    TryGetValue(key, out result);
-                    return result;
-                }
+                Thing result;
+                TryGetValue(key, out result);
+                return result;
             }
             set => Add(key, value);
         }
@@ -45,25 +33,19 @@ namespace RW_NodeTree
         {
             get
             {
-                lock (this)
-                {
-                    int index = IndexOf(item);
-                    if (index < 0 || index >= Count) return null;
-                    return innerIdList[index];
-                }
+                int index = IndexOf(item);
+                if (index < 0 || index >= Count) return null;
+                return innerIdList[index];
             }
             set
             {
-                lock (this)
+                if (state == stateCode.r) return;
+                if (Comp != null && value.IsVaildityKeyFormat() && !innerIdList.Contains(value) && Comp.AllowNode(item, value))
                 {
-                    if (state == stateCode.r) return;
-                    if (Comp != null && value.IsVaildityKeyFormat() && !innerIdList.Contains(value) && Comp.AllowNode(item, value))
+                    int index = IndexOf(item);
+                    if (index >= 0 && index < Count)
                     {
-                        int index = IndexOf(item);
-                        if (index >= 0 && index < Count)
-                        {
-                            innerIdList[index] = value;
-                        }
+                        innerIdList[index] = value;
                     }
                 }
             }
@@ -75,13 +57,7 @@ namespace RW_NodeTree
 
         public bool NeedUpdate
         {
-            get
-            {
-                lock (this)
-                {
-                    return needUpdate;
-                }
-            }
+            get => needUpdate;
             set
             {
                 lock (this)
@@ -89,7 +65,7 @@ namespace RW_NodeTree
                     if (needUpdate != value && (needUpdate = value))
                     {
                         NodeContainer parent = ParentContainer;
-                        if(parent != null) parent.NeedUpdate = true;
+                        if (parent != null) parent.NeedUpdate = true;
                     }
                 }
             }
@@ -598,28 +574,21 @@ namespace RW_NodeTree
             }
         }
 
-        public bool Remove(string key)
-        {
-            lock (this)
-                return Remove(this[key]);
-        }
+        public bool Remove(string key) => Remove(this[key]);
 
         public bool TryGetValue(string key, out Thing value)
         {
-            lock (this)
+            value = null;
+            if (key.IsVaildityKeyFormat())
             {
-                value = null;
-                if (key.IsVaildityKeyFormat())
+                int index = innerIdList.IndexOf(key);
+                if (index >= 0 && index < Count)
                 {
-                    int index = innerIdList.IndexOf(key);
-                    if (index >= 0 && index < Count)
-                    {
-                        value = this[index];
-                        return true;
-                    }
+                    value = this[index];
+                    return true;
                 }
-                return false;
             }
+            return false;
         }
 
         public IEnumerator<KeyValuePair<string, Thing>> GetEnumerator()
@@ -639,38 +608,24 @@ namespace RW_NodeTree
 
         public void CopyTo(KeyValuePair<string, Thing>[] array, int arrayIndex)
         {
-            lock (this)
+            for (int i = 0; i < Count; i++)
             {
-                for (int i = 0; i < Count; i++)
-                {
-                    array[i + arrayIndex] = new KeyValuePair<string, Thing>(this[(uint)i], this[i]);
-                }
+                array[i + arrayIndex] = new KeyValuePair<string, Thing>(this[(uint)i], this[i]);
             }
         }
 
         bool ICollection<KeyValuePair<string, Thing>>.Remove(KeyValuePair<string, Thing> item)
         {
-            lock (this)
+            if (((ICollection<KeyValuePair<string, Thing>>)this).Contains(item))
             {
-                if (((ICollection<KeyValuePair<string, Thing>>)this).Contains(item))
-                {
-                    return Remove(item.Value);
-                }
-                return false;
+                return Remove(item.Value);
             }
+            return false;
         }
 
-        public override int IndexOf(Thing item)
-        {
-            lock (this)
-                return innerList.IndexOf(item);
-        }
+        public override int IndexOf(Thing item) => innerList.IndexOf(item);
 
-        protected override Thing GetAt(int index)
-        {
-            lock (this)
-                return innerList[index];
-        }
+        protected override Thing GetAt(int index) => innerList[index];
 
         private bool needUpdate = true;
 
