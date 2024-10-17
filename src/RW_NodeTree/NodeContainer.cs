@@ -16,15 +16,27 @@ namespace RW_NodeTree
 
         public NodeContainer(CompChildNodeProccesser proccesser) : base(proccesser) { }
 
-        public string this[uint index] => innerIdList[(int)index];
+        public string this[uint index]
+        {
+            get
+            {
+                lock (this)
+                {
+                    return this[index];
+                }
+            } 
+        }
 
         public Thing this[string key]
         {
             get
             {
-                Thing result;
-                TryGetValue(key, out result);
-                return result;
+                lock (this)
+                {
+                    Thing result;
+                    TryGetValue(key, out result);
+                    return result;
+                }
             }
             set => Add(key, value);
         }
@@ -33,19 +45,25 @@ namespace RW_NodeTree
         {
             get
             {
-                int index = IndexOf(item);
-                if(index < 0 || index >= Count) return null;
-                return innerIdList[index];
+                lock (this)
+                {
+                    int index = IndexOf(item);
+                    if (index < 0 || index >= Count) return null;
+                    return innerIdList[index];
+                }
             }
             set
             {
-                if (state == stateCode.r) return;
-                if (Comp != null && value.IsVaildityKeyFormat() && !innerIdList.Contains(value) && Comp.AllowNode(item, value))
+                lock (this)
                 {
-                    int index = IndexOf(item);
-                    if (index >= 0 && index < Count)
+                    if (state == stateCode.r) return;
+                    if (Comp != null && value.IsVaildityKeyFormat() && !innerIdList.Contains(value) && Comp.AllowNode(item, value))
                     {
-                        innerIdList[index] = value;
+                        int index = IndexOf(item);
+                        if (index >= 0 && index < Count)
+                        {
+                            innerIdList[index] = value;
+                        }
                     }
                 }
             }
@@ -57,13 +75,22 @@ namespace RW_NodeTree
 
         public bool NeedUpdate
         {
-            get => needUpdate;
+            get
+            {
+                lock (this)
+                {
+                    return needUpdate;
+                }
+            }
             set
             {
-                if (needUpdate != value && (needUpdate = value))
+                lock (this)
                 {
-                    NodeContainer parent = ParentContainer;
-                    if(parent != null) parent.NeedUpdate = true;
+                    if (needUpdate != value && (needUpdate = value))
+                    {
+                        NodeContainer parent = ParentContainer;
+                        if(parent != null) parent.NeedUpdate = true;
+                    }
                 }
             }
         }
@@ -84,75 +111,77 @@ namespace RW_NodeTree
 
             if(Scribe.EnterNode("InnerList"))
             {
-
-                if (Scribe.mode == LoadSaveMode.Saving)
+                lock (this)
                 {
-                    HashSet<string> UsedIds = DebugLoadIDsSavingErrorsChecker_deepSaved(Scribe.saver.loadIDsErrorsChecker);
-                    for (int i = 0; i < Count; i++)
+                    if (Scribe.mode == LoadSaveMode.Saving)
                     {
-                        Thing thing = innerList[i];
-                        string id = innerIdList[i];
-                        try
+                        HashSet<string> UsedIds = DebugLoadIDsSavingErrorsChecker_deepSaved(Scribe.saver.loadIDsErrorsChecker);
+                        for (int i = 0; i < Count; i++)
                         {
-                            if (UsedIds.Contains(thing.GetUniqueLoadID())) Scribe_References.Look(ref thing, id);
-                            else Scribe_Deep.Look(ref thing, id);
-                        }
-                        catch(Exception e)
-                        {
-                            Log.Error(e.ToString());
-                        }
-                    }
-                }
-                else if(Scribe.mode == LoadSaveMode.LoadingVars)
-                {
-                    int i = 0;
-                    for (XmlNode xmlNode = Scribe.loader.curXmlParent.FirstChild; xmlNode != null; xmlNode = xmlNode.NextSibling)
-                    {
-                        if (xmlNode.NodeType == XmlNodeType.Element)
-                        {
+                            Thing thing = innerList[i];
+                            string id = innerIdList[i];
                             try
                             {
-                                Thing thing = null;
-                                innerList.Add(thing);
-                                innerIdList.Add(xmlNode.Name);
-                                if (xmlNode.ChildNodes.Count == 1 && xmlNode.FirstChild.NodeType == XmlNodeType.Text)
-                                {
-                                    Scribe_References.Look(ref thing, innerIdList[i]);
-                                    innerIdList[i] += " !ref";
-                                }
-                                else
-                                {
-                                    Scribe_Deep.Look(ref thing, innerIdList[i]);
-                                }
-                                innerList[i] = thing;
+                                if (UsedIds.Contains(thing.GetUniqueLoadID())) Scribe_References.Look(ref thing, id);
+                                else Scribe_Deep.Look(ref thing, id);
                             }
                             catch (Exception e)
                             {
                                 Log.Error(e.ToString());
                             }
-                            i++;
                         }
                     }
-                }
-                else
-                {
-                    for (int i = 0; i < Count; i++)
+                    else if (Scribe.mode == LoadSaveMode.LoadingVars)
                     {
-                        try
+                        int i = 0;
+                        for (XmlNode xmlNode = Scribe.loader.curXmlParent.FirstChild; xmlNode != null; xmlNode = xmlNode.NextSibling)
                         {
-                            Thing thing = innerList[i];
-                            string id = innerIdList[i];
-                            if (id.EndsWith(" !ref"))
+                            if (xmlNode.NodeType == XmlNodeType.Element)
                             {
-                                id = id.Substring(0, id.Length - 5);
-                                Scribe_References.Look(ref thing, id);
-                                innerIdList[i] = id;
-                                innerList[i] = thing;
+                                try
+                                {
+                                    Thing thing = null;
+                                    innerList.Add(thing);
+                                    innerIdList.Add(xmlNode.Name);
+                                    if (xmlNode.ChildNodes.Count == 1 && xmlNode.FirstChild.NodeType == XmlNodeType.Text)
+                                    {
+                                        Scribe_References.Look(ref thing, innerIdList[i]);
+                                        innerIdList[i] += " !ref";
+                                    }
+                                    else
+                                    {
+                                        Scribe_Deep.Look(ref thing, innerIdList[i]);
+                                    }
+                                    innerList[i] = thing;
+                                }
+                                catch (Exception e)
+                                {
+                                    Log.Error(e.ToString());
+                                }
+                                i++;
                             }
                         }
-                        catch(Exception e)
+                    }
+                    else
+                    {
+                        for (int i = 0; i < Count; i++)
                         {
-                            Log.Error(e.ToString());
+                            try
+                            {
+                                Thing thing = innerList[i];
+                                string id = innerIdList[i];
+                                if (id.EndsWith(" !ref"))
+                                {
+                                    id = id.Substring(0, id.Length - 5);
+                                    Scribe_References.Look(ref thing, id);
+                                    innerIdList[i] = id;
+                                    innerList[i] = thing;
+                                }
+                            }
+                            catch (Exception e)
+                            {
+                                Log.Error(e.ToString());
+                            }
                         }
                     }
                 }
@@ -161,25 +190,28 @@ namespace RW_NodeTree
 
             if (Scribe.mode == LoadSaveMode.ResolvingCrossRefs)
             {
-                for (int i = Count - 1; i >= 0; i--)
+                lock (this)
                 {
-                    if (innerList[i] == null || innerIdList[i] == null)
+                    for (int i = Count - 1; i >= 0; i--)
+                    {
+                        if (innerList[i] == null || innerIdList[i] == null)
+                        {
+                            innerList.RemoveAt(i);
+                            innerIdList.RemoveAt(i);
+                        }
+                    }
+                    for (int i = innerList.Count - 1; i >= Count; i--)
                     {
                         innerList.RemoveAt(i);
+                    }
+                    for (int i = innerIdList.Count - 1; i >= Count; i--)
+                    {
                         innerIdList.RemoveAt(i);
                     }
-                }
-                for (int i = innerList.Count - 1; i >= Count; i--)
-                {
-                    innerList.RemoveAt(i);
-                }
-                for (int i = innerIdList.Count - 1; i >= Count; i--)
-                {
-                    innerIdList.RemoveAt(i);
-                }
-                foreach(Thing thing in innerList)
-                {
-                    thing.holdingOwner = this;
+                    foreach (Thing thing in innerList)
+                    {
+                        thing.holdingOwner = this;
+                    }
                 }
             }
             //Scribe_Values.Look<bool>(ref this.needUpdate, "needUpdate");
@@ -188,135 +220,142 @@ namespace RW_NodeTree
 
         internal bool internal_UpdateNode(CompChildNodeProccesser actionNode = null)
         {
+
             bool StopEventBubble = false;
             bool NotUpdateTexture = false;
 
             CompChildNodeProccesser proccess = this.Comp;
-            if(proccess == null) return StopEventBubble;
+            if (proccess == null) return StopEventBubble;
 
             if (actionNode == null) return proccess.RootNode.ChildNodes.internal_UpdateNode(proccess);
-            if (!NeedUpdate) return StopEventBubble;
-
-            NeedUpdate = false;
-
-
-            state = stateCode.rw;
-            for (int i = Count - 1; i >= 0; i--)
+            lock (this)
             {
-                if (this[i] == null)
+                if (!NeedUpdate) return StopEventBubble;
+
+                NeedUpdate = false;
+
+
+                state = stateCode.rw;
+                for (int i = Count - 1; i >= 0; i--)
                 {
-                    innerIdList.RemoveAt(i);
-                    innerList.RemoveAt(i);
+                    if (this[i] == null)
+                    {
+                        innerIdList.RemoveAt(i);
+                        innerList.RemoveAt(i);
+                    }
+                    else if (this[i].Destroyed)
+                    {
+                        RemoveAt(i);
+                    }
                 }
-                else if (this[i].Destroyed)
+                //lockUpdate = true;
+                state = stateCode.rt;
+                //Log.Message("1:"+state.ToString());
+                Dictionary<string, object> cachingData = new Dictionary<string, object>();
+                Dictionary<string, Thing> prveChilds = new Dictionary<string, Thing>(this);
+                //Log.Message("2:" + state.ToString());
+                this.Clear();
+                //Log.Message("3:" + state.ToString());
+                foreach (CompBasicNodeComp comp in proccess.AllNodeComp)
                 {
-                    RemoveAt(i);
+                    try
+                    {
+                        comp.internal_PreUpdateNode(actionNode, cachingData, new Dictionary<string, Thing>(prveChilds), out bool blockEvent, out bool notUpdateTexture);
+                        StopEventBubble |= blockEvent;
+                        NotUpdateTexture |= notUpdateTexture;
+                    }
+                    catch (Exception ex)
+                    {
+                        Log.Error(ex.ToString());
+                    }
                 }
-            }
-            //lockUpdate = true;
-            state = stateCode.rt;
-            //Log.Message("1:"+state.ToString());
-            Dictionary<string, object> cachingData = new Dictionary<string, object>();
-            Dictionary<string, Thing> prveChilds = new Dictionary<string, Thing>(this);
-            //Log.Message("2:" + state.ToString());
-            this.Clear();
-            //Log.Message("3:" + state.ToString());
-            foreach (CompBasicNodeComp comp in proccess.AllNodeComp)
-            {
-                try
+                //Log.Message("4:" + state.ToString());
+                Dictionary<string, Thing> diff = new Dictionary<string, Thing>(Math.Max(prveChilds.Count, Count));
+                foreach (KeyValuePair<string, Thing> pair in this)
                 {
-                    comp.internal_PreUpdateNode(actionNode, cachingData, new Dictionary<string, Thing>(prveChilds), out bool blockEvent, out bool notUpdateTexture);
-                    StopEventBubble |= blockEvent;
-                    NotUpdateTexture |= notUpdateTexture;
+                    if (!prveChilds.TryGetValue(pair.Key, out Thing prveNode) || pair.Value != prveNode) diff.Add(pair.Key, pair.Value);
                 }
-                catch (Exception ex)
+                //Log.Message("5:" + state.ToString());
+                foreach (KeyValuePair<string, Thing> pair in prveChilds)
                 {
-                    Log.Error(ex.ToString());
+                    if (diff.ContainsKey(pair.Key)) continue;
+                    if (!this.TryGetValue(pair.Key, out Thing currentNode) || pair.Value != currentNode) diff.Add(pair.Key, currentNode);
                 }
-            }
-            //Log.Message("4:" + state.ToString());
-            Dictionary<string, Thing> diff = new Dictionary<string, Thing>(Math.Max(prveChilds.Count, Count));
-            foreach (KeyValuePair<string, Thing> pair in this)
-            {
-                if (!prveChilds.TryGetValue(pair.Key, out Thing prveNode) || pair.Value != prveNode) diff.Add(pair.Key, pair.Value);
-            }
-            //Log.Message("5:" + state.ToString());
-            foreach (KeyValuePair<string, Thing> pair in prveChilds)
-            {
-                if (diff.ContainsKey(pair.Key)) continue;
-                if (!this.TryGetValue(pair.Key, out Thing currentNode) || pair.Value != currentNode) diff.Add(pair.Key, currentNode);
-            }
-            //Log.Message("6:" + state.ToString());
-            this.Clear();
+                //Log.Message("6:" + state.ToString());
+                this.Clear();
 
-            //Log.Message("7:" + state.ToString());
-            state = stateCode.fw;
-            foreach (KeyValuePair<string, Thing> pair in prveChilds)
-            {
-                this[pair.Key] = pair.Value;
-            }
-
-            state = stateCode.rw;
-
-            foreach (KeyValuePair<string, Thing> pair in diff)
-            {
-                this[pair.Key] = pair.Value;
-            }
-
-            state = stateCode.r;
-            bool reset = true;
-            if (StopEventBubble) goto ret;
-            foreach (Thing node in this.Values)
-            {
-                NodeContainer container = ((CompChildNodeProccesser)node)?.ChildNodes;
-                if (container != null && container.NeedUpdate)
+                //Log.Message("7:" + state.ToString());
+                state = stateCode.fw;
+                foreach (KeyValuePair<string, Thing> pair in prveChilds)
                 {
-                    StopEventBubble = container.internal_UpdateNode(actionNode) || StopEventBubble;
-                    reset = false;
+                    this[pair.Key] = pair.Value;
                 }
-            }
 
-            foreach (string id in diff.Keys)
-            {
-                Thing node = prveChilds.TryGetValue(id);
-                NodeContainer container = ((CompChildNodeProccesser)node)?.ChildNodes;
-                if (container != null && container.NeedUpdate)
-                {
-                    StopEventBubble = container.internal_UpdateNode(actionNode) || StopEventBubble;
-                    //reset = false;
-                }
-            }
-            if (StopEventBubble) goto ret;
+                state = stateCode.rw;
 
-            foreach (CompBasicNodeComp comp in proccess.AllNodeComp)
-            {
-                try
+                foreach (KeyValuePair<string, Thing> pair in diff)
                 {
-                    comp.internal_PostUpdateNode(actionNode, cachingData, new Dictionary<string, Thing>(prveChilds), out bool blockEvent, out bool notUpdateTexture);
-                    StopEventBubble |= blockEvent;
-                    NotUpdateTexture |= notUpdateTexture;
+                    this[pair.Key] = pair.Value;
                 }
-                catch (Exception ex)
+
+                state = stateCode.r;
+                bool reset = true;
+                if (StopEventBubble) goto ret;
+                foreach (Thing node in this.Values)
                 {
-                    Log.Error(ex.ToString());
+                    NodeContainer container = ((CompChildNodeProccesser)node)?.ChildNodes;
+                    if (container != null && container.NeedUpdate)
+                    {
+                        StopEventBubble = container.internal_UpdateNode(actionNode) || StopEventBubble;
+                        reset = false;
+                    }
                 }
+
+                foreach (string id in diff.Keys)
+                {
+                    Thing node = prveChilds.TryGetValue(id);
+                    NodeContainer container = ((CompChildNodeProccesser)node)?.ChildNodes;
+                    if (container != null && container.NeedUpdate)
+                    {
+                        StopEventBubble = container.internal_UpdateNode(actionNode) || StopEventBubble;
+                        //reset = false;
+                    }
+                }
+                if (StopEventBubble) goto ret;
+
+                foreach (CompBasicNodeComp comp in proccess.AllNodeComp)
+                {
+                    try
+                    {
+                        comp.internal_PostUpdateNode(actionNode, cachingData, new Dictionary<string, Thing>(prveChilds), out bool blockEvent, out bool notUpdateTexture);
+                        StopEventBubble |= blockEvent;
+                        NotUpdateTexture |= notUpdateTexture;
+                    }
+                    catch (Exception ex)
+                    {
+                        Log.Error(ex.ToString());
+                    }
+                }
+                ret:;
+                if (reset)
+                {
+                    proccess.ResetVerbs();
+                    if (!NotUpdateTexture) proccess.ResetRenderedTexture();
+                }
+                return StopEventBubble;
             }
-            ret:;
-            if (reset)
-            {
-                proccess.ResetVerbs();
-                if (!NotUpdateTexture) proccess.ResetRenderedTexture();
-            }
-            return StopEventBubble;
         }
 
         public override int GetCountCanAccept(Thing item, bool canMergeWithExistingStacks = true)
         {
-            if (Comp != null && innerIdList.Count > Count && Comp.AllowNode(item, innerIdList[Count]))
+            lock (this)
             {
-                return base.GetCountCanAccept(item, false);
+                if (Comp != null && innerIdList.Count > Count && Comp.AllowNode(item, innerIdList[Count]))
+                {
+                    return base.GetCountCanAccept(item, false);
+                }
+                return 0;
             }
-            return 0;
         }
 
         public override int TryAdd(Thing item, int count, bool canMergeWithExistingStacks = true)
@@ -339,39 +378,43 @@ namespace RW_NodeTree
                 return 0;
             }
 
-            if (state == stateCode.r)
+            lock (this)
             {
-                Log.Warning("Tried to add item out side of preUpdate. Blocked...");
-                return 0;
-            }
 
-            if (Contains(item))
-            {
-                Log.Warning(string.Concat("Tried to add ", item, " to ThingOwner but this item is already here."));
-                return 0;
-            }
-
-            if ((state != stateCode.fw && !CanAcceptAnyOf(item, canMergeWithExistingStacks)) || item.holdingOwner != null || IsChildOf(item))
-            {
-                return 0;
-            }
-
-            int stackCount = item.stackCount;
-            int num = Mathf.Min(stackCount, count);
-            Thing thing = item.SplitOff(num);
-            if (!TryAdd(thing, canMergeWithExistingStacks))
-            {
-                if (thing != item)
+                if (state == stateCode.r)
                 {
-                    int result = stackCount - item.stackCount - thing.stackCount;
-                    item.TryAbsorbStack(thing, respectStackLimit: false);
-                    return result;
+                    Log.Warning("Tried to add item out side of preUpdate. Blocked...");
+                    return 0;
                 }
 
-                return stackCount - item.stackCount;
-            }
+                if (Contains(item))
+                {
+                    Log.Warning(string.Concat("Tried to add ", item, " to ThingOwner but this item is already here."));
+                    return 0;
+                }
 
-            return num;
+                if ((state != stateCode.fw && !CanAcceptAnyOf(item, canMergeWithExistingStacks)) || item.holdingOwner != null || IsChildOf(item))
+                {
+                    return 0;
+                }
+
+                int stackCount = item.stackCount;
+                int num = Mathf.Min(stackCount, count);
+                Thing thing = item.SplitOff(num);
+                if (!TryAdd(thing, canMergeWithExistingStacks))
+                {
+                    if (thing != item)
+                    {
+                        int result = stackCount - item.stackCount - thing.stackCount;
+                        item.TryAbsorbStack(thing, respectStackLimit: false);
+                        return result;
+                    }
+
+                    return stackCount - item.stackCount;
+                }
+
+                return num;
+            }
         }
 
         public override bool TryAdd(Thing item, bool canMergeWithExistingStacks = true)
@@ -389,149 +432,167 @@ namespace RW_NodeTree
                 return false;
             }
 
-            if (state == stateCode.r)
+            lock (this)
             {
-                Log.Warning("Tried to add item out side of preUpdate. Blocked...");
-                return false;
-            }
+                if (state == stateCode.r)
+                {
+                    Log.Warning("Tried to add item out side of preUpdate. Blocked...");
+                    return false;
+                }
 
-            string id = null;
-            bool flag = innerIdList.Count > innerList.Count;
-            if (flag)
-            {
-                for (int i = innerIdList.Count - 2; i >= Count; i--)
+                string id = null;
+                bool flag = innerIdList.Count > innerList.Count;
+                if (flag)
                 {
-                    innerIdList.RemoveAt(i);
-                }
-                id = innerIdList[Count];
-            }
-            else
-            {
-                for (int i = innerList.Count - 1; i >= Count; i--)
-                {
-                    innerList.RemoveAt(i);
-                }
-            }
-            Dictionary<string,object> cachedData = new Dictionary<string,object>();
-            if (!innerList.Contains(item))
-            {
-                if(id.IsVaildityKeyFormat())
-                {
-                    if(flag) innerIdList[Count] = id;
-                    else innerIdList.Add(id);
+                    for (int i = innerIdList.Count - 2; i >= Count; i--)
+                    {
+                        innerIdList.RemoveAt(i);
+                    }
+                    id = innerIdList[Count];
                 }
                 else
                 {
-                    Log.Warning("Invaild key format : " + id);
+                    for (int i = innerList.Count - 1; i >= Count; i--)
+                    {
+                        innerList.RemoveAt(i);
+                    }
+                }
+                Dictionary<string, object> cachedData = new Dictionary<string, object>();
+                if (!innerList.Contains(item))
+                {
+                    if (id.IsVaildityKeyFormat())
+                    {
+                        if (flag) innerIdList[Count] = id;
+                        else innerIdList.Add(id);
+                    }
+                    else
+                    {
+                        Log.Warning("Invaild key format : " + id);
+                        goto fail;
+                    }
+                }
+                else
+                {
+                    Log.Warning("Tried to add " + item.ToStringSafe() + " to ThingOwner but this item is already here.");
                     goto fail;
                 }
+
+                if ((state != stateCode.fw && !CanAcceptAnyOf(item, canMergeWithExistingStacks)) || item.holdingOwner != null || IsChildOf(item)) goto fail;
+
+                if (Count >= maxStacks) goto fail;
+
+                innerList.Add(item);
+                if (state == stateCode.rw) ((CompChildNodeProccesser)item)?.internal_Added(this, id, true, cachedData);
+                item.holdingOwner = this;
+                //NeedUpdate = true;
+                return true;
+                fail:
+                if (state == stateCode.rw) ((CompChildNodeProccesser)item)?.internal_Added(this, id, false, cachedData);
+                return false;
             }
-            else
-            {
-                Log.Warning("Tried to add " + item.ToStringSafe() + " to ThingOwner but this item is already here.");
-                goto fail;
-            }
-
-            if ((state != stateCode.fw && !CanAcceptAnyOf(item, canMergeWithExistingStacks)) || item.holdingOwner != null || IsChildOf(item)) goto fail;
-
-            if (Count >= maxStacks) goto fail;
-
-            innerList.Add(item);
-            if (state == stateCode.rw) ((CompChildNodeProccesser)item)?.internal_Added(this, id, true, cachedData);
-            item.holdingOwner = this;
-            //NeedUpdate = true;
-            return true;
-            fail:
-            if (state == stateCode.rw) ((CompChildNodeProccesser)item)?.internal_Added(this, id, false, cachedData);
-            return false;
         }
 
         public override bool Remove(Thing item)
         {
-
             if (item == null)
             {
                 Log.Warning("Tried to remove null item from ThingOwner.");
                 return false;
             }
 
-            if (state == stateCode.r)
+            lock (this)
             {
-                if (item.Destroyed && Contains(item)) NeedUpdate = true;
-                else Log.Warning("Tried to remove item out side of preUpdate. Blocked...");
-                return false;
+                if (state == stateCode.r)
+                {
+                    if (item.Destroyed && Contains(item)) NeedUpdate = true;
+                    else Log.Warning("Tried to remove item out side of preUpdate. Blocked...");
+                    return false;
+                }
+
+                for (int i = innerList.Count - 1; i >= Count; i--)
+                {
+                    innerList.RemoveAt(i);
+                }
+                for (int i = innerIdList.Count - 1; i >= Count; i--)
+                {
+                    innerIdList.RemoveAt(i);
+                }
+
+                Dictionary<string, object> cachedData = new Dictionary<string, object>();
+
+                int index = innerList.LastIndexOf(item);
+                string id = (index >= 0 && index < Count) ? innerIdList[index] : null;
+
+                if (index < 0 || index >= Count)
+                {
+                    if (state == stateCode.rw) ((CompChildNodeProccesser)item)?.internal_Removed(this, id, false, cachedData);
+                    return false;
+                }
+
+                innerList.RemoveAt(index);
+                innerIdList.RemoveAt(index);
+
+                if (state == stateCode.rw) ((CompChildNodeProccesser)item)?.internal_Removed(this, id, true, cachedData);
+                item.holdingOwner = null;
+                //NeedUpdate = true;
+                return true;
             }
-
-            for (int i = innerList.Count - 1; i >= Count; i--)
-            {
-                innerList.RemoveAt(i);
-            }
-            for (int i = innerIdList.Count - 1; i >= Count; i--)
-            {
-                innerIdList.RemoveAt(i);
-            }
-
-            Dictionary<string, object> cachedData = new Dictionary<string, object>();
-
-            int index = innerList.LastIndexOf(item);
-            string id = (index >= 0 && index < Count) ? innerIdList[index] : null;
-
-            if (index < 0 || index >= Count)
-            {
-                if (state == stateCode.rw) ((CompChildNodeProccesser)item)?.internal_Removed(this, id, false, cachedData);
-                return false;
-            }
-
-            innerList.RemoveAt(index);
-            innerIdList.RemoveAt(index);
-
-            if (state == stateCode.rw) ((CompChildNodeProccesser)item)?.internal_Removed(this, id, true, cachedData);
-            item.holdingOwner = null;
-            //NeedUpdate = true;
-            return true;
         }
 
 
         public bool IsChildOf(Thing node)
         {
             if (node == null) return false;
-            IThingHolder thingHolder = Owner;
-            Thing parent = (thingHolder as ThingComp)?.parent ?? (thingHolder as Thing);
-            while(thingHolder != null && parent != node)
+            lock (this)
             {
-                thingHolder = thingHolder.ParentHolder;
-                parent = (thingHolder as ThingComp)?.parent ?? (thingHolder as Thing);
+                IThingHolder thingHolder = Owner;
+                Thing parent = (thingHolder as ThingComp)?.parent ?? (thingHolder as Thing);
+                while (thingHolder != null && parent != node)
+                {
+                    thingHolder = thingHolder.ParentHolder;
+                    parent = (thingHolder as ThingComp)?.parent ?? (thingHolder as Thing);
+                }
+                return parent == node;
             }
-            return parent == node;
         }
 
         public bool IsChild(Thing node)
         {
             if (node == null) return false;
-            ThingOwner Owner = node.holdingOwner;
-            while (Owner != null && Owner != this)
+            lock (this)
             {
-                Owner = Owner.Owner?.ParentHolder?.GetDirectlyHeldThings();
+                ThingOwner Owner = node.holdingOwner;
+                while (Owner != null && Owner != this)
+                {
+                    Owner = Owner.Owner?.ParentHolder?.GetDirectlyHeldThings();
+                }
+                return Owner == this;
             }
-            return Owner == this;
         }
 
-        public bool ContainsKey(string key) => innerIdList.Contains(key);
+        public bool ContainsKey(string key)
+        {
+            lock (this)
+                return innerIdList.Contains(key);
+        }
 
         public void Add(string key, Thing value)
         {
             if (key.IsVaildityKeyFormat())
             {
-                Thing t = this[key];
-                if (value == t) return;
-                //ThingOwner owner = value?.holdingOwner;
-                if ((t != null ? Remove(t) : true) && value != null)
+                lock (this)
                 {
-                    innerIdList.Add(key);
-                    if (!TryAdd(value))
+                    Thing t = this[key];
+                    if (value == t) return;
+                    //ThingOwner owner = value?.holdingOwner;
+                    if ((t != null ? Remove(t) : true) && value != null)
                     {
-                        //owner?.TryAdd(value,false);
-                        if (t == null || !TryAdd(t)) innerIdList.RemoveAt(Count);
+                        innerIdList.Add(key);
+                        if (!TryAdd(value))
+                        {
+                            //owner?.TryAdd(value,false);
+                            if (t == null || !TryAdd(t)) innerIdList.RemoveAt(Count);
+                        }
                     }
                 }
             }
@@ -539,29 +600,36 @@ namespace RW_NodeTree
 
         public bool Remove(string key)
         {
-            return Remove(this[key]);
+            lock (this)
+                return Remove(this[key]);
         }
 
         public bool TryGetValue(string key, out Thing value)
         {
-            value = null;
-            if (key.IsVaildityKeyFormat())
+            lock (this)
             {
-                int index = innerIdList.IndexOf(key);
-                if(index >= 0 && index < Count)
+                value = null;
+                if (key.IsVaildityKeyFormat())
                 {
-                    value = this[index];
-                    return true;
+                    int index = innerIdList.IndexOf(key);
+                    if (index >= 0 && index < Count)
+                    {
+                        value = this[index];
+                        return true;
+                    }
                 }
+                return false;
             }
-            return false;
         }
 
         public IEnumerator<KeyValuePair<string, Thing>> GetEnumerator()
         {
-            for (int i = 0; i < Count; i++)
+            lock (this)
             {
-                yield return new KeyValuePair<string, Thing>(this[(uint)i], this[i]);
+                for (int i = 0; i < Count; i++)
+                {
+                    yield return new KeyValuePair<string, Thing>(this[(uint)i], this[i]);
+                }
             }
         }
 
@@ -571,24 +639,38 @@ namespace RW_NodeTree
 
         public void CopyTo(KeyValuePair<string, Thing>[] array, int arrayIndex)
         {
-            for (int i = 0; i < Count; i++)
+            lock (this)
             {
-                array[i + arrayIndex] = new KeyValuePair<string, Thing>(this[(uint)i], this[i]);
+                for (int i = 0; i < Count; i++)
+                {
+                    array[i + arrayIndex] = new KeyValuePair<string, Thing>(this[(uint)i], this[i]);
+                }
             }
         }
 
         bool ICollection<KeyValuePair<string, Thing>>.Remove(KeyValuePair<string, Thing> item)
         {
-            if(((ICollection<KeyValuePair<string, Thing>>)this).Contains(item))
+            lock (this)
             {
-                return Remove(item.Value);
+                if (((ICollection<KeyValuePair<string, Thing>>)this).Contains(item))
+                {
+                    return Remove(item.Value);
+                }
+                return false;
             }
-            return false;
         }
 
-        public override int IndexOf(Thing item) => innerList.IndexOf(item);
+        public override int IndexOf(Thing item)
+        {
+            lock (this)
+                return innerList.IndexOf(item);
+        }
 
-        protected override Thing GetAt(int index) => innerList[index];
+        protected override Thing GetAt(int index)
+        {
+            lock (this)
+                return innerList[index];
+        }
 
         private bool needUpdate = true;
 
