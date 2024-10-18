@@ -204,7 +204,7 @@ namespace RW_NodeTree
             if (proccess == null) return StopEventBubble;
 
             if (actionNode == null) return proccess.RootNode.ChildNodes.internal_UpdateNode(proccess);
-            lock (this)
+            // lock (this)
             {
                 if (!NeedUpdate) return StopEventBubble;
 
@@ -351,7 +351,7 @@ namespace RW_NodeTree
                 return 0;
             }
 
-            lock (this)
+            // lock (this)
             {
 
                 if (state == stateCode.r)
@@ -405,7 +405,7 @@ namespace RW_NodeTree
                 return false;
             }
 
-            lock (this)
+            // lock (this)
             {
                 if (state == stateCode.r)
                 {
@@ -473,7 +473,7 @@ namespace RW_NodeTree
                 return false;
             }
 
-            lock (this)
+            // lock (this)
             {
                 if (state == stateCode.r)
                 {
