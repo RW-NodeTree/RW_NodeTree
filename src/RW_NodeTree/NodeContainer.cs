@@ -61,7 +61,8 @@ namespace RW_NodeTree
             set
             {
                 bool flag;
-                lock (this) flag = needUpdate != value && (needUpdate = value);
+                // lock (this)
+                flag = needUpdate != value && (needUpdate = value);
                 if (flag)
                 {
                     NodeContainer parent = ParentContainer;
