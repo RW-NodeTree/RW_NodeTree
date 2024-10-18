@@ -187,14 +187,14 @@ namespace RW_NodeTree
         /// <returns>Verb infos before convert</returns>
         public (Thing, Verb, Tool, VerbProperties) GetBeforeConvertVerbCorrespondingThing(Type ownerType, Verb verbAfterConvert, Tool toolAfterConvert, VerbProperties verbPropertiesAfterConvert, bool needVerb = false)
         {
+            UpdateNode();
+
+            (Thing, Verb, Tool, VerbProperties) result = default((Thing, Verb, Tool, VerbProperties));
+
+            if (!CheckVerbDatasVaildityAndAdapt(ownerType, parent, ref verbAfterConvert, ref toolAfterConvert, ref verbPropertiesAfterConvert)) return result;
+
             lock (this)
             {
-                UpdateNode();
-
-                (Thing, Verb, Tool, VerbProperties) result = default((Thing, Verb, Tool, VerbProperties));
-
-                if (!CheckVerbDatasVaildityAndAdapt(ownerType, parent, ref verbAfterConvert, ref toolAfterConvert, ref verbPropertiesAfterConvert)) return result;
-
                 Dictionary<(Thing, Verb, Tool, VerbProperties, bool), (Thing, Verb, Tool, VerbProperties)> caches;
                 if (!BeforeConvertVerbCorrespondingThingCache.TryGetValue(ownerType, out caches))
                 {
@@ -383,8 +383,8 @@ namespace RW_NodeTree
                 regiestedNodeVerbPropertiesInfos.Clear();
                 regiestedNodeVerbToolInfos.Clear();
                 BeforeConvertVerbCorrespondingThingCache.Clear();
-                ParentProccesser?.ResetVerbs();
             }
+            ParentProccesser?.ResetVerbs();
         }
 
         public List<VerbPropertiesRegiestInfo> GetRegiestedNodeVerbPropertiesInfos(Type ownerType) => internal_GetRegiestedNodeVerbPropertiesInfos(ownerType);
@@ -716,14 +716,11 @@ namespace RW_NodeTree
 
         public ThingOwner GetDirectlyHeldThings()
         {
-            lock (this)
+            if (childNodes == null)
             {
-                if (childNodes == null)
-                {
-                    childNodes = new NodeContainer(this);
-                }
-                return childNodes;
+                childNodes = new NodeContainer(this);
             }
+            return childNodes;
         }
 
         public static IVerbOwner GetSameTypeVerbOwner(Type ownerType, Thing thing)

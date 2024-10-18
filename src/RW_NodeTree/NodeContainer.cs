@@ -60,13 +60,12 @@ namespace RW_NodeTree
             get => needUpdate;
             set
             {
-                lock (this)
+                bool flag;
+                lock (this) flag = needUpdate != value && (needUpdate = value);
+                if (flag)
                 {
-                    if (needUpdate != value && (needUpdate = value))
-                    {
-                        NodeContainer parent = ParentContainer;
-                        if (parent != null) parent.NeedUpdate = true;
-                    }
+                    NodeContainer parent = ParentContainer;
+                    if (parent != null) parent.NeedUpdate = true;
                 }
             }
         }
