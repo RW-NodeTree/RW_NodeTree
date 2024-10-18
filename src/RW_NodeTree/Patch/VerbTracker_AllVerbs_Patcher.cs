@@ -130,15 +130,12 @@ namespace RW_NodeTree
             //if (Prefs.DevMode) Log.Message($"{stackFrame[0].GetMethod()}\n{stackFrame[1].GetMethod()}\n{stackFrame[2].GetMethod()}\n{stackFrame[3].GetMethod()}\n{stackFrame[4].GetMethod()}\n{stackFrame[5].GetMethod()}\n{stackFrame[6].GetMethod()}\n");
             if (Props.VerbTrackerAllVerbRedictory && ownerType != null && typeof(IVerbOwner).IsAssignableFrom(ownerType) && !GetOriginalVerb)
             {
-                lock (this)
+                for (int i = 0; i < result.Count; i++)
                 {
-                    for (int i = 0; i < result.Count; i++)
-                    {
-                        result[i] = GetAfterConvertVerbCorrespondingThing(ownerType, result[i]).Item2 ?? result[i];
-                    }
-                    result.RemoveAll(x => x == null || x.verbProps == null);
-                    return result;
+                    result[i] = GetAfterConvertVerbCorrespondingThing(ownerType, result[i]).Item2 ?? result[i];
                 }
+                result.RemoveAll(x => x == null || x.verbProps == null);
+                return result;
             }
             return null;
         }

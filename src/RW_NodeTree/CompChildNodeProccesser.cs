@@ -58,19 +58,16 @@ namespace RW_NodeTree
         {
             get
             {
-                lock (this)
+                if (cachedRootNode != null) return cachedRootNode;
+                CompChildNodeProccesser proccesser = this;
+                CompChildNodeProccesser next = ParentProccesser;
+                while (next != null)
                 {
-                    if (cachedRootNode != null) return cachedRootNode;
-                    CompChildNodeProccesser proccesser = this;
-                    CompChildNodeProccesser next = ParentProccesser;
-                    while (next != null)
-                    {
-                        proccesser = next;
-                        next = next.ParentProccesser;
-                    }
-                    cachedRootNode = proccesser;
-                    return proccesser;
+                    proccesser = next;
+                    next = next.ParentProccesser;
                 }
+                cachedRootNode = proccesser;
+                return proccesser;
             }
         }
 
@@ -297,65 +294,61 @@ namespace RW_NodeTree
         /// <returns>correct verb ownner</returns>
         public (Thing, Verb, Tool, VerbProperties) GetAfterConvertVerbCorrespondingThing(Type ownerType, Verb verbBeforeConvert, Tool toolBeforeConvert, VerbProperties verbPropertiesBeforeConvert, bool needVerb = false)
         {
-            lock (this)
+            UpdateNode();
+
+            (Thing, Verb, Tool, VerbProperties) result = default((Thing, Verb, Tool, VerbProperties));
+
+            if (!CheckVerbDatasVaildityAndAdapt(ownerType, parent, ref verbBeforeConvert, ref toolBeforeConvert, ref verbPropertiesBeforeConvert)) return result;
+
+            result = (parent, verbBeforeConvert, toolBeforeConvert, verbPropertiesBeforeConvert);
+
+            if (ownerType != null && typeof(IVerbOwner).IsAssignableFrom(ownerType) && verbPropertiesBeforeConvert != null)
             {
-
-                UpdateNode();
-
-                (Thing, Verb, Tool, VerbProperties) result = default((Thing, Verb, Tool, VerbProperties));
-
-                if (!CheckVerbDatasVaildityAndAdapt(ownerType, parent, ref verbBeforeConvert, ref toolBeforeConvert, ref verbPropertiesBeforeConvert)) return result;
-
-                result = (parent, verbBeforeConvert, toolBeforeConvert, verbPropertiesBeforeConvert);
-
-                if (ownerType != null && typeof(IVerbOwner).IsAssignableFrom(ownerType) && verbPropertiesBeforeConvert != null)
+                (Thing, Verb, Tool, VerbProperties) cache = result;
+                if (ParentProccesser != null)
                 {
-                    (Thing, Verb, Tool, VerbProperties) cache = result;
-                    if (ParentProccesser != null)
+                    if (toolBeforeConvert != null)
                     {
-                        if (toolBeforeConvert != null)
+                        List<VerbToolRegiestInfo> Registed = internal_GetRegiestedNodeVerbToolInfos(ownerType);
+                        for (int i = 0; i < Registed.Count; i++)
                         {
-                            List<VerbToolRegiestInfo> Registed = internal_GetRegiestedNodeVerbToolInfos(ownerType);
-                            for (int i = 0; i < Registed.Count; i++)
+                            VerbToolRegiestInfo regiestInfo = Registed[i];
+                            if (regiestInfo.berforConvertTool == toolBeforeConvert)
                             {
-                                VerbToolRegiestInfo regiestInfo = Registed[i];
-                                if (regiestInfo.berforConvertTool == toolBeforeConvert)
-                                {
-                                    cache = (ParentProccesser, null, regiestInfo.afterCobvertTool, null);
-                                    break;
-                                }
-                            }
-                        }
-                        else
-                        {
-                            List<VerbPropertiesRegiestInfo> Registed = internal_GetRegiestedNodeVerbPropertiesInfos(ownerType);
-                            for (int i = 0; i < Registed.Count; i++)
-                            {
-                                VerbPropertiesRegiestInfo regiestInfo = Registed[i];
-                                if (regiestInfo.berforConvertProperties == verbPropertiesBeforeConvert)
-                                {
-                                    cache = (ParentProccesser, null, null, regiestInfo.afterConvertProperties);
-                                    break;
-                                }
+                                cache = (ParentProccesser, null, regiestInfo.afterCobvertTool, null);
+                                break;
                             }
                         }
                     }
-
-                    if (!CheckVerbDatasVaildityAndAdapt(ownerType, cache.Item1, ref cache.Item2, ref cache.Item3, ref cache.Item4)) return result;
-
-                    if (cache.Item1 != null && cache.Item1 != parent && ((CompChildNodeProccesser)cache.Item1) != null)
+                    else
                     {
-                        Thing before = cache.Item1;
-                        cache = ((CompChildNodeProccesser)cache.Item1).GetAfterConvertVerbCorrespondingThing(ownerType, cache.Item2, cache.Item3, cache.Item4);
-                        cache.Item1 = cache.Item1 ?? before;
+                        List<VerbPropertiesRegiestInfo> Registed = internal_GetRegiestedNodeVerbPropertiesInfos(ownerType);
+                        for (int i = 0; i < Registed.Count; i++)
+                        {
+                            VerbPropertiesRegiestInfo regiestInfo = Registed[i];
+                            if (regiestInfo.berforConvertProperties == verbPropertiesBeforeConvert)
+                            {
+                                cache = (ParentProccesser, null, null, regiestInfo.afterConvertProperties);
+                                break;
+                            }
+                        }
                     }
-
-                    if (needVerb && cache.Item2 == null) return result;
-
-                    result = cache;
                 }
-                return result;
+
+                if (!CheckVerbDatasVaildityAndAdapt(ownerType, cache.Item1, ref cache.Item2, ref cache.Item3, ref cache.Item4)) return result;
+
+                if (cache.Item1 != null && cache.Item1 != parent && ((CompChildNodeProccesser)cache.Item1) != null)
+                {
+                    Thing before = cache.Item1;
+                    cache = ((CompChildNodeProccesser)cache.Item1).GetAfterConvertVerbCorrespondingThing(ownerType, cache.Item2, cache.Item3, cache.Item4);
+                    cache.Item1 = cache.Item1 ?? before;
+                }
+
+                if (needVerb && cache.Item2 == null) return result;
+
+                result = cache;
             }
+            return result;
         }
 
         /// <summary>
@@ -363,19 +356,16 @@ namespace RW_NodeTree
         /// </summary>
         public void ResetRenderedTexture()
         {
-            lock (this)
+            nodeRenderingInfo.Reset();
+            try
             {
-                nodeRenderingInfo.Reset();
-                try
-                {
-                    if (parent.Spawned && parent.def.drawerType >= DrawerType.MapMeshOnly) parent.DirtyMapMesh(parent.Map);
-                }
-                catch (Exception ex)
-                {
-                    Log.Warning(ex.ToString());
-                }
-                ParentProccesser?.ResetRenderedTexture();
+                if (parent.Spawned && parent.def.drawerType >= DrawerType.MapMeshOnly) parent.DirtyMapMesh(parent.Map);
             }
+            catch (Exception ex)
+            {
+                Log.Warning(ex.ToString());
+            }
+            ParentProccesser?.ResetRenderedTexture();
         }
 
         /// <summary>
@@ -644,22 +634,19 @@ namespace RW_NodeTree
         {
             if (node?.holdingOwner != null) return false;
             if (node?.Destroyed ?? false) return false;
-            lock (this)
+            if (id.NullOrEmpty() || ChildNodes.IsChildOf(node)) return false;
+            foreach (CompBasicNodeComp comp in AllNodeComp)
             {
-                if (id.NullOrEmpty() || ChildNodes.IsChildOf(node)) return false;
-                foreach (CompBasicNodeComp comp in AllNodeComp)
+                try
                 {
-                    try
-                    {
-                        if (!comp.internal_AllowNode(node, id)) return false;
-                    }
-                    catch (Exception ex)
-                    {
-                        Log.Error(ex.ToString());
-                    }
+                    if (!comp.internal_AllowNode(node, id)) return false;
                 }
-                return true;
+                catch (Exception ex)
+                {
+                    Log.Error(ex.ToString());
+                }
             }
+            return true;
         }
 
         /// <summary>
@@ -682,14 +669,11 @@ namespace RW_NodeTree
 
         public void ResetCachedRootNode()
         {
-            lock (this)
+            cachedRootNode = null;
+            foreach (Thing part in ChildNodes.Values)
             {
-                cachedRootNode = null;
-                foreach (Thing part in ChildNodes.Values)
-                {
-                    CompChildNodeProccesser childComp = part;
-                    if (childComp != null) childComp.ResetCachedRootNode();
-                }
+                CompChildNodeProccesser childComp = part;
+                if (childComp != null) childComp.ResetCachedRootNode();
             }
         }
 
