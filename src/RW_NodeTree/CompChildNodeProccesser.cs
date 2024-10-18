@@ -193,7 +193,7 @@ namespace RW_NodeTree
 
             if (!CheckVerbDatasVaildityAndAdapt(ownerType, parent, ref verbAfterConvert, ref toolAfterConvert, ref verbPropertiesAfterConvert)) return result;
 
-            // lock (this)
+            lock (this)
             {
                 Dictionary<(Thing, Verb, Tool, VerbProperties, bool), (Thing, Verb, Tool, VerbProperties)> caches;
                 if (!BeforeConvertVerbCorrespondingThingCache.TryGetValue(ownerType, out caches))
@@ -373,7 +373,7 @@ namespace RW_NodeTree
         /// </summary>
         public void ResetVerbs()
         {
-            // lock (this)
+            lock (this)
             {
                 foreach (ThingComp comp in parent.AllComps)
                 {
@@ -391,7 +391,7 @@ namespace RW_NodeTree
 
         internal List<VerbPropertiesRegiestInfo> internal_GetRegiestedNodeVerbPropertiesInfos(Type ownerType, List<VerbProperties> verbProperties = null)
         {
-            // lock (this)
+            lock (this)
             {
                 verbProperties = verbProperties ?? GetSameTypeVerbOwner(ownerType, parent)?.VerbProperties ?? new List<VerbProperties>();
                 if (!regiestedNodeVerbPropertiesInfos.TryGetValue(ownerType, out List<VerbPropertiesRegiestInfo> info))
@@ -440,7 +440,7 @@ namespace RW_NodeTree
 
         internal List<VerbToolRegiestInfo> internal_GetRegiestedNodeVerbToolInfos(Type ownerType, List<Tool> tools = null)
         {
-            // lock (this)
+            lock (this)
             {
                 tools = tools ?? GetSameTypeVerbOwner(ownerType, parent)?.Tools ?? new List<Tool>();
                 if (!regiestedNodeVerbToolInfos.TryGetValue(ownerType, out List<VerbToolRegiestInfo> info))
@@ -655,7 +655,7 @@ namespace RW_NodeTree
         /// <returns></returns>
         public bool UpdateNode()
         {
-            // lock (this)
+            lock (compLoadingCache)
             {
                 if (blockUpdate) return false;
                 blockUpdate = true;
