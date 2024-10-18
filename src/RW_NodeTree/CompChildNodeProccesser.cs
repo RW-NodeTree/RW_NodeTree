@@ -193,7 +193,7 @@ namespace RW_NodeTree
 
             if (!CheckVerbDatasVaildityAndAdapt(ownerType, parent, ref verbAfterConvert, ref toolAfterConvert, ref verbPropertiesAfterConvert)) return result;
 
-            lock (this)
+            // lock (this)
             {
                 Dictionary<(Thing, Verb, Tool, VerbProperties, bool), (Thing, Verb, Tool, VerbProperties)> caches;
                 if (!BeforeConvertVerbCorrespondingThingCache.TryGetValue(ownerType, out caches))
@@ -373,7 +373,7 @@ namespace RW_NodeTree
         /// </summary>
         public void ResetVerbs()
         {
-            lock (this)
+            // lock (this)
             {
                 foreach (ThingComp comp in parent.AllComps)
                 {
@@ -655,7 +655,7 @@ namespace RW_NodeTree
         /// <returns></returns>
         public bool UpdateNode()
         {
-            lock (this)
+            // lock (this)
             {
                 if (blockUpdate) return false;
                 blockUpdate = true;

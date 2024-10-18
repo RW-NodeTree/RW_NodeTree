@@ -86,7 +86,7 @@ namespace RW_NodeTree
 
             if(Scribe.EnterNode("InnerList"))
             {
-                lock (this)
+                // lock (this)
                 {
                     if (Scribe.mode == LoadSaveMode.Saving)
                     {
@@ -165,7 +165,7 @@ namespace RW_NodeTree
 
             if (Scribe.mode == LoadSaveMode.ResolvingCrossRefs)
             {
-                lock (this)
+                // lock (this)
                 {
                     for (int i = Count - 1; i >= 0; i--)
                     {
