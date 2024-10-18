@@ -324,14 +324,11 @@ namespace RW_NodeTree
 
         public override int GetCountCanAccept(Thing item, bool canMergeWithExistingStacks = true)
         {
-            lock (this)
+            if (Comp != null && innerIdList.Count > Count && Comp.AllowNode(item, innerIdList[Count]))
             {
-                if (Comp != null && innerIdList.Count > Count && Comp.AllowNode(item, innerIdList[Count]))
-                {
-                    return base.GetCountCanAccept(item, false);
-                }
-                return 0;
+                return base.GetCountCanAccept(item, false);
             }
+            return 0;
         }
 
         public override int TryAdd(Thing item, int count, bool canMergeWithExistingStacks = true)
@@ -519,56 +516,43 @@ namespace RW_NodeTree
         public bool IsChildOf(Thing node)
         {
             if (node == null) return false;
-            lock (this)
+            IThingHolder thingHolder = Owner;
+            Thing parent = (thingHolder as ThingComp)?.parent ?? (thingHolder as Thing);
+            while (thingHolder != null && parent != node)
             {
-                IThingHolder thingHolder = Owner;
-                Thing parent = (thingHolder as ThingComp)?.parent ?? (thingHolder as Thing);
-                while (thingHolder != null && parent != node)
-                {
-                    thingHolder = thingHolder.ParentHolder;
-                    parent = (thingHolder as ThingComp)?.parent ?? (thingHolder as Thing);
-                }
-                return parent == node;
+                thingHolder = thingHolder.ParentHolder;
+                parent = (thingHolder as ThingComp)?.parent ?? (thingHolder as Thing);
             }
+            return parent == node;
         }
 
         public bool IsChild(Thing node)
         {
             if (node == null) return false;
-            lock (this)
+            ThingOwner Owner = node.holdingOwner;
+            while (Owner != null && Owner != this)
             {
-                ThingOwner Owner = node.holdingOwner;
-                while (Owner != null && Owner != this)
-                {
-                    Owner = Owner.Owner?.ParentHolder?.GetDirectlyHeldThings();
-                }
-                return Owner == this;
+                Owner = Owner.Owner?.ParentHolder?.GetDirectlyHeldThings();
             }
+            return Owner == this;
         }
 
-        public bool ContainsKey(string key)
-        {
-            lock (this)
-                return innerIdList.Contains(key);
-        }
+        public bool ContainsKey(string key) => innerIdList.Contains(key);
 
         public void Add(string key, Thing value)
         {
             if (key.IsVaildityKeyFormat())
             {
-                lock (this)
+                Thing t = this[key];
+                if (value == t) return;
+                //ThingOwner owner = value?.holdingOwner;
+                if ((t != null ? Remove(t) : true) && value != null)
                 {
-                    Thing t = this[key];
-                    if (value == t) return;
-                    //ThingOwner owner = value?.holdingOwner;
-                    if ((t != null ? Remove(t) : true) && value != null)
+                    innerIdList.Add(key);
+                    if (!TryAdd(value))
                     {
-                        innerIdList.Add(key);
-                        if (!TryAdd(value))
-                        {
-                            //owner?.TryAdd(value,false);
-                            if (t == null || !TryAdd(t)) innerIdList.RemoveAt(Count);
-                        }
+                        //owner?.TryAdd(value,false);
+                        if (t == null || !TryAdd(t)) innerIdList.RemoveAt(Count);
                     }
                 }
             }
@@ -593,12 +577,9 @@ namespace RW_NodeTree
 
         public IEnumerator<KeyValuePair<string, Thing>> GetEnumerator()
         {
-            lock (this)
+            for (int i = 0; i < Count; i++)
             {
-                for (int i = 0; i < Count; i++)
-                {
-                    yield return new KeyValuePair<string, Thing>(this[(uint)i], this[i]);
-                }
+                yield return new KeyValuePair<string, Thing>(this[(uint)i], this[i]);
             }
         }
 
