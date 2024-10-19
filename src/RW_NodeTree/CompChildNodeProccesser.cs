@@ -391,7 +391,7 @@ namespace RW_NodeTree
 
         internal List<VerbPropertiesRegiestInfo> internal_GetRegiestedNodeVerbPropertiesInfos(Type ownerType, List<VerbProperties> verbProperties = null)
         {
-            lock (this)
+            // lock (this)
             {
                 verbProperties = verbProperties ?? GetSameTypeVerbOwner(ownerType, parent)?.VerbProperties ?? new List<VerbProperties>();
                 if (!regiestedNodeVerbPropertiesInfos.TryGetValue(ownerType, out List<VerbPropertiesRegiestInfo> info))
@@ -440,7 +440,7 @@ namespace RW_NodeTree
 
         internal List<VerbToolRegiestInfo> internal_GetRegiestedNodeVerbToolInfos(Type ownerType, List<Tool> tools = null)
         {
-            lock (this)
+            // lock (this)
             {
                 tools = tools ?? GetSameTypeVerbOwner(ownerType, parent)?.Tools ?? new List<Tool>();
                 if (!regiestedNodeVerbToolInfos.TryGetValue(ownerType, out List<VerbToolRegiestInfo> info))
