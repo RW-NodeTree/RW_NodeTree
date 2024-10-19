@@ -16,7 +16,16 @@ namespace RW_NodeTree
 
         public NodeContainer(CompChildNodeProccesser proccesser) : base(proccesser) { }
 
-        public string this[uint index] => innerIdList[(int)index];
+        public string this[uint index]
+        {
+            get
+            {
+                lock (this)
+                {
+                    return innerIdList[(int)index];
+                }
+            }
+        }
 
         public Thing this[string key]
         {
@@ -33,19 +42,25 @@ namespace RW_NodeTree
         {
             get
             {
-                int index = IndexOf(item);
-                if (index < 0 || index >= Count) return null;
-                return innerIdList[index];
+                lock (this)
+                {
+                    int index = IndexOf(item);
+                    if (index < 0 || index >= Count) return null;
+                    return innerIdList[index];
+                }
             }
             set
             {
-                if (state == stateCode.r) return;
-                if (Comp != null && value.IsVaildityKeyFormat() && !innerIdList.Contains(value) && Comp.AllowNode(item, value))
+                lock (this)
                 {
-                    int index = IndexOf(item);
-                    if (index >= 0 && index < Count)
+                    if (state == stateCode.r) return;
+                    if (Comp != null && value.IsVaildityKeyFormat() && !innerIdList.Contains(value) && Comp.AllowNode(item, value))
                     {
-                        innerIdList[index] = value;
+                        int index = IndexOf(item);
+                        if (index >= 0 && index < Count)
+                        {
+                            innerIdList[index] = value;
+                        }
                     }
                 }
             }
@@ -57,12 +72,16 @@ namespace RW_NodeTree
 
         public bool NeedUpdate
         {
-            get => needUpdate;
+            get
+            {
+                lock (this)
+                    return needUpdate;
+            }
             set
             {
                 bool flag;
                 lock (this)
-                flag = needUpdate != value && (needUpdate = value);
+                    flag = needUpdate != value && (needUpdate = value);
                 if (flag)
                 {
                     NodeContainer parent = ParentContainer;
@@ -71,15 +90,37 @@ namespace RW_NodeTree
             }
         }
 
-        public ICollection<string> Keys => new List<string>(innerIdList);
+        public ICollection<string> Keys
+        {
+            get
+            {
+                lock (this)
+                {
+                    return new List<string>(innerIdList);
+                }
+            }
+        }
 
         public ICollection<Thing> Values => this;
 
 
-        bool ICollection<KeyValuePair<string, Thing>>.IsReadOnly => state > stateCode.r;
+        bool ICollection<KeyValuePair<string, Thing>>.IsReadOnly
+        {
+            get
+            {
+                lock (this)
+                    return state == stateCode.r;
+            }
+        }
 
-
-        public override int Count => Math.Min(innerList.Count, innerIdList.Count);
+        public override int Count
+        {
+            get
+            {
+                lock (this)
+                    return Math.Min(innerList.Count, innerIdList.Count);
+            }
+        }
 
         public override void ExposeData()
         {
@@ -324,11 +365,14 @@ namespace RW_NodeTree
 
         public override int GetCountCanAccept(Thing item, bool canMergeWithExistingStacks = true)
         {
-            if (Comp != null && innerIdList.Count > Count && Comp.AllowNode(item, innerIdList[Count]))
+            lock (this)
             {
-                return base.GetCountCanAccept(item, false);
+                if (Comp != null && innerIdList.Count > Count && Comp.AllowNode(item, innerIdList[Count]))
+                {
+                    return base.GetCountCanAccept(item, false);
+                }
+                return 0;
             }
-            return 0;
         }
 
         public override int TryAdd(Thing item, int count, bool canMergeWithExistingStacks = true)
@@ -537,22 +581,30 @@ namespace RW_NodeTree
             return Owner == this;
         }
 
-        public bool ContainsKey(string key) => innerIdList.Contains(key);
+        public bool ContainsKey(string key)
+        {
+            lock (this)
+                return innerIdList.Contains(key);
+        }
 
         public void Add(string key, Thing value)
         {
             if (key.IsVaildityKeyFormat())
             {
-                Thing t = this[key];
-                if (value == t) return;
-                //ThingOwner owner = value?.holdingOwner;
-                if ((t != null ? Remove(t) : true) && value != null)
+                
+                lock (this)
                 {
-                    innerIdList.Add(key);
-                    if (!TryAdd(value))
+                    Thing t = this[key];
+                    if (value == t) return;
+                    //ThingOwner owner = value?.holdingOwner;
+                    if ((t != null ? Remove(t) : true) && value != null)
                     {
-                        //owner?.TryAdd(value,false);
-                        if (t == null || !TryAdd(t)) innerIdList.RemoveAt(Count);
+                        innerIdList.Add(key);
+                        if (!TryAdd(value))
+                        {
+                            //owner?.TryAdd(value,false);
+                            if (t == null || !TryAdd(t)) innerIdList.RemoveAt(Count);
+                        }
                     }
                 }
             }
@@ -565,11 +617,14 @@ namespace RW_NodeTree
             value = null;
             if (key.IsVaildityKeyFormat())
             {
-                int index = innerIdList.IndexOf(key);
-                if (index >= 0 && index < Count)
+                lock (this)
                 {
-                    value = this[index];
-                    return true;
+                    int index = innerIdList.IndexOf(key);
+                    if (index >= 0 && index < Count)
+                    {
+                        value = this[index];
+                        return true;
+                    }
                 }
             }
             return false;
@@ -577,9 +632,12 @@ namespace RW_NodeTree
 
         public IEnumerator<KeyValuePair<string, Thing>> GetEnumerator()
         {
-            for (int i = 0; i < Count; i++)
+            lock (this)
             {
-                yield return new KeyValuePair<string, Thing>(this[(uint)i], this[i]);
+                for (int i = 0; i < Count; i++)
+                {
+                    yield return new KeyValuePair<string, Thing>(this[(uint)i], this[i]);
+                }
             }
         }
 
@@ -589,24 +647,38 @@ namespace RW_NodeTree
 
         public void CopyTo(KeyValuePair<string, Thing>[] array, int arrayIndex)
         {
-            for (int i = 0; i < Count; i++)
+            lock (this)
             {
-                array[i + arrayIndex] = new KeyValuePair<string, Thing>(this[(uint)i], this[i]);
+                for (int i = 0; i < Count; i++)
+                {
+                    array[i + arrayIndex] = new KeyValuePair<string, Thing>(this[(uint)i], this[i]);
+                }
             }
         }
 
         bool ICollection<KeyValuePair<string, Thing>>.Remove(KeyValuePair<string, Thing> item)
         {
-            if (((ICollection<KeyValuePair<string, Thing>>)this).Contains(item))
+            lock (this)
             {
-                return Remove(item.Value);
+                if (((ICollection<KeyValuePair<string, Thing>>)this).Contains(item))
+                {
+                    return Remove(item.Value);
+                }
+                return false;
             }
-            return false;
         }
 
-        public override int IndexOf(Thing item) => innerList.IndexOf(item);
+        public override int IndexOf(Thing item)
+        {
+            lock (this)
+                return innerList.IndexOf(item);
+        }
 
-        protected override Thing GetAt(int index) => innerList[index];
+        protected override Thing GetAt(int index)
+        {
+            lock (this)
+                return innerList[index];
+        }
 
         private bool needUpdate = true;
 

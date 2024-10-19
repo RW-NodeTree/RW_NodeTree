@@ -58,16 +58,19 @@ namespace RW_NodeTree
         {
             get
             {
-                if (cachedRootNode != null) return cachedRootNode;
-                CompChildNodeProccesser proccesser = this;
-                CompChildNodeProccesser next = ParentProccesser;
-                while (next != null)
+                lock (this)
                 {
-                    proccesser = next;
-                    next = next.ParentProccesser;
+                    if (cachedRootNode != null) return cachedRootNode;
+                    CompChildNodeProccesser proccesser = this;
+                    CompChildNodeProccesser next = ParentProccesser;
+                    while (next != null)
+                    {
+                        proccesser = next;
+                        next = next.ParentProccesser;
+                    }
+                    cachedRootNode = proccesser;
+                    return proccesser;
                 }
-                cachedRootNode = proccesser;
-                return proccesser;
             }
         }
 
@@ -670,11 +673,14 @@ namespace RW_NodeTree
 
         public void ResetCachedRootNode()
         {
-            cachedRootNode = null;
-            foreach (Thing part in ChildNodes.Values)
+            lock (this)
             {
-                CompChildNodeProccesser childComp = part;
-                if (childComp != null) childComp.ResetCachedRootNode();
+                cachedRootNode = null;
+                foreach (Thing part in ChildNodes.Values)
+                {
+                    CompChildNodeProccesser childComp = part;
+                    if (childComp != null) childComp.ResetCachedRootNode();
+                }
             }
         }
 
@@ -717,11 +723,14 @@ namespace RW_NodeTree
 
         public ThingOwner GetDirectlyHeldThings()
         {
-            if (childNodes == null)
+            lock (this)
             {
-                childNodes = new NodeContainer(this);
+                if (childNodes == null)
+                {
+                    childNodes = new NodeContainer(this);
+                }
+                return childNodes;
             }
-            return childNodes;
         }
 
         public static IVerbOwner GetSameTypeVerbOwner(Type ownerType, Thing thing)
