@@ -20,10 +20,8 @@ namespace RW_NodeTree
         {
             get
             {
-                lock (this)
-                {
+                lock (innerList)
                     return innerIdList[(int)index];
-                }
             }
         }
 
@@ -42,7 +40,7 @@ namespace RW_NodeTree
         {
             get
             {
-                lock (this)
+                lock (innerList)
                 {
                     int index = IndexOf(item);
                     if (index < 0 || index >= Count) return null;
@@ -52,6 +50,7 @@ namespace RW_NodeTree
             set
             {
                 lock (this)
+                lock (innerList)
                 {
                     if (state == stateCode.r) return;
                     if (Comp != null && value.IsVaildityKeyFormat() && !innerIdList.Contains(value) && Comp.AllowNode(item, value))
@@ -94,7 +93,7 @@ namespace RW_NodeTree
         {
             get
             {
-                lock (this)
+            lock (innerList)
                 {
                     return new List<string>(innerIdList);
                 }
@@ -117,7 +116,7 @@ namespace RW_NodeTree
         {
             get
             {
-                lock (this)
+                lock (innerList)
                     return Math.Min(innerList.Count, innerIdList.Count);
             }
         }
@@ -129,6 +128,7 @@ namespace RW_NodeTree
             if(Scribe.EnterNode("InnerList"))
             {
                 lock (this)
+                lock (innerList)
                 {
                     if (Scribe.mode == LoadSaveMode.Saving)
                     {
@@ -208,6 +208,7 @@ namespace RW_NodeTree
             if (Scribe.mode == LoadSaveMode.ResolvingCrossRefs)
             {
                 lock (this)
+                lock (innerList)
                 {
                     for (int i = Count - 1; i >= 0; i--)
                     {
@@ -365,7 +366,7 @@ namespace RW_NodeTree
 
         public override int GetCountCanAccept(Thing item, bool canMergeWithExistingStacks = true)
         {
-            lock (this)
+            lock (innerList)
             {
                 if (Comp != null && innerIdList.Count > Count && Comp.AllowNode(item, innerIdList[Count]))
                 {
@@ -396,6 +397,7 @@ namespace RW_NodeTree
             }
 
             lock (this)
+            lock (innerList)
             {
 
                 if (state == stateCode.r)
@@ -450,6 +452,7 @@ namespace RW_NodeTree
             }
 
             lock (this)
+            lock (innerList)
             {
                 if (state == stateCode.r)
                 {
@@ -518,6 +521,7 @@ namespace RW_NodeTree
             }
 
             lock (this)
+            lock (innerList)
             {
                 if (state == stateCode.r)
                 {
@@ -583,7 +587,7 @@ namespace RW_NodeTree
 
         public bool ContainsKey(string key)
         {
-            lock (this)
+            lock (innerList)
                 return innerIdList.Contains(key);
         }
 
@@ -591,8 +595,7 @@ namespace RW_NodeTree
         {
             if (key.IsVaildityKeyFormat())
             {
-                
-                lock (this)
+                lock (innerList)
                 {
                     Thing t = this[key];
                     if (value == t) return;
@@ -612,7 +615,7 @@ namespace RW_NodeTree
 
         public bool Remove(string key)
         {
-            lock (this)
+            lock (innerList)
                 return Remove(this[key]);
         }
 
@@ -621,7 +624,7 @@ namespace RW_NodeTree
             value = null;
             if (key.IsVaildityKeyFormat())
             {
-                lock (this)
+                lock (innerList)
                 {
                     int index = innerIdList.IndexOf(key);
                     if (index >= 0 && index < Count)
@@ -639,7 +642,7 @@ namespace RW_NodeTree
             int count;
             List<string> keys;
             List<Thing> values;
-            lock (this)
+            lock (innerList)
             {
                 count = Count;
                 keys = new List<string>(innerIdList);
@@ -657,7 +660,7 @@ namespace RW_NodeTree
 
         public void CopyTo(KeyValuePair<string, Thing>[] array, int arrayIndex)
         {
-            lock (this)
+            lock (innerList)
             {
                 for (int i = 0; i < Count; i++)
                 {
@@ -668,7 +671,7 @@ namespace RW_NodeTree
 
         bool ICollection<KeyValuePair<string, Thing>>.Remove(KeyValuePair<string, Thing> item)
         {
-            lock (this)
+            lock (innerList)
             {
                 if (((ICollection<KeyValuePair<string, Thing>>)this).Contains(item))
                 {
@@ -680,13 +683,13 @@ namespace RW_NodeTree
 
         public override int IndexOf(Thing item)
         {
-            lock (this)
+            lock (innerList)
                 return innerList.IndexOf(item);
         }
 
         protected override Thing GetAt(int index)
         {
-            lock (this)
+            lock (innerList)
                 return innerList[index];
         }
 
