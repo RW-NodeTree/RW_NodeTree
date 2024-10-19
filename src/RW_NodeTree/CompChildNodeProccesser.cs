@@ -655,13 +655,14 @@ namespace RW_NodeTree
         /// <returns></returns>
         public bool UpdateNode()
         {
-            lock (compLoadingCache)
+            // lock (compLoadingCache)
             {
                 if (blockUpdate) return false;
                 blockUpdate = true;
             }
             bool result = ChildNodes.internal_UpdateNode();
-            lock (compLoadingCache) blockUpdate = false;
+            // lock (compLoadingCache)
+            blockUpdate = false;
             return result;
         }
 
