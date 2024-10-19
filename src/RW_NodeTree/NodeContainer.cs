@@ -647,7 +647,7 @@ namespace RW_NodeTree
             }
             for (int i = 0; i < Count; i++)
             {
-                yield return new KeyValuePair<string, Thing>(this[(uint)i], this[i]);
+                yield return new KeyValuePair<string, Thing>(keys[i], values[i]);
             }
         }
 
