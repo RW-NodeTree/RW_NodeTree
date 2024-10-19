@@ -373,7 +373,7 @@ namespace RW_NodeTree
         /// </summary>
         public void ResetVerbs()
         {
-            lock (this)
+            // lock (this)
             {
                 foreach (ThingComp comp in parent.AllComps)
                 {
