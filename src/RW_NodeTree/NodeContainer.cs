@@ -610,7 +610,11 @@ namespace RW_NodeTree
             }
         }
 
-        public bool Remove(string key) => Remove(this[key]);
+        public bool Remove(string key)
+        {
+            lock (this)
+                return Remove(this[key]);
+        }
 
         public bool TryGetValue(string key, out Thing value)
         {
@@ -632,12 +636,18 @@ namespace RW_NodeTree
 
         public IEnumerator<KeyValuePair<string, Thing>> GetEnumerator()
         {
+            int count;
+            List<string> keys;
+            List<Thing> values;
             lock (this)
             {
-                for (int i = 0; i < Count; i++)
-                {
-                    yield return new KeyValuePair<string, Thing>(this[(uint)i], this[i]);
-                }
+                count = Count;
+                keys = new List<string>(innerIdList);
+                values = new List<Thing>(innerList);
+            }
+            for (int i = 0; i < Count; i++)
+            {
+                yield return new KeyValuePair<string, Thing>(this[(uint)i], this[i]);
             }
         }
 
