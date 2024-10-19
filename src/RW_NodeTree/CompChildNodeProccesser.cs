@@ -659,10 +659,10 @@ namespace RW_NodeTree
             {
                 if (blockUpdate) return false;
                 blockUpdate = true;
-                bool result = ChildNodes.internal_UpdateNode();
-                blockUpdate = false;
-                return result;
             }
+            bool result = ChildNodes.internal_UpdateNode();
+            lock (compLoadingCache) blockUpdate = false;
+            return result;
         }
 
         
