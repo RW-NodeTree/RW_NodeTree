@@ -193,7 +193,7 @@ namespace RW_NodeTree
 
             if (!CheckVerbDatasVaildityAndAdapt(ownerType, parent, ref verbAfterConvert, ref toolAfterConvert, ref verbPropertiesAfterConvert)) return result;
 
-            lock (this)
+            // lock (this)
             {
                 Dictionary<(Thing, Verb, Tool, VerbProperties, bool), (Thing, Verb, Tool, VerbProperties)> caches;
                 if (!BeforeConvertVerbCorrespondingThingCache.TryGetValue(ownerType, out caches))
