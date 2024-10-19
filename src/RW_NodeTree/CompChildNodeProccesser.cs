@@ -58,19 +58,16 @@ namespace RW_NodeTree
         {
             get
             {
-                lock (this)
+                if (cachedRootNode != null) return cachedRootNode;
+                CompChildNodeProccesser proccesser = this;
+                CompChildNodeProccesser next = ParentProccesser;
+                while (next != null)
                 {
-                    if (cachedRootNode != null) return cachedRootNode;
-                    CompChildNodeProccesser proccesser = this;
-                    CompChildNodeProccesser next = ParentProccesser;
-                    while (next != null)
-                    {
-                        proccesser = next;
-                        next = next.ParentProccesser;
-                    }
-                    cachedRootNode = proccesser;
-                    return proccesser;
+                    proccesser = next;
+                    next = next.ParentProccesser;
                 }
+                cachedRootNode = proccesser;
+                return proccesser;
             }
         }
 
@@ -673,14 +670,11 @@ namespace RW_NodeTree
 
         public void ResetCachedRootNode()
         {
-            lock (this)
+            cachedRootNode = null;
+            foreach (Thing part in ChildNodes.Values)
             {
-                cachedRootNode = null;
-                foreach (Thing part in ChildNodes.Values)
-                {
-                    CompChildNodeProccesser childComp = part;
-                    if (childComp != null) childComp.ResetCachedRootNode();
-                }
+                CompChildNodeProccesser childComp = part;
+                if (childComp != null) childComp.ResetCachedRootNode();
             }
         }
 
