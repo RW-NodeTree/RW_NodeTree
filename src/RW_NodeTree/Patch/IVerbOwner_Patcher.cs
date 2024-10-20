@@ -282,7 +282,7 @@ namespace RW_NodeTree
                     Log.Error(ex.ToString());
                 }
             }
-            lock (this)
+            lock (ChildNodes)
             {
                 List<VerbPropertiesRegiestInfo> verbPropertiesRegiestInfo = internal_GetRegiestedNodeVerbPropertiesInfos(ownerType, verbProperties);
                 verbProperties = new List<VerbProperties>(verbPropertiesRegiestInfo.Count);
@@ -313,7 +313,7 @@ namespace RW_NodeTree
                     Log.Error(ex.ToString());
                 }
             }
-            lock (this)
+            lock (ChildNodes)
             {
                 List<VerbToolRegiestInfo> verbToolRegiestInfo = internal_GetRegiestedNodeVerbToolInfos(ownerType, tools);
                 tools = new List<Tool>(verbToolRegiestInfo.Count);

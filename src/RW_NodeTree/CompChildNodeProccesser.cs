@@ -356,7 +356,7 @@ namespace RW_NodeTree
         /// </summary>
         public void ResetRenderedTexture()
         {
-            lock (this)
+            lock (ChildNodes)
             lock (nodeRenderingInfo)
             {
                 nodeRenderingInfo.Reset();
@@ -377,7 +377,7 @@ namespace RW_NodeTree
         /// </summary>
         public void ResetVerbs()
         {
-            lock (this)
+            lock (ChildNodes)
             lock (regiestedNodeVerbPropertiesInfos)
             lock (regiestedNodeVerbToolInfos)
             lock (BeforeConvertVerbCorrespondingThingCache)
