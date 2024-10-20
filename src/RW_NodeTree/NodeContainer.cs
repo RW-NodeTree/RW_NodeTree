@@ -695,11 +695,11 @@ namespace RW_NodeTree
 
         private bool needUpdate = true;
 
-        private List<Thing> innerList = new List<Thing>();
-
-        private List<string> innerIdList = new List<string>();
-
         private stateCode state = 0;
+
+        private readonly List<Thing> innerList = new List<Thing>();
+
+        private readonly List<string> innerIdList = new List<string>();
 
         private enum stateCode : byte
         {

@@ -193,13 +193,13 @@ namespace RW_NodeTree
 
             if (!CheckVerbDatasVaildityAndAdapt(ownerType, parent, ref verbAfterConvert, ref toolAfterConvert, ref verbPropertiesAfterConvert)) return result;
 
-            lock (BeforeConvertVerbCorrespondingThingCache)
+            lock (beforeConvertVerbCorrespondingThingCache)
             {
                 Dictionary<(Thing, Verb, Tool, VerbProperties, bool), (Thing, Verb, Tool, VerbProperties)> caches;
-                if (!BeforeConvertVerbCorrespondingThingCache.TryGetValue(ownerType, out caches))
+                if (!beforeConvertVerbCorrespondingThingCache.TryGetValue(ownerType, out caches))
                 {
                     caches = new Dictionary<(Thing, Verb, Tool, VerbProperties, bool), (Thing, Verb, Tool, VerbProperties)>();
-                    BeforeConvertVerbCorrespondingThingCache.Add(ownerType, caches);
+                    beforeConvertVerbCorrespondingThingCache.Add(ownerType, caches);
                 }
 
                 if (caches.TryGetValue((parent, verbAfterConvert, toolAfterConvert, verbPropertiesAfterConvert, needVerb), out result)) return result;
@@ -380,7 +380,7 @@ namespace RW_NodeTree
             lock (ChildNodes)
             lock (regiestedNodeVerbPropertiesInfos)
             lock (regiestedNodeVerbToolInfos)
-            lock (BeforeConvertVerbCorrespondingThingCache)
+            lock (beforeConvertVerbCorrespondingThingCache)
             {
                 foreach (ThingComp comp in parent.AllComps)
                 {
@@ -389,7 +389,7 @@ namespace RW_NodeTree
                 (parent as IVerbOwner)?.VerbTracker?.VerbsNeedReinitOnLoad();
                 regiestedNodeVerbPropertiesInfos.Clear();
                 regiestedNodeVerbToolInfos.Clear();
-                BeforeConvertVerbCorrespondingThingCache.Clear();
+                beforeConvertVerbCorrespondingThingCache.Clear();
             }
             ParentProccesser?.ResetVerbs();
         }
@@ -524,9 +524,9 @@ namespace RW_NodeTree
 
         public List<(string, Thing, List<RenderInfo>)> GetNodeRenderingInfos(Rot4 rot, out bool updated, Graphic subGraphic = null)
         {
-
             UpdateNode();
             updated = false;
+            if (!UnityData.IsInMainThread) return null;
             if (this.nodeRenderingInfo[rot] != null) return this.nodeRenderingInfo[rot];
             updated = true;
             List<(string, Thing, List<RenderInfo>)> nodeRenderingInfos = new List<(string, Thing, List<RenderInfo>)>(ChildNodes.Count + 1);
@@ -830,13 +830,13 @@ namespace RW_NodeTree
 
         private NodeContainer childNodes;
 
-        private readonly NodeRenderingInfoForRot4 nodeRenderingInfo = new NodeRenderingInfoForRot4();
+        internal readonly NodeRenderingInfoForRot4 nodeRenderingInfo = new NodeRenderingInfoForRot4();
 
-        private readonly Dictionary<Type, List<VerbToolRegiestInfo>> regiestedNodeVerbToolInfos = new Dictionary<Type, List<VerbToolRegiestInfo>>();
+        internal readonly Dictionary<Type, List<VerbToolRegiestInfo>> regiestedNodeVerbToolInfos = new Dictionary<Type, List<VerbToolRegiestInfo>>();
 
-        private readonly Dictionary<Type, List<VerbPropertiesRegiestInfo>> regiestedNodeVerbPropertiesInfos = new Dictionary<Type, List<VerbPropertiesRegiestInfo>>();
+        internal readonly Dictionary<Type, List<VerbPropertiesRegiestInfo>> regiestedNodeVerbPropertiesInfos = new Dictionary<Type, List<VerbPropertiesRegiestInfo>>();
 
-        private readonly Dictionary<Type, Dictionary<(Thing, Verb, Tool, VerbProperties, bool), (Thing, Verb, Tool, VerbProperties)>> BeforeConvertVerbCorrespondingThingCache = new Dictionary<Type, Dictionary<(Thing, Verb, Tool, VerbProperties, bool), (Thing, Verb, Tool, VerbProperties)>>();
+        internal readonly Dictionary<Type, Dictionary<(Thing, Verb, Tool, VerbProperties, bool), (Thing, Verb, Tool, VerbProperties)>> beforeConvertVerbCorrespondingThingCache = new Dictionary<Type, Dictionary<(Thing, Verb, Tool, VerbProperties, bool), (Thing, Verb, Tool, VerbProperties)>>();
 
         private static bool blockUpdate = false;
 
