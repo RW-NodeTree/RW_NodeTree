@@ -49,7 +49,7 @@ namespace RW_NodeTree
             }
             set
             {
-                lock (this)
+                lock (Comp)
                 lock (innerList)
                 {
                     if (state == stateCode.r) return;
@@ -73,13 +73,13 @@ namespace RW_NodeTree
         {
             get
             {
-                lock (this)
+                lock (Comp)
                     return needUpdate;
             }
             set
             {
                 bool flag;
-                lock (this)
+                lock (Comp)
                     flag = needUpdate != value && (needUpdate = value);
                 if (flag)
                 {
@@ -107,7 +107,7 @@ namespace RW_NodeTree
         {
             get
             {
-                lock (this)
+                lock (Comp)
                     return state == stateCode.r;
             }
         }
@@ -127,7 +127,7 @@ namespace RW_NodeTree
 
             if(Scribe.EnterNode("InnerList"))
             {
-                lock (this)
+                lock (Comp)
                 lock (innerList)
                 {
                     if (Scribe.mode == LoadSaveMode.Saving)
@@ -207,7 +207,7 @@ namespace RW_NodeTree
 
             if (Scribe.mode == LoadSaveMode.ResolvingCrossRefs)
             {
-                lock (this)
+                lock (Comp)
                 lock (innerList)
                 {
                     for (int i = Count - 1; i >= 0; i--)
@@ -246,7 +246,7 @@ namespace RW_NodeTree
             if (proccess == null) return StopEventBubble;
 
             if (actionNode == null) return proccess.RootNode.ChildNodes.internal_UpdateNode(proccess);
-            lock (this)
+            lock (Comp)
             {
                 if (!NeedUpdate) return StopEventBubble;
 
@@ -396,7 +396,7 @@ namespace RW_NodeTree
                 return 0;
             }
 
-            lock (this)
+            lock (Comp)
             lock (innerList)
             {
 
@@ -451,7 +451,7 @@ namespace RW_NodeTree
                 return false;
             }
 
-            lock (this)
+            lock (Comp)
             lock (innerList)
             {
                 if (state == stateCode.r)
@@ -520,7 +520,7 @@ namespace RW_NodeTree
                 return false;
             }
 
-            lock (this)
+            lock (Comp)
             lock (innerList)
             {
                 if (state == stateCode.r)
