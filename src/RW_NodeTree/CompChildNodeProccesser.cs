@@ -579,7 +579,7 @@ namespace RW_NodeTree
             {
                 try
                 {
-                    nodeRenderingInfos = comp.internal_PreDrawSteep(nodeRenderingInfos, rot, subGraphic, cachingData) ?? nodeRenderingInfos;
+                    nodeRenderingInfos = comp.internal_PreDrawStep(nodeRenderingInfos, rot, subGraphic, cachingData) ?? nodeRenderingInfos;
                 }
                 catch (Exception ex)
                 {
@@ -620,7 +620,7 @@ namespace RW_NodeTree
             {
                 try
                 {
-                    nodeRenderingInfos = comp.internal_PostDrawSteep(nodeRenderingInfos, rot, subGraphic, cachingData) ?? nodeRenderingInfos;
+                    nodeRenderingInfos = comp.internal_PostDrawStep(nodeRenderingInfos, rot, subGraphic, cachingData) ?? nodeRenderingInfos;
                 }
                 catch (Exception ex)
                 {
