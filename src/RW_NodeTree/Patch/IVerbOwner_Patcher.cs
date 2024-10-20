@@ -282,13 +282,16 @@ namespace RW_NodeTree
                     Log.Error(ex.ToString());
                 }
             }
-            List<VerbPropertiesRegiestInfo> verbPropertiesRegiestInfo = internal_GetRegiestedNodeVerbPropertiesInfos(ownerType, verbProperties);
-            verbProperties = new List<VerbProperties>(verbPropertiesRegiestInfo.Count);
-            foreach (VerbPropertiesRegiestInfo regiestInfo in verbPropertiesRegiestInfo)
+            lock (this)
             {
-                verbProperties.Add(regiestInfo.afterConvertProperties);
+                List<VerbPropertiesRegiestInfo> verbPropertiesRegiestInfo = internal_GetRegiestedNodeVerbPropertiesInfos(ownerType, verbProperties);
+                verbProperties = new List<VerbProperties>(verbPropertiesRegiestInfo.Count);
+                foreach (VerbPropertiesRegiestInfo regiestInfo in verbPropertiesRegiestInfo)
+                {
+                    verbProperties.Add(regiestInfo.afterConvertProperties);
+                }
+                return verbProperties;
             }
-            return verbProperties;
         }
 
         /// <summary>
@@ -310,13 +313,16 @@ namespace RW_NodeTree
                     Log.Error(ex.ToString());
                 }
             }
-            List<VerbToolRegiestInfo> verbToolRegiestInfo = internal_GetRegiestedNodeVerbToolInfos(ownerType, tools);
-            tools = new List<Tool>(verbToolRegiestInfo.Count);
-            foreach (VerbToolRegiestInfo regiestInfo in verbToolRegiestInfo)
+            lock (this)
             {
-                tools.Add(regiestInfo.afterCobvertTool);
+                List<VerbToolRegiestInfo> verbToolRegiestInfo = internal_GetRegiestedNodeVerbToolInfos(ownerType, tools);
+                tools = new List<Tool>(verbToolRegiestInfo.Count);
+                foreach (VerbToolRegiestInfo regiestInfo in verbToolRegiestInfo)
+                {
+                    tools.Add(regiestInfo.afterCobvertTool);
+                }
+                return tools;
             }
-            return tools;
         }
     }
     public abstract partial class CompBasicNodeComp : ThingComp

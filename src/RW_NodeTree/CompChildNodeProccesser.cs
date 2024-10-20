@@ -193,7 +193,7 @@ namespace RW_NodeTree
 
             if (!CheckVerbDatasVaildityAndAdapt(ownerType, parent, ref verbAfterConvert, ref toolAfterConvert, ref verbPropertiesAfterConvert)) return result;
 
-            lock (this)
+            lock (BeforeConvertVerbCorrespondingThingCache)
             {
                 Dictionary<(Thing, Verb, Tool, VerbProperties, bool), (Thing, Verb, Tool, VerbProperties)> caches;
                 if (!BeforeConvertVerbCorrespondingThingCache.TryGetValue(ownerType, out caches))
@@ -356,14 +356,18 @@ namespace RW_NodeTree
         /// </summary>
         public void ResetRenderedTexture()
         {
-            nodeRenderingInfo.Reset();
-            try
+            lock (this)
+            lock (nodeRenderingInfo)
             {
-                if (parent.Spawned && parent.def.drawerType >= DrawerType.MapMeshOnly) parent.DirtyMapMesh(parent.Map);
-            }
-            catch (Exception ex)
-            {
-                Log.Warning(ex.ToString());
+                nodeRenderingInfo.Reset();
+                try
+                {
+                    if (parent.Spawned && parent.def.drawerType >= DrawerType.MapMeshOnly) parent.DirtyMapMesh(parent.Map);
+                }
+                catch (Exception ex)
+                {
+                    Log.Warning(ex.ToString());
+                }
             }
             ParentProccesser?.ResetRenderedTexture();
         }
@@ -374,6 +378,9 @@ namespace RW_NodeTree
         public void ResetVerbs()
         {
             lock (this)
+            lock (regiestedNodeVerbPropertiesInfos)
+            lock (regiestedNodeVerbToolInfos)
+            lock (BeforeConvertVerbCorrespondingThingCache)
             {
                 foreach (ThingComp comp in parent.AllComps)
                 {
@@ -391,7 +398,7 @@ namespace RW_NodeTree
 
         internal List<VerbPropertiesRegiestInfo> internal_GetRegiestedNodeVerbPropertiesInfos(Type ownerType, List<VerbProperties> verbProperties = null)
         {
-            lock (this)
+            lock (regiestedNodeVerbPropertiesInfos)
             {
                 verbProperties = verbProperties ?? GetSameTypeVerbOwner(ownerType, parent)?.VerbProperties ?? new List<VerbProperties>();
                 if (!regiestedNodeVerbPropertiesInfos.TryGetValue(ownerType, out List<VerbPropertiesRegiestInfo> info))
@@ -440,7 +447,7 @@ namespace RW_NodeTree
 
         internal List<VerbToolRegiestInfo> internal_GetRegiestedNodeVerbToolInfos(Type ownerType, List<Tool> tools = null)
         {
-            lock (this)
+            lock (regiestedNodeVerbToolInfos)
             {
                 tools = tools ?? GetSameTypeVerbOwner(ownerType, parent)?.Tools ?? new List<Tool>();
                 if (!regiestedNodeVerbToolInfos.TryGetValue(ownerType, out List<VerbToolRegiestInfo> info))
@@ -662,7 +669,7 @@ namespace RW_NodeTree
             }
             bool result = ChildNodes.internal_UpdateNode();
             lock (compLoadingCache)
-            blockUpdate = false;
+                blockUpdate = false;
             return result;
         }
 
