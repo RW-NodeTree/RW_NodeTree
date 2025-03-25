@@ -599,7 +599,7 @@ namespace RW_NodeTree
                     {
                         Rot4 rotCache = child.Rotation;
                         child.Rotation = new Rot4((rot.AsInt + rotCache.AsInt) & 3);
-#if DEBUGV13 || RELEASEV13 || DEBUGV14 || RELEASEV14
+#if V13 || V14
                         child.DrawAt(Vector3.zero);
 #else
                         child.DrawNowAt(Vector3.zero);

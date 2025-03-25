@@ -1,5 +1,5 @@
 ﻿
-#if DEBUGV13 || RELEASEV13
+#if V13
 using HarmonyLib;
 using System;
 using System.Collections.Generic;

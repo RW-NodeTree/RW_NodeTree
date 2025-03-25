@@ -18,7 +18,7 @@ namespace RW_NodeTree.Patch
             typeof(Thing),
             typeof(float),
             typeof(Rot4?)
-#if !DEBUGV13 && !RELEASEV13
+#if !V13
             , typeof(bool)
 #endif
         )]
@@ -60,7 +60,7 @@ namespace RW_NodeTree.Patch
             typeof(Thing),
             typeof(float),
             typeof(Rot4?)
-#if !DEBUGV13 && !RELEASEV13
+#if !V13
             , typeof(bool)
 #endif
         )]
