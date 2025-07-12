@@ -17,7 +17,11 @@ namespace RW_NodeTree.Patch
         )]
         private static bool PrePawn_EquipmentTracker_EquipmentTrackerTick(Pawn_EquipmentTracker __instance)
         {
+#if V13 || V14 || V15
             __instance.GetDirectlyHeldThings()?.ThingOwnerTick();
+#else
+            __instance.GetDirectlyHeldThings()?.DoTick();
+#endif
             return false;
         }
 

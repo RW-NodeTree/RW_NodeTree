@@ -7,7 +7,7 @@
     <AssemblyName>RW_NodeTree</AssemblyName>
 		<TargetFramework>net48</TargetFramework>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
-    <Configurations>DebugV13;ReleaseV13;DebugV14;ReleaseV14;DebugV15;ReleaseV15</Configurations>
+    <Configurations>DebugV13;ReleaseV13;DebugV14;ReleaseV14;DebugV15;ReleaseV15;DebugV16;ReleaseV16</Configurations>
   </PropertyGroup>
 	<PropertyGroup Condition="$(Configuration.Contains('Debug'))">
     <DebugSymbols>true</DebugSymbols>
@@ -40,10 +40,16 @@
 		<DefineConstants>$(DefineConstants);V15</DefineConstants>
 		<GameVersion>V15</GameVersion>
 	</PropertyGroup>
+	<PropertyGroup Condition="$(Configuration.Contains('V16'))">
+		<OutputPath>../../1.6/Assemblies</OutputPath>
+		<DefineConstants>$(DefineConstants);V16</DefineConstants>
+		<GameVersion>V16</GameVersion>
+	</PropertyGroup>
 	<ItemGroup>
 		<PackageReference Condition=" '$(GameVersion)' == 'V13'" Include="Krafs.Rimworld.Ref" Version="1.3.*" GeneratePathProperty="true" />
 		<PackageReference Condition=" '$(GameVersion)' == 'V14'" Include="Krafs.Rimworld.Ref" Version="1.4.*" GeneratePathProperty="true" />
 		<PackageReference Condition=" '$(GameVersion)' == 'V15'" Include="Krafs.Rimworld.Ref" Version="1.5.*" GeneratePathProperty="true" />
+		<PackageReference Condition=" '$(GameVersion)' == 'V16'" Include="Krafs.Rimworld.Ref" Version="1.6.*" GeneratePathProperty="true" />
 		<PackageReference Include="Lib.Harmony" Version="2.*" ExcludeAssets="runtime" />
 	</ItemGroup>
 </Project>

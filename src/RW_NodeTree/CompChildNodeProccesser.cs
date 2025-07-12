@@ -104,7 +104,11 @@ namespace RW_NodeTree
 
         public override void CompTick()
         {
+#if V13 || V14 || V15
             ChildNodes.ThingOwnerTick();
+#else
+            ChildNodes.DoTick();
+#endif
             UpdateNode();
         }
 

@@ -1,4 +1,5 @@
-﻿using HarmonyLib;
+﻿#if V13 || V14 || V15
+using HarmonyLib;
 using System;
 using Verse;
 
@@ -63,3 +64,4 @@ namespace RW_NodeTree
 
     }
 }
+#endif

@@ -21,6 +21,10 @@ namespace RW_NodeTree.Patch
 #if !V13
             , typeof(bool)
 #endif
+#if V16
+            , typeof(float),
+            typeof(bool)
+#endif
         )]
         private static void PreWidgets_ThingIcon(Thing thing, ref (Vector2, float)? __state)
         {

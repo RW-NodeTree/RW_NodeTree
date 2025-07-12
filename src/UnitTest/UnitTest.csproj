@@ -4,7 +4,7 @@
     <TargetFramework>net6.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-		<Configurations>DebugV13;ReleaseV13;DebugV14;ReleaseV14;DebugV15;ReleaseV15</Configurations>
+		<Configurations>DebugV13;ReleaseV13;DebugV14;ReleaseV14;DebugV15;ReleaseV15;DebugV16;ReleaseV16</Configurations>
 
     <IsPackable>false</IsPackable>
   </PropertyGroup>

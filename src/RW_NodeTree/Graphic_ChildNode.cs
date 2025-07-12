@@ -126,30 +126,32 @@ namespace RW_NodeTree
             (Material material, Texture2D texture, RenderTexture cachedRenderTarget) = defaultRenderingCache[rot];
 
             List<(string, Thing, List<RenderInfo>)> commands = comp_ChildNodeProccesser.GetNodeRenderingInfos(rot, out bool needUpdate, subGraphic);
-            if (!needUpdate && material != null) goto ret;
-
-            List<RenderInfo> final = new List<RenderInfo>();
-            foreach ((string, Thing, List<RenderInfo>) infos in commands)
+            if (needUpdate || material == null)
             {
-                if (!infos.Item3.NullOrEmpty()) final.AddRange(infos.Item3);
-            }
-            RenderingTools.RenderToTarget(final, ref cachedRenderTarget, ref texture, default(Vector2Int), comp_ChildNodeProccesser.Props.TextureSizeFactor, comp_ChildNodeProccesser.Props.ExceedanceFactor, comp_ChildNodeProccesser.Props.ExceedanceOffset, comp_ChildNodeProccesser.HasPostFX(true) ? comp_ChildNodeProccesser.PostFX : default(Action<RenderTexture>));
-            Shader shader = subGraphic.Shader;
-            texture.wrapMode = TextureWrapMode.Clamp;
-            texture.filterMode = comp_ChildNodeProccesser.Props.TextureFilterMode;
+                List<RenderInfo> final = new List<RenderInfo>();
+                foreach ((string, Thing, List<RenderInfo>) infos in commands)
+                {
+                    if (!infos.Item3.NullOrEmpty()) final.AddRange(infos.Item3);
+                }
+                RenderingTools.RenderToTarget(final, ref cachedRenderTarget, ref texture, default(Vector2Int), comp_ChildNodeProccesser.Props.TextureSizeFactor, comp_ChildNodeProccesser.Props.ExceedanceFactor, comp_ChildNodeProccesser.Props.ExceedanceOffset, comp_ChildNodeProccesser.HasPostFX(true) ? comp_ChildNodeProccesser.PostFX : default(Action<RenderTexture>));
+                Shader shader = subGraphic.Shader;
+                texture.wrapMode = TextureWrapMode.Clamp;
+                texture.filterMode = comp_ChildNodeProccesser.Props.TextureFilterMode;
 
-            if (material == null)
-            {
-                material = new Material(shader);
-            }
-            else if (shader != null)
-            {
-                material.shader = shader;
-            }
-            material.mainTexture = texture;
-            defaultRenderingCache[rot] = (material, texture, cachedRenderTarget);
+                if (material == null)
+                {
+                    material = new Material(shader);
+                }
+                else if (shader != null)
+                {
+                    material.shader = shader;
+                }
+                material.mainTexture = texture;
+                defaultRenderingCache[rot] = (material, texture, cachedRenderTarget);
 
-            ret:;
+            }
+
+
 
             Vector2 size = new Vector2(texture.width, texture.height) / comp_ChildNodeProccesser.Props.TextureSizeFactor;
 
