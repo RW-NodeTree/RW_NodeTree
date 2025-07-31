@@ -330,7 +330,7 @@ namespace RW_NodeTree
                     }
                 }
 
-                foreach (string? id in diff.Keys)
+                foreach (string id in diff.Keys)
                 {
                     Thing? node = prveChilds.TryGetValue(id);
                     NodeContainer? container = ((CompChildNodeProccesser?)node)?.ChildNodes;
