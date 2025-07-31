@@ -29,30 +29,30 @@ namespace RW_NodeTree.Patch
         [HarmonyPatch(typeof(Pawn_EquipmentTracker), "GetGizmos")]
         private static void PostPawn_EquipmentTracker_GetGizmosPostfix(Pawn_EquipmentTracker __instance, ref IEnumerable<Gizmo> __result)
         {
-            IEnumerable<Gizmo> forEach(IEnumerable< Gizmo> result)
+            IEnumerable<Gizmo> forEach(IEnumerable<Gizmo> result)
             {
-                foreach(Gizmo gizmo in result)
+                foreach (Gizmo gizmo in result)
                 {
                     yield return gizmo;
                 }
                 ThingOwner list = __instance.GetDirectlyHeldThings();
-                for(int i = list.Count - 1; i >= 0; i--)
+                for (int i = list.Count - 1; i >= 0; i--)
                 {
-                    CompChildNodeProccesser proccesser = list[i];
-                    if(proccesser != null)
+                    CompChildNodeProccesser? proccesser = list[i];
+                    if (proccesser != null)
                     {
-                        foreach(CompBasicNodeComp comp in proccesser.AllNodeComp)
+                        foreach (CompBasicNodeComp comp in proccesser.AllNodeComp)
                         {
                             List<Gizmo> gizmos = new List<Gizmo>();
                             try
                             {
                                 gizmos.AddRange(comp.CompGetGizmosExtra());
                             }
-                            catch(Exception ex)
+                            catch (Exception ex)
                             {
                                 Log.Error(ex.ToString());
                             }
-                            foreach (Gizmo gizmo in gizmos) if(gizmo != null) yield return gizmo;
+                            foreach (Gizmo gizmo in gizmos) if (gizmo != null) yield return gizmo;
                         }
                     }
                 }

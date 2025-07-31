@@ -1,4 +1,5 @@
 ﻿using HarmonyLib;
+using RW_NodeTree.Tools;
 using System.Collections.Generic;
 using Verse;
 
@@ -12,11 +13,11 @@ namespace RW_NodeTree.Patch
             typeof(VerbTracker),
             "ExposeData"
         )]
-        private static void PreVerbTracker_ExposeData(VerbTracker __instance, ref List<Verb> __state)
+        private static void PreVerbTracker_ExposeData(VerbTracker __instance, ref List<Verb?>? __state)
         {
             if (Scribe.mode == LoadSaveMode.ResolvingCrossRefs)
             {
-                __state = CompChildNodeProccesser.GetOriginalAllVerbs(__instance);
+                __state = __instance.GetOriginalAllVerbs();
             }
         }
 
@@ -25,11 +26,11 @@ namespace RW_NodeTree.Patch
             typeof(VerbTracker),
             "ExposeData"
         )]
-        private static void FinalVerbTracker_ExposeData(VerbTracker __instance, List<Verb> __state)
+        private static void FinalVerbTracker_ExposeData(VerbTracker __instance, List<Verb?>? __state)
         {
-            if(__state != null)
+            if (__state != null)
             {
-                CompChildNodeProccesser.GetOriginalAllVerbs(__instance)?.SortBy(x => __state.IndexOf(x));
+                __instance.GetOriginalAllVerbs()?.SortBy(x => __state.IndexOf(x));
             }
         }
     }

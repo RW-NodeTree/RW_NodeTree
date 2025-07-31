@@ -11,7 +11,7 @@ namespace RW_NodeTree.Patch
     internal static partial class StatWorker_Patcher
     {
         private static readonly MethodInfo _PostStatWorker_GetInfoCardHyperlinks = typeof(StatWorker_Patcher).GetMethod("PostStatWorker_GetInfoCardHyperlinks", BindingFlags.NonPublic | BindingFlags.Static);
-        private static readonly Type[] StatWorker_GetInfoCardHyperlinks_ParmsType = new Type[] { typeof(StatRequest)};
+        private static readonly Type[] StatWorker_GetInfoCardHyperlinks_ParmsType = new Type[] { typeof(StatRequest) };
 
         private static readonly Dictionary<Type, MethodInfo> MethodInfo_GetInfoCardHyperlinks_OfType = new Dictionary<Type, MethodInfo>();
 
@@ -33,7 +33,7 @@ namespace RW_NodeTree.Patch
         private static void PostStatWorker_GetInfoCardHyperlinks(StatWorker __instance, MethodInfo __originalMethod, StatRequest statRequest, ref IEnumerable<Dialog_InfoCard.Hyperlink> __result)
         {
             //if (Prefs.DevMode) Log.Message("__originalMethod.GetType() : " + __originalMethod.GetType() + "; _GetInfoCardHyperlinks.GetType() : " + _GetInfoCardHyperlinks.GetType() + "; same : " + (_GetInfoCardHyperlinks == __originalMethod));
-            CompChildNodeProccesser proccesser = statRequest.Thing.RootNode();
+            CompChildNodeProccesser? proccesser = statRequest.Thing.RootNode();
             if (proccesser != null &&
                 __originalMethod.MethodHandle == GetMethodInfo_GetInfoCardHyperlinks_OfType(__instance.GetType()).MethodHandle
             )

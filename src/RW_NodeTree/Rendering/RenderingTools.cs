@@ -1,10 +1,11 @@
+using RW_NodeTree.DataStructure;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading;
-using Verse;
 using UnityEngine;
 using UnityEngine.Rendering;
-using RW_NodeTree.DataStructure;
+using Verse;
 
 namespace RW_NodeTree.Rendering
 {
@@ -81,7 +82,7 @@ namespace RW_NodeTree.Rendering
                 int current = Thread.CurrentThread.ManagedThreadId;
 
                 LinkStack<List<RenderInfo>> list;
-                lock(renderInfos)
+                lock (renderInfos)
                 {
                     if (!renderInfos.TryGetValue(current, out list))
                     {
@@ -89,7 +90,7 @@ namespace RW_NodeTree.Rendering
                         renderInfos.Add(current, list);
                     }
                 }
-                if(list.Count > 0) return true;
+                if (list.Count > 0) return true;
 
                 return false;
             }
@@ -121,7 +122,7 @@ namespace RW_NodeTree.Rendering
         /// <summary>
         /// Catched rendering infos
         /// </summary>
-        public static List<RenderInfo> RenderInfos
+        public static List<RenderInfo>? RenderInfos
         {
             get
             {
@@ -149,14 +150,14 @@ namespace RW_NodeTree.Rendering
         /// <param name="target"></param>
         /// <param name="size">force render texture size</param>
         /// <param name="TextureSizeFactor"></param>
-        public static void RenderToTarget(List<RenderInfo> infos, ref RenderTexture cachedRenderTarget, ref Texture2D target, Vector2Int size = default(Vector2Int), uint TextureSizeFactor = DefaultTextureSizeFactor, float ExceedanceFactor = 1f, float ExceedanceOffset = 1f, Action<RenderTexture> PostFX = null)
+        public static void RenderToTarget(List<RenderInfo> infos, ref RenderTexture? cachedRenderTarget, ref Texture2D? target, Vector2Int size = default(Vector2Int), uint TextureSizeFactor = DefaultTextureSizeFactor, float ExceedanceFactor = 1f, float ExceedanceOffset = 1f, Action<RenderTexture>? PostFX = null)
         {
             RenderToTarget(infos, ref cachedRenderTarget, size, TextureSizeFactor, ExceedanceFactor, ExceedanceOffset);
-            PostFX?.Invoke(cachedRenderTarget);
-            if (target == null || target.width != cachedRenderTarget.width || target.height != cachedRenderTarget.height)
+            PostFX?.Invoke(cachedRenderTarget!);
+            if (target == null || target.width != cachedRenderTarget!.width || target.height != cachedRenderTarget.height)
             {
                 if (target != null) GameObject.Destroy(target);
-                target = new Texture2D(cachedRenderTarget.width, cachedRenderTarget.height, TextureFormat.ARGB32, false);
+                target = new Texture2D(cachedRenderTarget!.width, cachedRenderTarget.height, TextureFormat.ARGB32, false);
             }
             //Camera.targetTexture = null;
             Graphics.CopyTexture(cachedRenderTarget, target);
@@ -179,7 +180,7 @@ namespace RW_NodeTree.Rendering
         /// <param name="cachedRenderTarget"></param>
         /// <param name="size">force render texture size</param>
         /// <param name="TextureSizeFactor"></param>
-        public static void RenderToTarget(List<RenderInfo> infos, ref RenderTexture cachedRenderTarget, Vector2Int size = default(Vector2Int), uint TextureSizeFactor = DefaultTextureSizeFactor, float ExceedanceFactor = 1f, float ExceedanceOffset = 1f)
+        public static void RenderToTarget(List<RenderInfo> infos, ref RenderTexture? cachedRenderTarget, Vector2Int size = default(Vector2Int), uint TextureSizeFactor = DefaultTextureSizeFactor, float ExceedanceFactor = 1f, float ExceedanceOffset = 1f)
         {
 
             if (size.x <= 0 || size.y <= 0)
@@ -197,7 +198,7 @@ namespace RW_NodeTree.Rendering
             //if (Prefs.DevMode) Log.Message("RenderToTarget size:" + size);
             //Debug.Log("RenderToTarget size:" + size);
 
-            if(CanUseFastDraw(infos))
+            if (CanUseFastDraw(infos))
             {
                 CommandBuffer.Clear();
 
@@ -244,7 +245,7 @@ namespace RW_NodeTree.Rendering
         }
 
 
-        public static Vector2Int CheckAndResizeRenderTexture(ref RenderTexture renderTexture, Vector2Int size, uint TextureSizeFactor = DefaultTextureSizeFactor, float ExceedanceFactor = 1f, float ExceedanceOffset = 1f)
+        public static Vector2Int CheckAndResizeRenderTexture(ref RenderTexture? renderTexture, Vector2Int size, uint TextureSizeFactor = DefaultTextureSizeFactor, float ExceedanceFactor = 1f, float ExceedanceOffset = 1f)
         {
             if (renderTexture != null)
             {
@@ -371,8 +372,8 @@ namespace RW_NodeTree.Rendering
             return true;
         }
 
-        private static Camera camera = null;
-        private static CommandBuffer commandBuffer = null;
+        private static Camera? camera = null;
+        private static CommandBuffer? commandBuffer = null;
         internal static RenderTexture empty = new RenderTexture(1, 1, 0, RenderTextureFormat.ARGB32);
         private static readonly Dictionary<int, LinkStack<List<RenderInfo>>> renderInfos = new Dictionary<int, LinkStack<List<RenderInfo>>>();
         public const float CanvasHeight = 4096;

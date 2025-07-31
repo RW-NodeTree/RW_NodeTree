@@ -14,7 +14,7 @@ namespace RW_NodeTree.Patch
             typeof(VerbTracker),
             "get_PrimaryVerb"
         )]
-        private static void PostVerbTracker_PrimaryVerb(VerbTracker __instance, ref Verb __result)
+        private static void PostVerbTracker_PrimaryVerb(VerbTracker __instance, ref Verb? __result)
         {
             foreach (Verb verb in __instance.AllVerbs)
             {
@@ -31,7 +31,7 @@ namespace RW_NodeTree.Patch
             typeof(VerbTracker),
             "get_AllVerbs"
         )]
-        private static void PreVerbTracker_AllVerbs(VerbTracker __instance, ref CompChildNodeProccesser __state)
+        private static void PreVerbTracker_AllVerbs(VerbTracker __instance, ref CompChildNodeProccesser? __state)
         {
             __state = ((__instance.directOwner as ThingComp)?.parent) ?? ((__instance.directOwner) as Thing);
             __state?.UpdateNode();
@@ -42,9 +42,9 @@ namespace RW_NodeTree.Patch
             typeof(VerbTracker),
             "get_AllVerbs"
         )]
-        private static void PostVerbTracker_AllVerbs(VerbTracker __instance, ref List<Verb> __result, ref CompChildNodeProccesser __state)
+        private static void PostVerbTracker_AllVerbs(VerbTracker __instance, ref List<Verb> __result, ref CompChildNodeProccesser? __state)
         {
-            __result = __state?.PostVerbTracker_AllVerbs(__instance.directOwner?.GetType(), new List<Verb>(__result)) ?? __result;
+            __result = __state?.PostVerbTracker_AllVerbs(__instance.directOwner.GetType(), new List<Verb>(__result)) ?? __result;
         }
     }
 }
@@ -57,13 +57,13 @@ namespace RW_NodeTree
     public partial class CompChildNodeProccesser : ThingComp, IThingHolder
     {
 
-        private bool GetOriginalVerb
+        internal bool GetOriginalVerb
         {
             get
             {
                 bool result;
                 int current = Thread.CurrentThread.ManagedThreadId;
-                lock(notSetVerbDirectOwner)
+                lock (notSetVerbDirectOwner)
                 {
                     if (!notSetVerbDirectOwner.TryGetValue(current, out result))
                     {
@@ -74,47 +74,11 @@ namespace RW_NodeTree
             }
             set
             {
-                lock(notSetVerbDirectOwner)
+                lock (notSetVerbDirectOwner)
                 {
                     notSetVerbDirectOwner.SetOrAdd(Thread.CurrentThread.ManagedThreadId, value);
                 }
             }
-        }
-
-        /// <summary>
-        /// Get all original verbs of verbTracker
-        /// </summary>
-        /// <param name="verbTracker">target VerbTracker</param>
-        /// <returns>all verbs before parent convert</returns>
-        public static List<Verb> GetOriginalAllVerbs(VerbTracker verbTracker)
-        {
-            if(verbTracker != null)
-            {
-                CompChildNodeProccesser proccess = (((verbTracker.directOwner) as ThingComp)?.parent) ?? ((verbTracker.directOwner) as Thing);
-                if (proccess != null) proccess.GetOriginalVerb = true;
-                List<Verb> result = verbTracker.AllVerbs;
-                if (proccess != null) proccess.GetOriginalVerb = false;
-                return result;
-            }
-            return null;
-        }
-
-        /// <summary>
-        /// Get original primary verbs of verbTracker
-        /// </summary>
-        /// <param name="verbTracker">target VerbTracker</param>
-        /// <returns>all verbs before parent convert</returns>
-        public static Verb GetOriginalPrimaryVerbs(VerbTracker verbTracker)
-        {
-            if (verbTracker != null)
-            {
-                CompChildNodeProccesser proccess = (((verbTracker.directOwner) as ThingComp)?.parent) ?? ((verbTracker.directOwner) as Thing);
-                if (proccess != null) proccess.GetOriginalVerb = true;
-                Verb result = verbTracker.PrimaryVerb;
-                if (proccess != null) proccess.GetOriginalVerb = false;
-                return result;
-            }
-            return null;
         }
 
         /// <summary>
@@ -123,7 +87,7 @@ namespace RW_NodeTree
         /// </summary>
         /// <param name="ownerType">VerbTracker instance</param>
         /// <param name="result">result of VerbTracker.AllVerbs</param>
-        internal List<Verb> PostVerbTracker_AllVerbs(Type ownerType, List<Verb> result)
+        internal List<Verb>? PostVerbTracker_AllVerbs(Type? ownerType, List<Verb> result)
         {
             //StackTrace stackTrace = new StackTrace();
             //StackFrame[] stackFrame = stackTrace.GetFrames();
@@ -132,7 +96,7 @@ namespace RW_NodeTree
             {
                 for (int i = 0; i < result.Count; i++)
                 {
-                    result[i] = GetAfterConvertVerbCorrespondingThing(ownerType, result[i]).Item2 ?? result[i];
+                    result[i] = GetAfterConvertThingWithVerb(ownerType, result[i]).Item2 ?? result[i];
                 }
                 result.RemoveAll(x => x == null || x.verbProps == null);
                 return result;

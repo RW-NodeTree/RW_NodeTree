@@ -13,7 +13,7 @@ namespace RW_NodeTree.Patch
         private static readonly MethodInfo _PreStatWorker_GetStatDrawEntryLabel = typeof(StatWorker_Patcher).GetMethod("PreStatWorker_GetStatDrawEntryLabel", BindingFlags.NonPublic | BindingFlags.Static);
         private static readonly MethodInfo _PostStatWorker_GetStatDrawEntryLabel = typeof(StatWorker_Patcher).GetMethod("PostStatWorker_GetStatDrawEntryLabel", BindingFlags.NonPublic | BindingFlags.Static);
         private static readonly MethodInfo _FinalStatWorker_GetStatDrawEntryLabel = typeof(StatWorker_Patcher).GetMethod("FinalStatWorker_GetStatDrawEntryLabel", BindingFlags.NonPublic | BindingFlags.Static);
-        private static readonly Type[] StatWorker_GetStatDrawEntryLabel_ParmsType = new Type[] { typeof(StatDef), typeof(float), typeof(ToStringNumberSense), typeof(StatRequest), typeof(bool)};
+        private static readonly Type[] StatWorker_GetStatDrawEntryLabel_ParmsType = new Type[] { typeof(StatDef), typeof(float), typeof(ToStringNumberSense), typeof(StatRequest), typeof(bool) };
 
         private static readonly Dictionary<Type, MethodInfo> MethodInfo_GetStatDrawEntryLabel_OfType = new Dictionary<Type, MethodInfo>();
 
@@ -34,7 +34,7 @@ namespace RW_NodeTree.Patch
 
         private static bool PreStatWorker_GetStatDrawEntryLabel(StatWorker __instance, MethodInfo __originalMethod, StatDef stat, float value, ToStringNumberSense numberSense, StatRequest optionalReq, bool finalized, ref (Dictionary<string, object>, CompChildNodeProccesser) __state)
         {
-            CompChildNodeProccesser proccesser = optionalReq.Thing.RootNode();
+            CompChildNodeProccesser? proccesser = optionalReq.Thing.RootNode();
             if (proccesser != null &&
                 __originalMethod.MethodHandle == GetMethodInfo_GetStatDrawEntryLabel_OfType(__instance.GetType()).MethodHandle
             )
@@ -70,8 +70,8 @@ namespace RW_NodeTree.Patch
                 if (_GetStatDrawEntryLabel?.DeclaringType == type && _GetStatDrawEntryLabel.HasMethodBody())
                 {
                     patcher.Patch(
-                        _GetStatDrawEntryLabel, 
-                        new HarmonyMethod(_PreStatWorker_GetStatDrawEntryLabel), 
+                        _GetStatDrawEntryLabel,
+                        new HarmonyMethod(_PreStatWorker_GetStatDrawEntryLabel),
                         new HarmonyMethod(_PostStatWorker_GetStatDrawEntryLabel),
                         null,
                         new HarmonyMethod(_FinalStatWorker_GetStatDrawEntryLabel)

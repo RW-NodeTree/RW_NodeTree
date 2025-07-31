@@ -1,10 +1,10 @@
-﻿using System;
+﻿using RW_NodeTree.Rendering;
+using RW_NodeTree.Tools;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using Verse;
-using RW_NodeTree.Rendering;
-using RW_NodeTree.Tools;
 
 namespace RW_NodeTree
 {
@@ -49,7 +49,7 @@ namespace RW_NodeTree
         /// <summary>
         /// get parent node if it is a node
         /// </summary>
-        public CompChildNodeProccesser ParentProccesser => this.ParentHolder as CompChildNodeProccesser;
+        public CompChildNodeProccesser? ParentProccesser => this.ParentHolder as CompChildNodeProccesser;
 
         /// <summary>
         /// root of this node tree
@@ -60,7 +60,7 @@ namespace RW_NodeTree
             {
                 if (cachedRootNode != null) return cachedRootNode;
                 CompChildNodeProccesser proccesser = this;
-                CompChildNodeProccesser next = ParentProccesser;
+                CompChildNodeProccesser? next = ParentProccesser;
                 while (next != null)
                 {
                     proccesser = next;
@@ -82,7 +82,7 @@ namespace RW_NodeTree
                 for (int i = 0; i < parent.AllComps.Count; i++)
                 {
                     ThingComp comp = parent.AllComps[i];
-                    CompBasicNodeComp c = comp as CompBasicNodeComp;
+                    CompBasicNodeComp? c = comp as CompBasicNodeComp;
                     if (c != null)
                     {
                         yield return c;
@@ -92,9 +92,9 @@ namespace RW_NodeTree
             }
         }
 
-        public override bool AllowStackWith(Thing other)
+        public override bool AllowStackWith(Thing? other)
         {
-            CompChildNodeProccesser comp = other;
+            CompChildNodeProccesser? comp = other;
             if (comp != null)
             {
                 return comp.ChildNodes.Count == 0 && ChildNodes.Count == 0;
@@ -112,247 +112,463 @@ namespace RW_NodeTree
             UpdateNode();
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="ownerType"></param>
-        /// <param name="thing"></param>
-        /// <param name="verb"></param>
-        /// <param name="tool"></param>
-        /// <param name="verbProperties"></param>
-        /// <returns></returns>
-        public static bool CheckVerbDatasVaildityAndAdapt(Type ownerType, Thing thing, ref Verb verb, ref Tool tool, ref VerbProperties verbProperties)
+        public (Thing, List<Verb>, Tool) GetBeforeConvertThingWithTool(Type ownerType, Tool toolAfterConvert, VerbProperties? verbPropertiesAfterConvert = null, bool needVerb = false)
         {
-            if (ownerType == null || !typeof(IVerbOwner).IsAssignableFrom(ownerType) || thing == null || (verb == null && tool == null && verbProperties == null)) return false;
-
-            List<VerbProperties> verbsPropertiesCache = tool?.VerbsProperties.ToList();
-            List<Verb> allVerbs = GetOriginalAllVerbs(GetSameTypeVerbOwner(ownerType, thing)?.VerbTracker);
-
-            if (verb != null)
-            {
-                if (allVerbs != null && !allVerbs.Contains(verb))
-                {
-                    return false;
-                }
-                else
-                {
-                    tool = verb.tool;
-                    verbProperties = verb.verbProps;
-                }
-            }
-            else if (verbsPropertiesCache != null && (verbProperties == null || !verbsPropertiesCache.Contains(verbProperties)))
-            {
-                verbProperties = verbsPropertiesCache.FirstOrDefault();
-            }
-
-            if (allVerbs != null)
-            {
-                Tool toolCache = tool;
-                VerbProperties verbPropertiesCache = verbProperties;
-                verb = allVerbs.Find(x => x.tool == toolCache && x.verbProps == verbPropertiesCache);
-                if (verb == null)
-                {
-                    return false;
-                }
-            }
-            return true;
-        }
-
-
-        /// <summary>
-        /// Return the correct verb ownner and complemented before&after verb
-        /// </summary>
-        /// <param name="verbAfterConvert">Verb after convert</param>
-        /// <returns>Verb infos before convert</returns>
-        public (Thing, Verb, Tool, VerbProperties) GetBeforeConvertVerbCorrespondingThing(Type ownerType, Verb verbAfterConvert, bool needVerb = false)
-        {
-            return GetBeforeConvertVerbCorrespondingThing(ownerType, verbAfterConvert, null, null, needVerb);
-        }
-
-
-        /// <summary>
-        /// Return the correct verb ownner and complemented before&after verb info
-        /// </summary>
-        /// <param name="verbPropertiesAfterConvert">verbProperties of verbAfterConvert</param>
-        /// <param name="toolAfterConvert">tool of verbAfterConvert</param>
-        /// <returns>Verb infos before convert</returns>
-        public (Thing, Verb, Tool, VerbProperties) GetBeforeConvertVerbCorrespondingThing(Type ownerType, Tool toolAfterConvert, VerbProperties verbPropertiesAfterConvert, bool needVerb = false)
-        {
-            return GetBeforeConvertVerbCorrespondingThing(ownerType, null, toolAfterConvert, verbPropertiesAfterConvert, needVerb);
-        }
-
-
-        /// <summary>
-        /// Return the correct verb ownner and complemented before&after verb info
-        /// </summary>
-        /// <param name="verbAfterConvert">Verb after convert</param>
-        /// <param name="verbPropertiesAfterConvert">verbProperties of verbAfterConvert</param>
-        /// <param name="toolAfterConvert">tool of verbAfterConvert</param>
-        /// <returns>Verb infos before convert</returns>
-        public (Thing, Verb, Tool, VerbProperties) GetBeforeConvertVerbCorrespondingThing(Type ownerType, Verb verbAfterConvert, Tool toolAfterConvert, VerbProperties verbPropertiesAfterConvert, bool needVerb = false)
-        {
+            if (ownerType == null || !typeof(IVerbOwner).IsAssignableFrom(ownerType)) throw new AggregateException(nameof(ownerType));
+            if (toolAfterConvert == null) throw new AggregateException(nameof(toolAfterConvert));
             UpdateNode();
-
-            (Thing, Verb, Tool, VerbProperties) result = default((Thing, Verb, Tool, VerbProperties));
-
-            if (!CheckVerbDatasVaildityAndAdapt(ownerType, parent, ref verbAfterConvert, ref toolAfterConvert, ref verbPropertiesAfterConvert)) return result;
-
             lock (beforeConvertVerbCorrespondingThingCache)
             {
-                Dictionary<(Thing, Verb, Tool, VerbProperties, bool), (Thing, Verb, Tool, VerbProperties)> caches;
-                if (!beforeConvertVerbCorrespondingThingCache.TryGetValue(ownerType, out caches))
-                {
-                    caches = new Dictionary<(Thing, Verb, Tool, VerbProperties, bool), (Thing, Verb, Tool, VerbProperties)>();
-                    beforeConvertVerbCorrespondingThingCache.Add(ownerType, caches);
-                }
+                (Type, Tool?, VerbProperties?, bool) key = (ownerType, toolAfterConvert, verbPropertiesAfterConvert, needVerb);
 
-                if (caches.TryGetValue((parent, verbAfterConvert, toolAfterConvert, verbPropertiesAfterConvert, needVerb), out result)) return result;
-                result = (parent, verbAfterConvert, toolAfterConvert, verbPropertiesAfterConvert);
-
-                if (ownerType != null && typeof(IVerbOwner).IsAssignableFrom(ownerType) && verbPropertiesAfterConvert != null)
+                if (beforeConvertVerbCorrespondingThingCache.TryGetValue(key, out (Thing, List<Verb>, Tool?, VerbProperties?) value))
                 {
-                    (Thing, Verb, Tool, VerbProperties) cache = result;
-                    if (toolAfterConvert != null)
-                    {
-                        List<VerbToolRegiestInfo> Registed = internal_GetRegiestedNodeVerbToolInfos(ownerType);
-                        for (int i = 0; i < Registed.Count; i++)
-                        {
-                            VerbToolRegiestInfo regiestInfo = Registed[i];
-                            if (regiestInfo.afterCobvertTool == toolAfterConvert)
-                            {
-                                cache = (ChildNodes[regiestInfo.id] ?? parent, null, regiestInfo.berforConvertTool, null);
-                                break;
-                            }
-                        }
-                    }
+                    if (value.Item1 != null && value.Item2 != null && value.Item3 != null)
+                        return (value.Item1, value.Item2, value.Item3);
                     else
+                        throw new Exception($"{this} can't find VerbToolRegiestInfo for {toolAfterConvert}");
+                }
+                IVerbOwner? verbOwner = GetSameTypeVerbOwner(ownerType, parent);
+                List<VerbProperties> props = toolAfterConvert.VerbsProperties.ToList();
+                if (verbPropertiesAfterConvert != null)
+                {
+                    if (props.Contains(verbPropertiesAfterConvert))
+                        props = [verbPropertiesAfterConvert];
+                    else
+                        throw new AggregateException(nameof(verbPropertiesAfterConvert));
+                }
+                List<Verb?> list = verbOwner?.VerbTracker?.GetOriginalAllVerbs() ?? new List<Verb?>();
+                List<Verb> verbs = new List<Verb>(list.Count);
+                foreach (Verb? verb in list)
+                {
+                    if (verb?.tool == toolAfterConvert && props.Contains(verb.verbProps))
                     {
-                        List<VerbPropertiesRegiestInfo> Registed = internal_GetRegiestedNodeVerbPropertiesInfos(ownerType);
-                        for (int i = 0; i < Registed.Count; i++)
+                        verbs.Add(verb);
+                    }
+                }
+                value = (
+                    parent,
+                    verbs,
+                    toolAfterConvert,
+                    verbPropertiesAfterConvert
+                );
+                foreach (VerbToolRegiestInfo regiestInfo in internal_GetRegiestedNodeVerbToolInfos(ownerType))
+                {
+                    if (regiestInfo.afterConvertTool == toolAfterConvert)
+                    {
+                        if (regiestInfo.id.NullOrEmpty())
                         {
-                            VerbPropertiesRegiestInfo regiestInfo = Registed[i];
-                            if (regiestInfo.afterConvertProperties == verbPropertiesAfterConvert)
+                            if (!needVerb)
                             {
-                                cache = (ChildNodes[regiestInfo.id] ?? parent, null, null, regiestInfo.berforConvertProperties);
-                                break;
+                                if (verbPropertiesAfterConvert == null || regiestInfo.berforConvertTool.VerbsProperties.Contains(verbPropertiesAfterConvert))
+                                {
+                                    value = (
+                                        parent,
+                                        new List<Verb>(),
+                                        regiestInfo.berforConvertTool,
+                                        verbPropertiesAfterConvert
+                                    );
+                                }
+                            }
+                            else if (value.Item2.Count <= 0) throw new AggregateException(nameof(ownerType));
+                        }
+                        else
+                        {
+                            Thing? child = ChildNodes[regiestInfo.id!];
+                            if (child == null) throw new Exception($"{this} RegiestedNodeVerbToolInfos has error");
+
+                            verbOwner = GetSameTypeVerbOwner(ownerType, child);
+                            props = regiestInfo.berforConvertTool.VerbsProperties.ToList();
+                            if (verbPropertiesAfterConvert != null)
+                            {
+                                if (props.Contains(verbPropertiesAfterConvert))
+                                    props = [verbPropertiesAfterConvert];
+                                else
+                                    props = [];
+                            }
+                            list = verbOwner?.VerbTracker?.GetOriginalAllVerbs() ?? new List<Verb?>();
+                            verbs = new List<Verb>(list.Count);
+                            foreach (Verb? verb in list)
+                            {
+                                if (verb?.tool == regiestInfo.berforConvertTool && props.Contains(verb.verbProps))
+                                {
+                                    verbs.Add(verb);
+                                }
+                            }
+                            if (needVerb)
+                            {
+                                if (verbs.Count > 0)
+                                {
+                                    CompChildNodeProccesser? proccesser = child;
+                                    if (proccesser != null)
+                                    {
+                                        (Thing, List<Verb>, Tool) next = proccesser.GetBeforeConvertThingWithTool(ownerType, regiestInfo.berforConvertTool, verbPropertiesAfterConvert, needVerb);
+
+                                        value = (
+                                            next.Item1,
+                                            next.Item2,
+                                            next.Item3,
+                                            verbPropertiesAfterConvert
+                                        );
+                                    }
+                                }
+                                else if (value.Item2.Count <= 0) throw new AggregateException(nameof(ownerType));
+                            }
+                            else if (props.Count > 0)
+                            {
+                                CompChildNodeProccesser? proccesser = child;
+                                if (proccesser != null)
+                                {
+                                    (Thing, List<Verb>, Tool) next = proccesser.GetBeforeConvertThingWithTool(ownerType, regiestInfo.berforConvertTool, verbPropertiesAfterConvert, needVerb);
+
+                                    value = (
+                                        next.Item1,
+                                        next.Item2,
+                                        next.Item3,
+                                        verbPropertiesAfterConvert
+                                    );
+                                }
+                                else
+                                {
+                                    value = (
+                                        child,
+                                        verbs,
+                                        regiestInfo.berforConvertTool,
+                                        verbPropertiesAfterConvert
+                                    );
+                                }
                             }
                         }
+                        break;
                     }
-                    //if (Prefs.DevMode) Log.Message(cache.ToString());
-
-                    if (!CheckVerbDatasVaildityAndAdapt(ownerType, cache.Item1, ref cache.Item2, ref cache.Item3, ref cache.Item4)) return result;
-
-
-                    if (cache.Item1 != null && cache.Item1 != parent && ((CompChildNodeProccesser)cache.Item1) != null)
-                    {
-                        Thing before = cache.Item1;
-                        cache = ((CompChildNodeProccesser)cache.Item1).GetBeforeConvertVerbCorrespondingThing(ownerType, cache.Item2, cache.Item3, cache.Item4, needVerb);
-                        cache.Item1 = cache.Item1 ?? before;
-                    }
-
-                    if (needVerb && cache.Item2 == null) return result;
-
-                    result = cache;
                 }
-                caches.Add((parent, verbAfterConvert, toolAfterConvert, verbPropertiesAfterConvert, needVerb), result);
-                return result;
+                beforeConvertVerbCorrespondingThingCache[key] = value;
+                if (value.Item1 != null && value.Item2 != null && value.Item3 != null)
+                    return (value.Item1, value.Item2, value.Item3);
+                else
+                    throw new Exception($"{this} can't find VerbToolRegiestInfo for {toolAfterConvert}");
             }
         }
 
 
-        /// <summary>
-        /// Return the correct verb ownner and complemented before&after verb
-        /// </summary>
-        /// <param name="verbOwner">Verb container</param>
-        /// <param name="verbBeforeConvert">Verb before convert</param>
-        /// <param name="verbAfterConvert">Verb after convert</param>
-        /// <returns>correct verb ownner</returns>
-        public (Thing, Verb, Tool, VerbProperties) GetAfterConvertVerbCorrespondingThing(Type ownerType, Verb verbBeforeConvert)
+        public (Thing, Verb?, VerbProperties) GetBeforeConvertThingWithVerbProperties(Type ownerType, VerbProperties verbPropertiesAfterConvert, bool needVerb = false)
         {
-            return GetAfterConvertVerbCorrespondingThing(ownerType, verbBeforeConvert, null, null);
-        }
-
-
-        /// <summary>
-        /// Return the correct verb ownner and complemented before&after verb info
-        /// </summary>
-        /// <param name="verbOwner">Verb container</param>
-        /// <param name="verbPropertiesBeforeConvert">verbProperties of verbBeforeConvert</param>
-        /// <param name="toolBeforeConvert">tool of verbBeforeConvert</param>
-        /// <param name="verbPropertiesAfterConvert">verbProperties of verbAfterConvert</param>
-        /// <param name="toolAfterConvert">tool of verbAfterConvert</param>
-        /// <returns>correct verb ownner</returns>
-        public (Thing, Verb, Tool, VerbProperties) GetAfterConvertVerbCorrespondingThing(Type ownerType, Tool toolBeforeConvert, VerbProperties verbPropertiesBeforeConvert)
-        {
-            return GetAfterConvertVerbCorrespondingThing(ownerType, null, toolBeforeConvert, verbPropertiesBeforeConvert);
-        }
-
-
-        /// <summary>
-        /// Return the correct verb ownner and complemented before&after verb info
-        /// </summary>
-        /// <param name="ownerType">Verb container</param>
-        /// <param name="verbBeforeConvert">Verb before convert</param>
-        /// <param name="verbPropertiesBeforeConvert">verbProperties of verbBeforeConvert</param>
-        /// <param name="toolBeforeConvert">tool of verbBeforeConvert</param>
-        /// <returns>correct verb ownner</returns>
-        public (Thing, Verb, Tool, VerbProperties) GetAfterConvertVerbCorrespondingThing(Type ownerType, Verb verbBeforeConvert, Tool toolBeforeConvert, VerbProperties verbPropertiesBeforeConvert, bool needVerb = false)
-        {
+            if (ownerType == null || !typeof(IVerbOwner).IsAssignableFrom(ownerType)) throw new AggregateException(nameof(ownerType));
+            if (verbPropertiesAfterConvert == null) throw new AggregateException(nameof(verbPropertiesAfterConvert));
             UpdateNode();
-
-            (Thing, Verb, Tool, VerbProperties) result = default((Thing, Verb, Tool, VerbProperties));
-
-            if (!CheckVerbDatasVaildityAndAdapt(ownerType, parent, ref verbBeforeConvert, ref toolBeforeConvert, ref verbPropertiesBeforeConvert)) return result;
-
-            result = (parent, verbBeforeConvert, toolBeforeConvert, verbPropertiesBeforeConvert);
-
-            if (ownerType != null && typeof(IVerbOwner).IsAssignableFrom(ownerType) && verbPropertiesBeforeConvert != null)
+            lock (beforeConvertVerbCorrespondingThingCache)
             {
-                (Thing, Verb, Tool, VerbProperties) cache = result;
-                if (ParentProccesser != null)
+                (Type, Tool?, VerbProperties?, bool) key = (ownerType, null, verbPropertiesAfterConvert, needVerb);
+
+                if (beforeConvertVerbCorrespondingThingCache.TryGetValue(key, out (Thing, List<Verb>, Tool?, VerbProperties?) value))
                 {
-                    if (toolBeforeConvert != null)
-                    {
-                        List<VerbToolRegiestInfo> Registed = internal_GetRegiestedNodeVerbToolInfos(ownerType);
-                        for (int i = 0; i < Registed.Count; i++)
-                        {
-                            VerbToolRegiestInfo regiestInfo = Registed[i];
-                            if (regiestInfo.berforConvertTool == toolBeforeConvert)
-                            {
-                                cache = (ParentProccesser, null, regiestInfo.afterCobvertTool, null);
-                                break;
-                            }
-                        }
-                    }
+                    if (value.Item1 != null && value.Item2 != null && value.Item4 != null)
+                        return (value.Item1, value.Item2.FirstOrDefault(), value.Item4);
                     else
+                        throw new Exception($"{this} can't find VerbPropertiesRegiestInfo for {verbPropertiesAfterConvert}");
+                }
+                IVerbOwner? verbOwner = GetSameTypeVerbOwner(ownerType, parent);
+                List<Verb?> list = verbOwner?.VerbTracker?.GetOriginalAllVerbs() ?? new List<Verb?>();
+                List<Verb> verbs = new List<Verb>(list.Count);
+                foreach (Verb? verb in list)
+                {
+                    if (verb?.verbProps == verbPropertiesAfterConvert)
                     {
-                        List<VerbPropertiesRegiestInfo> Registed = internal_GetRegiestedNodeVerbPropertiesInfos(ownerType);
-                        for (int i = 0; i < Registed.Count; i++)
-                        {
-                            VerbPropertiesRegiestInfo regiestInfo = Registed[i];
-                            if (regiestInfo.berforConvertProperties == verbPropertiesBeforeConvert)
-                            {
-                                cache = (ParentProccesser, null, null, regiestInfo.afterConvertProperties);
-                                break;
-                            }
-                        }
+                        verbs.Add(verb);
                     }
                 }
-
-                if (!CheckVerbDatasVaildityAndAdapt(ownerType, cache.Item1, ref cache.Item2, ref cache.Item3, ref cache.Item4)) return result;
-
-                if (cache.Item1 != null && cache.Item1 != parent && ((CompChildNodeProccesser)cache.Item1) != null)
+                value = (
+                    parent,
+                    verbs,
+                    null,
+                    verbPropertiesAfterConvert
+                );
+                foreach (VerbPropertiesRegiestInfo regiestInfo in internal_GetRegiestedNodeVerbPropertiesInfos(ownerType))
                 {
-                    Thing before = cache.Item1;
-                    cache = ((CompChildNodeProccesser)cache.Item1).GetAfterConvertVerbCorrespondingThing(ownerType, cache.Item2, cache.Item3, cache.Item4);
-                    cache.Item1 = cache.Item1 ?? before;
+                    if (regiestInfo.afterConvertProperties == verbPropertiesAfterConvert)
+                    {
+                        if (regiestInfo.id.NullOrEmpty())
+                        {
+                            if (!needVerb)
+                            {
+                                value = (
+                                    parent,
+                                    new List<Verb>(),
+                                    null,
+                                    regiestInfo.berforConvertProperties
+                                );
+                            }
+                            else if (value.Item2.Count <= 0) throw new AggregateException(nameof(ownerType));
+                        }
+                        else
+                        {
+                            Thing? child = ChildNodes[regiestInfo.id!];
+                            if (child == null) throw new Exception($"{this} RegiestedVerbPropertiesInfos has error");
+                            verbOwner = GetSameTypeVerbOwner(ownerType, parent);
+                            list = verbOwner?.VerbTracker?.GetOriginalAllVerbs() ?? new List<Verb?>();
+                            verbs = new List<Verb>(list.Count);
+                            foreach (Verb? verb in list)
+                            {
+                                if (verb?.verbProps == regiestInfo.berforConvertProperties)
+                                {
+                                    verbs.Add(verb);
+                                }
+                            }
+                            if (needVerb)
+                            {
+                                if (verbs.Count > 0)
+                                {
+                                    CompChildNodeProccesser? proccesser = child;
+                                    if (proccesser != null)
+                                    {
+                                        (Thing, Verb?, VerbProperties) next = proccesser.GetBeforeConvertThingWithVerbProperties(ownerType, regiestInfo.berforConvertProperties, needVerb);
+
+                                        value = (
+                                            next.Item1,
+                                            [next.Item2!],
+                                            null,
+                                            next.Item3
+                                        );
+                                    }
+                                }
+                                else if (value.Item2.Count <= 0) throw new AggregateException(nameof(ownerType));
+                            }
+                            else
+                            {
+                                CompChildNodeProccesser? proccesser = child;
+                                if (proccesser != null)
+                                {
+                                    (Thing, Verb?, VerbProperties) next = proccesser.GetBeforeConvertThingWithVerbProperties(ownerType, regiestInfo.berforConvertProperties, needVerb);
+
+                                    value = (
+                                        next.Item1,
+                                        next.Item2 == null ? [] : [next.Item2],
+                                        null,
+                                        next.Item3
+                                    );
+                                }
+                                else
+                                {
+                                    value = (
+                                        child,
+                                        verbs,
+                                        null,
+                                        regiestInfo.berforConvertProperties
+                                    );
+                                }
+                            }
+                        }
+                        break;
+                    }
                 }
-
-                if (needVerb && cache.Item2 == null) return result;
-
-                result = cache;
+                beforeConvertVerbCorrespondingThingCache[key] = value;
+                if (value.Item1 != null && value.Item2 != null && value.Item4 != null)
+                    return (value.Item1, value.Item2.FirstOrDefault(), value.Item4);
+                else
+                    throw new Exception($"{this} can't find VerbPropertiesRegiestInfo for {verbPropertiesAfterConvert}");
             }
-            return result;
+        }
+
+        public (Thing, Verb?, Tool?, VerbProperties) GetBeforeConvertThingWithVerb(Type ownerType, Verb verbAfterConvert, bool needVerb = false)
+        {
+            if (verbAfterConvert == null) throw new AggregateException(nameof(verbAfterConvert));
+            if (verbAfterConvert.tool != null)
+            {
+                (Thing, List<Verb>, Tool) tool = GetBeforeConvertThingWithTool(ownerType, verbAfterConvert.tool, verbAfterConvert.verbProps, needVerb);
+                return (tool.Item1, tool.Item2.FirstOrDefault(), tool.Item3, verbAfterConvert.verbProps);
+            }
+            else
+            {
+                (Thing, Verb?, VerbProperties) verbProperties = GetBeforeConvertThingWithVerbProperties(ownerType, verbAfterConvert.verbProps, needVerb);
+                return (verbProperties.Item1, verbProperties.Item2, null, verbProperties.Item3);
+            }
+        }
+
+
+
+        public (Thing, List<Verb>, Tool) GetAfterConvertThingWithTool(Type ownerType, Tool toolBeforeConvert, VerbProperties? verbPropertiesBeforeConvert, bool needVerb = false)
+        {
+            if (ownerType == null || !typeof(IVerbOwner).IsAssignableFrom(ownerType)) throw new AggregateException(nameof(ownerType));
+            if (toolBeforeConvert == null) throw new AggregateException(nameof(toolBeforeConvert));
+            UpdateNode();
+            IVerbOwner? verbOwner = GetSameTypeVerbOwner(ownerType, parent);
+            List<VerbProperties> props = toolBeforeConvert.VerbsProperties.ToList();
+            if (verbPropertiesBeforeConvert != null)
+            {
+                if (props.Contains(verbPropertiesBeforeConvert))
+                    props = [verbPropertiesBeforeConvert];
+                else
+                    throw new AggregateException(nameof(verbPropertiesBeforeConvert));
+            }
+            List<Verb?> list = verbOwner?.VerbTracker?.GetOriginalAllVerbs() ?? new List<Verb?>();
+            List<Verb> verbs = new List<Verb>(list.Count);
+            foreach (Verb? verb in list)
+            {
+                if (verb?.tool == toolBeforeConvert && props.Contains(verb.verbProps))
+                {
+                    verbs.Add(verb);
+                }
+            }
+            (Thing, List<Verb>, Tool?, VerbProperties?)
+            value = (
+                parent,
+                verbs,
+                toolBeforeConvert,
+                verbPropertiesBeforeConvert
+            );
+            CompChildNodeProccesser? parentProccesser = ParentProccesser;
+            if (parentProccesser != null)
+            {
+                foreach (VerbToolRegiestInfo regiestInfo in parentProccesser.internal_GetRegiestedNodeVerbToolInfos(ownerType))
+                {
+                    if (regiestInfo.berforConvertTool == toolBeforeConvert && regiestInfo.id != null && parentProccesser.ChildNodes[regiestInfo.id] == parent)
+                    {
+                        verbOwner = GetSameTypeVerbOwner(ownerType, parentProccesser.parent);
+                        props = regiestInfo.afterConvertTool.VerbsProperties.ToList();
+                        if (verbPropertiesBeforeConvert != null)
+                        {
+                            if (props.Contains(verbPropertiesBeforeConvert))
+                                props = [verbPropertiesBeforeConvert];
+                            else
+                                props = [];
+                        }
+                        list = verbOwner?.VerbTracker?.GetOriginalAllVerbs() ?? new List<Verb?>();
+                        verbs = new List<Verb>(list.Count);
+                        foreach (Verb? verb in list)
+                        {
+                            if (verb?.tool == regiestInfo.afterConvertTool && props.Contains(verb.verbProps))
+                            {
+                                verbs.Add(verb);
+                            }
+                        }
+                        if (needVerb)
+                        {
+                            if (verbs.Count > 0)
+                            {
+                                (Thing, List<Verb>, Tool) next = parentProccesser.GetAfterConvertThingWithTool(ownerType, regiestInfo.afterConvertTool, verbPropertiesBeforeConvert, needVerb);
+
+                                value = (
+                                    next.Item1,
+                                    next.Item2,
+                                    next.Item3,
+                                    verbPropertiesBeforeConvert
+                                );
+                            }
+                            else if (value.Item2.Count <= 0) throw new AggregateException(nameof(ownerType));
+                        }
+                        else if (props.Count > 0)
+                        {
+                            (Thing, List<Verb>, Tool) next = parentProccesser.GetAfterConvertThingWithTool(ownerType, regiestInfo.afterConvertTool, verbPropertiesBeforeConvert, needVerb);
+
+                            value = (
+                                next.Item1,
+                                next.Item2,
+                                next.Item3,
+                                verbPropertiesBeforeConvert
+                            );
+                        }
+                        break;
+                    }
+                }
+            }
+
+            if (value.Item1 != null && value.Item2 != null && value.Item3 != null)
+                return (value.Item1, value.Item2, value.Item3);
+            else
+                throw new Exception($"{this} can't find VerbToolRegiestInfo for {toolBeforeConvert}");
+        }
+
+
+        public (Thing, Verb?, VerbProperties) GetAfterConvertThingWithVerbProperties(Type ownerType, VerbProperties verbPropertiesBeforeConvert, bool needVerb = false)
+        {
+            if (ownerType == null || !typeof(IVerbOwner).IsAssignableFrom(ownerType)) throw new AggregateException(nameof(ownerType));
+            if (verbPropertiesBeforeConvert == null) throw new AggregateException(nameof(verbPropertiesBeforeConvert));
+            UpdateNode();
+            IVerbOwner? verbOwner = GetSameTypeVerbOwner(ownerType, parent);
+            List<Verb?> list = verbOwner?.VerbTracker?.GetOriginalAllVerbs() ?? new List<Verb?>();
+            List<Verb> verbs = new List<Verb>(list.Count);
+            foreach (Verb? verb in list)
+            {
+                if (verb?.verbProps == verbPropertiesBeforeConvert)
+                {
+                    verbs.Add(verb);
+                }
+            }
+            (Thing, List<Verb>, Tool?, VerbProperties?)
+            value = (
+                parent,
+                verbs,
+                null,
+                verbPropertiesBeforeConvert
+            );
+            CompChildNodeProccesser? parentProccesser = ParentProccesser;
+            if (parentProccesser != null)
+            {
+                foreach (VerbPropertiesRegiestInfo regiestInfo in parentProccesser.internal_GetRegiestedNodeVerbPropertiesInfos(ownerType))
+                {
+                    if (regiestInfo.berforConvertProperties == verbPropertiesBeforeConvert && regiestInfo.id != null && parentProccesser.ChildNodes[regiestInfo.id] == parent)
+                    {
+                        verbOwner = GetSameTypeVerbOwner(ownerType, parentProccesser.parent);
+                        list = verbOwner?.VerbTracker?.GetOriginalAllVerbs() ?? new List<Verb?>();
+                        verbs = new List<Verb>(list.Count);
+                        foreach (Verb? verb in list)
+                        {
+                            if (verb?.verbProps == regiestInfo.afterConvertProperties)
+                            {
+                                verbs.Add(verb);
+                            }
+                        }
+                        if (needVerb)
+                        {
+                            if (verbs.Count > 0)
+                            {
+                                (Thing, Verb?, VerbProperties) next = parentProccesser.GetAfterConvertThingWithVerbProperties(ownerType, regiestInfo.afterConvertProperties, needVerb);
+
+                                value = (
+                                    next.Item1,
+                                    next.Item2 == null ? [] : [next.Item2],
+                                    null,
+                                    next.Item3
+                                );
+                            }
+                            else if (value.Item2.Count <= 0) throw new AggregateException(nameof(ownerType));
+                        }
+                        else
+                        {
+                            (Thing, Verb?, VerbProperties) next = parentProccesser.GetAfterConvertThingWithVerbProperties(ownerType, regiestInfo.afterConvertProperties, needVerb);
+
+                            value = (
+                                next.Item1,
+                                next.Item2 == null ? [] : [next.Item2],
+                                null,
+                                next.Item3
+                            );
+                        }
+                        break;
+                    }
+                }
+            }
+
+            if (value.Item1 != null && value.Item2 != null && value.Item4 != null)
+                return (value.Item1, value.Item2.FirstOrDefault(), value.Item4);
+            else
+                throw new Exception($"{this} can't find VerbPropertiesRegiestInfo for {verbPropertiesBeforeConvert}");
+        }
+
+
+        public (Thing, Verb?, Tool?, VerbProperties) GetAfterConvertThingWithVerb(Type ownerType, Verb verbAfterConvert, bool needVerb = false)
+        {
+            if (verbAfterConvert == null) throw new AggregateException(nameof(verbAfterConvert));
+            if (verbAfterConvert.tool != null)
+            {
+                (Thing, List<Verb>, Tool) tool = GetAfterConvertThingWithTool(ownerType, verbAfterConvert.tool, verbAfterConvert.verbProps, needVerb);
+                return (tool.Item1, tool.Item2.FirstOrDefault(), tool.Item3, verbAfterConvert.verbProps);
+            }
+            else
+            {
+                (Thing, Verb?, VerbProperties) verbProperties = GetAfterConvertThingWithVerbProperties(ownerType, verbAfterConvert.verbProps, needVerb);
+                return (verbProperties.Item1, verbProperties.Item2, null, verbProperties.Item3);
+            }
         }
 
         /// <summary>
@@ -361,18 +577,18 @@ namespace RW_NodeTree
         public void ResetRenderedTexture()
         {
             lock (ChildNodes)
-            lock (nodeRenderingInfo)
-            {
-                nodeRenderingInfo.Reset();
-                try
+                lock (nodeRenderingInfo)
                 {
-                    if (parent.Spawned && parent.def.drawerType >= DrawerType.MapMeshOnly) parent.DirtyMapMesh(parent.Map);
+                    nodeRenderingInfo.Reset();
+                    try
+                    {
+                        if (parent.Spawned && parent.def.drawerType >= DrawerType.MapMeshOnly) parent.DirtyMapMesh(parent.Map);
+                    }
+                    catch (Exception ex)
+                    {
+                        Log.Warning(ex.ToString());
+                    }
                 }
-                catch (Exception ex)
-                {
-                    Log.Warning(ex.ToString());
-                }
-            }
             ParentProccesser?.ResetRenderedTexture();
         }
 
@@ -382,34 +598,35 @@ namespace RW_NodeTree
         public void ResetVerbs()
         {
             lock (ChildNodes)
-            lock (regiestedNodeVerbPropertiesInfos)
-            lock (regiestedNodeVerbToolInfos)
-            lock (beforeConvertVerbCorrespondingThingCache)
-            {
-                foreach (ThingComp comp in parent.AllComps)
-                {
-                    (comp as IVerbOwner)?.VerbTracker?.VerbsNeedReinitOnLoad();
-                }
-                (parent as IVerbOwner)?.VerbTracker?.VerbsNeedReinitOnLoad();
-                regiestedNodeVerbPropertiesInfos.Clear();
-                regiestedNodeVerbToolInfos.Clear();
-                beforeConvertVerbCorrespondingThingCache.Clear();
-            }
+                lock (regiestedNodeVerbPropertiesInfos)
+                    lock (regiestedNodeVerbToolInfos)
+                        lock (beforeConvertVerbCorrespondingThingCache)
+                        {
+                            foreach (ThingComp comp in parent.AllComps)
+                            {
+                                (comp as IVerbOwner)?.VerbTracker?.VerbsNeedReinitOnLoad();
+                            }
+                            (parent as IVerbOwner)?.VerbTracker?.VerbsNeedReinitOnLoad();
+                            regiestedNodeVerbPropertiesInfos.Clear();
+                            regiestedNodeVerbToolInfos.Clear();
+                            beforeConvertVerbCorrespondingThingCache.Clear();
+                        }
             ParentProccesser?.ResetVerbs();
         }
 
         public List<VerbPropertiesRegiestInfo> GetRegiestedNodeVerbPropertiesInfos(Type ownerType) => internal_GetRegiestedNodeVerbPropertiesInfos(ownerType);
 
-        internal List<VerbPropertiesRegiestInfo> internal_GetRegiestedNodeVerbPropertiesInfos(Type ownerType, List<VerbProperties> verbProperties = null)
+        internal List<VerbPropertiesRegiestInfo> internal_GetRegiestedNodeVerbPropertiesInfos(Type ownerType, List<VerbProperties?>? verbProperties = null)
         {
             lock (regiestedNodeVerbPropertiesInfos)
             {
-                verbProperties = verbProperties ?? GetSameTypeVerbOwner(ownerType, parent)?.VerbProperties ?? new List<VerbProperties>();
+                verbProperties = verbProperties ?? GetSameTypeVerbOwner(ownerType, parent)?.VerbProperties ?? new List<VerbProperties?>();
                 if (!regiestedNodeVerbPropertiesInfos.TryGetValue(ownerType, out List<VerbPropertiesRegiestInfo> info))
                 {
                     info = new List<VerbPropertiesRegiestInfo>(verbProperties.Count);
-                    foreach (VerbProperties verbProperty in verbProperties)
+                    foreach (VerbProperties? verbProperty in verbProperties)
                     {
+                        if (verbProperty == null) continue;
                         info.Add(new VerbPropertiesRegiestInfo(null, verbProperty, verbProperty));
                     }
 
@@ -428,7 +645,7 @@ namespace RW_NodeTree
                     for (int i = info.Count - 1; i >= 0; i--)
                     {
                         VerbPropertiesRegiestInfo regiestInfo = info[i];
-                        List<VerbPropertiesRegiestInfo> childInfo = ((CompChildNodeProccesser)ChildNodes[regiestInfo.id])?.internal_GetRegiestedNodeVerbPropertiesInfos(ownerType);
+                        List<VerbPropertiesRegiestInfo>? childInfo = regiestInfo.id != null ? ((CompChildNodeProccesser?)ChildNodes[regiestInfo.id])?.internal_GetRegiestedNodeVerbPropertiesInfos(ownerType) : null;
                         if (regiestInfo.Vaildity && (regiestInfo.id.NullOrEmpty() || ChildNodes.ContainsKey(regiestInfo.id)) && ((childInfo != null && childInfo.Find(x => x.afterConvertProperties == regiestInfo.berforConvertProperties).Vaildity) || childInfo == null))
                         {
                             regiestInfo.afterConvertProperties = Gen.MemberwiseClone(regiestInfo.afterConvertProperties);
@@ -442,23 +659,24 @@ namespace RW_NodeTree
                     }
                     regiestedNodeVerbPropertiesInfos.Add(ownerType, info);
                 }
-                return info ?? new List<VerbPropertiesRegiestInfo>();
+                return info;
             }
         }
 
 
         public List<VerbToolRegiestInfo> GetRegiestedNodeVerbToolInfos(Type ownerType) => internal_GetRegiestedNodeVerbToolInfos(ownerType);
 
-        internal List<VerbToolRegiestInfo> internal_GetRegiestedNodeVerbToolInfos(Type ownerType, List<Tool> tools = null)
+        internal List<VerbToolRegiestInfo> internal_GetRegiestedNodeVerbToolInfos(Type ownerType, List<Tool?>? tools = null)
         {
             lock (regiestedNodeVerbToolInfos)
             {
-                tools = tools ?? GetSameTypeVerbOwner(ownerType, parent)?.Tools ?? new List<Tool>();
+                tools = tools ?? GetSameTypeVerbOwner(ownerType, parent)?.Tools ?? new List<Tool?>();
                 if (!regiestedNodeVerbToolInfos.TryGetValue(ownerType, out List<VerbToolRegiestInfo> info))
                 {
                     info = new List<VerbToolRegiestInfo>(tools.Count);
-                    foreach (Tool tool in tools)
+                    foreach (Tool? tool in tools)
                     {
+                        if (tool == null) continue;
                         info.Add(new VerbToolRegiestInfo(null, tool, tool));
                     }
 
@@ -478,11 +696,11 @@ namespace RW_NodeTree
                     for (int i = info.Count - 1; i >= 0; i--)
                     {
                         VerbToolRegiestInfo regiestInfo = info[i];
-                        List<VerbToolRegiestInfo> childInfo = ((CompChildNodeProccesser)ChildNodes[regiestInfo.id])?.internal_GetRegiestedNodeVerbToolInfos(ownerType);
-                        if (info[i].Vaildity && (regiestInfo.id.NullOrEmpty() || ChildNodes.ContainsKey(regiestInfo.id)) && ((childInfo != null && childInfo.Find(x => x.afterCobvertTool == regiestInfo.berforConvertTool).Vaildity) || childInfo == null))
+                        List<VerbToolRegiestInfo>? childInfo = regiestInfo.id != null ? ((CompChildNodeProccesser?)ChildNodes[regiestInfo.id])?.internal_GetRegiestedNodeVerbToolInfos(ownerType) : null;
+                        if (info[i].Vaildity && (regiestInfo.id.NullOrEmpty() || ChildNodes.ContainsKey(regiestInfo.id)) && ((childInfo != null && childInfo.Find(x => x.afterConvertTool == regiestInfo.berforConvertTool).Vaildity) || childInfo == null))
                         {
-                            regiestInfo.afterCobvertTool = Gen.MemberwiseClone(regiestInfo.afterCobvertTool);
-                            regiestInfo.afterCobvertTool.id = i.ToString();
+                            regiestInfo.afterConvertTool = Gen.MemberwiseClone(regiestInfo.afterConvertTool);
+                            regiestInfo.afterConvertTool.id = i.ToString();
                             info[i] = regiestInfo;
                         }
                         else
@@ -526,14 +744,15 @@ namespace RW_NodeTree
         }
 
 
-        public List<(string, Thing, List<RenderInfo>)> GetNodeRenderingInfos(Rot4 rot, out bool updated, Graphic subGraphic = null)
+        public List<(string?, Thing, List<RenderInfo>)> GetNodeRenderingInfos(Rot4 rot, out bool updated, Graphic? subGraphic = null)
         {
             UpdateNode();
             updated = false;
-            if (!UnityData.IsInMainThread) return null;
-            if (this.nodeRenderingInfo[rot] != null) return this.nodeRenderingInfo[rot];
+            if (!UnityData.IsInMainThread) throw new InvalidOperationException("not in main thread");
+            List<(string?, Thing, List<RenderInfo>)>? nodeRenderingInfos = this.nodeRenderingInfo[rot];
+            if (nodeRenderingInfos != null) return nodeRenderingInfos;
             updated = true;
-            List<(string, Thing, List<RenderInfo>)> nodeRenderingInfos = new List<(string, Thing, List<RenderInfo>)>(ChildNodes.Count + 1);
+            nodeRenderingInfos = new List<(string?, Thing, List<RenderInfo>)>(ChildNodes.Count + 1);
 
             //if (Prefs.DevMode)
             //{
@@ -557,7 +776,7 @@ namespace RW_NodeTree
                 try
                 {
                     subGraphic.Draw(Vector3.zero, rot, parent);
-                    nodeRenderingInfos.Add((null, this, RenderingTools.RenderInfos));
+                    nodeRenderingInfos.Add((null, this!, RenderingTools.RenderInfos!));
                 }
                 catch (Exception ex)
                 {
@@ -593,7 +812,7 @@ namespace RW_NodeTree
 
             for (int i = 0; i < nodeRenderingInfos.Count; i++)
             {
-                string id = nodeRenderingInfos[i].Item1;
+                string? id = nodeRenderingInfos[i].Item1;
                 Thing child = nodeRenderingInfos[i].Item2;
                 List<RenderInfo> infos = nodeRenderingInfos[i].Item3 ?? new List<RenderInfo>();
                 if (child != null && id != null)
@@ -616,8 +835,8 @@ namespace RW_NodeTree
                         Log.Error(ex.ToString());
                     }
                     RenderingTools.StartOrEndDrawCatchingBlock = false;
+                    nodeRenderingInfos[i] = (id, child, infos);
                 }
-                nodeRenderingInfos[i] = (id, child, infos);
             }
 
             foreach (CompBasicNodeComp comp in AllNodeComp)
@@ -641,7 +860,7 @@ namespace RW_NodeTree
         /// <param name="node"></param>
         /// <param name="id"></param>
         /// <returns></returns>
-        public bool AllowNode(Thing node, string id = null)
+        public bool AllowNode(Thing? node, string? id = null)
         {
             if (node?.holdingOwner != null) return false;
             if (node?.Destroyed ?? false) return false;
@@ -677,19 +896,19 @@ namespace RW_NodeTree
             return result;
         }
 
-        
+
 
         public void ResetCachedRootNode()
         {
             cachedRootNode = null;
-            foreach (Thing part in ChildNodes.Values)
+            foreach (Thing? part in ChildNodes.Values)
             {
-                CompChildNodeProccesser childComp = part;
+                CompChildNodeProccesser? childComp = part;
                 if (childComp != null) childComp.ResetCachedRootNode();
             }
         }
 
-        internal void internal_Added(NodeContainer container, string id, bool success, Dictionary<string, object> cachedData)
+        internal void internal_Added(NodeContainer container, string? id, bool success, Dictionary<string, object?> cachedData)
         {
             ResetCachedRootNode();
             foreach (CompBasicNodeComp comp in AllNodeComp)
@@ -705,7 +924,7 @@ namespace RW_NodeTree
             }
         }
 
-        internal void internal_Removed(NodeContainer container, string id, bool success, Dictionary<string, object> cachedData)
+        internal void internal_Removed(NodeContainer container, string? id, bool success, Dictionary<string, object?> cachedData)
         {
             ResetCachedRootNode();
             foreach (CompBasicNodeComp comp in AllNodeComp)
@@ -738,48 +957,47 @@ namespace RW_NodeTree
             }
         }
 
-        public static IVerbOwner GetSameTypeVerbOwner(Type ownerType, Thing thing)
+        public static IVerbOwner? GetSameTypeVerbOwner(Type ownerType, Thing thing)
         {
-            if (thing != null && ownerType != null && typeof(IVerbOwner).IsAssignableFrom(ownerType))
+            if (ownerType == null || !typeof(IVerbOwner).IsAssignableFrom(ownerType)) throw new AggregateException(nameof(ownerType));
+            if (thing == null) throw new AggregateException(nameof(thing));
+            IVerbOwner? verbOwner = null;
+            ThingWithComps? t = thing as ThingWithComps;
+            if (ownerType.IsAssignableFrom(thing.GetType()))
             {
-                IVerbOwner verbOwner = null;
-                ThingWithComps t = thing as ThingWithComps;
-                if (ownerType.IsAssignableFrom(thing.GetType()))
+                verbOwner = (thing as IVerbOwner);
+            }
+            else if (t != null)
+            {
+                foreach (ThingComp comp in t.AllComps)
                 {
-                    verbOwner = (thing as IVerbOwner);
-                }
-                else if (t != null)
-                {
-                    foreach (ThingComp comp in t.AllComps)
+                    if (ownerType.IsAssignableFrom(comp.GetType()))
                     {
-                        if (ownerType.IsAssignableFrom(comp.GetType()))
-                        {
-                            verbOwner = (comp as IVerbOwner);
-                            break;
-                        }
+                        verbOwner = comp as IVerbOwner;
+                        break;
                     }
                 }
-                return verbOwner;
             }
-            return null;
+            return verbOwner;
         }
 
 
 
         #region operator
-        public static implicit operator Thing(CompChildNodeProccesser node)
+        public static implicit operator Thing?(CompChildNodeProccesser? node)
         {
             return node?.parent;
         }
 
-        public static implicit operator CompChildNodeProccesser(Thing thing)
+
+        public static implicit operator CompChildNodeProccesser?(Thing? thing)
         {
-            List<ThingComp> comps = (thing as ThingWithComps)?.AllComps;
+            List<ThingComp>? comps = (thing as ThingWithComps)?.AllComps;
             if (comps == null || comps.Count < 1) return null;
-            CompChildNodeProccesser result = comps[0] as CompChildNodeProccesser;
-            if(result != null) return result;
+            CompChildNodeProccesser? result = comps[0] as CompChildNodeProccesser;
+            if (result != null) return result;
             retry:;
-            if (!compLoadingCache.TryGetValue(thing.def, out int index))
+            if (!compLoadingCache.TryGetValue(thing!.def, out int index))
             {
                 int i = 0;
                 for (; i < comps.Count; i++)
@@ -795,17 +1013,17 @@ namespace RW_NodeTree
                 {
                     index = -1;
                 }
-                compLoadingCache.Add(thing.def,index);
+                compLoadingCache.Add(thing.def, index);
             }
-            else if(index >= 0)
+            else if (index >= 0)
             {
-                if(index >= comps.Count)
+                if (index >= comps.Count)
                 {
                     compLoadingCache.Remove(thing.def);
                     goto retry;
                 }
                 result = comps[index] as CompChildNodeProccesser;
-                if(result == null)
+                if (result == null)
                 {
                     compLoadingCache.Remove(thing.def);
                     goto retry;
@@ -818,7 +1036,7 @@ namespace RW_NodeTree
 
         public class NodeRenderingInfoForRot4
         {
-            public List<(string, Thing, List<RenderInfo>)> this[Rot4 rot]
+            public List<(string?, Thing, List<RenderInfo>)>? this[Rot4 rot]
             {
                 get => nodeRenderingInfos[rot.AsInt];
                 set => nodeRenderingInfos[rot.AsInt] = value;
@@ -827,12 +1045,12 @@ namespace RW_NodeTree
             {
                 for (int i = 0; i < nodeRenderingInfos.Length; i++) nodeRenderingInfos[i] = null;
             }
-            public readonly List<(string, Thing, List<RenderInfo>)>[] nodeRenderingInfos = new List<(string, Thing, List<RenderInfo>)>[4];
+            public readonly List<(string?, Thing, List<RenderInfo>)>?[] nodeRenderingInfos = new List<(string?, Thing, List<RenderInfo>)>?[4];
         }
 
-        private CompChildNodeProccesser cachedRootNode;
+        private CompChildNodeProccesser? cachedRootNode;
 
-        private NodeContainer childNodes;
+        private NodeContainer? childNodes;
 
         internal readonly NodeRenderingInfoForRot4 nodeRenderingInfo = new NodeRenderingInfoForRot4();
 
@@ -840,11 +1058,11 @@ namespace RW_NodeTree
 
         internal readonly Dictionary<Type, List<VerbPropertiesRegiestInfo>> regiestedNodeVerbPropertiesInfos = new Dictionary<Type, List<VerbPropertiesRegiestInfo>>();
 
-        internal readonly Dictionary<Type, Dictionary<(Thing, Verb, Tool, VerbProperties, bool), (Thing, Verb, Tool, VerbProperties)>> beforeConvertVerbCorrespondingThingCache = new Dictionary<Type, Dictionary<(Thing, Verb, Tool, VerbProperties, bool), (Thing, Verb, Tool, VerbProperties)>>();
+        internal readonly Dictionary<(Type, Tool?, VerbProperties?, bool), (Thing, List<Verb>, Tool?, VerbProperties?)> beforeConvertVerbCorrespondingThingCache = new Dictionary<(Type, Tool?, VerbProperties?, bool), (Thing, List<Verb>, Tool?, VerbProperties?)>();
 
         private static bool blockUpdate = false;
 
-        private readonly static Dictionary<ThingDef,int> compLoadingCache = new Dictionary<ThingDef,int>();
+        private readonly static Dictionary<ThingDef, int> compLoadingCache = new Dictionary<ThingDef, int>();
 
         /*
         private static Matrix4x4 matrix =
@@ -870,16 +1088,16 @@ namespace RW_NodeTree
 
         static CompProperties_ChildNodeProccesser()
         {
-            foreach(ThingDef def in DefDatabase<ThingDef>.AllDefs)
+            foreach (ThingDef def in DefDatabase<ThingDef>.AllDefs)
             {
                 if (def.comps.Count < 1) continue;
                 for (int i = 0; i < def.comps.Count; i++)
                 {
                     CompProperties properties = def.comps[i];
-                    if(properties.compClass == typeof(CompChildNodeProccesser))
+                    if (properties.compClass == typeof(CompChildNodeProccesser))
                     {
                         def.comps.RemoveAt(i);
-                        def.comps.Insert(0,properties);
+                        def.comps.Insert(0, properties);
                         break;
                     }
                 }

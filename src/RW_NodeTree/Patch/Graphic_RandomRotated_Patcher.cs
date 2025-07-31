@@ -15,7 +15,7 @@ namespace RW_NodeTree.Patch
         )]
         private static bool PreGraphic_RandomRotated_DrawWorker(Graphic_RandomRotated __instance, Vector3 loc, Rot4 rot, ThingDef thingDef, Thing thing, float extraRotation)
         {
-            if ((CompChildNodeProccesser)thing != null)
+            if ((CompChildNodeProccesser?)thing != null)
             {
                 float maxAngle = Graphic_RandomRotated_MaxAngle(__instance);
                 extraRotation += -maxAngle + (float)(thing.thingIDNumber * 542) % (maxAngle * 2f);

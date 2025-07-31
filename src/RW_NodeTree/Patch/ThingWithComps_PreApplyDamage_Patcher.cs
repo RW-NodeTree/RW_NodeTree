@@ -19,7 +19,7 @@ namespace RW_NodeTree.Patch
             {
                 return;
             }
-            absorbed = ((CompChildNodeProccesser)__instance)?.PostThingWithComps_PreApplyDamage(ref dinfo, absorbed) ?? absorbed;
+            absorbed = ((CompChildNodeProccesser?)__instance)?.PostThingWithComps_PreApplyDamage(ref dinfo, absorbed) ?? absorbed;
         }
     }
 }

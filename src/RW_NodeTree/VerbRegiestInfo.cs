@@ -5,27 +5,27 @@ namespace RW_NodeTree
 {
     public struct VerbToolRegiestInfo
     {
-        public VerbToolRegiestInfo(string id, Tool berforConvertTool, Tool afterCobvertTool)
+        public VerbToolRegiestInfo(string? id, Tool berforConvertTool, Tool afterConvertTool)
         {
             this.id = id;
             this.berforConvertTool = berforConvertTool;
-            this.afterCobvertTool = afterCobvertTool;
+            this.afterConvertTool = afterConvertTool;
         }
 
-        public bool Vaildity => berforConvertTool != null && afterCobvertTool != null && (id == null || id.IsVaildityKeyFormat());
+        public bool Vaildity => berforConvertTool != null && afterConvertTool != null && (id == null || id.IsVaildityKeyFormat());
 
         public override string ToString()
         {
-            return $"id={id}; berforConvertTool={berforConvertTool}; afterCobvertTool={afterCobvertTool}";
+            return $"id={id}; berforConvertTool={berforConvertTool}; afterConvertTool={afterConvertTool}";
         }
 
-        public string id;
-        public Tool berforConvertTool, afterCobvertTool;
+        public string? id;
+        public Tool berforConvertTool, afterConvertTool;
     }
 
     public struct VerbPropertiesRegiestInfo
     {
-        public VerbPropertiesRegiestInfo(string id, VerbProperties berforConvertProperties, VerbProperties afterConvertProperties)
+        public VerbPropertiesRegiestInfo(string? id, VerbProperties berforConvertProperties, VerbProperties afterConvertProperties)
         {
             this.id = id;
             this.berforConvertProperties = berforConvertProperties;
@@ -38,7 +38,7 @@ namespace RW_NodeTree
             return $"id={id}; berforConvertProperties={berforConvertProperties}; afterConvertProperties={afterConvertProperties}";
         }
 
-        public string id;
-        public VerbProperties berforConvertProperties,afterConvertProperties;
+        public string? id;
+        public VerbProperties berforConvertProperties, afterConvertProperties;
     }
 }

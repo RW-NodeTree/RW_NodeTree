@@ -12,9 +12,9 @@ namespace RW_NodeTree.Patch
             "GraphicColoredFor",
             typeof(Thing)
         )]
-        private static void PostGraphicData_GraphicColoredFor(/**GraphicData __instance, **/Thing t,ref Graphic __result)
+        private static void PostGraphicData_GraphicColoredFor(/**GraphicData __instance, **/Thing t, ref Graphic __result)
         {
-            ((CompChildNodeProccesser)t)?.CreateGraphic_ChildNode(ref __result);
+            ((CompChildNodeProccesser?)t)?.CreateGraphic_ChildNode(ref __result);
         }
 
     }
@@ -27,7 +27,7 @@ namespace RW_NodeTree
     /// </summary>
     public partial class CompChildNodeProccesser : ThingComp, IThingHolder
     {
-        
+
 
         /// <summary>
         /// create Graphic_ChildNode and insert into the Graphic nestification;

@@ -10,7 +10,7 @@ namespace RW_NodeTree.Patch
     {
         static HarmonyInjector()
         {
-            foreach(Type t in GenTypes.AllTypes)
+            foreach (Type t in GenTypes.AllTypes)
             {
                 StatWorker_Patcher.PatchValue(t, patcher);
                 StatWorker_Patcher.PatchExplanation(t, patcher);

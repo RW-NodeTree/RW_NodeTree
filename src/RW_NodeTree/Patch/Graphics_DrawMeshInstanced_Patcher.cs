@@ -26,12 +26,12 @@ namespace RW_NodeTree.Patch
             typeof(LightProbeUsage),
             typeof(LightProbeProxyVolume)
         )]
-        private static bool DrawMeshInstanced_Catcher(Mesh mesh, int submeshIndex, Material material, Matrix4x4[] matrices, int count, MaterialPropertyBlock properties, ShadowCastingMode castShadows, bool receiveShadows, int layer, Camera camera, LightProbeUsage lightProbeUsage, LightProbeProxyVolume lightProbeProxyVolume)
+        private static bool DrawMeshInstanced_Catcher(Mesh mesh, int submeshIndex, Material material, Matrix4x4[] matrices, int count, MaterialPropertyBlock? properties, ShadowCastingMode castShadows, bool receiveShadows, int layer, Camera? camera, LightProbeUsage lightProbeUsage, LightProbeProxyVolume? lightProbeProxyVolume)
         {
             if (camera == null && RenderingTools.StartOrEndDrawCatchingBlock)
             {
                 //if (Prefs.DevMode) Log.Message(" Internal_DrawMesh: camera=" + camera + "; layer=" + layer + "\n");
-                RenderingTools.RenderInfos.Add(new RenderInfo(mesh, submeshIndex, material, matrices, count, properties, castShadows, receiveShadows, layer, lightProbeUsage, lightProbeProxyVolume));
+                RenderingTools.RenderInfos!.Add(new RenderInfo(mesh, submeshIndex, material, matrices, count, properties, castShadows, receiveShadows, layer, lightProbeUsage, lightProbeProxyVolume));
                 return false;
             }
             return true;

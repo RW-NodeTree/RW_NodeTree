@@ -1,9 +1,9 @@
 ﻿using HarmonyLib;
 using RimWorld;
+using RW_NodeTree.Tools;
 using System;
 using System.Collections.Generic;
 using Verse;
-using RW_NodeTree.Tools;
 
 namespace RW_NodeTree.Patch
 {
@@ -18,7 +18,7 @@ namespace RW_NodeTree.Patch
             )]
         private static bool PreStatWorker_GearHasCompsThatAffectStat(Thing gear, StatDef stat, ref Dictionary<string, object> __state)
         {
-            CompChildNodeProccesser comp = gear.RootNode();
+            CompChildNodeProccesser? comp = gear.RootNode();
             if (comp != null)
             {
                 __state = new Dictionary<string, object>();
@@ -34,7 +34,7 @@ namespace RW_NodeTree.Patch
             )]
         private static bool PreStatWorker_StatOffsetFromGear(Thing gear, StatDef stat, ref Dictionary<string, object> __state)
         {
-            CompChildNodeProccesser comp = gear.RootNode();
+            CompChildNodeProccesser? comp = gear.RootNode();
             if (comp != null)
             {
                 __state = new Dictionary<string, object>();
@@ -50,7 +50,7 @@ namespace RW_NodeTree.Patch
             )]
         private static bool PreStatWorker_InfoTextLineFromGear(Thing gear, StatDef stat, ref Dictionary<string, object> __state)
         {
-            CompChildNodeProccesser comp = gear.RootNode();
+            CompChildNodeProccesser? comp = gear.RootNode();
             if (comp != null)
             {
                 __state = new Dictionary<string, object>();
@@ -191,7 +191,7 @@ namespace RW_NodeTree
             }
             return result;
         }
-        
+
         internal bool PreStatWorker_InfoTextLineFromGear(Thing gear, StatDef stat, Dictionary<string, object> stats)
         {
             UpdateNode();

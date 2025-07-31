@@ -1,7 +1,7 @@
 ﻿using HarmonyLib;
 using RimWorld;
-using Verse;
 using RW_NodeTree.Tools;
+using Verse;
 
 namespace RW_NodeTree.Patch
 {
@@ -16,7 +16,8 @@ namespace RW_NodeTree.Patch
         )]
         private static void PreStatWorker_MeleeAverageDPS_GetCurrentWeaponUser(ref Thing weapon)
         {
-            weapon = weapon.RootNode() ?? weapon;
+            Thing? root = weapon.RootNode();
+            weapon = root ?? weapon;
         }
     }
 }

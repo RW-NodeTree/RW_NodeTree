@@ -1,18 +1,18 @@
-﻿using System.Collections.Generic;
-using HarmonyLib;
+﻿using HarmonyLib;
 using RimWorld;
+using System.Collections.Generic;
 using Verse;
 
 namespace RW_NodeTree.Patch
 {
-	[HarmonyPatch(typeof(StatDrawEntry))]
+    [HarmonyPatch(typeof(StatDrawEntry))]
     internal static class StatDrawEntry_Patcher
-	{
-		[HarmonyPostfix]
-		[HarmonyPatch(typeof(StatDrawEntry), "get_ValueString")]
+    {
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(StatDrawEntry), "get_ValueString")]
         private static void PostStatDrawEntry_ValueString(StatDrawEntry __instance, string __result)
-		{
-			if(__instance.hasOptionalReq)
+        {
+            if (__instance.hasOptionalReq)
             {
                 ref string valueStringInt = ref StatDrawEntry_valueStringInt(__instance);
                 if (valueStringInt.NullOrEmpty())
@@ -20,19 +20,19 @@ namespace RW_NodeTree.Patch
                     valueStringInt = __result;
                 }
             }
-		}
+        }
 
-		[HarmonyPrefix]
-		[HarmonyPatch(typeof(StatDrawEntry), "GetExplanationText")]
+        [HarmonyPrefix]
+        [HarmonyPatch(typeof(StatDrawEntry), "GetExplanationText")]
         private static bool PreStatDrawEntry_GetExplanationText(StatDrawEntry __instance, ref string __result)
-		{
-			ref string explanationText = ref StatDrawEntry_explanationText(__instance);
-			if (!explanationText.NullOrEmpty())
-			{
-				__result = explanationText;
-				return false;
-			}
-			return true;
+        {
+            ref string explanationText = ref StatDrawEntry_explanationText(__instance);
+            if (!explanationText.NullOrEmpty())
+            {
+                __result = explanationText;
+                return false;
+            }
+            return true;
         }
 
         [HarmonyPostfix]

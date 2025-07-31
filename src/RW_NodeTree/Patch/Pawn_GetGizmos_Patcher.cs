@@ -22,7 +22,7 @@ namespace RW_NodeTree.Patch
         private static IEnumerable<Gizmo> PerAndPostFixFor_Pawn_GetGizmos(Pawn instance, IEnumerable<Gizmo> result)
         {
             List<(Thing, List<Tool>, List<VerbProperties>)> state = new List<(Thing, List<Tool>, List<VerbProperties>)>();
-            ThingOwner list = instance.equipment?.GetDirectlyHeldThings();
+            ThingOwner? list = instance.equipment?.GetDirectlyHeldThings();
             if (list != null)
             {
                 state.Capacity += list.Count;
@@ -40,7 +40,7 @@ namespace RW_NodeTree.Patch
                             else thing.def.tools.Add(verb.tool);
                         }
                     }
-                    catch(Exception ex)
+                    catch (Exception ex)
                     {
                         Log.Error(ex.ToString());
                     }

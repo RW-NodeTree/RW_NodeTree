@@ -1,6 +1,5 @@
 ﻿
 using HarmonyLib;
-using RimWorld;
 using System;
 using Verse;
 
@@ -32,7 +31,7 @@ namespace RW_NodeTree.Patch
             for (int i = __instance.Count - 1; i >= 0; i--)
             {
                 Thing t = __instance[i];
-                if ((t is IVerbOwner) || (t as ThingWithComps)?.AllComps.Find(x => x is IVerbOwner) != null || (CompChildNodeProccesser)t != null)
+                if ((t is IVerbOwner) || (t as ThingWithComps)?.AllComps.Find(x => x is IVerbOwner) != null || (CompChildNodeProccesser?)t != null)
                 {
                     try
                     {

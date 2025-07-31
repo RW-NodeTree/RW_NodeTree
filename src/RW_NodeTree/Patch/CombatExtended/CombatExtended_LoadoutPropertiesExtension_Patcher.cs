@@ -15,7 +15,7 @@ namespace RW_NodeTree.Patch.CombatExtended
         private static Type CombatExtended_LoadoutPropertiesExtension = GenTypes.GetTypeInAnyAssembly("CombatExtended.LoadoutPropertiesExtension");
         private static Type CombatExtended_CompAmmoUser = GenTypes.GetTypeInAnyAssembly("CombatExtended.CompAmmoUser");
 
-        private static MethodInfo TryGetComp;
+        private static MethodInfo? TryGetComp;
 
 
         private static IEnumerable<CodeInstruction> LoadoutPropertiesExtension_LoadWeaponWithRandAmmo_Transpiler(IEnumerable<CodeInstruction> instructions)
@@ -36,36 +36,36 @@ namespace RW_NodeTree.Patch.CombatExtended
             }
         }
 
-        private static ThingComp LoadoutPropertiesExtension_TryGetComp(Thing thing)
+        private static ThingComp? LoadoutPropertiesExtension_TryGetComp(Thing? thing)
         {
-            CompChildNodeProccesser comp = thing;
+            CompChildNodeProccesser? comp = thing;
             if (comp != null)
             {
-                CompEquippable equippable = thing.TryGetComp<CompEquippable>();
+                CompEquippable? equippable = thing.TryGetComp<CompEquippable?>();
                 if (equippable != null)
                 {
-                    thing = comp.GetBeforeConvertVerbCorrespondingThing(typeof(CompEquippable), equippable.PrimaryVerb, true).Item1 as ThingWithComps;
+                    thing = comp.GetBeforeConvertThingWithVerb(typeof(CompEquippable), equippable.PrimaryVerb, true).Item1 as ThingWithComps;
 
-                    ThingComp
-                    result = (ThingComp)TryGetComp.Invoke(null, new object[] { thing });
+                    ThingComp?
+                    result = (ThingComp?)TryGetComp?.Invoke(null, new object?[] { thing });
                     if (result != null) return result;
 
-                    thing = comp.GetBeforeConvertVerbCorrespondingThing(typeof(CompEquippable), equippable.PrimaryVerb).Item1 as ThingWithComps;
+                    thing = comp.GetBeforeConvertThingWithVerb(typeof(CompEquippable), equippable.PrimaryVerb).Item1 as ThingWithComps;
 
-                    result = (ThingComp)TryGetComp.Invoke(null, new object[] { thing });
+                    result = (ThingComp?)TryGetComp?.Invoke(null, new object?[] { thing });
                     if (result != null) return result;
                 }
                 thing = comp.parent;
             }
-            return (ThingComp)TryGetComp.Invoke(null, new object[] { thing });
+            return (ThingComp?)TryGetComp?.Invoke(null, new object?[] { thing });
         }
 
 
         public static void PatchLoadoutPropertiesExtension(Harmony patcher)
         {
-            if(CombatExtended_CompAmmoUser != null)
+            if (CombatExtended_CompAmmoUser != null)
             {
-                TryGetComp = typeof(ThingCompUtility).GetMethod("TryGetComp", BindingFlags.Static | BindingFlags.Public,null,new Type[] {typeof(Thing)},null).MakeGenericMethod(new Type[] { CombatExtended_CompAmmoUser });
+                TryGetComp = typeof(ThingCompUtility).GetMethod("TryGetComp", BindingFlags.Static | BindingFlags.Public, null, new Type[] { typeof(Thing) }, null).MakeGenericMethod(new Type[] { CombatExtended_CompAmmoUser });
             }
             if (CombatExtended_LoadoutPropertiesExtension != null)
             {

@@ -11,17 +11,17 @@ namespace RW_NodeTree.Patch.CombatExtended
         private static Type CombatExtended_BipodComp = GenTypes.GetTypeInAnyAssembly("CombatExtended.BipodComp");
         private static Type CombatExtended_VerbPropertiesCE = GenTypes.GetTypeInAnyAssembly("CombatExtended.VerbPropertiesCE");
 
-        private static MethodInfo BipodComp_AssignVerbProps;
+        private static MethodInfo? BipodComp_AssignVerbProps;
 
-        private static bool PreBipodComp_ResetVerbProps(ThingComp __instance, Thing source)
+        private static bool PreBipodComp_ResetVerbProps(ThingComp __instance, Thing? source)
         {
-            CompChildNodeProccesser comp = source;
+            CompChildNodeProccesser? comp = source;
             if (comp != null)
             {
-                VerbProperties props = source.TryGetComp<CompEquippable>()?.VerbProperties?.Find(x => CombatExtended_VerbPropertiesCE.IsAssignableFrom(x.GetType()));
-                if(props != null)
+                VerbProperties? props = source.TryGetComp<CompEquippable>()?.VerbProperties?.Find(x => CombatExtended_VerbPropertiesCE.IsAssignableFrom(x.GetType()));
+                if (props != null)
                 {
-                    BipodComp_AssignVerbProps.Invoke(__instance, new object[] { source, props });
+                    BipodComp_AssignVerbProps?.Invoke(__instance, new object?[] { source, props });
                     return false;
                 }
             }

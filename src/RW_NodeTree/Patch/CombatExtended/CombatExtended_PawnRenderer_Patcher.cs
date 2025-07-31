@@ -14,21 +14,22 @@ namespace RW_NodeTree.Patch.CombatExtended
         private static MethodInfo _FinalHarmony_PawnRenderer_DrawEquipmentAiming_DrawMesh = typeof(CombatExtended_PawnRenderer_Patcher).GetMethod("FinalHarmony_PawnRenderer_DrawEquipmentAiming_DrawMesh", BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public);
         private static Type Harmony_PawnRenderer_DrawEquipmentAiming = GenTypes.GetTypeInAnyAssembly("CombatExtended.HarmonyCE.Harmony_PawnRenderer")?.GetNestedType("Harmony_PawnRenderer_DrawEquipmentAiming", BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public) ?? GenTypes.GetTypeInAnyAssembly("CombatExtended.HarmonyCE.Harmony_PawnRenderer_DrawEquipmentAiming");
         private static Type GunDrawExtension = GenTypes.GetTypeInAnyAssembly("CombatExtended.GunDrawExtension");
-        private static AccessTools.FieldRef<object, Vector2> GunDrawExtension_DrawSize = null;
+        private static AccessTools.FieldRef<object, Vector2>? GunDrawExtension_DrawSize = null;
 
         private static void PerHarmony_PawnRenderer_DrawEquipmentAiming_DrawMesh(
-            Thing eq,
-            ref (DefModExtension, Vector2) __state)
+            Thing? eq,
+            ref (DefModExtension?, Vector2) __state)
         {
-            CompChildNodeProccesser comp = eq;
-            if (comp != null)
+            if (GunDrawExtension_DrawSize == null) throw new ArgumentNullException(nameof(GunDrawExtension_DrawSize));
+            CompChildNodeProccesser? comp = eq;
+            if (comp != null && eq != null)
             {
                 if (eq.def.modExtensions.NullOrEmpty())
                 {
                     eq.def.modExtensions = eq.def.modExtensions ?? new List<DefModExtension>();
                     eq.def.modExtensions.Add((DefModExtension)Activator.CreateInstance(GunDrawExtension));
                 }
-                DefModExtension targetExtension = null;
+                DefModExtension? targetExtension = null;
                 foreach (DefModExtension extension in eq.def.modExtensions)
                 {
                     if (GunDrawExtension.IsAssignableFrom(extension.GetType()))
@@ -37,7 +38,7 @@ namespace RW_NodeTree.Patch.CombatExtended
                         break;
                     }
                 }
-                if(targetExtension == null)
+                if (targetExtension == null)
                 {
                     targetExtension = (DefModExtension)Activator.CreateInstance(GunDrawExtension);
                     GunDrawExtension_DrawSize(targetExtension) = eq.def.graphicData.drawSize;
@@ -49,9 +50,10 @@ namespace RW_NodeTree.Patch.CombatExtended
             }
         }
 
-        private static void FinalHarmony_PawnRenderer_DrawEquipmentAiming_DrawMesh((DefModExtension, Vector2) __state)
+        private static void FinalHarmony_PawnRenderer_DrawEquipmentAiming_DrawMesh((DefModExtension?, Vector2) __state)
         {
-            (DefModExtension extension, Vector2 drawSize) = __state;
+            if (GunDrawExtension_DrawSize == null) throw new ArgumentNullException(nameof(GunDrawExtension_DrawSize));
+            (DefModExtension? extension, Vector2 drawSize) = __state;
             if (extension != null)
             {
                 GunDrawExtension_DrawSize(extension) = drawSize;

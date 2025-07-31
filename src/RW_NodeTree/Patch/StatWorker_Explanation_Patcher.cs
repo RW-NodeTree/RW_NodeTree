@@ -54,7 +54,7 @@ namespace RW_NodeTree.Patch
 
         private static bool PreStatWorker_GetExplanationUnfinalized(StatWorker __instance, MethodInfo __originalMethod, StatRequest req, ToStringNumberSense numberSense, ref (Dictionary<string, object>, CompChildNodeProccesser) __state)
         {
-            CompChildNodeProccesser proccesser = req.Thing.RootNode();
+            CompChildNodeProccesser? proccesser = req.Thing.RootNode();
             if (
                 proccesser != null &&
                 __originalMethod.MethodHandle == GetMethodInfo_GetExplanationUnfinalized_OfType(__instance.GetType()).MethodHandle
@@ -68,7 +68,7 @@ namespace RW_NodeTree.Patch
         }
         private static bool PreStatWorker_GetExplanationFinalizePart(StatWorker __instance, MethodBase __originalMethod, StatRequest req, ToStringNumberSense numberSense, float finalVal, ref (Dictionary<string, object>, CompChildNodeProccesser) __state)
         {
-            CompChildNodeProccesser proccesser = req.Thing.RootNode();
+            CompChildNodeProccesser? proccesser = req.Thing.RootNode();
             if (
                 proccesser != null &&
                 __originalMethod.MethodHandle
@@ -131,8 +131,8 @@ namespace RW_NodeTree.Patch
                 if (_GetExplanationUnfinalized?.DeclaringType == type && _GetExplanationUnfinalized.HasMethodBody())
                 {
                     patcher.Patch(
-                        _GetExplanationUnfinalized, 
-                        new HarmonyMethod(_PreStatWorker_GetExplanationUnfinalized), 
+                        _GetExplanationUnfinalized,
+                        new HarmonyMethod(_PreStatWorker_GetExplanationUnfinalized),
                         new HarmonyMethod(_PostStatWorker_GetExplanationUnfinalized),
                         null,
                         new HarmonyMethod(_FinalStatWorker_GetExplanationUnfinalized)
@@ -143,8 +143,8 @@ namespace RW_NodeTree.Patch
                 if (_GetExplanationFinalizePart?.DeclaringType == type && _GetExplanationFinalizePart.HasMethodBody())
                 {
                     patcher.Patch(
-                        _GetExplanationFinalizePart, 
-                        new HarmonyMethod(_PreStatWorker_GetExplanationFinalizePart), 
+                        _GetExplanationFinalizePart,
+                        new HarmonyMethod(_PreStatWorker_GetExplanationFinalizePart),
                         new HarmonyMethod(_PostStatWorker_GetExplanationFinalizePart),
                         null,
                         new HarmonyMethod(_FinalStatWorker_GetExplanationFinalizePart)

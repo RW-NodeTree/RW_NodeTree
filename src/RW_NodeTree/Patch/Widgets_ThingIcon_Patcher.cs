@@ -31,8 +31,8 @@ namespace RW_NodeTree.Patch
             ThingStyleDef styleDef = thing.StyleDef;
             if (thing?.def?.graphicData != null && (styleDef == null || styleDef.UIIcon == null) && thing.def.uiIconPath.NullOrEmpty() && !(thing is Pawn || thing is Corpse))
             {
-                CompChildNodeProccesser proccesser = thing;
-                if(proccesser != null)
+                CompChildNodeProccesser? proccesser = thing;
+                if (proccesser != null)
                 {
                     Rot4 defaultPlacingRot = thing.def.defaultPlacingRot;
                     ref Vector2 drawSize = ref thing.def.graphicData.drawSize;

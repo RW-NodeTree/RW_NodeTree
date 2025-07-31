@@ -11,6 +11,8 @@ namespace RW_NodeTree
     {
         public Graphic_ChildNode(CompChildNodeProccesser thing, Graphic org)
         {
+            if (thing == null) throw new ArgumentNullException(nameof(thing));
+            if (org == null) throw new ArgumentNullException(nameof(org));
             currentProccess = thing;
             subGraphic = org;
             //base.drawSize = _THING.DrawSize(_THING.parent.Rotation);
@@ -19,121 +21,50 @@ namespace RW_NodeTree
 
         public Graphic SubGraphic => subGraphic;
 
-        public override Material MatSingle
-        {
-            get
-            {
-                if (currentProccess == null) return SubGraphic?.MatSingle ?? BaseContent.BadMat;
-                return MatAt(currentProccess.parent.Rotation);
-            }
-        }
+        public override Material? MatSingle => MatAt(currentProccess.parent.Rotation);
 
-        public override Material MatNorth
-        {
-            get
-            {
-                if (currentProccess == null) return SubGraphic?.MatNorth ?? BaseContent.BadMat;
-                return MatAt(Rot4.North);
-            }
-        }
+        public override Material? MatNorth => MatAt(Rot4.North);
 
-        public override Material MatEast
-        {
-            get
-            {
-                if (currentProccess == null) return SubGraphic?.MatEast ?? BaseContent.BadMat;
-                return MatAt(Rot4.East);
-            }
-        }
+        public override Material? MatEast => MatAt(Rot4.East);
 
-        public override Material MatSouth
-        {
-            get
-            {
-                if (currentProccess == null) return SubGraphic?.MatSouth ?? BaseContent.BadMat;
-                return MatAt(Rot4.South);
-            }
-        }
+        public override Material? MatSouth => MatAt(Rot4.South);
 
-        public override Material MatWest
-        {
-            get
-            {
-                if (currentProccess == null) return SubGraphic.MatWest ?? BaseContent.BadMat;
-                return MatAt(Rot4.West);
-            }
-        }
+        public override Material? MatWest => MatAt(Rot4.West);
 
-        public override bool WestFlipped
-        {
-            get
-            {
-                if (SubGraphic != null && (currentProccess == null)) return SubGraphic.WestFlipped;
-                return false;
-            }
-        }
+        public override bool WestFlipped => false;
 
-        public override bool UseSameGraphicForGhost
-        {
-            get
-            {
-                if (SubGraphic != null && (currentProccess == null)) return SubGraphic.UseSameGraphicForGhost;
-                return false;
-            }
-        }
+        public override bool UseSameGraphicForGhost => false;
 
-        public override bool ShouldDrawRotated
-        {
-            get
-            {
-                if (SubGraphic != null && (currentProccess == null)) return SubGraphic.ShouldDrawRotated;
-                return false;
-            }
-        }
+        public override bool ShouldDrawRotated => false;
 
-        public override bool EastFlipped
-        {
-            get
-            {
-                if (SubGraphic != null && (currentProccess == null)) return SubGraphic.EastFlipped;
-                return false;
-            }
-        }
+        public override bool EastFlipped => false;
 
-        public override float DrawRotatedExtraAngleOffset
-        {
-            get
-            {
-                if (SubGraphic != null && (currentProccess == null)) return SubGraphic.DrawRotatedExtraAngleOffset;
-                return 0;
-            }
-        }
+        public override float DrawRotatedExtraAngleOffset => 0f;
 
         public override Mesh MeshAt(Rot4 rot)
         {
-            if (currentProccess == null) return SubGraphic?.MeshAt(rot);
             MatAt(rot);
             //if (Prefs.DevMode) Log.Message(" DrawSize: currentProccess=" + currentProccess + "; Rot4=" + rot + "; size=" + base.drawSize + ";\n");
             return base.MeshAt(rot);
         }
 
-        public override Material MatAt(Rot4 rot, Thing thing = null)
+        public override Material MatAt(Rot4 rot, Thing? thing = null)
         {
-            CompChildNodeProccesser comp_ChildNodeProccesser = ((CompChildNodeProccesser)thing) ?? currentProccess;
-            if (comp_ChildNodeProccesser != currentProccess) return SubGraphic?.MatAt(rot, thing);
+            CompChildNodeProccesser comp_ChildNodeProccesser = ((CompChildNodeProccesser?)thing) ?? currentProccess;
+            if (comp_ChildNodeProccesser != currentProccess) return SubGraphic.MatAt(rot, thing);
 
 
-            (Material material, Texture2D texture, RenderTexture cachedRenderTarget) = defaultRenderingCache[rot];
+            (Material? material, Texture2D? texture, RenderTexture? cachedRenderTarget) = defaultRenderingCache[rot];
 
-            List<(string, Thing, List<RenderInfo>)> commands = comp_ChildNodeProccesser.GetNodeRenderingInfos(rot, out bool needUpdate, subGraphic);
-            if (needUpdate || material == null)
+            List<(string?, Thing, List<RenderInfo>)> commands = comp_ChildNodeProccesser.GetNodeRenderingInfos(rot, out bool needUpdate, subGraphic);
+            if (needUpdate || material == null || texture == null || cachedRenderTarget == null)
             {
                 List<RenderInfo> final = new List<RenderInfo>();
-                foreach ((string, Thing, List<RenderInfo>) infos in commands)
+                foreach ((string?, Thing, List<RenderInfo>) infos in commands)
                 {
                     if (!infos.Item3.NullOrEmpty()) final.AddRange(infos.Item3);
                 }
-                RenderingTools.RenderToTarget(final, ref cachedRenderTarget, ref texture, default(Vector2Int), comp_ChildNodeProccesser.Props.TextureSizeFactor, comp_ChildNodeProccesser.Props.ExceedanceFactor, comp_ChildNodeProccesser.Props.ExceedanceOffset, comp_ChildNodeProccesser.HasPostFX(true) ? comp_ChildNodeProccesser.PostFX : default(Action<RenderTexture>));
+                RenderingTools.RenderToTarget(final, ref cachedRenderTarget!, ref texture!, default(Vector2Int), comp_ChildNodeProccesser.Props.TextureSizeFactor, comp_ChildNodeProccesser.Props.ExceedanceFactor, comp_ChildNodeProccesser.Props.ExceedanceOffset, comp_ChildNodeProccesser.HasPostFX(true) ? comp_ChildNodeProccesser.PostFX : default);
                 Shader shader = subGraphic.Shader;
                 texture.wrapMode = TextureWrapMode.Clamp;
                 texture.filterMode = comp_ChildNodeProccesser.Props.TextureFilterMode;
@@ -155,7 +86,7 @@ namespace RW_NodeTree
 
             Vector2 size = new Vector2(texture.width, texture.height) / comp_ChildNodeProccesser.Props.TextureSizeFactor;
 
-            Graphic graphic = comp_ChildNodeProccesser.parent.Graphic;
+            Graphic? graphic = comp_ChildNodeProccesser.parent.Graphic;
             //if (graphic.GetGraphic_ChildNode() == this)
             while (graphic != null && graphic != this)
             {
@@ -167,23 +98,23 @@ namespace RW_NodeTree
             return material;
         }
 
-        public override Material MatSingleFor(Thing thing)
+        public override Material? MatSingleFor(Thing? thing)
         {
-            CompChildNodeProccesser comp_ChildNodeProccesser = ((CompChildNodeProccesser)thing) ?? currentProccess;
-            if (comp_ChildNodeProccesser != currentProccess) return SubGraphic?.MatSingleFor(thing);
-            return MatAt(thing.Rotation, thing);
+            CompChildNodeProccesser comp_ChildNodeProccesser = ((CompChildNodeProccesser?)thing) ?? currentProccess;
+            if (comp_ChildNodeProccesser != currentProccess) return SubGraphic.MatSingleFor(thing);
+            return MatAt(comp_ChildNodeProccesser.parent.Rotation, comp_ChildNodeProccesser);
         }
 
-        public override void DrawWorker(Vector3 loc, Rot4 rot, ThingDef thingDef, Thing thing, float extraRotation)
+        public override void DrawWorker(Vector3 loc, Rot4 rot, ThingDef? thingDef, Thing? thing, float extraRotation)
         {
-            CompChildNodeProccesser comp_ChildNodeProccesser = ((CompChildNodeProccesser)thing) ?? currentProccess;
+            CompChildNodeProccesser comp_ChildNodeProccesser = ((CompChildNodeProccesser?)thing) ?? currentProccess;
             if (comp_ChildNodeProccesser != currentProccess) SubGraphic?.DrawWorker(loc, rot, thingDef, thing, extraRotation);
-            else if(!RenderingTools.StartOrEndDrawCatchingBlock || comp_ChildNodeProccesser.HasPostFX(false)) base.DrawWorker(loc, rot, thingDef, thing, extraRotation);
+            else if (!RenderingTools.StartOrEndDrawCatchingBlock || comp_ChildNodeProccesser.HasPostFX(false)) base.DrawWorker(loc, rot, thingDef, thing, extraRotation);
             else
             {
                 MatAt(rot, thing);
                 List<RenderInfo> final = new List<RenderInfo>();
-                foreach ((string, Thing, List<RenderInfo>) infos in currentProccess.GetNodeRenderingInfos(rot, out _, subGraphic))
+                foreach ((string?, Thing, List<RenderInfo>) infos in currentProccess.GetNodeRenderingInfos(rot, out _, subGraphic))
                 {
                     if (!infos.Item3.NullOrEmpty()) final.AddRange(infos.Item3);
                 }
@@ -204,11 +135,11 @@ namespace RW_NodeTree
 
         public override void Print(SectionLayer layer, Thing thing, float extraRotation)
         {
-            CompChildNodeProccesser comp_ChildNodeProccesser = ((CompChildNodeProccesser)thing) ?? currentProccess;
+            CompChildNodeProccesser comp_ChildNodeProccesser = ((CompChildNodeProccesser?)thing) ?? currentProccess;
             if (comp_ChildNodeProccesser != currentProccess) SubGraphic?.Print(layer, thing, extraRotation);
             else
             {
-                MatAt(thing.Rotation);
+                MatAt(comp_ChildNodeProccesser.parent.Rotation, comp_ChildNodeProccesser);
                 base.Print(layer, thing, extraRotation);
             }
         }
@@ -218,20 +149,20 @@ namespace RW_NodeTree
         {
             ~OffScreenRenderingCache()
             {
-                GameObject.Destroy(materialNorth);
-                GameObject.Destroy(materialEast);
-                GameObject.Destroy(materialSouth);
-                GameObject.Destroy(materialWest);
-                GameObject.Destroy(textureNorth);
-                GameObject.Destroy(textureEast);
-                GameObject.Destroy(textureSouth);
-                GameObject.Destroy(textureWest);
-                GameObject.Destroy(cachedRenderTargetNorth);
-                GameObject.Destroy(cachedRenderTargetEast);
-                GameObject.Destroy(cachedRenderTargetSouth);
-                GameObject.Destroy(cachedRenderTargetWest);
+                if (materialNorth != null) GameObject.Destroy(materialNorth);
+                if (materialEast != null) GameObject.Destroy(materialEast);
+                if (materialSouth != null) GameObject.Destroy(materialSouth);
+                if (materialWest != null) GameObject.Destroy(materialWest);
+                if (textureNorth != null) GameObject.Destroy(textureNorth);
+                if (textureEast != null) GameObject.Destroy(textureEast);
+                if (textureSouth != null) GameObject.Destroy(textureSouth);
+                if (textureWest != null) GameObject.Destroy(textureWest);
+                if (cachedRenderTargetNorth != null) GameObject.Destroy(cachedRenderTargetNorth);
+                if (cachedRenderTargetEast != null) GameObject.Destroy(cachedRenderTargetEast);
+                if (cachedRenderTargetSouth != null) GameObject.Destroy(cachedRenderTargetSouth);
+                if (cachedRenderTargetWest != null) GameObject.Destroy(cachedRenderTargetWest);
             }
-            public (Material, Texture2D, RenderTexture) this[Rot4 index]
+            public (Material?, Texture2D?, RenderTexture?) this[Rot4 index]
             {
                 get
                 {
@@ -278,15 +209,15 @@ namespace RW_NodeTree
                 }
             }
 
-            public Material materialNorth, materialEast, materialSouth, materialWest;
+            public Material? materialNorth, materialEast, materialSouth, materialWest;
 
-            public Texture2D textureNorth, textureEast, textureSouth, textureWest;
+            public Texture2D? textureNorth, textureEast, textureSouth, textureWest;
 
-            public RenderTexture cachedRenderTargetNorth, cachedRenderTargetEast, cachedRenderTargetSouth, cachedRenderTargetWest;
+            public RenderTexture? cachedRenderTargetNorth, cachedRenderTargetEast, cachedRenderTargetSouth, cachedRenderTargetWest;
         }
 
         private readonly OffScreenRenderingCache defaultRenderingCache = new OffScreenRenderingCache();
-        private CompChildNodeProccesser currentProccess = null;
-        private Graphic subGraphic = null;
+        private CompChildNodeProccesser currentProccess;
+        private Graphic subGraphic;
     }
 }

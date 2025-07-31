@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using UnityEngine.Rendering;
 
 namespace RW_NodeTree.Rendering
@@ -27,7 +28,7 @@ namespace RW_NodeTree.Rendering
         /// <summary>
         /// the parms properties in DrawMesh or DrawMeshInstanced
         /// </summary>
-        public MaterialPropertyBlock properties;
+        public MaterialPropertyBlock? properties;
         /// <summary>
         /// the parms castShadows in DrawMesh or DrawMeshInstanced
         /// </summary>
@@ -43,7 +44,7 @@ namespace RW_NodeTree.Rendering
         /// <summary>
         /// the parms probeAnchor in DrawMesh or DrawMeshInstanced
         /// </summary>
-        public Transform probeAnchor;
+        public Transform? probeAnchor;
         /// <summary>
         /// the parms lightProbeUsage in DrawMesh or DrawMeshInstanced
         /// </summary>
@@ -51,7 +52,7 @@ namespace RW_NodeTree.Rendering
         /// <summary>
         /// the parms lightProbeProxyVolume in DrawMesh or DrawMeshInstanced
         /// </summary>
-        public LightProbeProxyVolume lightProbeProxyVolume;
+        public LightProbeProxyVolume? lightProbeProxyVolume;
         /// <summary>
         /// the parms count in DrawMesh or DrawMeshInstanced
         /// </summary>
@@ -68,9 +69,11 @@ namespace RW_NodeTree.Rendering
 
         public RenderInfo(Mesh mesh, int submeshIndex, Matrix4x4 matrix, Material material, int layer, bool DrawMeshInstanced = false)
         {
+            if (mesh == null) throw new ArgumentNullException(nameof(mesh));
+            if (material == null) throw new ArgumentNullException(nameof(material));
             this.mesh = mesh;
             this.submeshIndex = submeshIndex;
-            this.matrices = new Matrix4x4[] { matrix };
+            this.matrices = [matrix];
             this.material = material;
             this.layer = layer;
             this.properties = null;
@@ -84,11 +87,13 @@ namespace RW_NodeTree.Rendering
             this.disableFastMode = false;
         }
 
-        public RenderInfo(Mesh mesh, int submeshIndex, Matrix4x4 matrix, Material material, int layer, MaterialPropertyBlock properties, ShadowCastingMode castShadows, bool receiveShadows, Transform probeAnchor, LightProbeUsage lightProbeUsage, LightProbeProxyVolume lightProbeProxyVolume)
+        public RenderInfo(Mesh mesh, int submeshIndex, Matrix4x4 matrix, Material material, int layer, MaterialPropertyBlock? properties, ShadowCastingMode castShadows, bool receiveShadows, Transform? probeAnchor, LightProbeUsage lightProbeUsage, LightProbeProxyVolume? lightProbeProxyVolume)
         {
+            if (mesh == null) throw new ArgumentNullException(nameof(mesh));
+            if (material == null) throw new ArgumentNullException(nameof(material));
             this.mesh = mesh;
             this.submeshIndex = submeshIndex;
-            this.matrices = new Matrix4x4[] { matrix };
+            this.matrices = [matrix];
             this.material = material;
             this.layer = layer;
             this.properties = properties;
@@ -102,8 +107,10 @@ namespace RW_NodeTree.Rendering
             this.disableFastMode = false;
         }
 
-        public RenderInfo(Mesh mesh, int submeshIndex, Material material, Matrix4x4[] matrices, int count, MaterialPropertyBlock properties, ShadowCastingMode castShadows, bool receiveShadows, int layer, LightProbeUsage lightProbeUsage, LightProbeProxyVolume lightProbeProxyVolume, bool DrawMeshInstanced = true)
+        public RenderInfo(Mesh mesh, int submeshIndex, Material material, Matrix4x4[] matrices, int count, MaterialPropertyBlock? properties, ShadowCastingMode castShadows, bool receiveShadows, int layer, LightProbeUsage lightProbeUsage, LightProbeProxyVolume? lightProbeProxyVolume, bool DrawMeshInstanced = true)
         {
+            if (mesh == null) throw new ArgumentNullException(nameof(mesh));
+            if (material == null) throw new ArgumentNullException(nameof(material));
             this.mesh = mesh;
             this.submeshIndex = submeshIndex;
             this.matrices = (Matrix4x4[])matrices.Clone();
@@ -143,7 +150,7 @@ namespace RW_NodeTree.Rendering
         public override string ToString()
         {
             string str = base.ToString() + " :\n[\n\tmesh : " + mesh + ",\n\tsubmeshIndex : " + submeshIndex + ",\n\tmatrices :\n\t";
-            if(matrices != null && matrices.Length > 0)
+            if (matrices != null && matrices.Length > 0)
             {
                 str += "[\n\t\t0 :\n" + matrices[0] + "\n\t\tcount : " + matrices.Length + "\n\t],";
             }
@@ -168,7 +175,7 @@ namespace RW_NodeTree.Rendering
         /// 
         /// </summary>
         /// <param name="camera"></param>
-        public void DrawInfo(Camera camera)
+        public void DrawInfo(Camera? camera)
         {
             if (probeAnchor != null || !DrawMeshInstanced)
             {

@@ -1,4 +1,5 @@
 ﻿using HarmonyLib;
+using RW_NodeTree.Tools;
 using System;
 using System.Collections.Generic;
 using Verse;
@@ -20,16 +21,16 @@ namespace RW_NodeTree.Patch
             try
             {
                 Job job = __instance.CurJob;
-                if(job != null && typeof(JobDriver_AttackStatic).IsAssignableFrom(job.def.driverClass) && job.verbToUse?.Caster == __instance)
+                if (job != null && typeof(JobDriver_AttackStatic).IsAssignableFrom(job.def.driverClass) && job.verbToUse?.Caster == __instance)
                 {
-                    List<Verb> verbList = CompChildNodeProccesser.GetOriginalAllVerbs(__instance.CurJob.verbToUse.verbTracker);
+                    List<Verb?>? verbList = __instance.CurJob.verbToUse.verbTracker.GetOriginalAllVerbs();
                     if (verbList.Remove(__instance.CurJob.verbToUse))
                     {
                         verbList.Insert(0, __instance.CurJob.verbToUse);
                     }
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 Log.Error(ex.ToString());
             }

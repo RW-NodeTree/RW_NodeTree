@@ -16,11 +16,11 @@ namespace RW_NodeTree.Patch
         )]
         private static void PostVerb_DirectOwner(Verb __instance, ref IVerbOwner __result)
         {
-            Thing thing = (__result as Thing) ?? (__result as ThingComp)?.parent;
-            CompChildNodeProccesser compChild = ((CompChildNodeProccesser)thing) ?? (thing?.ParentHolder as CompChildNodeProccesser);
-            if (compChild != null && compChild.Props.VerbDirectOwnerRedictory && CompChildNodeProccesser.GetSameTypeVerbOwner(__result.GetType(), thing) == __instance)
+            Thing? thing = (__result as Thing) ?? (__result as ThingComp)?.parent;
+            CompChildNodeProccesser? compChild = ((CompChildNodeProccesser?)thing) ?? (thing?.ParentHolder as CompChildNodeProccesser);
+            if (compChild != null && compChild.Props.VerbDirectOwnerRedictory && CompChildNodeProccesser.GetSameTypeVerbOwner(__result.GetType(), thing!) == __instance)
             {
-                __result = compChild.GetBeforeConvertVerbCorrespondingThing(__result.GetType(), __instance, true).Item2?.DirectOwner ?? __result;
+                __result = compChild.GetBeforeConvertThingWithVerb(__result.GetType(), __instance, true).Item2?.DirectOwner ?? __result;
             }
         }
 
@@ -33,12 +33,12 @@ namespace RW_NodeTree.Patch
         )]
         private static void PostVerb_EquipmentSource(Verb __instance, ref ThingWithComps __result)
         {
-            IVerbOwner directOwner = __instance.verbTracker?.directOwner;
-            Thing thing = (directOwner as Thing) ?? (directOwner as ThingComp)?.parent;
-            CompChildNodeProccesser compChild = ((CompChildNodeProccesser)thing) ?? (thing?.ParentHolder as CompChildNodeProccesser);
-            if (compChild != null && compChild.Props.VerbEquipmentSourceRedictory && CompChildNodeProccesser.GetSameTypeVerbOwner(directOwner.GetType(), thing) == directOwner)
+            IVerbOwner? directOwner = __instance.verbTracker?.directOwner;
+            Thing? thing = (directOwner as Thing) ?? (directOwner as ThingComp)?.parent;
+            CompChildNodeProccesser? compChild = ((CompChildNodeProccesser?)thing) ?? (thing?.ParentHolder as CompChildNodeProccesser);
+            if (compChild != null && directOwner != null && compChild.Props.VerbEquipmentSourceRedictory && CompChildNodeProccesser.GetSameTypeVerbOwner(directOwner.GetType(), thing!) == directOwner)
             {
-                __result = (compChild.GetBeforeConvertVerbCorrespondingThing(directOwner.GetType(), __instance).Item1 as ThingWithComps) ?? __result;
+                __result = (compChild.GetBeforeConvertThingWithVerb(directOwner.GetType(), __instance).Item1 as ThingWithComps) ?? __result;
             }
         }
 
@@ -50,15 +50,15 @@ namespace RW_NodeTree.Patch
         )]
         private static void PostVerb_UIIcon(Verb __instance, ref Texture2D __result)
         {
-            IVerbOwner directOwner = __instance.verbTracker?.directOwner;
-            Thing thing = (directOwner as Thing) ?? (directOwner as ThingComp)?.parent;
-            Thing EquipmentSource = __instance.EquipmentSource;
-            CompChildNodeProccesser compChild = EquipmentSource;
-            if (compChild != null && compChild.Props.VerbIconVerbInstanceSource && CompChildNodeProccesser.GetSameTypeVerbOwner(directOwner.GetType(), thing) == directOwner)
+            IVerbOwner? directOwner = __instance.verbTracker?.directOwner;
+            Thing? thing = (directOwner as Thing) ?? (directOwner as ThingComp)?.parent;
+            Thing? EquipmentSource = __instance.EquipmentSource;
+            CompChildNodeProccesser? compChild = EquipmentSource;
+            if (compChild != null && directOwner != null && compChild.Props.VerbIconVerbInstanceSource && CompChildNodeProccesser.GetSameTypeVerbOwner(directOwner.GetType(), thing!) == directOwner)
             {
                 EquipmentSource = thing;
-                compChild = ((CompChildNodeProccesser)EquipmentSource)?? (EquipmentSource?.ParentHolder as CompChildNodeProccesser);
-                EquipmentSource = (compChild?.GetBeforeConvertVerbCorrespondingThing(directOwner.GetType(), __instance).Item1 as ThingWithComps) ?? EquipmentSource;
+                compChild = ((CompChildNodeProccesser?)EquipmentSource) ?? (EquipmentSource?.ParentHolder as CompChildNodeProccesser);
+                EquipmentSource = (compChild?.GetBeforeConvertThingWithVerb(directOwner.GetType(), __instance).Item1 as ThingWithComps) ?? EquipmentSource;
             }
             __result = (EquipmentSource?.Graphic?.MatSingleFor(EquipmentSource)?.mainTexture as Texture2D) ?? __result;
         }

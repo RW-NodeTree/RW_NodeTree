@@ -53,7 +53,7 @@ namespace RW_NodeTree.Patch
 
         private static bool PreStatWorker_GetValueUnfinalized(StatWorker __instance, MethodInfo __originalMethod, StatRequest req, bool applyPostProcess, ref (Dictionary<string, object>, CompChildNodeProccesser) __state)
         {
-            CompChildNodeProccesser proccesser = req.Thing.RootNode();
+            CompChildNodeProccesser? proccesser = req.Thing.RootNode();
             if (proccesser != null &&
                 __originalMethod.MethodHandle == GetMethodInfo_GetValueUnfinalized_OfType(__instance.GetType()).MethodHandle
             )
@@ -66,7 +66,7 @@ namespace RW_NodeTree.Patch
         }
         private static bool PreStatWorker_FinalizeValue(StatWorker __instance, MethodInfo __originalMethod, StatRequest req, bool applyPostProcess, ref float val, ref (Dictionary<string, object>, CompChildNodeProccesser) __state)
         {
-            CompChildNodeProccesser proccesser = req.Thing.RootNode();
+            CompChildNodeProccesser? proccesser = req.Thing.RootNode();
             if (proccesser != null &&
                 __originalMethod.MethodHandle == GetMethodInfo_FinalizeValue_OfType(__instance.GetType()).MethodHandle
             )
@@ -118,8 +118,8 @@ namespace RW_NodeTree.Patch
                 if (_GetValueUnfinalized?.DeclaringType == type && _GetValueUnfinalized.HasMethodBody())
                 {
                     patcher.Patch(
-                        _GetValueUnfinalized, 
-                        new HarmonyMethod(_PreStatWorker_GetValueUnfinalized), 
+                        _GetValueUnfinalized,
+                        new HarmonyMethod(_PreStatWorker_GetValueUnfinalized),
                         new HarmonyMethod(_PostStatWorker_GetValueUnfinalized),
                         null,
                         new HarmonyMethod(_FinalStatWorker_GetValueUnfinalized)
@@ -130,9 +130,9 @@ namespace RW_NodeTree.Patch
                 if (_FinalizeValue?.DeclaringType == type && _FinalizeValue.HasMethodBody())
                 {
                     patcher.Patch(
-                        _FinalizeValue, 
-                        new HarmonyMethod(_PreStatWorker_FinalizeValue), 
-                        new HarmonyMethod(_PostStatWorker_FinalizeValue), 
+                        _FinalizeValue,
+                        new HarmonyMethod(_PreStatWorker_FinalizeValue),
+                        new HarmonyMethod(_PostStatWorker_FinalizeValue),
                         null,
                         new HarmonyMethod(_FinalStatWorker_FinalizeValue)
                         );

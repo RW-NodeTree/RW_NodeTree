@@ -24,7 +24,7 @@ namespace RW_NodeTree.Patch
             {
                 __result = thing.RootNode()?.PostStatsReportUtility_StatsToDraw(thing, __result)?.ToList() ?? __result;
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 Log.Message(ex.ToString());
             }

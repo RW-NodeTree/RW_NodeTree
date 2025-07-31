@@ -18,19 +18,19 @@ namespace RW_NodeTree.Patch.CombatExtended
 
         //private static AccessTools.FieldRef<object, Verb> CompFireModes_verbInt = null;
 
-        private static bool PreCompFireModes_Verb(ThingComp __instance, ref Verb __result)
+        private static bool PreCompFireModes_Verb(ThingComp __instance, ref Verb? __result)
         {
-            CompChildNodeProccesser comp = ((CompChildNodeProccesser)__instance.parent) ?? (__instance.ParentHolder as CompChildNodeProccesser);
+            CompChildNodeProccesser? comp = ((CompChildNodeProccesser?)__instance.parent) ?? (__instance.ParentHolder as CompChildNodeProccesser);
             if (comp != null)
             {
                 while (comp != null)
                 {
-                    List<Verb> verbs = comp.parent.TryGetComp<CompEquippable>()?.AllVerbs;
+                    List<Verb?>? verbs = comp.parent.TryGetComp<CompEquippable>()?.AllVerbs;
                     if (verbs != null)
                     {
-                        foreach (Verb verb in verbs)
+                        foreach (Verb? verb in verbs)
                         {
-                            if (verb.EquipmentSource == __instance.parent && verb.verbProps.isPrimary)
+                            if (verb != null && verb.EquipmentSource == __instance.parent && verb.verbProps.isPrimary)
                             {
                                 __result = verb;
                                 return false;

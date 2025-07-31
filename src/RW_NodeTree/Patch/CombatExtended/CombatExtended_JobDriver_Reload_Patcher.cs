@@ -15,23 +15,23 @@ namespace RW_NodeTree.Patch.CombatExtended
         private static Type CombatExtended_JobDriver_Reload = GenTypes.GetTypeInAnyAssembly("CombatExtended.JobDriver_Reload");
         private static Type CombatExtended_CompAmmoUser = GenTypes.GetTypeInAnyAssembly("CombatExtended.CompAmmoUser");
 
-        private static MethodInfo JobDriver_Reload_weapon = null;
-        private static void PostJobDriver_Reload_weapon(ref ThingWithComps __result)
+        private static MethodInfo? JobDriver_Reload_weapon = null;
+        private static void PostJobDriver_Reload_weapon(ref ThingWithComps? __result)
         {
-            __result = __result.RootNode()?.parent ?? __result;
+            __result = __result?.RootNode()?.parent ?? __result;
         }
 
-        private static void PostJobDriver_Reload_compReloader(JobDriver __instance, ref ThingComp __result)
+        private static void PostJobDriver_Reload_compReloader(JobDriver __instance, ref ThingComp? __result)
         {
-            CompChildNodeProccesser Proccesser = ((CompChildNodeProccesser)__instance.job.targetB.Thing) ?? (__instance.job.targetB.Thing?.ParentHolder as CompChildNodeProccesser);
-            if(Proccesser != null)
+            CompChildNodeProccesser? Proccesser = ((CompChildNodeProccesser?)__instance.job.targetB.Thing) ?? (__instance.job.targetB.Thing?.ParentHolder as CompChildNodeProccesser);
+            if (Proccesser != null)
             {
-                List<ThingComp> comps = (__instance.job.targetB.Thing as ThingWithComps)?.AllComps;
+                List<ThingComp?>? comps = (__instance.job.targetB.Thing as ThingWithComps)?.AllComps;
                 if (comps != null)
                 {
-                    foreach (ThingComp comp in comps)
+                    foreach (ThingComp? comp in comps)
                     {
-                        if (CombatExtended_CompAmmoUser.IsAssignableFrom(comp.GetType()))
+                        if (comp != null && CombatExtended_CompAmmoUser.IsAssignableFrom(comp.GetType()))
                         {
                             __result = comp;
                             return;

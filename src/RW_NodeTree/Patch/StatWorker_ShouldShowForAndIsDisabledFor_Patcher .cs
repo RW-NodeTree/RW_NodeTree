@@ -16,7 +16,7 @@ namespace RW_NodeTree.Patch
         private static readonly MethodInfo _PostStatWorker_IsDisabledFor = typeof(StatWorker_Patcher).GetMethod("PostStatWorker_IsDisabledFor", BindingFlags.NonPublic | BindingFlags.Static);
         private static readonly MethodInfo _FinalStatWorker_ShouldShowFor = typeof(StatWorker_Patcher).GetMethod("FinalStatWorker_ShouldShowFor", BindingFlags.NonPublic | BindingFlags.Static);
         private static readonly MethodInfo _FinalStatWorker_IsDisabledFor = typeof(StatWorker_Patcher).GetMethod("FinalStatWorker_IsDisabledFor", BindingFlags.NonPublic | BindingFlags.Static);
-        private static readonly Type[] StatWorker_ShouldShowFor_ParmsType = new Type[] { typeof(StatRequest)};
+        private static readonly Type[] StatWorker_ShouldShowFor_ParmsType = new Type[] { typeof(StatRequest) };
         private static readonly Type[] StatWorker_IsDisabledFor_ParmsType = new Type[] { typeof(Thing) };
 
         private static readonly Dictionary<Type, MethodInfo> MethodInfo_ShouldShowFor_OfType = new Dictionary<Type, MethodInfo>();
@@ -53,7 +53,7 @@ namespace RW_NodeTree.Patch
 
         private static bool PreStatWorker_ShouldShowFor(StatWorker __instance, MethodInfo __originalMethod, StatRequest req, ref (Dictionary<string, object>, CompChildNodeProccesser) __state)
         {
-            CompChildNodeProccesser proccesser = req.Thing.RootNode();
+            CompChildNodeProccesser? proccesser = req.Thing.RootNode();
             if (proccesser != null &&
                 __originalMethod.MethodHandle == GetMethodInfo_ShouldShowFor_OfType(__instance.GetType()).MethodHandle
             )
@@ -66,7 +66,7 @@ namespace RW_NodeTree.Patch
         }
         private static bool PreStatWorker_IsDisabledFor(StatWorker __instance, MethodInfo __originalMethod, Thing thing, ref (Dictionary<string, object>, CompChildNodeProccesser) __state)
         {
-            CompChildNodeProccesser proccesser = thing.RootNode();
+            CompChildNodeProccesser? proccesser = thing.RootNode();
             if (proccesser != null &&
                 __originalMethod.MethodHandle == GetMethodInfo_IsDisabledFor_OfType(__instance.GetType()).MethodHandle
             )
@@ -118,8 +118,8 @@ namespace RW_NodeTree.Patch
                 if (_ShouldShowFor?.DeclaringType == type && _ShouldShowFor.HasMethodBody())
                 {
                     patcher.Patch(
-                        _ShouldShowFor, 
-                        new HarmonyMethod(_PreStatWorker_ShouldShowFor), 
+                        _ShouldShowFor,
+                        new HarmonyMethod(_PreStatWorker_ShouldShowFor),
                         new HarmonyMethod(_PostStatWorker_ShouldShowFor),
                         null,
                         new HarmonyMethod(_FinalStatWorker_ShouldShowFor)
@@ -130,8 +130,8 @@ namespace RW_NodeTree.Patch
                 if (_IsDisabledFor?.DeclaringType == type && _IsDisabledFor.HasMethodBody())
                 {
                     patcher.Patch(
-                        _IsDisabledFor, 
-                        new HarmonyMethod(_PreStatWorker_IsDisabledFor), 
+                        _IsDisabledFor,
+                        new HarmonyMethod(_PreStatWorker_IsDisabledFor),
                         new HarmonyMethod(_PostStatWorker_IsDisabledFor),
                         null,
                         new HarmonyMethod(_FinalStatWorker_IsDisabledFor)
