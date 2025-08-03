@@ -282,16 +282,13 @@ namespace RW_NodeTree
                     Log.Error(ex.ToString());
                 }
             }
-            lock (ChildNodes)
+            List<VerbPropertiesRegiestInfo> verbPropertiesRegiestInfo = internal_GetRegiestedNodeVerbPropertiesInfos(ownerType, verbProperties);
+            List<VerbProperties> result = new List<VerbProperties>(verbPropertiesRegiestInfo.Count);
+            foreach (VerbPropertiesRegiestInfo regiestInfo in verbPropertiesRegiestInfo)
             {
-                List<VerbPropertiesRegiestInfo> verbPropertiesRegiestInfo = internal_GetRegiestedNodeVerbPropertiesInfos(ownerType, verbProperties);
-                List<VerbProperties> result = new List<VerbProperties>(verbPropertiesRegiestInfo.Count);
-                foreach (VerbPropertiesRegiestInfo regiestInfo in verbPropertiesRegiestInfo)
-                {
-                    result.Add(regiestInfo.afterConvertProperties);
-                }
-                return result;
+                result.Add(regiestInfo.afterConvertProperties);
             }
+            return result;
         }
 
         /// <summary>
@@ -313,16 +310,13 @@ namespace RW_NodeTree
                     Log.Error(ex.ToString());
                 }
             }
-            lock (ChildNodes)
+            List<VerbToolRegiestInfo> verbToolRegiestInfo = internal_GetRegiestedNodeVerbToolInfos(ownerType, tools);
+            List<Tool> result = new List<Tool>(verbToolRegiestInfo.Count);
+            foreach (VerbToolRegiestInfo regiestInfo in verbToolRegiestInfo)
             {
-                List<VerbToolRegiestInfo> verbToolRegiestInfo = internal_GetRegiestedNodeVerbToolInfos(ownerType, tools);
-                List<Tool> result = new List<Tool>(verbToolRegiestInfo.Count);
-                foreach (VerbToolRegiestInfo regiestInfo in verbToolRegiestInfo)
-                {
-                    result.Add(regiestInfo.afterConvertTool);
-                }
-                return result;
+                result.Add(regiestInfo.afterConvertTool);
             }
+            return result;
         }
     }
     public abstract partial class CompBasicNodeComp : ThingComp

@@ -576,19 +576,18 @@ namespace RW_NodeTree
         /// </summary>
         public void ResetRenderedTexture()
         {
-            lock (ChildNodes)
-                lock (nodeRenderingInfo)
+            lock (nodeRenderingInfo)
+            {
+                nodeRenderingInfo.Reset();
+                try
                 {
-                    nodeRenderingInfo.Reset();
-                    try
-                    {
-                        if (parent.Spawned && parent.def.drawerType >= DrawerType.MapMeshOnly) parent.DirtyMapMesh(parent.Map);
-                    }
-                    catch (Exception ex)
-                    {
-                        Log.Warning(ex.ToString());
-                    }
+                    if (parent.Spawned && parent.def.drawerType >= DrawerType.MapMeshOnly) parent.DirtyMapMesh(parent.Map);
                 }
+                catch (Exception ex)
+                {
+                    Log.Warning(ex.ToString());
+                }
+            }
             ParentProccesser?.ResetRenderedTexture();
         }
 
@@ -597,20 +596,19 @@ namespace RW_NodeTree
         /// </summary>
         public void ResetVerbs()
         {
-            lock (ChildNodes)
-                lock (regiestedNodeVerbPropertiesInfos)
-                    lock (regiestedNodeVerbToolInfos)
-                        lock (beforeConvertVerbCorrespondingThingCache)
-                        {
-                            foreach (ThingComp comp in parent.AllComps)
-                            {
-                                (comp as IVerbOwner)?.VerbTracker?.VerbsNeedReinitOnLoad();
-                            }
-                            (parent as IVerbOwner)?.VerbTracker?.VerbsNeedReinitOnLoad();
-                            regiestedNodeVerbPropertiesInfos.Clear();
-                            regiestedNodeVerbToolInfos.Clear();
-                            beforeConvertVerbCorrespondingThingCache.Clear();
-                        }
+            lock (regiestedNodeVerbToolInfos)
+            lock (regiestedNodeVerbPropertiesInfos)
+            lock (beforeConvertVerbCorrespondingThingCache)
+            {
+                foreach (ThingComp comp in parent.AllComps)
+                {
+                    (comp as IVerbOwner)?.VerbTracker?.VerbsNeedReinitOnLoad();
+                }
+                (parent as IVerbOwner)?.VerbTracker?.VerbsNeedReinitOnLoad();
+                regiestedNodeVerbToolInfos.Clear();
+                regiestedNodeVerbPropertiesInfos.Clear();
+                beforeConvertVerbCorrespondingThingCache.Clear();
+            }
             ParentProccesser?.ResetVerbs();
         }
 

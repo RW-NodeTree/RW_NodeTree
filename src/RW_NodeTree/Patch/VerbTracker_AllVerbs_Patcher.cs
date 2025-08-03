@@ -1,5 +1,6 @@
 ﻿using HarmonyLib;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading;
 using Verse;
@@ -59,26 +60,8 @@ namespace RW_NodeTree
 
         internal bool GetOriginalVerb
         {
-            get
-            {
-                bool result;
-                int current = Thread.CurrentThread.ManagedThreadId;
-                lock (notSetVerbDirectOwner)
-                {
-                    if (!notSetVerbDirectOwner.TryGetValue(current, out result))
-                    {
-                        notSetVerbDirectOwner.Add(current, false);
-                    }
-                }
-                return result;
-            }
-            set
-            {
-                lock (notSetVerbDirectOwner)
-                {
-                    notSetVerbDirectOwner.SetOrAdd(Thread.CurrentThread.ManagedThreadId, value);
-                }
-            }
+            get => notSetVerbDirectOwner.GetOrAdd(Thread.CurrentThread.ManagedThreadId, true);
+            set => notSetVerbDirectOwner[Thread.CurrentThread.ManagedThreadId] = value;
         }
 
         /// <summary>
@@ -104,6 +87,6 @@ namespace RW_NodeTree
             return null;
         }
 
-        private readonly Dictionary<int, bool> notSetVerbDirectOwner = new Dictionary<int, bool>();
+        private readonly ConcurrentDictionary<int, bool> notSetVerbDirectOwner = new ConcurrentDictionary<int, bool>();
     }
 }

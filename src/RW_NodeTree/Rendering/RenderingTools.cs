@@ -1,5 +1,6 @@
 using RW_NodeTree.DataStructure;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading;
@@ -81,15 +82,7 @@ namespace RW_NodeTree.Rendering
             {
                 int current = Thread.CurrentThread.ManagedThreadId;
 
-                LinkStack<List<RenderInfo>> list;
-                lock (renderInfos)
-                {
-                    if (!renderInfos.TryGetValue(current, out list))
-                    {
-                        list = new LinkStack<List<RenderInfo>>();
-                        renderInfos.Add(current, list);
-                    }
-                }
+                LinkStack<List<RenderInfo>> list = renderInfos.GetOrAdd(current, _ => new LinkStack<List<RenderInfo>>());
                 if (list.Count > 0) return true;
 
                 return false;
@@ -98,23 +91,15 @@ namespace RW_NodeTree.Rendering
             {
                 int current = Thread.CurrentThread.ManagedThreadId;
 
-                LinkStack<List<RenderInfo>> list;
-                lock (renderInfos)
-                {
-                    if (!renderInfos.TryGetValue(current, out list))
-                    {
-                        list = new LinkStack<List<RenderInfo>>();
-                        renderInfos.Add(current, list);
-                    }
+                LinkStack<List<RenderInfo>> list = renderInfos.GetOrAdd(current, _ => new LinkStack<List<RenderInfo>>());
 
-                    if (value)
-                    {
-                        list.Push(new List<RenderInfo>());
-                    }
-                    else
-                    {
-                        list.Pop();
-                    }
+                if (value)
+                {
+                    list.Push(new List<RenderInfo>());
+                }
+                else
+                {
+                    list.Pop();
                 }
             }
         }
@@ -126,17 +111,11 @@ namespace RW_NodeTree.Rendering
         {
             get
             {
-                LinkStack<List<RenderInfo>> result;
                 int current = Thread.CurrentThread.ManagedThreadId;
-                lock (renderInfos)
-                {
-                    if (!renderInfos.TryGetValue(current, out result))
-                    {
-                        result = new LinkStack<List<RenderInfo>>();
-                        renderInfos.Add(current, result);
-                    }
-                    return result.Peek();
-                }
+                
+                LinkStack<List<RenderInfo>> list = renderInfos.GetOrAdd(current, _ => new LinkStack<List<RenderInfo>>());
+
+                return list.Peek();
             }
         }
 
@@ -375,7 +354,7 @@ namespace RW_NodeTree.Rendering
         private static Camera? camera = null;
         private static CommandBuffer? commandBuffer = null;
         internal static RenderTexture empty = new RenderTexture(1, 1, 0, RenderTextureFormat.ARGB32);
-        private static readonly Dictionary<int, LinkStack<List<RenderInfo>>> renderInfos = new Dictionary<int, LinkStack<List<RenderInfo>>>();
+        private static readonly ConcurrentDictionary<int, LinkStack<List<RenderInfo>>> renderInfos = new ConcurrentDictionary<int, LinkStack<List<RenderInfo>>>();
         public const float CanvasHeight = 4096;
         public const int MaxTexSize = 4096;
         public const uint DefaultTextureSizeFactor = 128;
