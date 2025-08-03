@@ -137,7 +137,7 @@ namespace RW_NodeTree
         /// <param name="rot">rotation</param>
         /// <param name="graphic">original graphic</param>
         /// <returns></returns>
-        protected virtual List<(string?, Thing, List<RenderInfo>)> PreDrawStep(List<(string?, Thing, List<RenderInfo>)> nodeRenderingInfos, Rot4 rot, Graphic? graphic, Dictionary<string, object> cachedDataToPostDrawStep)
+        protected virtual List<(string?, Thing, List<RenderInfo>)> PreDrawStep(List<(string?, Thing, List<RenderInfo>)> nodeRenderingInfos, Rot4 rot, Graphic? graphic, Dictionary<string, object?> cachedDataToPostDrawStep)
         {
             return nodeRenderingInfos;
         }
@@ -149,7 +149,7 @@ namespace RW_NodeTree
         /// <param name="rot">rotation</param>
         /// <param name="graphic">original graphic</param>
         /// <returns></returns>
-        protected virtual List<(string?, Thing, List<RenderInfo>)> PostDrawStep(List<(string?, Thing, List<RenderInfo>)> nodeRenderingInfos, Rot4 rot, Graphic? graphic, Dictionary<string, object> cachedDataFromPerDrawStep)
+        protected virtual List<(string?, Thing, List<RenderInfo>)> PostDrawStep(List<(string?, Thing, List<RenderInfo>)> nodeRenderingInfos, Rot4 rot, Graphic? graphic, Dictionary<string, object?> cachedDataFromPerDrawStep)
         {
             return nodeRenderingInfos;
         }
@@ -170,8 +170,8 @@ namespace RW_NodeTree
         internal bool internal_AllowNode(Thing? node, string? id = null) => AllowNode(node, id);
         internal void internal_Added(NodeContainer container, string? id, bool success, Dictionary<string, object?> cachedData) => Added(container, id, success, cachedData);
         internal void internal_Removed(NodeContainer container, string? id, bool success, Dictionary<string, object?> cachedData) => Removed(container, id, success, cachedData);
-        internal List<(string?, Thing, List<RenderInfo>)> internal_PreDrawStep(List<(string?, Thing, List<RenderInfo>)> nodeRenderingInfos, Rot4 rot, Graphic? graphic, Dictionary<string, object> cachedDataToPostDrawStep) => PreDrawStep(nodeRenderingInfos, rot, graphic, cachedDataToPostDrawStep);
-        internal List<(string?, Thing, List<RenderInfo>)> internal_PostDrawStep(List<(string?, Thing, List<RenderInfo>)> nodeRenderingInfos, Rot4 rot, Graphic? graphic, Dictionary<string, object> cachedDataFromPerDrawStep) => PostDrawStep(nodeRenderingInfos, rot, graphic, cachedDataFromPerDrawStep);
+        internal List<(string?, Thing, List<RenderInfo>)> internal_PreDrawStep(List<(string?, Thing, List<RenderInfo>)> nodeRenderingInfos, Rot4 rot, Graphic? graphic, Dictionary<string, object?> cachedDataToPostDrawStep) => PreDrawStep(nodeRenderingInfos, rot, graphic, cachedDataToPostDrawStep);
+        internal List<(string?, Thing, List<RenderInfo>)> internal_PostDrawStep(List<(string?, Thing, List<RenderInfo>)> nodeRenderingInfos, Rot4 rot, Graphic? graphic, Dictionary<string, object?> cachedDataFromPerDrawStep) => PostDrawStep(nodeRenderingInfos, rot, graphic, cachedDataFromPerDrawStep);
         internal List<VerbPropertiesRegiestInfo> internal_VerbPropertiesRegiestInfoUpadte(Type ownerType, List<VerbPropertiesRegiestInfo> result) => VerbPropertiesRegiestInfoUpadte(ownerType, result);
         internal List<VerbToolRegiestInfo> internal_VerbToolRegiestInfoUpdate(Type ownerType, List<VerbToolRegiestInfo> result) => VerbToolRegiestInfoUpdate(ownerType, result);
     }

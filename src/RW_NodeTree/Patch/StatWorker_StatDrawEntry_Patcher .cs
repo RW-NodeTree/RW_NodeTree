@@ -32,30 +32,30 @@ namespace RW_NodeTree.Patch
             return result;
         }
 
-        private static bool PreStatWorker_GetStatDrawEntryLabel(StatWorker __instance, MethodInfo __originalMethod, StatDef stat, float value, ToStringNumberSense numberSense, StatRequest optionalReq, bool finalized, ref (Dictionary<string, object>, CompChildNodeProccesser) __state)
+        private static bool PreStatWorker_GetStatDrawEntryLabel(StatWorker __instance, MethodInfo __originalMethod, StatDef stat, float value, ToStringNumberSense numberSense, StatRequest optionalReq, bool finalized, ref (Dictionary<string, object?>, CompChildNodeProccesser) __state)
         {
             CompChildNodeProccesser? proccesser = optionalReq.Thing.RootNode();
             if (proccesser != null &&
                 __originalMethod.MethodHandle == GetMethodInfo_GetStatDrawEntryLabel_OfType(__instance.GetType()).MethodHandle
             )
             {
-                __state.Item1 = new Dictionary<string, object>();
+                __state.Item1 = new Dictionary<string, object?>();
                 __state.Item2 = proccesser;
                 return proccesser.PreStatWorker_GetStatDrawEntryLabel(__instance, stat, value, numberSense, optionalReq, finalized, __state.Item1);
             }
             return true;
         }
-        private static void PostStatWorker_GetStatDrawEntryLabel(StatWorker __instance, StatDef stat, float value, ToStringNumberSense numberSense, StatRequest optionalReq, bool finalized, ref string __result, (Dictionary<string, object>, CompChildNodeProccesser) __state)
+        private static void PostStatWorker_GetStatDrawEntryLabel(StatWorker __instance, StatDef stat, float value, ToStringNumberSense numberSense, StatRequest optionalReq, bool finalized, ref string __result, (Dictionary<string, object?>, CompChildNodeProccesser) __state)
         {
-            (Dictionary<string, object> stats, CompChildNodeProccesser proccesser) = __state;
+            (Dictionary<string, object?> stats, CompChildNodeProccesser proccesser) = __state;
             if (stats != null &&
                 proccesser != null
             )
                 __result = proccesser.PostStatWorker_GetStatDrawEntryLabel(__instance, stat, value, numberSense, optionalReq, finalized, __result, stats) ?? __result;
         }
-        private static void FinalStatWorker_GetStatDrawEntryLabel(StatWorker __instance, StatDef stat, float value, ToStringNumberSense numberSense, StatRequest optionalReq, bool finalized, ref string __result, (Dictionary<string, object>, CompChildNodeProccesser) __state, Exception __exception)
+        private static void FinalStatWorker_GetStatDrawEntryLabel(StatWorker __instance, StatDef stat, float value, ToStringNumberSense numberSense, StatRequest optionalReq, bool finalized, ref string __result, (Dictionary<string, object?>, CompChildNodeProccesser) __state, Exception __exception)
         {
-            (Dictionary<string, object> stats, CompChildNodeProccesser proccesser) = __state;
+            (Dictionary<string, object?> stats, CompChildNodeProccesser proccesser) = __state;
             if (stats != null &&
                 proccesser != null
             )
@@ -98,7 +98,7 @@ namespace RW_NodeTree
         /// <param name="statWorker">StatWorker</param>
         /// <param name="req">parm 'req' of StatWorker.GetStatDrawEntryLabel()</param>
         /// <param name="applyPostProcess">parm 'applyPostProcess' of StatWorker.GetStatDrawEntryLabel()</param>
-        internal bool PreStatWorker_GetStatDrawEntryLabel(StatWorker statWorker, StatDef stat, float value, ToStringNumberSense numberSense, StatRequest optionalReq, bool finalized, Dictionary<string, object> stats)
+        internal bool PreStatWorker_GetStatDrawEntryLabel(StatWorker statWorker, StatDef stat, float value, ToStringNumberSense numberSense, StatRequest optionalReq, bool finalized, Dictionary<string, object?> stats)
         {
             UpdateNode();
             bool result = true;
@@ -124,7 +124,7 @@ namespace RW_NodeTree
         /// <param name="statWorker">StatWorker</param>
         /// <param name="req">parm 'req' of StatWorker.GetStatDrawEntryLabel()</param>
         /// <param name="applyPostProcess">parm 'applyPostProcess' of StatWorker.GetStatDrawEntryLabel()</param>
-        internal string PostStatWorker_GetStatDrawEntryLabel(StatWorker statWorker, StatDef stat, float value, ToStringNumberSense numberSense, StatRequest optionalReq, bool finalized, string result, Dictionary<string, object> stats)
+        internal string PostStatWorker_GetStatDrawEntryLabel(StatWorker statWorker, StatDef stat, float value, ToStringNumberSense numberSense, StatRequest optionalReq, bool finalized, string result, Dictionary<string, object?> stats)
         {
             foreach (CompBasicNodeComp comp in AllNodeComp)
             {
@@ -148,7 +148,7 @@ namespace RW_NodeTree
         /// <param name="statWorker">StatWorker</param>
         /// <param name="req">parm 'req' of StatWorker.GetStatDrawEntryLabel()</param>
         /// <param name="applyFinalProcess">parm 'applyFinalProcess' of StatWorker.GetStatDrawEntryLabel()</param>
-        internal string FinalStatWorker_GetStatDrawEntryLabel(StatWorker statWorker, StatDef stat, float value, ToStringNumberSense numberSense, StatRequest optionalReq, bool finalized, string result, Dictionary<string, object> stats, Exception exception)
+        internal string FinalStatWorker_GetStatDrawEntryLabel(StatWorker statWorker, StatDef stat, float value, ToStringNumberSense numberSense, StatRequest optionalReq, bool finalized, string result, Dictionary<string, object?> stats, Exception exception)
         {
             foreach (CompBasicNodeComp comp in AllNodeComp)
             {
@@ -166,23 +166,23 @@ namespace RW_NodeTree
     }
     public abstract partial class CompBasicNodeComp : ThingComp
     {
-        protected virtual bool PreStatWorker_GetStatDrawEntryLabel(StatWorker statWorker, StatDef stat, float value, ToStringNumberSense numberSense, StatRequest optionalReq, bool finalized, Dictionary<string, object> stats)
+        protected virtual bool PreStatWorker_GetStatDrawEntryLabel(StatWorker statWorker, StatDef stat, float value, ToStringNumberSense numberSense, StatRequest optionalReq, bool finalized, Dictionary<string, object?> stats)
         {
             return true;
         }
-        protected virtual string PostStatWorker_GetStatDrawEntryLabel(StatWorker statWorker, StatDef stat, float value, ToStringNumberSense numberSense, StatRequest optionalReq, bool finalized, string result, Dictionary<string, object> stats)
+        protected virtual string PostStatWorker_GetStatDrawEntryLabel(StatWorker statWorker, StatDef stat, float value, ToStringNumberSense numberSense, StatRequest optionalReq, bool finalized, string result, Dictionary<string, object?> stats)
         {
             return result;
         }
-        protected virtual string FinalStatWorker_GetStatDrawEntryLabel(StatWorker statWorker, StatDef stat, float value, ToStringNumberSense numberSense, StatRequest optionalReq, bool finalized, string result, Dictionary<string, object> stats, Exception exception)
+        protected virtual string FinalStatWorker_GetStatDrawEntryLabel(StatWorker statWorker, StatDef stat, float value, ToStringNumberSense numberSense, StatRequest optionalReq, bool finalized, string result, Dictionary<string, object?> stats, Exception exception)
         {
             return result;
         }
-        internal bool internal_PreStatWorker_GetStatDrawEntryLabel(StatWorker statWorker, StatDef stat, float value, ToStringNumberSense numberSense, StatRequest optionalReq, bool finalized, Dictionary<string, object> stats)
+        internal bool internal_PreStatWorker_GetStatDrawEntryLabel(StatWorker statWorker, StatDef stat, float value, ToStringNumberSense numberSense, StatRequest optionalReq, bool finalized, Dictionary<string, object?> stats)
             => PreStatWorker_GetStatDrawEntryLabel(statWorker, stat, value, numberSense, optionalReq, finalized, stats);
-        internal string internal_PostStatWorker_GetStatDrawEntryLabel(StatWorker statWorker, StatDef stat, float value, ToStringNumberSense numberSense, StatRequest optionalReq, bool finalized, string result, Dictionary<string, object> stats)
+        internal string internal_PostStatWorker_GetStatDrawEntryLabel(StatWorker statWorker, StatDef stat, float value, ToStringNumberSense numberSense, StatRequest optionalReq, bool finalized, string result, Dictionary<string, object?> stats)
             => PostStatWorker_GetStatDrawEntryLabel(statWorker, stat, value, numberSense, optionalReq, finalized, result, stats);
-        internal string internal_FinalStatWorker_GetStatDrawEntryLabel(StatWorker statWorker, StatDef stat, float value, ToStringNumberSense numberSense, StatRequest optionalReq, bool finalized, string result, Dictionary<string, object> stats, Exception exception)
+        internal string internal_FinalStatWorker_GetStatDrawEntryLabel(StatWorker statWorker, StatDef stat, float value, ToStringNumberSense numberSense, StatRequest optionalReq, bool finalized, string result, Dictionary<string, object?> stats, Exception exception)
             => FinalStatWorker_GetStatDrawEntryLabel(statWorker, stat, value, numberSense, optionalReq, finalized, result, stats, exception);
 
     }

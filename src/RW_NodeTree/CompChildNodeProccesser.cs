@@ -796,7 +796,7 @@ namespace RW_NodeTree
                 }
             }
 
-            Dictionary<string, object> cachingData = new Dictionary<string, object>();
+            Dictionary<string, object?> cachingData = new Dictionary<string, object?>();
 
             foreach (CompBasicNodeComp comp in AllNodeComp)
             {

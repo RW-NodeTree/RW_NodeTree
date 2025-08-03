@@ -52,7 +52,7 @@ namespace RW_NodeTree.Patch
             return result;
         }
 
-        private static bool PreStatWorker_GetExplanationUnfinalized(StatWorker __instance, MethodInfo __originalMethod, StatRequest req, ToStringNumberSense numberSense, ref (Dictionary<string, object>, CompChildNodeProccesser) __state)
+        private static bool PreStatWorker_GetExplanationUnfinalized(StatWorker __instance, MethodInfo __originalMethod, StatRequest req, ToStringNumberSense numberSense, ref (Dictionary<string, object?>, CompChildNodeProccesser) __state)
         {
             CompChildNodeProccesser? proccesser = req.Thing.RootNode();
             if (
@@ -60,13 +60,13 @@ namespace RW_NodeTree.Patch
                 __originalMethod.MethodHandle == GetMethodInfo_GetExplanationUnfinalized_OfType(__instance.GetType()).MethodHandle
             )
             {
-                __state.Item1 = new Dictionary<string, object>();
+                __state.Item1 = new Dictionary<string, object?>();
                 __state.Item2 = proccesser;
                 return proccesser.PreStatWorker_GetExplanationUnfinalized(__instance, req, numberSense, __state.Item1);
             }
             return true;
         }
-        private static bool PreStatWorker_GetExplanationFinalizePart(StatWorker __instance, MethodBase __originalMethod, StatRequest req, ToStringNumberSense numberSense, float finalVal, ref (Dictionary<string, object>, CompChildNodeProccesser) __state)
+        private static bool PreStatWorker_GetExplanationFinalizePart(StatWorker __instance, MethodBase __originalMethod, StatRequest req, ToStringNumberSense numberSense, float finalVal, ref (Dictionary<string, object?>, CompChildNodeProccesser) __state)
         {
             CompChildNodeProccesser? proccesser = req.Thing.RootNode();
             if (
@@ -76,15 +76,15 @@ namespace RW_NodeTree.Patch
                 GetMethodInfo_GetExplanationFinalizePart_OfType(__instance.GetType()).MethodHandle
             )
             {
-                __state.Item1 = new Dictionary<string, object>();
+                __state.Item1 = new Dictionary<string, object?>();
                 __state.Item2 = proccesser;
                 return proccesser.PreStatWorker_GetExplanationFinalizePart(__instance, req, numberSense, finalVal, __state.Item1);
             }
             return true;
         }
-        private static void PostStatWorker_GetExplanationUnfinalized(StatWorker __instance, StatRequest req, ToStringNumberSense numberSense, ref string __result, (Dictionary<string, object>, CompChildNodeProccesser) __state)
+        private static void PostStatWorker_GetExplanationUnfinalized(StatWorker __instance, StatRequest req, ToStringNumberSense numberSense, ref string __result, (Dictionary<string, object?>, CompChildNodeProccesser) __state)
         {
-            (Dictionary<string, object> stats, CompChildNodeProccesser proccesser) = __state;
+            (Dictionary<string, object?> stats, CompChildNodeProccesser proccesser) = __state;
             if (stats != null &&
                 proccesser != null
             )
@@ -92,9 +92,9 @@ namespace RW_NodeTree.Patch
                 __result = proccesser.PostStatWorker_GetExplanationUnfinalized(__instance, req, numberSense, __result, stats) ?? __result;
             }
         }
-        private static void PostStatWorker_GetExplanationFinalizePart(StatWorker __instance, StatRequest req, ToStringNumberSense numberSense, float finalVal, ref string __result, (Dictionary<string, object>, CompChildNodeProccesser) __state)
+        private static void PostStatWorker_GetExplanationFinalizePart(StatWorker __instance, StatRequest req, ToStringNumberSense numberSense, float finalVal, ref string __result, (Dictionary<string, object?>, CompChildNodeProccesser) __state)
         {
-            (Dictionary<string, object> stats, CompChildNodeProccesser proccesser) = __state;
+            (Dictionary<string, object?> stats, CompChildNodeProccesser proccesser) = __state;
             if (stats != null &&
                 proccesser != null
             )
@@ -102,9 +102,9 @@ namespace RW_NodeTree.Patch
                 __result = proccesser.PostStatWorker_GetExplanationFinalizePart(__instance, req, numberSense, finalVal, __result, stats) ?? __result;
             }
         }
-        private static void FinalStatWorker_GetExplanationUnfinalized(StatWorker __instance, StatRequest req, ToStringNumberSense numberSense, ref string __result, (Dictionary<string, object>, CompChildNodeProccesser) __state, Exception __exception)
+        private static void FinalStatWorker_GetExplanationUnfinalized(StatWorker __instance, StatRequest req, ToStringNumberSense numberSense, ref string __result, (Dictionary<string, object?>, CompChildNodeProccesser) __state, Exception __exception)
         {
-            (Dictionary<string, object> stats, CompChildNodeProccesser proccesser) = __state;
+            (Dictionary<string, object?> stats, CompChildNodeProccesser proccesser) = __state;
             if (stats != null &&
                 proccesser != null
             )
@@ -112,9 +112,9 @@ namespace RW_NodeTree.Patch
                 __result = proccesser.FinalStatWorker_GetExplanationUnfinalized(__instance, req, numberSense, __result, stats, __exception) ?? __result;
             }
         }
-        private static void FinalStatWorker_GetExplanationFinalizePart(StatWorker __instance, StatRequest req, ToStringNumberSense numberSense, float finalVal, ref string __result, (Dictionary<string, object>, CompChildNodeProccesser) __state, Exception __exception)
+        private static void FinalStatWorker_GetExplanationFinalizePart(StatWorker __instance, StatRequest req, ToStringNumberSense numberSense, float finalVal, ref string __result, (Dictionary<string, object?>, CompChildNodeProccesser) __state, Exception __exception)
         {
-            (Dictionary<string, object> stats, CompChildNodeProccesser proccesser) = __state;
+            (Dictionary<string, object?> stats, CompChildNodeProccesser proccesser) = __state;
             if (stats != null &&
                 proccesser != null
             )
@@ -171,7 +171,7 @@ namespace RW_NodeTree
         /// <param name="statWorker">StatWorker</param>
         /// <param name="req">parm 'req' of StatWorker.GetExplanationUnfinalized()</param>
         /// <param name="numberSense">parm 'numberSense' of StatWorker.GetExplanationUnfinalized()</param>
-        internal bool PreStatWorker_GetExplanationUnfinalized(StatWorker statWorker, StatRequest req, ToStringNumberSense numberSense, Dictionary<string, object> stats)
+        internal bool PreStatWorker_GetExplanationUnfinalized(StatWorker statWorker, StatRequest req, ToStringNumberSense numberSense, Dictionary<string, object?> stats)
         {
             UpdateNode();
             bool result = true;
@@ -197,7 +197,7 @@ namespace RW_NodeTree
         /// <param name="req">parm 'req' of StatWorker.GetExplanationFinalizePart()</param>
         /// <param name="numberSense">parm 'numberSense' of StatWorker.GetExplanationFinalizePart()</param>
         /// <param name="finalVal">parm 'finalVal' of StatWorker.GetExplanationFinalizePart()</param>
-        internal bool PreStatWorker_GetExplanationFinalizePart(StatWorker statWorker, StatRequest req, ToStringNumberSense numberSense, float finalVal, Dictionary<string, object> stats)
+        internal bool PreStatWorker_GetExplanationFinalizePart(StatWorker statWorker, StatRequest req, ToStringNumberSense numberSense, float finalVal, Dictionary<string, object?> stats)
         {
             UpdateNode();
             bool result = true;
@@ -222,7 +222,7 @@ namespace RW_NodeTree
         /// <param name="statWorker">StatWorker</param>
         /// <param name="req">parm 'req' of StatWorker.GetExplanationUnfinalized()</param>
         /// <param name="numberSense">parm 'numberSense' of StatWorker.GetExplanationUnfinalized()</param>
-        internal string PostStatWorker_GetExplanationUnfinalized(StatWorker statWorker, StatRequest req, ToStringNumberSense numberSense, string result, Dictionary<string, object> stats)
+        internal string PostStatWorker_GetExplanationUnfinalized(StatWorker statWorker, StatRequest req, ToStringNumberSense numberSense, string result, Dictionary<string, object?> stats)
         {
             foreach (CompBasicNodeComp comp in AllNodeComp)
             {
@@ -247,7 +247,7 @@ namespace RW_NodeTree
         /// <param name="req">parm 'req' of StatWorker.GetExplanationFinalizePart()</param>
         /// <param name="numberSense">parm 'numberSense' of StatWorker.GetExplanationFinalizePart()</param>
         /// <param name="finalVal">parm 'finalVal' of StatWorker.GetExplanationFinalizePart()</param>
-        internal string PostStatWorker_GetExplanationFinalizePart(StatWorker statWorker, StatRequest req, ToStringNumberSense numberSense, float finalVal, string result, Dictionary<string, object> stats)
+        internal string PostStatWorker_GetExplanationFinalizePart(StatWorker statWorker, StatRequest req, ToStringNumberSense numberSense, float finalVal, string result, Dictionary<string, object?> stats)
         {
             foreach (CompBasicNodeComp comp in AllNodeComp)
             {
@@ -270,7 +270,7 @@ namespace RW_NodeTree
         /// <param name="statWorker">StatWorker</param>
         /// <param name="req">parm 'req' of StatWorker.GetExplanationUnfinalized()</param>
         /// <param name="numberSense">parm 'numberSense' of StatWorker.GetExplanationUnfinalized()</param>
-        internal string FinalStatWorker_GetExplanationUnfinalized(StatWorker statWorker, StatRequest req, ToStringNumberSense numberSense, string result, Dictionary<string, object> stats, Exception exception)
+        internal string FinalStatWorker_GetExplanationUnfinalized(StatWorker statWorker, StatRequest req, ToStringNumberSense numberSense, string result, Dictionary<string, object?> stats, Exception exception)
         {
             foreach (CompBasicNodeComp comp in AllNodeComp)
             {
@@ -295,7 +295,7 @@ namespace RW_NodeTree
         /// <param name="req">parm 'req' of StatWorker.GetExplanationFinalizePart()</param>
         /// <param name="numberSense">parm 'numberSense' of StatWorker.GetExplanationFinalizePart()</param>
         /// <param name="finalVal">parm 'finalVal' of StatWorker.GetExplanationFinalizePart()</param>
-        internal string FinalStatWorker_GetExplanationFinalizePart(StatWorker statWorker, StatRequest req, ToStringNumberSense numberSense, float finalVal, string result, Dictionary<string, object> stats, Exception exception)
+        internal string FinalStatWorker_GetExplanationFinalizePart(StatWorker statWorker, StatRequest req, ToStringNumberSense numberSense, float finalVal, string result, Dictionary<string, object?> stats, Exception exception)
         {
             foreach (CompBasicNodeComp comp in AllNodeComp)
             {
@@ -314,41 +314,41 @@ namespace RW_NodeTree
     }
     public abstract partial class CompBasicNodeComp : ThingComp
     {
-        protected virtual bool PreStatWorker_GetExplanationUnfinalized(StatWorker statWorker, StatRequest req, ToStringNumberSense numberSense, Dictionary<string, object> stats)
+        protected virtual bool PreStatWorker_GetExplanationUnfinalized(StatWorker statWorker, StatRequest req, ToStringNumberSense numberSense, Dictionary<string, object?> stats)
         {
             return true;
         }
-        protected virtual bool PreStatWorker_GetExplanationFinalizePart(StatWorker statWorker, StatRequest req, ToStringNumberSense numberSense, float finalVal, Dictionary<string, object> stats)
+        protected virtual bool PreStatWorker_GetExplanationFinalizePart(StatWorker statWorker, StatRequest req, ToStringNumberSense numberSense, float finalVal, Dictionary<string, object?> stats)
         {
             return true;
         }
-        protected virtual string PostStatWorker_GetExplanationUnfinalized(StatWorker statWorker, StatRequest req, ToStringNumberSense numberSense, string result, Dictionary<string, object> stats)
+        protected virtual string PostStatWorker_GetExplanationUnfinalized(StatWorker statWorker, StatRequest req, ToStringNumberSense numberSense, string result, Dictionary<string, object?> stats)
         {
             return result;
         }
-        protected virtual string PostStatWorker_GetExplanationFinalizePart(StatWorker statWorker, StatRequest req, ToStringNumberSense numberSense, float finalVal, string result, Dictionary<string, object> stats)
+        protected virtual string PostStatWorker_GetExplanationFinalizePart(StatWorker statWorker, StatRequest req, ToStringNumberSense numberSense, float finalVal, string result, Dictionary<string, object?> stats)
         {
             return result;
         }
-        protected virtual string FinalStatWorker_GetExplanationUnfinalized(StatWorker statWorker, StatRequest req, ToStringNumberSense numberSense, string result, Dictionary<string, object> stats, Exception exception)
+        protected virtual string FinalStatWorker_GetExplanationUnfinalized(StatWorker statWorker, StatRequest req, ToStringNumberSense numberSense, string result, Dictionary<string, object?> stats, Exception exception)
         {
             return result;
         }
-        protected virtual string FinalStatWorker_GetExplanationFinalizePart(StatWorker statWorker, StatRequest req, ToStringNumberSense numberSense, float finalVal, string result, Dictionary<string, object> stats, Exception exception)
+        protected virtual string FinalStatWorker_GetExplanationFinalizePart(StatWorker statWorker, StatRequest req, ToStringNumberSense numberSense, float finalVal, string result, Dictionary<string, object?> stats, Exception exception)
         {
             return result;
         }
-        internal bool internal_PreStatWorker_GetExplanationUnfinalized(StatWorker statWorker, StatRequest req, ToStringNumberSense numberSense, Dictionary<string, object> stats)
+        internal bool internal_PreStatWorker_GetExplanationUnfinalized(StatWorker statWorker, StatRequest req, ToStringNumberSense numberSense, Dictionary<string, object?> stats)
             => PreStatWorker_GetExplanationUnfinalized(statWorker, req, numberSense, stats);
-        internal bool internal_PreStatWorker_GetExplanationFinalizePart(StatWorker statWorker, StatRequest req, ToStringNumberSense numberSense, float finalVal, Dictionary<string, object> stats)
+        internal bool internal_PreStatWorker_GetExplanationFinalizePart(StatWorker statWorker, StatRequest req, ToStringNumberSense numberSense, float finalVal, Dictionary<string, object?> stats)
             => PreStatWorker_GetExplanationFinalizePart(statWorker, req, numberSense, finalVal, stats);
-        internal string internal_PostStatWorker_GetExplanationUnfinalized(StatWorker statWorker, StatRequest req, ToStringNumberSense numberSense, string result, Dictionary<string, object> stats)
+        internal string internal_PostStatWorker_GetExplanationUnfinalized(StatWorker statWorker, StatRequest req, ToStringNumberSense numberSense, string result, Dictionary<string, object?> stats)
             => PostStatWorker_GetExplanationUnfinalized(statWorker, req, numberSense, result, stats);
-        internal string internal_PostStatWorker_GetExplanationFinalizePart(StatWorker statWorker, StatRequest req, ToStringNumberSense numberSense, float finalVal, string result, Dictionary<string, object> stats)
+        internal string internal_PostStatWorker_GetExplanationFinalizePart(StatWorker statWorker, StatRequest req, ToStringNumberSense numberSense, float finalVal, string result, Dictionary<string, object?> stats)
             => PostStatWorker_GetExplanationFinalizePart(statWorker, req, numberSense, finalVal, result, stats);
-        internal string internal_FinalStatWorker_GetExplanationUnfinalized(StatWorker statWorker, StatRequest req, ToStringNumberSense numberSense, string result, Dictionary<string, object> stats, Exception exception)
+        internal string internal_FinalStatWorker_GetExplanationUnfinalized(StatWorker statWorker, StatRequest req, ToStringNumberSense numberSense, string result, Dictionary<string, object?> stats, Exception exception)
             => FinalStatWorker_GetExplanationUnfinalized(statWorker, req, numberSense, result, stats, exception);
-        internal string internal_FinalStatWorker_GetExplanationFinalizePart(StatWorker statWorker, StatRequest req, ToStringNumberSense numberSense, float finalVal, string result, Dictionary<string, object> stats, Exception exception)
+        internal string internal_FinalStatWorker_GetExplanationFinalizePart(StatWorker statWorker, StatRequest req, ToStringNumberSense numberSense, float finalVal, string result, Dictionary<string, object?> stats, Exception exception)
             => FinalStatWorker_GetExplanationFinalizePart(statWorker, req, numberSense, finalVal, result, stats, exception);
     }
 }
