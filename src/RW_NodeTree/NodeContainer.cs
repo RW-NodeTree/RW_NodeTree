@@ -37,7 +37,7 @@ namespace RW_NodeTree
                     if (value != null && indicesByThing.ContainsKey(value)) return;
                     Thing? origin = this[key];
                     currentKey = key;
-                    if ((origin == null || Remove(origin)) && !TryAdd(value))
+                    if ((origin == null || Remove(origin)) && value != null && !TryAdd(value))
                     {
                         if (origin != null && !TryAdd(origin))
                         {
@@ -65,7 +65,7 @@ namespace RW_NodeTree
                     if (item == null || !indicesByThing.ContainsKey(item)) return;
                     string? origin = this[item];
                     currentKey = value;
-                    if ((origin == null || Remove(origin)) && !TryAdd(item))
+                    if ((origin == null || Remove(origin)) && value != null && !TryAdd(item))
                     {
                         currentKey = origin;
                         if (origin != null && !TryAdd(item))
@@ -558,12 +558,7 @@ namespace RW_NodeTree
 
         public IEnumerator<KeyValuePair<string, Thing?>> GetEnumerator()
         {
-            List<(string, Thing)> innerListCopy;
-            lock (this)
-            {
-                innerListCopy = new List<(string, Thing)>(innerList);
-            }
-            foreach(var kv in innerListCopy)
+            foreach(var kv in innerList)
             {
                 yield return new KeyValuePair<string, Thing?>(kv.Item1, kv.Item2);
             }
