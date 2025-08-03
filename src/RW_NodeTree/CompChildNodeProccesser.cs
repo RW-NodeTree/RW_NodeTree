@@ -646,7 +646,7 @@ namespace RW_NodeTree
                     {
                         VerbPropertiesRegiestInfo regiestInfo = info[i];
                         List<VerbPropertiesRegiestInfo>? childInfo = regiestInfo.id != null ? ((CompChildNodeProccesser?)ChildNodes[regiestInfo.id])?.internal_GetRegiestedNodeVerbPropertiesInfos(ownerType) : null;
-                        if (regiestInfo.Vaildity && (regiestInfo.id.NullOrEmpty() || ChildNodes.ContainsKey(regiestInfo.id)) && ((childInfo != null && childInfo.Find(x => x.afterConvertProperties == regiestInfo.berforConvertProperties).Vaildity) || childInfo == null))
+                        if (regiestInfo.Vaildity && (regiestInfo.id.NullOrEmpty() || ChildNodes.ContainsKey(regiestInfo.id!)) && ((childInfo != null && childInfo.Find(x => x.afterConvertProperties == regiestInfo.berforConvertProperties).Vaildity) || childInfo == null))
                         {
                             regiestInfo.afterConvertProperties = Gen.MemberwiseClone(regiestInfo.afterConvertProperties);
                             info[i] = regiestInfo;
@@ -697,7 +697,7 @@ namespace RW_NodeTree
                     {
                         VerbToolRegiestInfo regiestInfo = info[i];
                         List<VerbToolRegiestInfo>? childInfo = regiestInfo.id != null ? ((CompChildNodeProccesser?)ChildNodes[regiestInfo.id])?.internal_GetRegiestedNodeVerbToolInfos(ownerType) : null;
-                        if (info[i].Vaildity && (regiestInfo.id.NullOrEmpty() || ChildNodes.ContainsKey(regiestInfo.id)) && ((childInfo != null && childInfo.Find(x => x.afterConvertTool == regiestInfo.berforConvertTool).Vaildity) || childInfo == null))
+                        if (info[i].Vaildity && (regiestInfo.id.NullOrEmpty() || ChildNodes.ContainsKey(regiestInfo.id!)) && ((childInfo != null && childInfo.Find(x => x.afterConvertTool == regiestInfo.berforConvertTool).Vaildity) || childInfo == null))
                         {
                             regiestInfo.afterConvertTool = Gen.MemberwiseClone(regiestInfo.afterConvertTool);
                             regiestInfo.afterConvertTool.id = i.ToString();
@@ -864,7 +864,7 @@ namespace RW_NodeTree
         {
             if (node?.holdingOwner != null) return false;
             if (node?.Destroyed ?? false) return false;
-            if (id.NullOrEmpty() || ChildNodes.IsChildOf(node)) return false;
+            if (!id.IsVaildityKeyFormat() || ChildNodes.IsChildOf(node)) return false;
             foreach (CompBasicNodeComp comp in AllNodeComp)
             {
                 try

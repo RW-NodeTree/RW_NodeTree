@@ -1,6 +1,7 @@
 ﻿using RW_NodeTree.Rendering;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using UnityEngine;
 using Verse;
 
@@ -80,10 +81,11 @@ namespace RW_NodeTree
         /// update event
         /// </summary>
         /// <param name="actionNode">update event action node</param>
-        protected virtual void PreUpdateNode(CompChildNodeProccesser actionNode, Dictionary<string, object?> cachedDataToPostUpatde, Dictionary<string, Thing?> prveChilds, out bool blockEvent, out bool notUpdateTexture)
+        protected virtual Dictionary<string, Thing>? PreUpdateNode(CompChildNodeProccesser actionNode, Dictionary<string, object?> cachedDataToPostUpatde, out bool blockEvent, out bool notUpdateTexture)
         {
             blockEvent = false;
             notUpdateTexture = false;
+            return null;
         }
 
         /// <summary>
@@ -91,7 +93,7 @@ namespace RW_NodeTree
         /// </summary>
         /// <param name="actionNode">update event action node</param>
         /// <returns>stope bubble</returns>
-        protected virtual void PostUpdateNode(CompChildNodeProccesser actionNode, Dictionary<string, object?> cachedDataFromPerUpdate, Dictionary<string, Thing?> prveChilds, out bool blockEvent, out bool notUpdateTexture)
+        protected virtual void PostUpdateNode(CompChildNodeProccesser actionNode, Dictionary<string, object?> cachedDataFromPerUpdate, ReadOnlyDictionary<string, Thing> prveChilds, out bool blockEvent, out bool notUpdateTexture)
         {
             blockEvent = false;
             notUpdateTexture = false;
@@ -163,8 +165,8 @@ namespace RW_NodeTree
             return result;
         }
 
-        internal void internal_PreUpdateNode(CompChildNodeProccesser actionNode, Dictionary<string, object?> cachedDataToPostUpatde, Dictionary<string, Thing?> prveChilds, out bool blockEvent, out bool notUpdateTexture) => PreUpdateNode(actionNode, cachedDataToPostUpatde, prveChilds, out blockEvent, out notUpdateTexture);
-        internal void internal_PostUpdateNode(CompChildNodeProccesser actionNode, Dictionary<string, object?> cachedDataFromPerUpdate, Dictionary<string, Thing?> prveChilds, out bool blockEvent, out bool notUpdateTexture) => PostUpdateNode(actionNode, cachedDataFromPerUpdate, prveChilds, out blockEvent, out notUpdateTexture);
+        internal Dictionary<string, Thing>? internal_PreUpdateNode(CompChildNodeProccesser actionNode, Dictionary<string, object?> cachedDataToPostUpatde, out bool blockEvent, out bool notUpdateTexture) => PreUpdateNode(actionNode, cachedDataToPostUpatde, out blockEvent, out notUpdateTexture);
+        internal void internal_PostUpdateNode(CompChildNodeProccesser actionNode, Dictionary<string, object?> cachedDataFromPerUpdate, ReadOnlyDictionary<string, Thing> prveChilds, out bool blockEvent, out bool notUpdateTexture) => PostUpdateNode(actionNode, cachedDataFromPerUpdate, prveChilds, out blockEvent, out notUpdateTexture);
         internal bool internal_AllowNode(Thing? node, string? id = null) => AllowNode(node, id);
         internal void internal_Added(NodeContainer container, string? id, bool success, Dictionary<string, object?> cachedData) => Added(container, id, success, cachedData);
         internal void internal_Removed(NodeContainer container, string? id, bool success, Dictionary<string, object?> cachedData) => Removed(container, id, success, cachedData);
