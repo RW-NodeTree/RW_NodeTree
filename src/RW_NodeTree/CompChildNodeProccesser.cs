@@ -790,7 +790,7 @@ namespace RW_NodeTree
 
                 if (child != null)
                 {
-                    nodeRenderingInfos.Add((container[(uint)i], child, new List<RenderInfo>()));
+                    nodeRenderingInfos.Add((((IList<string?>)container)[i], child, new List<RenderInfo>()));
                 }
             }
 
@@ -862,7 +862,7 @@ namespace RW_NodeTree
         {
             if (node?.holdingOwner != null) return false;
             if (node?.Destroyed ?? false) return false;
-            if (!id.IsVaildityKeyFormat() || ChildNodes.IsChildOf(node)) return false;
+            if (ChildNodes.IsChildOf(node)) return false;
             foreach (CompBasicNodeComp comp in AllNodeComp)
             {
                 try
