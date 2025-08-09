@@ -25,16 +25,8 @@ namespace RW_NodeTree
         {
             get
             {
-                readerWriterLockSlim.EnterReadLock();
-                try
-                {
-                    TryGetValue(key, out Thing? result);
-                    return result;
-                }
-                finally
-                {
-                    readerWriterLockSlim.ExitReadLock();
-                }
+                TryGetValue(key, out Thing? result);
+                return result;
             }
             set
             {
@@ -70,17 +62,8 @@ namespace RW_NodeTree
         {
             get
             {
-                readerWriterLockSlim.EnterReadLock();
-                try
-                {
-
-                    TryGetValue(key, out string? result);
-                    return result;
-                }
-                finally
-                {
-                    readerWriterLockSlim.ExitReadLock();
-                }
+                TryGetValue(key, out string? result);
+                return result;
             }
             set
             {
@@ -126,7 +109,7 @@ namespace RW_NodeTree
         {
             get
             {
-                readerWriterLockSlim.TryEnterReadLock(10);
+                readerWriterLockSlim.EnterReadLock();
                 try
                 {
 
