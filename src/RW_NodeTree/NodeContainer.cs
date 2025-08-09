@@ -934,7 +934,7 @@ namespace RW_NodeTree
                 value = null;
                 if (!key.IsVaildityKeyFormat()) return false;
                 if (!indicesById.TryGetValue(key!, out int index)) return false;
-                value = this[index];
+                value = innerList[index].Item2;
                 return true;
             }
             finally
@@ -951,7 +951,7 @@ namespace RW_NodeTree
                 value = null;
                 if (key == null) return false;
                 if (!indicesByThing.TryGetValue(key, out int index)) return false;
-                value = ((IList<string>)this)[index];
+                value = innerList[index].Item1;
                 return true;
             }
             finally
