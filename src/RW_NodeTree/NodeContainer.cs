@@ -109,31 +109,17 @@ namespace RW_NodeTree
         {
             get
             {
-                readerWriterLockSlim.EnterReadLock();
-                try
-                {
-
-                    return needUpdate;
-                }
-                finally
-                {
-                    readerWriterLockSlim.ExitReadLock();
-                }
+                return needUpdate;
             }
             set
             {
-                readerWriterLockSlim.EnterWriteLock();
-                try
+                lock (this)
                 {
                     if (needUpdate != value && (needUpdate = value))
                     {
                         NodeContainer? parent = ParentContainer;
                         if (parent != null) parent.NeedUpdate = true;
                     }
-                }
-                finally
-                {
-                    readerWriterLockSlim.ExitWriteLock();
                 }
             }
         }
@@ -356,23 +342,31 @@ namespace RW_NodeTree
             if (proccess == null) return StopEventBubble;
 
             if (actionNode == null) return proccess.RootNode.ChildNodes.internal_UpdateNode(proccess);
-            readerWriterLockSlim.EnterUpgradeableReadLock();
-            try
+            lock (this)
             {
                 if (!NeedUpdate) return StopEventBubble;
 
                 NeedUpdate = false;
 
-                enableWrite = true;
-                for (int i = Count - 1; i >= 0; i--)
+                readerWriterLockSlim.EnterUpgradeableReadLock();
+                try
                 {
-                    if (this[i].Destroyed)
+
+                    enableWrite = true;
+                    for (int i = Count - 1; i >= 0; i--)
                     {
-                        RemoveAt(i);
+                        if (this[i].Destroyed)
+                        {
+                            RemoveAt(i);
+                        }
                     }
+                    //lockUpdate = true;
+                    enableWrite = false;
                 }
-                //lockUpdate = true;
-                enableWrite = false;
+                finally
+                {
+                    readerWriterLockSlim.ExitUpgradeableReadLock();
+                }
                 //Log.Message("1:"+state.ToString());
                 Dictionary<string, object?> cachingData = new Dictionary<string, object?>();
                 Dictionary<string, Thing> nextChilds = new Dictionary<string, Thing>();
@@ -419,12 +413,20 @@ namespace RW_NodeTree
                 //Log.Message("6:" + state.ToString());
 
                 //Log.Message("7:" + state.ToString());
-                enableWrite = true;
-                foreach (KeyValuePair<string, Thing?> pair in diff)
+                readerWriterLockSlim.EnterUpgradeableReadLock();
+                try
                 {
-                    this[pair.Key] = pair.Value;
+                    enableWrite = true;
+                    foreach (KeyValuePair<string, Thing?> pair in diff)
+                    {
+                        this[pair.Key] = pair.Value;
+                    }
+                    enableWrite = false;
                 }
-                enableWrite = false;
+                finally
+                {
+                    readerWriterLockSlim.ExitUpgradeableReadLock();
+                }
 
                 bool reset = true;
                 if (StopEventBubble) goto ret;
@@ -469,10 +471,6 @@ namespace RW_NodeTree
                     if (!NotUpdateTexture) proccess.ResetRenderedTexture();
                 }
                 return StopEventBubble;
-            }
-            finally
-            {
-                readerWriterLockSlim.ExitUpgradeableReadLock();
             }
         }
 
