@@ -126,7 +126,7 @@ namespace RW_NodeTree
         {
             get
             {
-                readerWriterLockSlim.EnterReadLock();
+                readerWriterLockSlim.TryEnterReadLock(10);
                 try
                 {
 
@@ -788,12 +788,9 @@ namespace RW_NodeTree
 
         public void Add((string, Thing) item) => this[item.Item1] = item.Item2;
 
-        public void Add(string item)
-        {
-            throw new NotImplementedException();
-        }
-        public void Add(Thing item) => TryAdd(item);
+        public void Add(string item) => CurrentKey = (item, -1);
 
+        public void Add(Thing item) => TryAdd(item);
 
         public void Add(KeyValuePair<string, Thing?> item) => this[item.Key] = item.Value;
 
@@ -838,10 +835,7 @@ namespace RW_NodeTree
             }
         }
 
-        public void Insert(int index, string item)
-        {
-            throw new NotImplementedException();
-        }
+        void IList<string>.Insert(int index, string item) => CurrentKey = (item, index);
 
         public bool Remove(string key)
         {
@@ -951,8 +945,7 @@ namespace RW_NodeTree
 
         public bool TryGetValue(string key, out Thing? value)
         {
-            bool isUpgradeableReadLockHeld = readerWriterLockSlim.IsUpgradeableReadLockHeld;
-            if (!isUpgradeableReadLockHeld) readerWriterLockSlim.EnterUpgradeableReadLock();
+            readerWriterLockSlim.EnterReadLock();
             try
             {
                 value = null;
@@ -963,14 +956,13 @@ namespace RW_NodeTree
             }
             finally
             {
-                if (!isUpgradeableReadLockHeld) readerWriterLockSlim.ExitUpgradeableReadLock();
+                readerWriterLockSlim.ExitReadLock();
             }
         }
 
         public bool TryGetValue(Thing key, out string? value)
         {
-            bool isUpgradeableReadLockHeld = readerWriterLockSlim.IsUpgradeableReadLockHeld;
-            if (!isUpgradeableReadLockHeld) readerWriterLockSlim.EnterUpgradeableReadLock();
+            readerWriterLockSlim.EnterReadLock();
             try
             {
                 value = null;
@@ -981,7 +973,7 @@ namespace RW_NodeTree
             }
             finally
             {
-                if (!isUpgradeableReadLockHeld) readerWriterLockSlim.ExitUpgradeableReadLock();
+                readerWriterLockSlim.ExitReadLock();
             }
         }
 
