@@ -790,7 +790,7 @@ namespace RW_NodeTree
 
                 if (child != null)
                 {
-                    nodeRenderingInfos.Add((((IList<string?>)container)[i], child, new List<RenderInfo>()));
+                    nodeRenderingInfos.Add((((IList<string>)container)[i], child, new List<RenderInfo>()));
                 }
             }
 
