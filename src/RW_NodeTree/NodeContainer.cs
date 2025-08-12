@@ -449,7 +449,7 @@ namespace RW_NodeTree
                         //reset = false;
                     }
                 }
-                if (!StopEventBubble) goto ret;
+                if (StopEventBubble) goto ret;
                 ReadOnlyDictionary<string, Thing> prveChildsReadOnly = new ReadOnlyDictionary<string, Thing>(prveChilds);
                 foreach (CompBasicNodeComp comp in proccess.AllNodeComp)
                 {
