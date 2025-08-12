@@ -881,17 +881,16 @@ namespace RW_NodeTree
         /// Update node tree
         /// </summary>
         /// <returns></returns>
-        public bool UpdateNode()
+        public void UpdateNode()
         {
             lock (compLoadingCache)
             {
-                if (blockUpdate) return false;
+                if (blockUpdate) return;
                 blockUpdate = true;
             }
-            bool result = ChildNodes.internal_UpdateNode();
+            ChildNodes.internal_UpdateNode();
             lock (compLoadingCache)
                 blockUpdate = false;
-            return result;
         }
 
 

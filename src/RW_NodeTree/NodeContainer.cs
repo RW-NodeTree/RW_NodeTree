@@ -332,19 +332,22 @@ namespace RW_NodeTree
             //if (Scribe.mode == LoadSaveMode.PostLoadInit) needUpdate = false;
         }
 
-        internal bool internal_UpdateNode(CompChildNodeProccesser? actionNode = null)
+        internal void internal_UpdateNode(CompChildNodeProccesser? actionNode = null)
         {
 
-            bool StopEventBubble = false;
             bool NotUpdateTexture = false;
 
             CompChildNodeProccesser proccess = this.Comp;
-            if (proccess == null) return StopEventBubble;
+            if (proccess == null) return;
 
-            if (actionNode == null) return proccess.RootNode.ChildNodes.internal_UpdateNode(proccess);
+            if (actionNode == null)
+            {
+                proccess.RootNode.ChildNodes.internal_UpdateNode(proccess);
+                return;
+            }
             lock (this)
             {
-                if (!NeedUpdate) return StopEventBubble;
+                if (!NeedUpdate) return;
 
                 NeedUpdate = false;
 
@@ -376,7 +379,7 @@ namespace RW_NodeTree
                 {
                     try
                     {
-                        Dictionary<string, Thing>? nexts = comp.internal_PreUpdateNode(actionNode, cachingData, out bool blockEvent, out bool notUpdateTexture);
+                        Dictionary<string, Thing>? nexts = comp.internal_PreUpdateNode(actionNode, cachingData, out bool notUpdateTexture);
                         if (nexts != null)
                         {
                             foreach (var next in nexts)
@@ -385,7 +388,6 @@ namespace RW_NodeTree
                                     nextChilds[next.Key] = next.Value;
                             }
                         }
-                        StopEventBubble |= blockEvent;
                         NotUpdateTexture |= notUpdateTexture;
                     }
                     catch (Exception ex)
@@ -429,13 +431,12 @@ namespace RW_NodeTree
                 }
 
                 bool reset = true;
-                if (StopEventBubble) goto ret;
                 foreach (Thing? node in prveChilds.Values)
                 {
                     NodeContainer? container = ((CompChildNodeProccesser?)node)?.ChildNodes;
                     if (container != null && container.NeedUpdate)
                     {
-                        StopEventBubble = container.internal_UpdateNode(actionNode) || StopEventBubble;
+                        container.internal_UpdateNode(actionNode);
                         reset = false;
                     }
                 }
@@ -445,18 +446,16 @@ namespace RW_NodeTree
                     NodeContainer? container = ((CompChildNodeProccesser?)node)?.ChildNodes;
                     if (container != null && container.NeedUpdate)
                     {
-                        StopEventBubble = container.internal_UpdateNode(actionNode) || StopEventBubble;
+                        container.internal_UpdateNode(actionNode);
                         //reset = false;
                     }
                 }
-                if (StopEventBubble) goto ret;
                 ReadOnlyDictionary<string, Thing> prveChildsReadOnly = new ReadOnlyDictionary<string, Thing>(prveChilds);
                 foreach (CompBasicNodeComp comp in proccess.AllNodeComp)
                 {
                     try
                     {
-                        comp.internal_PostUpdateNode(actionNode, cachingData, prveChildsReadOnly, out bool blockEvent, out bool notUpdateTexture);
-                        StopEventBubble |= blockEvent;
+                        comp.internal_PostUpdateNode(actionNode, cachingData, prveChildsReadOnly, out bool notUpdateTexture);
                         NotUpdateTexture |= notUpdateTexture;
                     }
                     catch (Exception ex)
@@ -464,13 +463,12 @@ namespace RW_NodeTree
                         Log.Error(ex.ToString());
                     }
                 }
-                ret:;
                 if (reset)
                 {
                     proccess.ResetVerbs();
                     if (!NotUpdateTexture) proccess.ResetRenderedTexture();
                 }
-                return StopEventBubble;
+                return;
             }
         }
 
