@@ -364,25 +364,6 @@ namespace RW_NodeTree
             }
         }
 
-        public static T? GetControlledVerbOwner<T>(Thing thing) where T : class, IVerbOwner
-        {
-            if (thing == null) throw new AggregateException(nameof(thing));
-            T? verbOwner = thing as T;
-            ThingWithComps? t = thing as ThingWithComps;
-            if (verbOwner == null && t != null)
-            {
-                foreach (ThingComp comp in t.AllComps)
-                {
-                    if (comp is T casted)
-                    {
-                        verbOwner = casted;
-                        break;
-                    }
-                }
-            }
-            return verbOwner;
-        }
-
 
 
         #region operator
