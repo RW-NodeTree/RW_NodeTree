@@ -107,10 +107,7 @@ namespace RW_NodeTree
 
         public bool NeedUpdate
         {
-            get
-            {
-                return needUpdate;
-            }
+            get => needUpdate;
             set
             {
                 lock (this)
@@ -342,8 +339,14 @@ namespace RW_NodeTree
 
             if (actionNode == null)
             {
-                proccess.RootNode.ChildNodes.internal_UpdateNode(proccess);
-                return;
+                lock (typeof(NodeContainer))
+                {
+                    if (blockUpdate) return;
+                    blockUpdate = true;
+                    proccess.RootNode.ChildNodes.internal_UpdateNode(proccess);
+                    blockUpdate = false;
+                    return;
+                }
             }
             lock (this)
             {
@@ -463,10 +466,9 @@ namespace RW_NodeTree
                         Log.Error(ex.ToString());
                     }
                 }
-                if (reset)
+                if (reset && !NotUpdateTexture)
                 {
-                    proccess.ResetVerbs();
-                    if (!NotUpdateTexture) proccess.ResetRenderedTexture();
+                    proccess.ResetRenderedTexture();
                 }
                 return;
             }
@@ -1060,6 +1062,8 @@ namespace RW_NodeTree
         private readonly Dictionary<string, int> indicesById = new Dictionary<string, int>();
         private readonly Dictionary<Thing, int> indicesByThing = new Dictionary<Thing, int>();
         private readonly ConcurrentDictionary<int, (string?, int)> currentKey = new ConcurrentDictionary<int, (string?, int)>();
+
+        private static bool blockUpdate = false;
 
 
     }

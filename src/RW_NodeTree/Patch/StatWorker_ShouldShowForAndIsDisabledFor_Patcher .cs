@@ -53,7 +53,7 @@ namespace RW_NodeTree.Patch
 
         private static bool PreStatWorker_ShouldShowFor(StatWorker __instance, MethodInfo __originalMethod, StatRequest req, ref (Dictionary<string, object?>, CompChildNodeProccesser) __state)
         {
-            CompChildNodeProccesser? proccesser = req.Thing.RootNode();
+            CompChildNodeProccesser? proccesser = req.Thing;
             if (proccesser != null &&
                 __originalMethod.MethodHandle == GetMethodInfo_ShouldShowFor_OfType(__instance.GetType()).MethodHandle
             )
@@ -66,7 +66,7 @@ namespace RW_NodeTree.Patch
         }
         private static bool PreStatWorker_IsDisabledFor(StatWorker __instance, MethodInfo __originalMethod, Thing thing, ref (Dictionary<string, object?>, CompChildNodeProccesser) __state)
         {
-            CompChildNodeProccesser? proccesser = thing.RootNode();
+            CompChildNodeProccesser? proccesser = thing;
             if (proccesser != null &&
                 __originalMethod.MethodHandle == GetMethodInfo_IsDisabledFor_OfType(__instance.GetType()).MethodHandle
             )

@@ -22,7 +22,8 @@ namespace RW_NodeTree.Patch
         {
             try
             {
-                __result = thing.RootNode()?.PostStatsReportUtility_StatsToDraw(thing, __result)?.ToList() ?? __result;
+                CompChildNodeProccesser? proccesser = thing;
+                __result = proccesser?.PostStatsReportUtility_StatsToDraw(thing, __result)?.ToList() ?? __result;
             }
             catch (Exception ex)
             {

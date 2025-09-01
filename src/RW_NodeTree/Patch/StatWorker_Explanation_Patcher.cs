@@ -54,7 +54,7 @@ namespace RW_NodeTree.Patch
 
         private static bool PreStatWorker_GetExplanationUnfinalized(StatWorker __instance, MethodInfo __originalMethod, StatRequest req, ToStringNumberSense numberSense, ref (Dictionary<string, object?>, CompChildNodeProccesser) __state)
         {
-            CompChildNodeProccesser? proccesser = req.Thing.RootNode();
+            CompChildNodeProccesser? proccesser = req.Thing;
             if (
                 proccesser != null &&
                 __originalMethod.MethodHandle == GetMethodInfo_GetExplanationUnfinalized_OfType(__instance.GetType()).MethodHandle
@@ -68,7 +68,7 @@ namespace RW_NodeTree.Patch
         }
         private static bool PreStatWorker_GetExplanationFinalizePart(StatWorker __instance, MethodBase __originalMethod, StatRequest req, ToStringNumberSense numberSense, float finalVal, ref (Dictionary<string, object?>, CompChildNodeProccesser) __state)
         {
-            CompChildNodeProccesser? proccesser = req.Thing.RootNode();
+            CompChildNodeProccesser? proccesser = req.Thing;
             if (
                 proccesser != null &&
                 __originalMethod.MethodHandle

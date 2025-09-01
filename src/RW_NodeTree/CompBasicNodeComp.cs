@@ -152,17 +152,6 @@ namespace RW_NodeTree
             return nodeRenderingInfos;
         }
 
-
-        protected virtual List<VerbPropertiesRegiestInfo> VerbPropertiesRegiestInfoUpadte(Type ownerType, List<VerbPropertiesRegiestInfo> result)
-        {
-            return result;
-        }
-
-        protected virtual List<VerbToolRegiestInfo> VerbToolRegiestInfoUpdate(Type ownerType, List<VerbToolRegiestInfo> result)
-        {
-            return result;
-        }
-
         internal Dictionary<string, Thing>? internal_PreUpdateNode(CompChildNodeProccesser actionNode, Dictionary<string, object?> cachedDataToPostUpatde, out bool notUpdateTexture) => PreUpdateNode(actionNode, cachedDataToPostUpatde, out notUpdateTexture);
         internal void internal_PostUpdateNode(CompChildNodeProccesser actionNode, Dictionary<string, object?> cachedDataFromPerUpdate, ReadOnlyDictionary<string, Thing> prveChilds, out bool notUpdateTexture) => PostUpdateNode(actionNode, cachedDataFromPerUpdate, prveChilds, out notUpdateTexture);
         internal bool internal_AllowNode(Thing? node, string? id = null) => AllowNode(node, id);
@@ -170,7 +159,5 @@ namespace RW_NodeTree
         internal void internal_Removed(NodeContainer container, string? id, bool success, Dictionary<string, object?> cachedData) => Removed(container, id, success, cachedData);
         internal List<(string?, Thing, List<RenderInfo>)> internal_PreDrawStep(List<(string?, Thing, List<RenderInfo>)> nodeRenderingInfos, Rot4 rot, Graphic? graphic, Dictionary<string, object?> cachedDataToPostDrawStep) => PreDrawStep(nodeRenderingInfos, rot, graphic, cachedDataToPostDrawStep);
         internal List<(string?, Thing, List<RenderInfo>)> internal_PostDrawStep(List<(string?, Thing, List<RenderInfo>)> nodeRenderingInfos, Rot4 rot, Graphic? graphic, Dictionary<string, object?> cachedDataFromPerDrawStep) => PostDrawStep(nodeRenderingInfos, rot, graphic, cachedDataFromPerDrawStep);
-        internal List<VerbPropertiesRegiestInfo> internal_VerbPropertiesRegiestInfoUpadte(Type ownerType, List<VerbPropertiesRegiestInfo> result) => VerbPropertiesRegiestInfoUpadte(ownerType, result);
-        internal List<VerbToolRegiestInfo> internal_VerbToolRegiestInfoUpdate(Type ownerType, List<VerbToolRegiestInfo> result) => VerbToolRegiestInfoUpdate(ownerType, result);
     }
 }

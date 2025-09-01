@@ -19,7 +19,8 @@ namespace RW_NodeTree.Patch
             )]
         private static void PostThingDef_SpecialDisplayStats(ThingDef __instance, StatRequest req, ref IEnumerable<StatDrawEntry> __result)
         {
-            __result = req.Thing.RootNode()?.PostThingDef_SpecialDisplayStats(__instance, req, __result) ?? __result;
+            CompChildNodeProccesser? proccesser = req.Thing;
+            __result = proccesser?.PostThingDef_SpecialDisplayStats(__instance, req, __result) ?? __result;
         }
     }
 }

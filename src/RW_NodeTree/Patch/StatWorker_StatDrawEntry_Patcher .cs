@@ -34,7 +34,7 @@ namespace RW_NodeTree.Patch
 
         private static bool PreStatWorker_GetStatDrawEntryLabel(StatWorker __instance, MethodInfo __originalMethod, StatDef stat, float value, ToStringNumberSense numberSense, StatRequest optionalReq, bool finalized, ref (Dictionary<string, object?>, CompChildNodeProccesser) __state)
         {
-            CompChildNodeProccesser? proccesser = optionalReq.Thing.RootNode();
+            CompChildNodeProccesser? proccesser = optionalReq.Thing;
             if (proccesser != null &&
                 __originalMethod.MethodHandle == GetMethodInfo_GetStatDrawEntryLabel_OfType(__instance.GetType()).MethodHandle
             )

@@ -53,7 +53,7 @@ namespace RW_NodeTree.Patch
 
         private static bool PreStatWorker_GetValueUnfinalized(StatWorker __instance, MethodInfo __originalMethod, StatRequest req, bool applyPostProcess, ref (Dictionary<string, object?>, CompChildNodeProccesser) __state)
         {
-            CompChildNodeProccesser? proccesser = req.Thing.RootNode();
+            CompChildNodeProccesser? proccesser = req.Thing;
             if (proccesser != null &&
                 __originalMethod.MethodHandle == GetMethodInfo_GetValueUnfinalized_OfType(__instance.GetType()).MethodHandle
             )
@@ -66,7 +66,7 @@ namespace RW_NodeTree.Patch
         }
         private static bool PreStatWorker_FinalizeValue(StatWorker __instance, MethodInfo __originalMethod, StatRequest req, bool applyPostProcess, ref float val, ref (Dictionary<string, object?>, CompChildNodeProccesser) __state)
         {
-            CompChildNodeProccesser? proccesser = req.Thing.RootNode();
+            CompChildNodeProccesser? proccesser = req.Thing;
             if (proccesser != null &&
                 __originalMethod.MethodHandle == GetMethodInfo_FinalizeValue_OfType(__instance.GetType()).MethodHandle
             )

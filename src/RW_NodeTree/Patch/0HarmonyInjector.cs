@@ -17,7 +17,6 @@ namespace RW_NodeTree.Patch
                 StatWorker_Patcher.PatchGetInfoCardHyperlinks(t, patcher);
                 StatWorker_Patcher.PatchShouldShowForAndIsDisabledFor(t, patcher);
                 StatWorker_Patcher.PatchStatDrawEntry(t, patcher);
-                IVerbOwner_Patcher.PatchIVerbOwner(t, patcher);
             }
             patcher.PatchAll();
         }
