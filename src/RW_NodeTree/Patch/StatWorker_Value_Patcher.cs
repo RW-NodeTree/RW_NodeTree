@@ -60,7 +60,7 @@ namespace RW_NodeTree.Patch
             {
                 __state.Item1 = new Dictionary<string, object?>();
                 __state.Item2 = proccesser;
-                return proccesser.PreStatWorker_GetValueUnfinalized(__instance, req, applyPostProcess, __state.Item1);
+                return proccesser.PreStatWorker_GetValueUnfinalized(__instance, StatWorker_stat(__instance), req, applyPostProcess, __state.Item1);
             }
             return true;
         }
@@ -73,7 +73,7 @@ namespace RW_NodeTree.Patch
             {
                 __state.Item1 = new Dictionary<string, object?>();
                 __state.Item2 = proccesser;
-                return proccesser.PreStatWorker_FinalizeValue(__instance, req, applyPostProcess, ref val, __state.Item1);
+                return proccesser.PreStatWorker_FinalizeValue(__instance, StatWorker_stat(__instance), req, applyPostProcess, ref val, __state.Item1);
             }
             return true;
         }
@@ -83,7 +83,7 @@ namespace RW_NodeTree.Patch
             if (stats != null &&
                 proccesser != null
             )
-                __result = proccesser.PostStatWorker_GetValueUnfinalized(__instance, req, applyPostProcess, __result, __state.Item1);
+                __result = proccesser.PostStatWorker_GetValueUnfinalized(__instance, StatWorker_stat(__instance), req, applyPostProcess, __result, __state.Item1);
         }
         private static void PostStatWorker_FinalizeValue(StatWorker __instance, StatRequest req, bool applyPostProcess, ref float val, (Dictionary<string, object?>, CompChildNodeProccesser) __state)
         {
@@ -91,7 +91,7 @@ namespace RW_NodeTree.Patch
             if (stats != null &&
                 proccesser != null
             )
-                val = proccesser.PostStatWorker_FinalizeValue(__instance, req, applyPostProcess, val, __state.Item1);
+                val = proccesser.PostStatWorker_FinalizeValue(__instance, StatWorker_stat(__instance), req, applyPostProcess, val, __state.Item1);
         }
         private static void FinalStatWorker_GetValueUnfinalized(StatWorker __instance, StatRequest req, bool applyPostProcess, ref float __result, (Dictionary<string, object?>, CompChildNodeProccesser) __state, Exception __exception)
         {
@@ -99,7 +99,7 @@ namespace RW_NodeTree.Patch
             if (stats != null &&
                 proccesser != null
             )
-                __result = proccesser.FinalStatWorker_GetValueUnfinalized(__instance, req, applyPostProcess, __result, __state.Item1, __exception);
+                __result = proccesser.FinalStatWorker_GetValueUnfinalized(__instance, StatWorker_stat(__instance), req, applyPostProcess, __result, __state.Item1, __exception);
         }
         private static void FinalStatWorker_FinalizeValue(StatWorker __instance, StatRequest req, bool applyPostProcess, ref float val, (Dictionary<string, object?>, CompChildNodeProccesser) __state, Exception __exception)
         {
@@ -107,7 +107,7 @@ namespace RW_NodeTree.Patch
             if (stats != null &&
                 proccesser != null
             )
-                val = proccesser.FinalStatWorker_FinalizeValue(__instance, req, applyPostProcess, val, __state.Item1, __exception);
+                val = proccesser.FinalStatWorker_FinalizeValue(__instance, StatWorker_stat(__instance), req, applyPostProcess, val, __state.Item1, __exception);
         }
 
         public static void PatchValue(Type type, Harmony patcher)
@@ -158,7 +158,7 @@ namespace RW_NodeTree
         /// <param name="statWorker">StatWorker</param>
         /// <param name="req">parm 'req' of StatWorker.GetValueUnfinalized()</param>
         /// <param name="applyPostProcess">parm 'applyPostProcess' of StatWorker.GetValueUnfinalized()</param>
-        internal bool PreStatWorker_GetValueUnfinalized(StatWorker statWorker, StatRequest req, bool applyPostProcess, Dictionary<string, object?> stats)
+        internal bool PreStatWorker_GetValueUnfinalized(StatWorker statWorker, StatDef stateDef, StatRequest req, bool applyPostProcess, Dictionary<string, object?> stats)
         {
             UpdateNode();
             bool result = true;
@@ -166,7 +166,7 @@ namespace RW_NodeTree
             {
                 try
                 {
-                    result = comp.internal_PreStatWorker_GetValueUnfinalized(statWorker, req, applyPostProcess, stats) && result;
+                    result = comp.internal_PreStatWorker_GetValueUnfinalized(statWorker, stateDef, req, applyPostProcess, stats) && result;
                 }
                 catch (Exception ex)
                 {
@@ -184,7 +184,7 @@ namespace RW_NodeTree
         /// <param name="statWorker">StatWorker</param>
         /// <param name="req">parm 'req' of StatWorker.FinalizeValue()</param>
         /// <param name="applyPostProcess">parm 'applyPostProcess' of StatWorker.FinalizeValue()</param>
-        internal bool PreStatWorker_FinalizeValue(StatWorker statWorker, StatRequest req, bool applyPostProcess, ref float value, Dictionary<string, object?> stats)
+        internal bool PreStatWorker_FinalizeValue(StatWorker statWorker, StatDef stateDef, StatRequest req, bool applyPostProcess, ref float value, Dictionary<string, object?> stats)
         {
             UpdateNode();
             bool result = true;
@@ -192,7 +192,7 @@ namespace RW_NodeTree
             {
                 try
                 {
-                    result = comp.internal_PreStatWorker_FinalizeValue(statWorker, req, applyPostProcess, ref value, stats) && result;
+                    result = comp.internal_PreStatWorker_FinalizeValue(statWorker, stateDef, req, applyPostProcess, ref value, stats) && result;
                 }
                 catch (Exception ex)
                 {
@@ -210,13 +210,13 @@ namespace RW_NodeTree
         /// <param name="statWorker">StatWorker</param>
         /// <param name="req">parm 'req' of StatWorker.GetValueUnfinalized()</param>
         /// <param name="applyPostProcess">parm 'applyPostProcess' of StatWorker.GetValueUnfinalized()</param>
-        internal float PostStatWorker_GetValueUnfinalized(StatWorker statWorker, StatRequest req, bool applyPostProcess, float result, Dictionary<string, object?> stats)
+        internal float PostStatWorker_GetValueUnfinalized(StatWorker statWorker, StatDef stateDef, StatRequest req, bool applyPostProcess, float result, Dictionary<string, object?> stats)
         {
             foreach (CompBasicNodeComp comp in AllNodeComp)
             {
                 try
                 {
-                    result = comp.internal_PostStatWorker_GetValueUnfinalized(statWorker, req, applyPostProcess, result, stats);
+                    result = comp.internal_PostStatWorker_GetValueUnfinalized(statWorker, stateDef, req, applyPostProcess, result, stats);
                 }
                 catch (Exception ex)
                 {
@@ -234,13 +234,13 @@ namespace RW_NodeTree
         /// <param name="statWorker">StatWorker</param>
         /// <param name="req">parm 'req' of StatWorker.FinalizeValue()</param>
         /// <param name="applyPostProcess">parm 'applyPostProcess' of StatWorker.FinalizeValue()</param>
-        internal float PostStatWorker_FinalizeValue(StatWorker statWorker, StatRequest req, bool applyPostProcess, float result, Dictionary<string, object?> stats)
+        internal float PostStatWorker_FinalizeValue(StatWorker statWorker, StatDef stateDef, StatRequest req, bool applyPostProcess, float result, Dictionary<string, object?> stats)
         {
             foreach (CompBasicNodeComp comp in AllNodeComp)
             {
                 try
                 {
-                    result = comp.internal_PostStatWorker_FinalizeValue(statWorker, req, applyPostProcess, result, stats);
+                    result = comp.internal_PostStatWorker_FinalizeValue(statWorker, stateDef, req, applyPostProcess, result, stats);
                 }
                 catch (Exception ex)
                 {
@@ -258,13 +258,13 @@ namespace RW_NodeTree
         /// <param name="statWorker">StatWorker</param>
         /// <param name="req">parm 'req' of StatWorker.GetValueUnfinalized()</param>
         /// <param name="applyFinalProcess">parm 'applyFinalProcess' of StatWorker.GetValueUnfinalized()</param>
-        internal float FinalStatWorker_GetValueUnfinalized(StatWorker statWorker, StatRequest req, bool applyPostProcess, float result, Dictionary<string, object?> stats, Exception exception)
+        internal float FinalStatWorker_GetValueUnfinalized(StatWorker statWorker, StatDef stateDef, StatRequest req, bool applyPostProcess, float result, Dictionary<string, object?> stats, Exception exception)
         {
             foreach (CompBasicNodeComp comp in AllNodeComp)
             {
                 try
                 {
-                    result = comp.internal_FinalStatWorker_GetValueUnfinalized(statWorker, req, applyPostProcess, result, stats, exception);
+                    result = comp.internal_FinalStatWorker_GetValueUnfinalized(statWorker, stateDef, req, applyPostProcess, result, stats, exception);
                 }
                 catch (Exception ex)
                 {
@@ -282,13 +282,13 @@ namespace RW_NodeTree
         /// <param name="statWorker">StatWorker</param>
         /// <param name="req">parm 'req' of StatWorker.FinalizeValue()</param>
         /// <param name="applyFinalProcess">parm 'applyFinalProcess' of StatWorker.FinalizeValue()</param>
-        internal float FinalStatWorker_FinalizeValue(StatWorker statWorker, StatRequest req, bool applyPostProcess, float result, Dictionary<string, object?> stats, Exception exception)
+        internal float FinalStatWorker_FinalizeValue(StatWorker statWorker, StatDef stateDef, StatRequest req, bool applyPostProcess, float result, Dictionary<string, object?> stats, Exception exception)
         {
             foreach (CompBasicNodeComp comp in AllNodeComp)
             {
                 try
                 {
-                    result = comp.internal_FinalStatWorker_FinalizeValue(statWorker, req, applyPostProcess, result, stats, exception);
+                    result = comp.internal_FinalStatWorker_FinalizeValue(statWorker, stateDef, req, applyPostProcess, result, stats, exception);
                 }
                 catch (Exception ex)
                 {
@@ -300,42 +300,42 @@ namespace RW_NodeTree
     }
     public abstract partial class CompBasicNodeComp : ThingComp
     {
-        protected virtual bool PreStatWorker_GetValueUnfinalized(StatWorker statWorker, StatRequest req, bool applyPostProcess, Dictionary<string, object?> stats)
+        protected virtual bool PreStatWorker_GetValueUnfinalized(StatWorker statWorker, StatDef stateDef, StatRequest req, bool applyPostProcess, Dictionary<string, object?> stats)
         {
             return true;
         }
-        protected virtual bool PreStatWorker_FinalizeValue(StatWorker statWorker, StatRequest req, bool applyPostProcess, ref float value, Dictionary<string, object?> stats)
+        protected virtual bool PreStatWorker_FinalizeValue(StatWorker statWorker, StatDef stateDef, StatRequest req, bool applyPostProcess, ref float value, Dictionary<string, object?> stats)
         {
             return true;
         }
-        protected virtual float PostStatWorker_GetValueUnfinalized(StatWorker statWorker, StatRequest req, bool applyPostProcess, float result, Dictionary<string, object?> stats)
+        protected virtual float PostStatWorker_GetValueUnfinalized(StatWorker statWorker, StatDef stateDef, StatRequest req, bool applyPostProcess, float result, Dictionary<string, object?> stats)
         {
             return result;
         }
-        protected virtual float PostStatWorker_FinalizeValue(StatWorker statWorker, StatRequest req, bool applyPostProcess, float result, Dictionary<string, object?> stats)
+        protected virtual float PostStatWorker_FinalizeValue(StatWorker statWorker, StatDef stateDef, StatRequest req, bool applyPostProcess, float result, Dictionary<string, object?> stats)
         {
             return result;
         }
-        protected virtual float FinalStatWorker_GetValueUnfinalized(StatWorker statWorker, StatRequest req, bool applyPostProcess, float result, Dictionary<string, object?> stats, Exception exception)
+        protected virtual float FinalStatWorker_GetValueUnfinalized(StatWorker statWorker, StatDef stateDef, StatRequest req, bool applyPostProcess, float result, Dictionary<string, object?> stats, Exception exception)
         {
             return result;
         }
-        protected virtual float FinalStatWorker_FinalizeValue(StatWorker statWorker, StatRequest req, bool applyPostProcess, float result, Dictionary<string, object?> stats, Exception exception)
+        protected virtual float FinalStatWorker_FinalizeValue(StatWorker statWorker, StatDef stateDef, StatRequest req, bool applyPostProcess, float result, Dictionary<string, object?> stats, Exception exception)
         {
             return result;
         }
-        internal bool internal_PreStatWorker_GetValueUnfinalized(StatWorker statWorker, StatRequest req, bool applyPostProcess, Dictionary<string, object?> stats)
-            => PreStatWorker_GetValueUnfinalized(statWorker, req, applyPostProcess, stats);
-        internal bool internal_PreStatWorker_FinalizeValue(StatWorker statWorker, StatRequest req, bool applyPostProcess, ref float value, Dictionary<string, object?> stats)
-            => PreStatWorker_FinalizeValue(statWorker, req, applyPostProcess, ref value, stats);
-        internal float internal_PostStatWorker_GetValueUnfinalized(StatWorker statWorker, StatRequest req, bool applyPostProcess, float result, Dictionary<string, object?> stats)
-            => PostStatWorker_GetValueUnfinalized(statWorker, req, applyPostProcess, result, stats);
-        internal float internal_PostStatWorker_FinalizeValue(StatWorker statWorker, StatRequest req, bool applyPostProcess, float result, Dictionary<string, object?> stats)
-            => PostStatWorker_FinalizeValue(statWorker, req, applyPostProcess, result, stats);
-        internal float internal_FinalStatWorker_GetValueUnfinalized(StatWorker statWorker, StatRequest req, bool applyPostProcess, float result, Dictionary<string, object?> stats, Exception exception)
-            => FinalStatWorker_GetValueUnfinalized(statWorker, req, applyPostProcess, result, stats, exception);
-        internal float internal_FinalStatWorker_FinalizeValue(StatWorker statWorker, StatRequest req, bool applyPostProcess, float result, Dictionary<string, object?> stats, Exception exception)
-            => FinalStatWorker_FinalizeValue(statWorker, req, applyPostProcess, result, stats, exception);
+        internal bool internal_PreStatWorker_GetValueUnfinalized(StatWorker statWorker, StatDef stateDef, StatRequest req, bool applyPostProcess, Dictionary<string, object?> stats)
+            => PreStatWorker_GetValueUnfinalized(statWorker, stateDef, req, applyPostProcess, stats);
+        internal bool internal_PreStatWorker_FinalizeValue(StatWorker statWorker, StatDef stateDef, StatRequest req, bool applyPostProcess, ref float value, Dictionary<string, object?> stats)
+            => PreStatWorker_FinalizeValue(statWorker, stateDef, req, applyPostProcess, ref value, stats);
+        internal float internal_PostStatWorker_GetValueUnfinalized(StatWorker statWorker, StatDef stateDef, StatRequest req, bool applyPostProcess, float result, Dictionary<string, object?> stats)
+            => PostStatWorker_GetValueUnfinalized(statWorker, stateDef, req, applyPostProcess, result, stats);
+        internal float internal_PostStatWorker_FinalizeValue(StatWorker statWorker, StatDef stateDef, StatRequest req, bool applyPostProcess, float result, Dictionary<string, object?> stats)
+            => PostStatWorker_FinalizeValue(statWorker, stateDef, req, applyPostProcess, result, stats);
+        internal float internal_FinalStatWorker_GetValueUnfinalized(StatWorker statWorker, StatDef stateDef, StatRequest req, bool applyPostProcess, float result, Dictionary<string, object?> stats, Exception exception)
+            => FinalStatWorker_GetValueUnfinalized(statWorker, stateDef, req, applyPostProcess, result, stats, exception);
+        internal float internal_FinalStatWorker_FinalizeValue(StatWorker statWorker, StatDef stateDef, StatRequest req, bool applyPostProcess, float result, Dictionary<string, object?> stats, Exception exception)
+            => FinalStatWorker_FinalizeValue(statWorker, stateDef, req, applyPostProcess, result, stats, exception);
 
     }
 }

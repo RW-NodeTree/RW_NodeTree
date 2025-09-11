@@ -10,6 +10,7 @@ namespace RW_NodeTree.Patch
     [HarmonyPatch(typeof(StatWorker))]
     internal static partial class StatWorker_Patcher
     {
+        private static readonly AccessTools.FieldRef<StatWorker, StatDef> StatWorker_stat = AccessTools.FieldRefAccess<StatWorker, StatDef>("stat");
 
         [HarmonyPrefix]
         [HarmonyPatch(
