@@ -2,6 +2,7 @@
 using RW_NodeTree.Tools;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using UnityEngine;
 using Verse;
 
@@ -50,13 +51,13 @@ namespace RW_NodeTree
 
             (Material? material, Texture2D? texture, RenderTexture? cachedRenderTarget) = defaultRenderingCache[rot];
 
-            List<(string?, Thing, List<RenderInfo>)> commands = currentProccesser.ChildNodes.GetNodeRenderingInfos(rot, out bool needUpdate, subGraphic);
+            ReadOnlyDictionary<string, ReadOnlyCollection<RenderInfo>> commands = currentProccesser.ChildNodes.GetNodeRenderingInfos(rot, out bool needUpdate, subGraphic);
             if (needUpdate || material == null || texture == null || cachedRenderTarget == null)
             {
                 List<RenderInfo> final = new List<RenderInfo>();
-                foreach ((string?, Thing, List<RenderInfo>) infos in commands)
+                foreach (var infos in commands)
                 {
-                    if (!infos.Item3.NullOrEmpty()) final.AddRange(infos.Item3);
+                    if (!infos.Value.NullOrEmpty()) final.AddRange(infos.Value);
                 }
                 RenderingTools.RenderToTarget(final, ref cachedRenderTarget!, ref texture!, default(Vector2Int), currentProccesser.TextureSizeFactor, currentProccesser.ExceedanceFactor, currentProccesser.ExceedanceOffset, currentProccesser.HasPostFX(true) ? currentProccesser.PostFX : default);
                 Shader shader = subGraphic.Shader;
@@ -105,9 +106,9 @@ namespace RW_NodeTree
             {
                 MatAt(rot, thing);
                 List<RenderInfo> final = new List<RenderInfo>();
-                foreach ((string?, Thing, List<RenderInfo>) infos in currentProccesser.ChildNodes.GetNodeRenderingInfos(rot, out _, subGraphic))
+                foreach (var infos in currentProccesser.ChildNodes.GetNodeRenderingInfos(rot, out _, subGraphic))
                 {
-                    if (!infos.Item3.NullOrEmpty()) final.AddRange(infos.Item3);
+                    if (!infos.Value.NullOrEmpty()) final.AddRange(infos.Value);
                 }
                 Matrix4x4 matrix = Matrix4x4.TRS(loc, Quaternion.AngleAxis(extraRotation, Vector3.up), Vector3.one);
                 for (int i = 0; i < final.Count; i++)

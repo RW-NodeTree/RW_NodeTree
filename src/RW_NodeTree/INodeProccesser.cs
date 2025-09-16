@@ -1,5 +1,4 @@
 ﻿using RW_NodeTree.Rendering;
-using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using UnityEngine;
@@ -70,7 +69,7 @@ namespace RW_NodeTree
         /// <param name="rot">rotation</param>
         /// <param name="graphic">original graphic</param>
         /// <returns></returns>
-        List<(string?, Thing, List<RenderInfo>)> PreGenRenderInfos(List<(string?, Thing, List<RenderInfo>)> nodeRenderingInfos, Rot4 rot, Graphic? graphic, Dictionary<string, object?> cachedDataToPostDrawStep);
+        HashSet<string> PreGenRenderInfos(Rot4 rot, Dictionary<string, object?> cachedDataToPostDrawStep);
 
         /// <summary>
         /// Adapte draw steep of this node
@@ -79,6 +78,6 @@ namespace RW_NodeTree
         /// <param name="rot">rotation</param>
         /// <param name="graphic">original graphic</param>
         /// <returns></returns>
-        List<(string?, Thing, List<RenderInfo>)> PostGenRenderInfos(List<(string?, Thing, List<RenderInfo>)> nodeRenderingInfos, Rot4 rot, Graphic? graphic, Dictionary<string, object?> cachedDataFromPerDrawStep);
+        Dictionary<string, List<RenderInfo>>? PostGenRenderInfos(Dictionary<string, List<RenderInfo>> nodeRenderingInfos, Rot4 rot, Graphic? graphic, Dictionary<string, object?> cachedDataFromPerDrawStep);
     }
 }

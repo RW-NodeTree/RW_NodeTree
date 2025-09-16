@@ -21,7 +21,7 @@ namespace RW_NodeTree
     {
         public class NodeRenderingInfoForRot4
         {
-            public List<(string?, Thing, List<RenderInfo>)>? this[Rot4 rot]
+            public ReadOnlyDictionary<string, ReadOnlyCollection<RenderInfo>>? this[Rot4 rot]
             {
                 get => nodeRenderingInfos[rot.AsInt];
                 set => nodeRenderingInfos[rot.AsInt] = value;
@@ -30,7 +30,7 @@ namespace RW_NodeTree
             {
                 for (int i = 0; i < nodeRenderingInfos.Length; i++) nodeRenderingInfos[i] = null;
             }
-            public readonly List<(string?, Thing, List<RenderInfo>)>?[] nodeRenderingInfos = new List<(string?, Thing, List<RenderInfo>)>?[4];
+            public readonly ReadOnlyDictionary<string, ReadOnlyCollection<RenderInfo>>?[] nodeRenderingInfos = new ReadOnlyDictionary<string, ReadOnlyCollection<RenderInfo>>?[4];
         }
 
         public NodeContainer(Thing proccesser) : base(proccesser as INodeProccesser)
@@ -369,16 +369,25 @@ namespace RW_NodeTree
             //if (Scribe.mode == LoadSaveMode.PostLoadInit) needUpdate = false;
         }
 
+        public void CachedRootNodeNeedUpdate()
+        {
+            cachedRootNode = null;
+            for (int i = Count - 1; i >= 0; i--)
+            {
+                (this[i] as INodeProccesser)?.ChildNodes?.CachedRootNodeNeedUpdate();
+            }
+        }
 
-        public List<(string?, Thing, List<RenderInfo>)> GetNodeRenderingInfos(Rot4 rot, out bool updated, Graphic? subGraphic = null)
+
+        public ReadOnlyDictionary<string, ReadOnlyCollection<RenderInfo>> GetNodeRenderingInfos(Rot4 rot, out bool updated, Graphic? subGraphic = null)
         {
             UpdateNode();
             updated = false;
             if (!UnityData.IsInMainThread) throw new InvalidOperationException("not in main thread");
-            List<(string?, Thing, List<RenderInfo>)>? nodeRenderingInfos = this.nodeRenderingInfo[rot];
-            if (nodeRenderingInfos != null) return nodeRenderingInfos;
+            ReadOnlyDictionary<string, ReadOnlyCollection<RenderInfo>>? readOnlyNodeRenderingInfos = this.nodeRenderingInfo[rot];
+            if (readOnlyNodeRenderingInfos != null) return readOnlyNodeRenderingInfos;
             updated = true;
-            nodeRenderingInfos = new List<(string?, Thing, List<RenderInfo>)>(Count + 1);
+            Dictionary<string, List<RenderInfo>> nodeRenderingInfos = new Dictionary<string, List<RenderInfo>>(Count + 1);
             Thing parent = (Thing)Proccesser;
 
             //if (Prefs.DevMode)
@@ -396,67 +405,65 @@ namespace RW_NodeTree
 
 
             //ORIGIN
-            subGraphic = (subGraphic ?? parent.Graphic)?.GetGraphic_ChildNode()?.SubGraphic ?? subGraphic ?? parent.Graphic;
-            if (subGraphic != null)
-            {
-                RenderingTools.StartOrEndDrawCatchingBlock = true;
-                try
-                {
-                    subGraphic.Draw(Vector3.zero, rot, parent);
-                    nodeRenderingInfos.Add((null, parent, RenderingTools.RenderInfos!));
-                }
-                catch (Exception ex)
-                {
-                    Log.Error(ex.ToString());
-                }
-                RenderingTools.StartOrEndDrawCatchingBlock = false;
-            }
 
-            for (int i = 0; i < this.Count; i++)
-            {
-                Thing child = this[i];
-
-                if (child != null)
-                {
-                    nodeRenderingInfos.Add((((IList<string>)this)[i], child, new List<RenderInfo>()));
-                }
-            }
 
             Dictionary<string, object?> cachingData = new Dictionary<string, object?>();
 
-            nodeRenderingInfos = Proccesser.PreGenRenderInfos(nodeRenderingInfos, rot, subGraphic, cachingData) ?? nodeRenderingInfos;
+            HashSet<string>? ChildForDraw = Proccesser.PreGenRenderInfos(rot, cachingData);
 
-            for (int i = 0; i < nodeRenderingInfos.Count; i++)
+            subGraphic = (subGraphic ?? parent.Graphic)?.GetGraphic_ChildNode()?.SubGraphic ?? subGraphic ?? parent.Graphic;
+            if (ChildForDraw != null)
             {
-                string? id = nodeRenderingInfos[i].Item1;
-                Thing child = nodeRenderingInfos[i].Item2;
-                List<RenderInfo> infos = nodeRenderingInfos[i].Item3 ?? new List<RenderInfo>();
-                if (child != null && id != null)
+                if (subGraphic != null && ChildForDraw.Contains(""))
                 {
                     RenderingTools.StartOrEndDrawCatchingBlock = true;
                     try
                     {
-                        Rot4 rotCache = child.Rotation;
-                        child.Rotation = new Rot4((rot.AsInt + rotCache.AsInt) & 3);
-#if V13 || V14
-                        child.DrawAt(Vector3.zero);
-#else
-                        child.DrawNowAt(Vector3.zero);
-#endif
-                        child.Rotation = rotCache;
-                        infos.AddRange(RenderingTools.RenderInfos);
+                        subGraphic.Draw(Vector3.zero, rot, parent);
+                        nodeRenderingInfos[""] = RenderingTools.RenderInfos!;
                     }
                     catch (Exception ex)
                     {
                         Log.Error(ex.ToString());
                     }
                     RenderingTools.StartOrEndDrawCatchingBlock = false;
-                    nodeRenderingInfos[i] = (id, child, infos);
+                }
+
+                foreach (string id in ChildForDraw)
+                {
+                    Thing? child = this[id];
+                    if (child != null && id != null)
+                    {
+                        RenderingTools.StartOrEndDrawCatchingBlock = true;
+                        try
+                        {
+                            Rot4 rotCache = child.Rotation;
+                            child.Rotation = new Rot4((rot.AsInt + rotCache.AsInt) & 3);
+#if V13 || V14
+                            child.DrawAt(Vector3.zero);
+#else
+                            child.DrawNowAt(Vector3.zero);
+#endif
+                            child.Rotation = rotCache;
+                            nodeRenderingInfos[id] = RenderingTools.RenderInfos!;
+                        }
+                        catch (Exception ex)
+                        {
+                            Log.Error(ex.ToString());
+                        }
+                        RenderingTools.StartOrEndDrawCatchingBlock = false;
+                    }
                 }
             }
             nodeRenderingInfos = Proccesser.PostGenRenderInfos(nodeRenderingInfos, rot, subGraphic, cachingData) ?? nodeRenderingInfos;
-            this.nodeRenderingInfo[rot] = nodeRenderingInfos;
-            return nodeRenderingInfos;
+            Dictionary<string, ReadOnlyCollection<RenderInfo>> mid = new Dictionary<string, ReadOnlyCollection<RenderInfo>>(nodeRenderingInfos.Count);
+            foreach (var kv in nodeRenderingInfos)
+            {
+                mid[kv.Key] = new ReadOnlyCollection<RenderInfo>(kv.Value);
+            }
+            readOnlyNodeRenderingInfos = new ReadOnlyDictionary<string, ReadOnlyCollection<RenderInfo>>(mid);
+            this.nodeRenderingInfo[rot] = readOnlyNodeRenderingInfos;
+            return readOnlyNodeRenderingInfos;
         }
 
 
@@ -466,7 +473,7 @@ namespace RW_NodeTree
         /// <returns></returns>
         public void UpdateNode() => internal_UpdateNode();
 
-        internal void internal_UpdateNode(INodeProccesser? actionNode = null)
+        private void internal_UpdateNode(INodeProccesser? actionNode = null)
         {
 
 
@@ -550,7 +557,17 @@ namespace RW_NodeTree
                 }
 
                 bool reset = true;
+
                 foreach (Thing? node in prveChilds.Values)
+                {
+                    NodeContainer? container = (node as INodeProccesser)?.ChildNodes;
+                    if (container != null && container.NeedUpdate && !this.Contains(node))
+                    {
+                        container.internal_UpdateNode(actionNode);
+                    }
+                }
+
+                foreach (Thing? node in this.Values)
                 {
                     NodeContainer? container = (node as INodeProccesser)?.ChildNodes;
                     if (container != null && container.NeedUpdate)
@@ -560,15 +577,6 @@ namespace RW_NodeTree
                     }
                 }
 
-                foreach (Thing? node in diff.Values)
-                {
-                    NodeContainer? container = (node as INodeProccesser)?.ChildNodes;
-                    if (container != null && container.NeedUpdate)
-                    {
-                        container.internal_UpdateNode(actionNode);
-                        reset = false;
-                    }
-                }
                 ReadOnlyDictionary<string, Thing> prveChildsReadOnly = new ReadOnlyDictionary<string, Thing>(prveChilds);
                 proccess.PostUpdateChilds(actionNode, cachingData, prveChildsReadOnly, out bool notUpdateTexture);
                 if (reset && !notUpdateTexture)
@@ -620,7 +628,7 @@ namespace RW_NodeTree
             if (item?.Destroyed ?? false) return 0;
             if (item?.holdingOwner != null) return 0;
             if (IsChildOf(item)) return 0;
-            if (Proccesser != null && Proccesser.AllowNode(item, currentKey.Item1))
+            if (Proccesser.AllowNode(item, currentKey.Item1))
             {
                 return base.GetCountCanAccept(item, false);
             }
@@ -778,7 +786,7 @@ namespace RW_NodeTree
                 }
                 if (proccesser != null)
                 {
-                    proccesser.ChildNodes.cachedRootNode = null;
+                    proccesser.ChildNodes.CachedRootNodeNeedUpdate();
                     proccesser.Added(this, currentKey.Item1, true);
                 }
                 //NeedUpdate = true;
@@ -1026,7 +1034,7 @@ namespace RW_NodeTree
                 item.holdingOwner = null;
                 if (proccesser != null)
                 {
-                    proccesser.ChildNodes.cachedRootNode = null;
+                    proccesser.ChildNodes.CachedRootNodeNeedUpdate();
                     proccesser.Removed(this, key, true);
                 }
                 //NeedUpdate = true;
