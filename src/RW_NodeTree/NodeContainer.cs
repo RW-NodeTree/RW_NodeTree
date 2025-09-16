@@ -1,5 +1,6 @@
 ﻿using HarmonyLib;
 using RimWorld;
+using RW_NodeTree.Rendering;
 using RW_NodeTree.Tools;
 using System;
 using System.Collections;
@@ -18,8 +19,27 @@ namespace RW_NodeTree
     /// </summary>
     public class NodeContainer : ThingOwner, IList<string>, IList<Thing>, IDictionary<string, Thing?>, IDictionary<Thing, string?>, IList<(string, Thing)>
     {
+        public class NodeRenderingInfoForRot4
+        {
+            public List<(string?, Thing, List<RenderInfo>)>? this[Rot4 rot]
+            {
+                get => nodeRenderingInfos[rot.AsInt];
+                set => nodeRenderingInfos[rot.AsInt] = value;
+            }
+            public void Reset()
+            {
+                for (int i = 0; i < nodeRenderingInfos.Length; i++) nodeRenderingInfos[i] = null;
+            }
+            public readonly List<(string?, Thing, List<RenderInfo>)>?[] nodeRenderingInfos = new List<(string?, Thing, List<RenderInfo>)>?[4];
+        }
 
-        public NodeContainer(CompChildNodeProccesser proccesser) : base(proccesser) { }
+        public NodeContainer(Thing proccesser) : base(proccesser as INodeProccesser)
+        {
+            if (proccesser is not INodeProccesser)
+            {
+                throw new InvalidCastException("Invalid proccesser type");
+            }
+        }
 
         public Thing? this[string key]
         {
@@ -37,14 +57,14 @@ namespace RW_NodeTree
                     if (!enableWrite || key == null) return;
                     if (indicesById.TryGetValue(key, out int index))
                     {
-                        if(value == null) RemoveAt(index);
+                        if (value == null) RemoveAt(index);
                         else
                         {
                             IList<(string, Thing)> convertedSelf = this;
                             convertedSelf[index] = (key, value);
                         }
                     }
-                    else if(value != null && key.IsVaildityKeyFormat())
+                    else if (value != null && key.IsVaildityKeyFormat())
                     {
                         CurrentKey = (key, -1);
                         TryAdd(value);
@@ -95,9 +115,9 @@ namespace RW_NodeTree
             }
         }
 
-        public CompChildNodeProccesser Comp => (CompChildNodeProccesser)base.Owner;
-
-        public NodeContainer? ParentContainer => Comp.ParentProccesser?.ChildNodes;
+        public INodeProccesser Proccesser => (INodeProccesser)Owner;
+        public INodeProccesser? ParentProccesser => Proccesser.ParentHolder as INodeProccesser;
+        public NodeContainer? ParentContainer => ParentProccesser?.ChildNodes;
 
         private (string?, int) CurrentKey
         {
@@ -118,6 +138,26 @@ namespace RW_NodeTree
                         if (parent != null) parent.NeedUpdate = true;
                     }
                 }
+            }
+        }
+
+        /// <summary>
+        /// root of this node tree
+        /// </summary>
+        public INodeProccesser RootNode
+        {
+            get
+            {
+                if (cachedRootNode != null) return cachedRootNode;
+                INodeProccesser proccesser = Proccesser;
+                INodeProccesser? next = ParentProccesser;
+                while (next != null)
+                {
+                    proccesser = next;
+                    next = next.ParentHolder as INodeProccesser;
+                }
+                cachedRootNode = proccesser;
+                return proccesser;
             }
         }
 
@@ -329,12 +369,108 @@ namespace RW_NodeTree
             //if (Scribe.mode == LoadSaveMode.PostLoadInit) needUpdate = false;
         }
 
-        internal void internal_UpdateNode(CompChildNodeProccesser? actionNode = null)
+
+        public List<(string?, Thing, List<RenderInfo>)> GetNodeRenderingInfos(Rot4 rot, out bool updated, Graphic? subGraphic = null)
+        {
+            UpdateNode();
+            updated = false;
+            if (!UnityData.IsInMainThread) throw new InvalidOperationException("not in main thread");
+            List<(string?, Thing, List<RenderInfo>)>? nodeRenderingInfos = this.nodeRenderingInfo[rot];
+            if (nodeRenderingInfos != null) return nodeRenderingInfos;
+            updated = true;
+            nodeRenderingInfos = new List<(string?, Thing, List<RenderInfo>)>(Count + 1);
+            Thing parent = (Thing)Proccesser;
+
+            //if (Prefs.DevMode)
+            //{
+            //    StackTrace stack = new StackTrace();
+            //    string stackReport = "";
+            //    for(int i =0; i < 8; i++)
+            //    {
+            //        StackFrame sf = stack.GetFrame(i);
+            //        MethodBase method = sf.GetMethod();
+            //        stackReport += method.DeclaringType + " -> " + method + " " + sf + "\n";
+            //    }
+            //    Log.Message(parent + " graphic : " + parent.Graphic + ";\nstack : " + stackReport);
+            //}
+
+
+            //ORIGIN
+            subGraphic = (subGraphic ?? parent.Graphic)?.GetGraphic_ChildNode()?.SubGraphic ?? subGraphic ?? parent.Graphic;
+            if (subGraphic != null)
+            {
+                RenderingTools.StartOrEndDrawCatchingBlock = true;
+                try
+                {
+                    subGraphic.Draw(Vector3.zero, rot, parent);
+                    nodeRenderingInfos.Add((null, parent, RenderingTools.RenderInfos!));
+                }
+                catch (Exception ex)
+                {
+                    Log.Error(ex.ToString());
+                }
+                RenderingTools.StartOrEndDrawCatchingBlock = false;
+            }
+
+            for (int i = 0; i < this.Count; i++)
+            {
+                Thing child = this[i];
+
+                if (child != null)
+                {
+                    nodeRenderingInfos.Add((((IList<string>)this)[i], child, new List<RenderInfo>()));
+                }
+            }
+
+            Dictionary<string, object?> cachingData = new Dictionary<string, object?>();
+
+            nodeRenderingInfos = Proccesser.PreGenRenderInfos(nodeRenderingInfos, rot, subGraphic, cachingData) ?? nodeRenderingInfos;
+
+            for (int i = 0; i < nodeRenderingInfos.Count; i++)
+            {
+                string? id = nodeRenderingInfos[i].Item1;
+                Thing child = nodeRenderingInfos[i].Item2;
+                List<RenderInfo> infos = nodeRenderingInfos[i].Item3 ?? new List<RenderInfo>();
+                if (child != null && id != null)
+                {
+                    RenderingTools.StartOrEndDrawCatchingBlock = true;
+                    try
+                    {
+                        Rot4 rotCache = child.Rotation;
+                        child.Rotation = new Rot4((rot.AsInt + rotCache.AsInt) & 3);
+#if V13 || V14
+                        child.DrawAt(Vector3.zero);
+#else
+                        child.DrawNowAt(Vector3.zero);
+#endif
+                        child.Rotation = rotCache;
+                        infos.AddRange(RenderingTools.RenderInfos);
+                    }
+                    catch (Exception ex)
+                    {
+                        Log.Error(ex.ToString());
+                    }
+                    RenderingTools.StartOrEndDrawCatchingBlock = false;
+                    nodeRenderingInfos[i] = (id, child, infos);
+                }
+            }
+            nodeRenderingInfos = Proccesser.PostGenRenderInfos(nodeRenderingInfos, rot, subGraphic, cachingData) ?? nodeRenderingInfos;
+            this.nodeRenderingInfo[rot] = nodeRenderingInfos;
+            return nodeRenderingInfos;
+        }
+
+
+        /// <summary>
+        /// Update node tree
+        /// </summary>
+        /// <returns></returns>
+        public void UpdateNode() => internal_UpdateNode();
+
+        internal void internal_UpdateNode(INodeProccesser? actionNode = null)
         {
 
-            bool NotUpdateTexture = false;
 
-            CompChildNodeProccesser proccess = this.Comp;
+            INodeProccesser proccess = this.Proccesser;
             if (proccess == null) return;
 
             if (actionNode == null)
@@ -343,7 +479,7 @@ namespace RW_NodeTree
                 {
                     if (blockUpdate) return;
                     blockUpdate = true;
-                    proccess.RootNode.ChildNodes.internal_UpdateNode(proccess);
+                    RootNode.ChildNodes.internal_UpdateNode(proccess);
                     blockUpdate = false;
                     return;
                 }
@@ -375,29 +511,9 @@ namespace RW_NodeTree
                 }
                 //Log.Message("1:"+state.ToString());
                 Dictionary<string, object?> cachingData = new Dictionary<string, object?>();
-                Dictionary<string, Thing> nextChilds = new Dictionary<string, Thing>();
+                Dictionary<string, Thing> nextChilds = proccess.PreUpdateChilds(actionNode, cachingData) ?? new Dictionary<string, Thing>();
                 //Log.Message("2:" + state.ToString());
                 //Log.Message("3:" + state.ToString());
-                foreach (CompBasicNodeComp comp in proccess.AllNodeComp)
-                {
-                    try
-                    {
-                        Dictionary<string, Thing>? nexts = comp.internal_PreUpdateNode(actionNode, cachingData, out bool notUpdateTexture);
-                        if (nexts != null)
-                        {
-                            foreach (var next in nexts)
-                            {
-                                if (next.Value != null)
-                                    nextChilds[next.Key] = next.Value;
-                            }
-                        }
-                        NotUpdateTexture |= notUpdateTexture;
-                    }
-                    catch (Exception ex)
-                    {
-                        Log.Error(ex.ToString());
-                    }
-                }
                 //Log.Message("4:" + state.ToString());
                 Dictionary<string, Thing> prveChilds = new Dictionary<string, Thing>(innerList.Count);
                 foreach (var child in innerList)
@@ -436,7 +552,7 @@ namespace RW_NodeTree
                 bool reset = true;
                 foreach (Thing? node in prveChilds.Values)
                 {
-                    NodeContainer? container = ((CompChildNodeProccesser?)node)?.ChildNodes;
+                    NodeContainer? container = (node as INodeProccesser)?.ChildNodes;
                     if (container != null && container.NeedUpdate)
                     {
                         container.internal_UpdateNode(actionNode);
@@ -446,32 +562,43 @@ namespace RW_NodeTree
 
                 foreach (Thing? node in diff.Values)
                 {
-                    NodeContainer? container = ((CompChildNodeProccesser?)node)?.ChildNodes;
+                    NodeContainer? container = (node as INodeProccesser)?.ChildNodes;
                     if (container != null && container.NeedUpdate)
                     {
                         container.internal_UpdateNode(actionNode);
-                        //reset = false;
+                        reset = false;
                     }
                 }
                 ReadOnlyDictionary<string, Thing> prveChildsReadOnly = new ReadOnlyDictionary<string, Thing>(prveChilds);
-                foreach (CompBasicNodeComp comp in proccess.AllNodeComp)
+                proccess.PostUpdateChilds(actionNode, cachingData, prveChildsReadOnly, out bool notUpdateTexture);
+                if (reset && !notUpdateTexture)
                 {
-                    try
-                    {
-                        comp.internal_PostUpdateNode(actionNode, cachingData, prveChildsReadOnly, out bool notUpdateTexture);
-                        NotUpdateTexture |= notUpdateTexture;
-                    }
-                    catch (Exception ex)
-                    {
-                        Log.Error(ex.ToString());
-                    }
-                }
-                if (reset && !NotUpdateTexture)
-                {
-                    proccess.ResetRenderedTexture();
+                    ResetRenderedTexture();
                 }
                 return;
             }
+        }
+
+
+        /// <summary>
+        /// set all texture need regenerate
+        /// </summary>
+        public void ResetRenderedTexture()
+        {
+            lock (nodeRenderingInfo)
+            {
+                nodeRenderingInfo.Reset();
+                try
+                {
+                    Thing parent = (Thing)Proccesser;
+                    if (parent.Spawned && parent.def.drawerType >= DrawerType.MapMeshOnly) parent.DirtyMapMesh(parent.Map);
+                }
+                catch (Exception ex)
+                {
+                    Log.Warning(ex.ToString());
+                }
+            }
+            ParentContainer?.ResetRenderedTexture();
         }
 
         public override int GetCountCanAccept(Thing? item, bool canMergeWithExistingStacks = true)
@@ -490,7 +617,10 @@ namespace RW_NodeTree
             {
                 readerWriterLockSlim.ExitReadLock();
             }
-            if (Comp != null && Comp.AllowNode(item, currentKey.Item1))
+            if (item?.Destroyed ?? false) return 0;
+            if (item?.holdingOwner != null) return 0;
+            if (IsChildOf(item)) return 0;
+            if (Proccesser != null && Proccesser.AllowNode(item, currentKey.Item1))
             {
                 return base.GetCountCanAccept(item, false);
             }
@@ -615,11 +745,10 @@ namespace RW_NodeTree
                     return false;
                 }
 
-                Dictionary<string, object?> cachedData = new Dictionary<string, object?>();
-
+                INodeProccesser? proccesser = item as INodeProccesser;
                 if (!CanAcceptAnyOf(item, canMergeWithExistingStacks) || item.holdingOwner != null || IsChildOf(item))
                 {
-                    ((CompChildNodeProccesser?)item)?.internal_Added(this, currentKey.Item1, false, cachedData);
+                    proccesser?.Added(this, currentKey.Item1, false);
                     return false;
                 }
                 readerWriterLockSlim.EnterWriteLock();
@@ -647,7 +776,11 @@ namespace RW_NodeTree
                 {
                     readerWriterLockSlim.ExitWriteLock();
                 }
-                ((CompChildNodeProccesser?)item)?.internal_Added(this, currentKey.Item1, true, cachedData);
+                if (proccesser != null)
+                {
+                    proccesser.ChildNodes.cachedRootNode = null;
+                    proccesser.Added(this, currentKey.Item1, true);
+                }
                 //NeedUpdate = true;
                 return true;
             }
@@ -662,11 +795,11 @@ namespace RW_NodeTree
         {
             if (node == null) return false;
             IThingHolder thingHolder = Owner;
-            Thing? parent = (thingHolder as ThingComp)?.parent ?? (thingHolder as Thing);
+            Thing? parent = thingHolder as Thing;
             while (thingHolder != null && parent != node)
             {
                 thingHolder = thingHolder.ParentHolder;
-                parent = (thingHolder as ThingComp)?.parent ?? (thingHolder as Thing);
+                parent = thingHolder as Thing;
             }
             return parent == node;
         }
@@ -859,10 +992,11 @@ namespace RW_NodeTree
                 }
 
                 string key = innerList[index].Item1;
-                Dictionary<string, object?> cachedData = new Dictionary<string, object?>();
-                if (!Comp.AllowNode(item, key))
+
+                INodeProccesser? proccesser = item as INodeProccesser;
+                if (!Proccesser.AllowNode(null, key))
                 {
-                    ((CompChildNodeProccesser?)item)?.internal_Removed(this, key, false, cachedData);
+                    proccesser?.Removed(this, key, false);
                     return false;
                 }
 
@@ -883,15 +1017,18 @@ namespace RW_NodeTree
                 {
                     readerWriterLockSlim.ExitWriteLock();
                 }
-
-                if(item.holdingOwner != this)
+                if (item.holdingOwner != this)
                 {
-                    ((CompChildNodeProccesser?)item)?.internal_Removed(this, key, false, cachedData);
+                    proccesser?.Removed(this, key, false);
                     return false;
                 }
 
                 item.holdingOwner = null;
-                ((CompChildNodeProccesser?)item)?.internal_Removed(this, key, true, cachedData);
+                if (proccesser != null)
+                {
+                    proccesser.ChildNodes.cachedRootNode = null;
+                    proccesser.Removed(this, key, true);
+                }
                 //NeedUpdate = true;
                 return true;
             }
@@ -1057,14 +1194,16 @@ namespace RW_NodeTree
 
         private bool enableWrite = false;
 
+        private INodeProccesser? cachedRootNode;
+
         private readonly ReaderWriterLockSlim readerWriterLockSlim = new ReaderWriterLockSlim();
         private readonly List<(string, Thing)> innerList = new List<(string, Thing)>();
         private readonly Dictionary<string, int> indicesById = new Dictionary<string, int>();
         private readonly Dictionary<Thing, int> indicesByThing = new Dictionary<Thing, int>();
         private readonly ConcurrentDictionary<int, (string?, int)> currentKey = new ConcurrentDictionary<int, (string?, int)>();
+        private readonly NodeRenderingInfoForRot4 nodeRenderingInfo = new NodeRenderingInfoForRot4();
 
         private static bool blockUpdate = false;
-
 
     }
 }

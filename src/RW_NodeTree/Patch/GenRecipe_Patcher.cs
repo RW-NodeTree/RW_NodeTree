@@ -21,18 +21,18 @@ namespace RW_NodeTree.Patch
             if (worker == null) throw new ArgumentNullException(nameof(worker));
             if (ingredients == null) throw new ArgumentNullException(nameof(ingredients));
             if (billGiver == null) throw new ArgumentNullException(nameof(billGiver));
-            __result = ((CompChildNodeProccesser?)dominantIngredient)?.PostGenRecipe_MakeRecipeProducts(recipeDef, worker, ingredients, dominantIngredient, billGiver, precept, RecipeInvokeSource.dominantIngredient, __result) ?? __result;
+            __result = (dominantIngredient as IRecipePatcher)?.PostGenRecipe_MakeRecipeProducts(recipeDef, worker, ingredients, dominantIngredient, billGiver, precept, RecipeInvokeSource.dominantIngredient, __result) ?? __result;
             foreach (Thing thing in ingredients)
             {
-                __result = ((CompChildNodeProccesser?)thing)?.PostGenRecipe_MakeRecipeProducts(recipeDef, worker, ingredients, dominantIngredient, billGiver, precept, RecipeInvokeSource.ingredients, __result) ?? __result;
+                __result = (thing as IRecipePatcher)?.PostGenRecipe_MakeRecipeProducts(recipeDef, worker, ingredients, dominantIngredient, billGiver, precept, RecipeInvokeSource.ingredients, __result) ?? __result;
             }
-            __result = ((CompChildNodeProccesser?)worker)?.PostGenRecipe_MakeRecipeProducts(recipeDef, worker, ingredients, dominantIngredient, billGiver, precept, RecipeInvokeSource.worker, __result) ?? __result;
+            __result = (worker as IRecipePatcher)?.PostGenRecipe_MakeRecipeProducts(recipeDef, worker, ingredients, dominantIngredient, billGiver, precept, RecipeInvokeSource.worker, __result) ?? __result;
             try
             {
                 __result = new List<Thing>(__result);
                 foreach (Thing thing in __result)
                 {
-                    __result = ((CompChildNodeProccesser?)thing)?.PostGenRecipe_MakeRecipeProducts(recipeDef, worker!, ingredients, dominantIngredient, billGiver, precept, RecipeInvokeSource.products, __result) ?? __result;
+                    __result = (thing as IRecipePatcher)?.PostGenRecipe_MakeRecipeProducts(recipeDef, worker!, ingredients, dominantIngredient, billGiver, precept, RecipeInvokeSource.products, __result) ?? __result;
                 }
             }
             catch (Exception ex)
@@ -47,36 +47,9 @@ namespace RW_NodeTree.Patch
 
 namespace RW_NodeTree
 {
-    /// <summary>
-    /// Node function proccesser
-    /// </summary>
-    public partial class CompChildNodeProccesser : ThingComp, IThingHolder
+    public partial interface IRecipePatcher
     {
-        internal IEnumerable<Thing> PostGenRecipe_MakeRecipeProducts(RecipeDef recipeDef, Pawn worker, List<Thing> ingredients, Thing? dominantIngredient, IBillGiver billGiver, Precept_ThingStyle? precept, RecipeInvokeSource InvokeSource, IEnumerable<Thing> result)
-        {
-            UpdateNode();
-            foreach (CompBasicNodeComp comp in AllNodeComp)
-            {
-                try
-                {
-                    result = comp.internal_PostGenRecipe_MakeRecipeProducts(recipeDef, worker, ingredients, dominantIngredient, billGiver, precept, InvokeSource, result) ?? result;
-                }
-                catch (Exception ex)
-                {
-                    Log.Error(ex.ToString());
-                }
-            }
-            return result;
-        }
-    }
-    public abstract partial class CompBasicNodeComp : ThingComp
-    {
-        protected virtual IEnumerable<Thing> PostGenRecipe_MakeRecipeProducts(RecipeDef recipeDef, Pawn worker, List<Thing> ingredients, Thing? dominantIngredient, IBillGiver billGiver, Precept_ThingStyle? precept, RecipeInvokeSource invokeSource, IEnumerable<Thing> result)
-        {
-            return result;
-        }
-        internal IEnumerable<Thing> internal_PostGenRecipe_MakeRecipeProducts(RecipeDef recipeDef, Pawn worker, List<Thing> ingredients, Thing? dominantIngredient, IBillGiver billGiver, Precept_ThingStyle? precept, RecipeInvokeSource invokeSource, IEnumerable<Thing> result)
-            => PostGenRecipe_MakeRecipeProducts(recipeDef, worker, ingredients, dominantIngredient, billGiver, precept, invokeSource, result);
+        IEnumerable<Thing> PostGenRecipe_MakeRecipeProducts(RecipeDef recipeDef, Pawn worker, List<Thing> ingredients, Thing? dominantIngredient, IBillGiver billGiver, Precept_ThingStyle? precept, RecipeInvokeSource invokeSource, IEnumerable<Thing> result);
     }
 
     public enum RecipeInvokeSource

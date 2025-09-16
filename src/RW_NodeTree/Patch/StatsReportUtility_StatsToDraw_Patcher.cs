@@ -22,7 +22,7 @@ namespace RW_NodeTree.Patch
         {
             try
             {
-                CompChildNodeProccesser? proccesser = thing;
+                IStatsToDrawPatcher? proccesser = thing as IStatsToDrawPatcher;
                 __result = proccesser?.PostStatsReportUtility_StatsToDraw(thing, __result)?.ToList() ?? __result;
             }
             catch (Exception ex)
@@ -35,43 +35,8 @@ namespace RW_NodeTree.Patch
 
 namespace RW_NodeTree
 {
-    /// <summary>
-    /// Node function proccesser
-    /// </summary>
-    public partial class CompChildNodeProccesser : ThingComp, IThingHolder
+    public partial interface IStatsToDrawPatcher
     {
-
-
-        /// <summary>
-        /// event proccesser after ThingDef.SpecialDisplayStats
-        /// (WARRING!!!: Don't invoke any method if thet will invoke ThingDef.SpecialDisplayStats)
-        /// </summary>
-        /// <param name="thing">parm 'thing' of StatsReportUtility.StatsToDraw()</param>
-        /// <param name="result">result of ThingDef.SpecialDisplayStats</param>
-        internal IEnumerable<StatDrawEntry> PostStatsReportUtility_StatsToDraw(Thing thing, IEnumerable<StatDrawEntry> result)
-        {
-            UpdateNode();
-            foreach (CompBasicNodeComp comp in AllNodeComp)
-            {
-                try
-                {
-                    result = comp.internal_PostStatsReportUtility_StatsToDraw(thing, result) ?? result;
-                }
-                catch (Exception ex)
-                {
-                    Log.Error(ex.ToString());
-                }
-            }
-            return result;
-        }
-    }
-    public abstract partial class CompBasicNodeComp : ThingComp
-    {
-        protected virtual IEnumerable<StatDrawEntry> PostStatsReportUtility_StatsToDraw(Thing thing, IEnumerable<StatDrawEntry> result)
-        {
-            return result;
-        }
-        internal IEnumerable<StatDrawEntry> internal_PostStatsReportUtility_StatsToDraw(Thing thing, IEnumerable<StatDrawEntry> result)
-            => PostStatsReportUtility_StatsToDraw(thing, result);
+        IEnumerable<StatDrawEntry> PostStatsReportUtility_StatsToDraw(Thing thing, IEnumerable<StatDrawEntry> result);
     }
 }

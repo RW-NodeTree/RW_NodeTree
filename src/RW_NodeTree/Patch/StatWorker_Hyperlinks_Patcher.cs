@@ -33,7 +33,7 @@ namespace RW_NodeTree.Patch
         private static void PostStatWorker_GetInfoCardHyperlinks(StatWorker __instance, MethodInfo __originalMethod, StatRequest statRequest, ref IEnumerable<Dialog_InfoCard.Hyperlink> __result)
         {
             //if (Prefs.DevMode) Log.Message("__originalMethod.GetType() : " + __originalMethod.GetType() + "; _GetInfoCardHyperlinks.GetType() : " + _GetInfoCardHyperlinks.GetType() + "; same : " + (_GetInfoCardHyperlinks == __originalMethod));
-            CompChildNodeProccesser? proccesser = statRequest.Thing;
+            IStatHyperlinksPatcher? proccesser = statRequest.Thing as IStatHyperlinksPatcher;
             if (proccesser != null &&
                 __originalMethod.MethodHandle == GetMethodInfo_GetInfoCardHyperlinks_OfType(__instance.GetType()).MethodHandle
             )
@@ -57,45 +57,9 @@ namespace RW_NodeTree.Patch
 
 namespace RW_NodeTree
 {
-    /// <summary>
-    /// Node function proccesser
-    /// </summary>
-    public partial class CompChildNodeProccesser : ThingComp, IThingHolder
+    public partial interface IStatHyperlinksPatcher
     {
 
-
-        /// <summary>
-        /// event proccesser after StatWorker.GetInfoCardHyperlinks()
-        /// (WARRING!!!: Don't invoke any method if thet will invoke StatWorker.GetInfoCardHyperlinks)
-        /// </summary>
-        /// <param name="result">result of StatWorker.GetInfoCardHyperlinks(), modifiable</param>
-        /// <param name="statWorker">StatWorker</param>
-        /// <param name="reqstatRequest">parm 'reqstatRequest' of StatWorker.GetInfoCardHyperlinks()</param>
-        internal IEnumerable<Dialog_InfoCard.Hyperlink> PostStatWorker_GetInfoCardHyperlinks(StatWorker statWorker, StatDef stateDef, StatRequest statRequest, IEnumerable<Dialog_InfoCard.Hyperlink> result)
-        {
-            UpdateNode();
-            foreach (CompBasicNodeComp comp in AllNodeComp)
-            {
-                try
-                {
-                    result = comp.internal_PostStatWorker_GetInfoCardHyperlinks(statWorker, stateDef, statRequest, result) ?? result;
-                }
-                catch (Exception ex)
-                {
-                    Log.Error(ex.ToString());
-                }
-            }
-            return result;
-        }
-    }
-    public abstract partial class CompBasicNodeComp : ThingComp
-    {
-
-        protected virtual IEnumerable<Dialog_InfoCard.Hyperlink> PostStatWorker_GetInfoCardHyperlinks(StatWorker statWorker, StatDef stateDef, StatRequest statRequest, IEnumerable<Dialog_InfoCard.Hyperlink> result)
-        {
-            return result;
-        }
-        internal IEnumerable<Dialog_InfoCard.Hyperlink> internal_PostStatWorker_GetInfoCardHyperlinks(StatWorker statWorker, StatDef stateDef, StatRequest statRequest, IEnumerable<Dialog_InfoCard.Hyperlink> result)
-            => PostStatWorker_GetInfoCardHyperlinks(statWorker, stateDef, statRequest, result);
+        IEnumerable<Dialog_InfoCard.Hyperlink> PostStatWorker_GetInfoCardHyperlinks(StatWorker statWorker, StatDef stateDef, StatRequest statRequest, IEnumerable<Dialog_InfoCard.Hyperlink> result);
     }
 }

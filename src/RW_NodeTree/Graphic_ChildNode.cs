@@ -9,11 +9,12 @@ namespace RW_NodeTree
 {
     public class Graphic_ChildNode : Graphic
     {
-        public Graphic_ChildNode(CompChildNodeProccesser thing, Graphic org)
+        public Graphic_ChildNode(Thing thing, Graphic org)
         {
             if (thing == null) throw new ArgumentNullException(nameof(thing));
             if (org == null) throw new ArgumentNullException(nameof(org));
-            currentProccess = thing;
+            if (thing is not INodeProccesser nodeProccesser) throw new ArgumentNullException(nameof(thing));
+            else currentProccesser = nodeProccesser;
             subGraphic = org;
             //base.drawSize = _THING.DrawSize(_THING.parent.Rotation);
             //base.data = _GRAPHIC.data;
@@ -21,7 +22,7 @@ namespace RW_NodeTree
 
         public Graphic SubGraphic => subGraphic;
 
-        public override Material? MatSingle => MatAt(currentProccess.parent.Rotation);
+        public override Material? MatSingle => MatAt(((Thing)currentProccesser).Rotation);
 
         public override Material? MatNorth => MatAt(Rot4.North);
 
@@ -41,22 +42,15 @@ namespace RW_NodeTree
 
         public override float DrawRotatedExtraAngleOffset => 0f;
 
-        public override Mesh MeshAt(Rot4 rot)
-        {
-            MatAt(rot);
-            //if (Prefs.DevMode) Log.Message(" DrawSize: currentProccess=" + currentProccess + "; Rot4=" + rot + "; size=" + base.drawSize + ";\n");
-            return base.MeshAt(rot);
-        }
-
         public override Material MatAt(Rot4 rot, Thing? thing = null)
         {
-            CompChildNodeProccesser comp_ChildNodeProccesser = ((CompChildNodeProccesser?)thing) ?? currentProccess;
-            if (comp_ChildNodeProccesser != currentProccess) return SubGraphic.MatAt(rot, thing);
+            thing = thing ?? (Thing)currentProccesser;
+            if ((thing as INodeProccesser) != currentProccesser) return SubGraphic.MatAt(rot, thing);
 
 
             (Material? material, Texture2D? texture, RenderTexture? cachedRenderTarget) = defaultRenderingCache[rot];
 
-            List<(string?, Thing, List<RenderInfo>)> commands = comp_ChildNodeProccesser.GetNodeRenderingInfos(rot, out bool needUpdate, subGraphic);
+            List<(string?, Thing, List<RenderInfo>)> commands = currentProccesser.ChildNodes.GetNodeRenderingInfos(rot, out bool needUpdate, subGraphic);
             if (needUpdate || material == null || texture == null || cachedRenderTarget == null)
             {
                 List<RenderInfo> final = new List<RenderInfo>();
@@ -64,10 +58,10 @@ namespace RW_NodeTree
                 {
                     if (!infos.Item3.NullOrEmpty()) final.AddRange(infos.Item3);
                 }
-                RenderingTools.RenderToTarget(final, ref cachedRenderTarget!, ref texture!, default(Vector2Int), comp_ChildNodeProccesser.Props.TextureSizeFactor, comp_ChildNodeProccesser.Props.ExceedanceFactor, comp_ChildNodeProccesser.Props.ExceedanceOffset, comp_ChildNodeProccesser.HasPostFX(true) ? comp_ChildNodeProccesser.PostFX : default);
+                RenderingTools.RenderToTarget(final, ref cachedRenderTarget!, ref texture!, default(Vector2Int), currentProccesser.TextureSizeFactor, currentProccesser.ExceedanceFactor, currentProccesser.ExceedanceOffset, currentProccesser.HasPostFX(true) ? currentProccesser.PostFX : default);
                 Shader shader = subGraphic.Shader;
                 texture.wrapMode = TextureWrapMode.Clamp;
-                texture.filterMode = comp_ChildNodeProccesser.Props.TextureFilterMode;
+                texture.filterMode = currentProccesser.TextureFilterMode;
 
                 if (material == null)
                 {
@@ -79,14 +73,11 @@ namespace RW_NodeTree
                 }
                 material.mainTexture = texture;
                 defaultRenderingCache[rot] = (material, texture, cachedRenderTarget);
-
             }
 
+            Vector2 size = new Vector2(texture.width, texture.height) / currentProccesser.TextureSizeFactor;
 
-
-            Vector2 size = new Vector2(texture.width, texture.height) / comp_ChildNodeProccesser.Props.TextureSizeFactor;
-
-            Graphic? graphic = comp_ChildNodeProccesser.parent.Graphic;
+            Graphic? graphic = thing.Graphic;
             //if (graphic.GetGraphic_ChildNode() == this)
             while (graphic != null && graphic != this)
             {
@@ -100,21 +91,21 @@ namespace RW_NodeTree
 
         public override Material? MatSingleFor(Thing? thing)
         {
-            CompChildNodeProccesser comp_ChildNodeProccesser = ((CompChildNodeProccesser?)thing) ?? currentProccess;
-            if (comp_ChildNodeProccesser != currentProccess) return SubGraphic.MatSingleFor(thing);
-            return MatAt(comp_ChildNodeProccesser.parent.Rotation, comp_ChildNodeProccesser);
+            thing = thing ?? (Thing)currentProccesser;
+            if ((thing as INodeProccesser) != currentProccesser) return SubGraphic.MatSingleFor(thing);
+            return MatAt(thing.Rotation, thing);
         }
 
         public override void DrawWorker(Vector3 loc, Rot4 rot, ThingDef? thingDef, Thing? thing, float extraRotation)
         {
-            CompChildNodeProccesser comp_ChildNodeProccesser = ((CompChildNodeProccesser?)thing) ?? currentProccess;
-            if (comp_ChildNodeProccesser != currentProccess) SubGraphic?.DrawWorker(loc, rot, thingDef, thing, extraRotation);
-            else if (!RenderingTools.StartOrEndDrawCatchingBlock || comp_ChildNodeProccesser.HasPostFX(false)) base.DrawWorker(loc, rot, thingDef, thing, extraRotation);
+            thing = thing ?? (Thing)currentProccesser;
+            if ((thing as INodeProccesser) != currentProccesser) SubGraphic?.DrawWorker(loc, rot, thingDef, thing, extraRotation);
+            else if (!RenderingTools.StartOrEndDrawCatchingBlock || currentProccesser.HasPostFX(false)) base.DrawWorker(loc, rot, thingDef, thing, extraRotation);
             else
             {
                 MatAt(rot, thing);
                 List<RenderInfo> final = new List<RenderInfo>();
-                foreach ((string?, Thing, List<RenderInfo>) infos in currentProccess.GetNodeRenderingInfos(rot, out _, subGraphic))
+                foreach ((string?, Thing, List<RenderInfo>) infos in currentProccesser.ChildNodes.GetNodeRenderingInfos(rot, out _, subGraphic))
                 {
                     if (!infos.Item3.NullOrEmpty()) final.AddRange(infos.Item3);
                 }
@@ -135,11 +126,11 @@ namespace RW_NodeTree
 
         public override void Print(SectionLayer layer, Thing thing, float extraRotation)
         {
-            CompChildNodeProccesser comp_ChildNodeProccesser = ((CompChildNodeProccesser?)thing) ?? currentProccess;
-            if (comp_ChildNodeProccesser != currentProccess) SubGraphic?.Print(layer, thing, extraRotation);
+            thing = thing ?? (Thing)currentProccesser;
+            if ((thing as INodeProccesser) != currentProccesser) SubGraphic?.Print(layer, thing, extraRotation);
             else
             {
-                MatAt(comp_ChildNodeProccesser.parent.Rotation, comp_ChildNodeProccesser);
+                MatAt(thing.Rotation, thing);
                 base.Print(layer, thing, extraRotation);
             }
         }
@@ -217,7 +208,7 @@ namespace RW_NodeTree
         }
 
         private readonly OffScreenRenderingCache defaultRenderingCache = new OffScreenRenderingCache();
-        private CompChildNodeProccesser currentProccess;
+        private INodeProccesser currentProccesser;
         private Graphic subGraphic;
     }
 }

@@ -1,30 +1,22 @@
 ﻿using HarmonyLib;
+using RW_NodeTree.Tools;
 using UnityEngine;
 using Verse;
 
 namespace RW_NodeTree.Patch
 {
-    [HarmonyPatch(typeof(Graphic_RandomRotated))]
-    internal static class Graphic_RandomRotated_Patcher
+    [HarmonyPatch(typeof(Graphic))]
+    internal static class Graphic_Patcher
     {
 
         [HarmonyPrefix]
         [HarmonyPatch(
-            typeof(Graphic_RandomRotated),
-            "DrawWorker"
+            typeof(Graphic),
+            "MeshAt"
         )]
-        private static bool PreGraphic_RandomRotated_DrawWorker(Graphic_RandomRotated __instance, Vector3 loc, Rot4 rot, ThingDef thingDef, Thing thing, float extraRotation)
+        private static void PreGraphic_MeshAt(Graphic __instance, Rot4 rot)
         {
-            if ((CompChildNodeProccesser?)thing != null)
-            {
-                float maxAngle = Graphic_RandomRotated_MaxAngle(__instance);
-                extraRotation += -maxAngle + (float)(thing.thingIDNumber * 542) % (maxAngle * 2f);
-                Graphic_RandomRotated_SubGraphic(__instance)?.DrawWorker(loc, rot, thingDef, thing, extraRotation);
-                return false;
-            }
-            return true;
+            __instance.GetGraphic_ChildNode()?.MatAt(rot);
         }
-        private static AccessTools.FieldRef<Graphic_RandomRotated, Graphic> Graphic_RandomRotated_SubGraphic = AccessTools.FieldRefAccess<Graphic>(typeof(Graphic_RandomRotated), "subGraphic");
-        private static AccessTools.FieldRef<Graphic_RandomRotated, float> Graphic_RandomRotated_MaxAngle = AccessTools.FieldRefAccess<float>(typeof(Graphic_RandomRotated), "maxAngle");
     }
 }
