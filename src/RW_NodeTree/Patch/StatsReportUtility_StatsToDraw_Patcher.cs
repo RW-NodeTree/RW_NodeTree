@@ -31,10 +31,7 @@ namespace RW_NodeTree.Patch
             }
         }
     }
-}
-
-namespace RW_NodeTree
-{
+    
     public partial interface IStatsToDrawPatcher
     {
         IEnumerable<StatDrawEntry> PostStatsReportUtility_StatsToDraw(Thing thing, IEnumerable<StatDrawEntry> result);

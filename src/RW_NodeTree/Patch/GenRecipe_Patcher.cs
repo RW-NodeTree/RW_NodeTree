@@ -43,10 +43,7 @@ namespace RW_NodeTree.Patch
         }
 
     }
-}
-
-namespace RW_NodeTree
-{
+    
     public partial interface IRecipePatcher
     {
         IEnumerable<Thing> PostGenRecipe_MakeRecipeProducts(RecipeDef recipeDef, Pawn worker, List<Thing> ingredients, Thing? dominantIngredient, IBillGiver billGiver, Precept_ThingStyle? precept, RecipeInvokeSource invokeSource, IEnumerable<Thing> result);

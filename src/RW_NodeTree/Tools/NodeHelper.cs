@@ -10,7 +10,7 @@ namespace RW_NodeTree.Tools
     /// </summary>
     public static class NodeHelper
     {
-        public static INodeProccesser? RootNode(this Thing thing) => (((INodeProccesser?)thing) ?? (thing?.ParentHolder as INodeProccesser))?.ChildNodes.RootNode;
+        public static INodeProcesser? RootNode(this Thing thing) => (((INodeProcesser?)thing) ?? (thing?.ParentHolder as INodeProcesser))?.ChildNodes.RootNode;
 
 
         /// <summary>

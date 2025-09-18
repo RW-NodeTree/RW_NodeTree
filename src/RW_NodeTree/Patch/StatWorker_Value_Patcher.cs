@@ -141,10 +141,7 @@ namespace RW_NodeTree.Patch
             }
         }
     }
-}
-
-namespace RW_NodeTree
-{
+    
     public partial interface IStatValuePatcher
     {
         bool PreStatWorker_GetValueUnfinalized(StatWorker statWorker, StatDef stateDef, StatRequest req, bool applyPostProcess, Dictionary<string, object?> stats);

@@ -31,7 +31,7 @@ namespace RW_NodeTree.Patch
             ThingStyleDef styleDef = thing.StyleDef;
             if (thing?.def?.graphicData != null && (styleDef == null || styleDef.UIIcon == null) && thing.def.uiIconPath.NullOrEmpty() && !(thing is Pawn || thing is Corpse))
             {
-                INodeProccesser? proccesser = thing as INodeProccesser;
+                INodeProcesser? proccesser = thing as INodeProcesser;
                 if (proccesser != null)
                 {
                     Rot4 defaultPlacingRot = thing.def.defaultPlacingRot;

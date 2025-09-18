@@ -6,7 +6,7 @@ using Verse;
 
 namespace RW_NodeTree
 {
-    public partial interface INodeProccesser : IThingHolder
+    public partial interface INodeProcesser : IThingHolder
     {
         uint TextureSizeFactor { get; }
 
@@ -31,14 +31,14 @@ namespace RW_NodeTree
         /// update event
         /// </summary>
         /// <param name="actionNode">update event action node</param>
-        Dictionary<string, Thing>? PreUpdateChilds(INodeProccesser actionNode, Dictionary<string, object?> cachedDataToPostUpatde);
+        Dictionary<string, Thing>? PreUpdateChilds(INodeProcesser actionNode, Dictionary<string, object?> cachedDataToPostUpatde);
 
         /// <summary>
         /// update event
         /// </summary>
         /// <param name="actionNode">update event action node</param>
         /// <returns>stope bubble</returns>
-        void PostUpdateChilds(INodeProccesser actionNode, Dictionary<string, object?> cachedDataFromPerUpdate, ReadOnlyDictionary<string, Thing> prveChilds, out bool notUpdateTexture);
+        void PostUpdateChilds(INodeProcesser actionNode, Dictionary<string, object?> cachedDataFromPerUpdate, ReadOnlyDictionary<string, Thing> prveChilds, out bool notUpdateTexture);
 
         /// <summary>
         /// allow node to append into container

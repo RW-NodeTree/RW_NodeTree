@@ -33,9 +33,9 @@ namespace RW_NodeTree
             public readonly ReadOnlyDictionary<string, ReadOnlyCollection<RenderInfo>>?[] nodeRenderingInfos = new ReadOnlyDictionary<string, ReadOnlyCollection<RenderInfo>>?[4];
         }
 
-        public NodeContainer(Thing proccesser) : base(proccesser as INodeProccesser)
+        public NodeContainer(Thing proccesser) : base(proccesser as INodeProcesser)
         {
-            if (proccesser is not INodeProccesser)
+            if (proccesser is not INodeProcesser)
             {
                 throw new InvalidCastException("Invalid proccesser type");
             }
@@ -115,8 +115,8 @@ namespace RW_NodeTree
             }
         }
 
-        public INodeProccesser Proccesser => (INodeProccesser)Owner;
-        public INodeProccesser? ParentProccesser => Proccesser.ParentHolder as INodeProccesser;
+        public INodeProcesser Proccesser => (INodeProcesser)Owner;
+        public INodeProcesser? ParentProccesser => Proccesser.ParentHolder as INodeProcesser;
         public NodeContainer? ParentContainer => ParentProccesser?.ChildNodes;
 
         private (string?, int) CurrentKey
@@ -144,17 +144,17 @@ namespace RW_NodeTree
         /// <summary>
         /// root of this node tree
         /// </summary>
-        public INodeProccesser RootNode
+        public INodeProcesser RootNode
         {
             get
             {
                 if (cachedRootNode != null) return cachedRootNode;
-                INodeProccesser proccesser = Proccesser;
-                INodeProccesser? next = ParentProccesser;
+                INodeProcesser proccesser = Proccesser;
+                INodeProcesser? next = ParentProccesser;
                 while (next != null)
                 {
                     proccesser = next;
-                    next = next.ParentHolder as INodeProccesser;
+                    next = next.ParentHolder as INodeProcesser;
                 }
                 cachedRootNode = proccesser;
                 return proccesser;
@@ -374,7 +374,7 @@ namespace RW_NodeTree
             cachedRootNode = null;
             for (int i = Count - 1; i >= 0; i--)
             {
-                (this[i] as INodeProccesser)?.ChildNodes?.CachedRootNodeNeedUpdate();
+                (this[i] as INodeProcesser)?.ChildNodes?.CachedRootNodeNeedUpdate();
             }
         }
 
@@ -473,11 +473,11 @@ namespace RW_NodeTree
         /// <returns></returns>
         public void UpdateNode() => internal_UpdateNode();
 
-        private void internal_UpdateNode(INodeProccesser? actionNode = null)
+        private void internal_UpdateNode(INodeProcesser? actionNode = null)
         {
 
 
-            INodeProccesser proccess = this.Proccesser;
+            INodeProcesser proccess = this.Proccesser;
             if (proccess == null) return;
 
             if (actionNode == null)
@@ -560,7 +560,7 @@ namespace RW_NodeTree
 
                 foreach (Thing? node in prveChilds.Values)
                 {
-                    NodeContainer? container = (node as INodeProccesser)?.ChildNodes;
+                    NodeContainer? container = (node as INodeProcesser)?.ChildNodes;
                     if (container != null && container.NeedUpdate && !this.Contains(node))
                     {
                         container.internal_UpdateNode(actionNode);
@@ -569,7 +569,7 @@ namespace RW_NodeTree
 
                 foreach (Thing? node in this.Values)
                 {
-                    NodeContainer? container = (node as INodeProccesser)?.ChildNodes;
+                    NodeContainer? container = (node as INodeProcesser)?.ChildNodes;
                     if (container != null && container.NeedUpdate)
                     {
                         container.internal_UpdateNode(actionNode);
@@ -753,7 +753,7 @@ namespace RW_NodeTree
                     return false;
                 }
 
-                INodeProccesser? proccesser = item as INodeProccesser;
+                INodeProcesser? proccesser = item as INodeProcesser;
                 if (!CanAcceptAnyOf(item, canMergeWithExistingStacks) || item.holdingOwner != null || IsChildOf(item))
                 {
                     proccesser?.Added(this, currentKey.Item1, false);
@@ -1001,7 +1001,7 @@ namespace RW_NodeTree
 
                 string key = innerList[index].Item1;
 
-                INodeProccesser? proccesser = item as INodeProccesser;
+                INodeProcesser? proccesser = item as INodeProcesser;
                 if (!Proccesser.AllowNode(null, key))
                 {
                     proccesser?.Removed(this, key, false);
@@ -1202,7 +1202,7 @@ namespace RW_NodeTree
 
         private bool enableWrite = false;
 
-        private INodeProccesser? cachedRootNode;
+        private INodeProcesser? cachedRootNode;
 
         private readonly ReaderWriterLockSlim readerWriterLockSlim = new ReaderWriterLockSlim();
         private readonly List<(string, Thing)> innerList = new List<(string, Thing)>();

@@ -14,7 +14,7 @@ namespace RW_NodeTree
         {
             if (thing == null) throw new ArgumentNullException(nameof(thing));
             if (org == null) throw new ArgumentNullException(nameof(org));
-            if (thing is not INodeProccesser nodeProccesser) throw new ArgumentNullException(nameof(thing));
+            if (thing is not INodeProcesser nodeProccesser) throw new ArgumentNullException(nameof(thing));
             else currentProccesser = nodeProccesser;
             subGraphic = org;
             //base.drawSize = _THING.DrawSize(_THING.parent.Rotation);
@@ -46,7 +46,7 @@ namespace RW_NodeTree
         public override Material MatAt(Rot4 rot, Thing? thing = null)
         {
             thing = thing ?? (Thing)currentProccesser;
-            if ((thing as INodeProccesser) != currentProccesser) return SubGraphic.MatAt(rot, thing);
+            if ((thing as INodeProcesser) != currentProccesser) return SubGraphic.MatAt(rot, thing);
 
 
             (Material? material, Texture2D? texture, RenderTexture? cachedRenderTarget) = defaultRenderingCache[rot];
@@ -93,14 +93,14 @@ namespace RW_NodeTree
         public override Material? MatSingleFor(Thing? thing)
         {
             thing = thing ?? (Thing)currentProccesser;
-            if ((thing as INodeProccesser) != currentProccesser) return SubGraphic.MatSingleFor(thing);
+            if ((thing as INodeProcesser) != currentProccesser) return SubGraphic.MatSingleFor(thing);
             return MatAt(thing.Rotation, thing);
         }
 
         public override void DrawWorker(Vector3 loc, Rot4 rot, ThingDef? thingDef, Thing? thing, float extraRotation)
         {
             thing = thing ?? (Thing)currentProccesser;
-            if ((thing as INodeProccesser) != currentProccesser) SubGraphic?.DrawWorker(loc, rot, thingDef, thing, extraRotation);
+            if ((thing as INodeProcesser) != currentProccesser) SubGraphic?.DrawWorker(loc, rot, thingDef, thing, extraRotation);
             else if (!RenderingTools.StartOrEndDrawCatchingBlock || currentProccesser.HasPostFX(false)) base.DrawWorker(loc, rot, thingDef, thing, extraRotation);
             else
             {
@@ -128,7 +128,7 @@ namespace RW_NodeTree
         public override void Print(SectionLayer layer, Thing thing, float extraRotation)
         {
             thing = thing ?? (Thing)currentProccesser;
-            if ((thing as INodeProccesser) != currentProccesser) SubGraphic?.Print(layer, thing, extraRotation);
+            if ((thing as INodeProcesser) != currentProccesser) SubGraphic?.Print(layer, thing, extraRotation);
             else
             {
                 MatAt(thing.Rotation, thing);
@@ -209,7 +209,7 @@ namespace RW_NodeTree
         }
 
         private readonly OffScreenRenderingCache defaultRenderingCache = new OffScreenRenderingCache();
-        private INodeProccesser currentProccesser;
+        private INodeProcesser currentProccesser;
         private Graphic subGraphic;
     }
 }

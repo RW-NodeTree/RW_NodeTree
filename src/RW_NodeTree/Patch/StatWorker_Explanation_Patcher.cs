@@ -154,10 +154,7 @@ namespace RW_NodeTree.Patch
             }
         }
     }
-}
-
-namespace RW_NodeTree
-{
+    
     public partial interface IStatExplanationPatcher
     {
         bool PreStatWorker_GetExplanationUnfinalized(StatWorker statWorker, StatDef stateDef, StatRequest req, ToStringNumberSense numberSense, Dictionary<string, object?> stats);

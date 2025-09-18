@@ -141,10 +141,7 @@ namespace RW_NodeTree.Patch
             }
         }
     }
-}
-
-namespace RW_NodeTree
-{
+    
     public partial interface IStatShowPatcher
     {
         bool PreStatWorker_ShouldShowFor(StatWorker statWorker, StatDef stateDef, StatRequest req, Dictionary<string, object?> stats);

@@ -23,10 +23,7 @@ namespace RW_NodeTree.Patch
             __result = proccesser?.PostThingDef_SpecialDisplayStats(__instance, req, __result) ?? __result;
         }
     }
-}
-
-namespace RW_NodeTree
-{
+    
     public partial interface IThingDefStatsPatcher
     {
         IEnumerable<StatDrawEntry> PostThingDef_SpecialDisplayStats(ThingDef def, StatRequest req, IEnumerable<StatDrawEntry> result);

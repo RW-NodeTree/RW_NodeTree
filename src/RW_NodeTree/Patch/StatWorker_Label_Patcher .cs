@@ -81,10 +81,7 @@ namespace RW_NodeTree.Patch
             }
         }
     }
-}
-
-namespace RW_NodeTree
-{
+    
     public partial interface IStatLabelPatcher : IThingHolder
     {
         bool PreStatWorker_GetStatDrawEntryLabel(StatWorker statWorker, StatDef stat, float value, ToStringNumberSense numberSense, StatRequest optionalReq, bool finalized, Dictionary<string, object?> stats);

@@ -157,10 +157,7 @@ namespace RW_NodeTree.Patch
             __result = proccesser?.FinalStatWorker_InfoTextLineFromGear(gear, stat, __result, __state, __exception) ?? __result;
         }
     }
-}
-
-namespace RW_NodeTree
-{
+    
     public partial interface IStatGearAffectPatcher
     {
         bool PreStatWorker_GearHasCompsThatAffectStat(Thing gear, StatDef stat, Dictionary<string, object?> stats);
