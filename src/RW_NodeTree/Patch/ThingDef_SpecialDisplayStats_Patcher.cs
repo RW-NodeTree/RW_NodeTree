@@ -19,8 +19,8 @@ namespace RW_NodeTree.Patch
             )]
         private static void PostThingDef_SpecialDisplayStats(ThingDef __instance, StatRequest req, ref IEnumerable<StatDrawEntry> __result)
         {
-            IThingDefStatsPatcher? proccesser = req.Thing as IThingDefStatsPatcher;
-            __result = proccesser?.PostThingDef_SpecialDisplayStats(__instance, req, __result) ?? __result;
+            IThingDefStatsPatcher? processer = req.Thing as IThingDefStatsPatcher;
+            __result = processer?.PostThingDef_SpecialDisplayStats(__instance, req, __result) ?? __result;
         }
     }
     

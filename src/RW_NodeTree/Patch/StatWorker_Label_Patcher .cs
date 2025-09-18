@@ -34,32 +34,32 @@ namespace RW_NodeTree.Patch
 
         private static bool PreStatWorker_GetStatDrawEntryLabel(StatWorker __instance, MethodInfo __originalMethod, StatDef stat, float value, ToStringNumberSense numberSense, StatRequest optionalReq, bool finalized, ref (Dictionary<string, object?>, IStatLabelPatcher) __state)
         {
-            IStatLabelPatcher? proccesser = optionalReq.Thing as IStatLabelPatcher;
-            if (proccesser != null &&
+            IStatLabelPatcher? processer = optionalReq.Thing as IStatLabelPatcher;
+            if (processer != null &&
                 __originalMethod.MethodHandle == GetMethodInfo_GetStatDrawEntryLabel_OfType(__instance.GetType()).MethodHandle
             )
             {
                 __state.Item1 = new Dictionary<string, object?>();
-                __state.Item2 = proccesser;
-                return proccesser.PreStatWorker_GetStatDrawEntryLabel(__instance, stat, value, numberSense, optionalReq, finalized, __state.Item1);
+                __state.Item2 = processer;
+                return processer.PreStatWorker_GetStatDrawEntryLabel(__instance, stat, value, numberSense, optionalReq, finalized, __state.Item1);
             }
             return true;
         }
         private static void PostStatWorker_GetStatDrawEntryLabel(StatWorker __instance, StatDef stat, float value, ToStringNumberSense numberSense, StatRequest optionalReq, bool finalized, ref string __result, (Dictionary<string, object?>, IStatLabelPatcher) __state)
         {
-            (Dictionary<string, object?> stats, IStatLabelPatcher proccesser) = __state;
+            (Dictionary<string, object?> stats, IStatLabelPatcher processer) = __state;
             if (stats != null &&
-                proccesser != null
+                processer != null
             )
-                __result = proccesser.PostStatWorker_GetStatDrawEntryLabel(__instance, stat, value, numberSense, optionalReq, finalized, __result, stats) ?? __result;
+                __result = processer.PostStatWorker_GetStatDrawEntryLabel(__instance, stat, value, numberSense, optionalReq, finalized, __result, stats) ?? __result;
         }
         private static void FinalStatWorker_GetStatDrawEntryLabel(StatWorker __instance, StatDef stat, float value, ToStringNumberSense numberSense, StatRequest optionalReq, bool finalized, ref string __result, (Dictionary<string, object?>, IStatLabelPatcher) __state, Exception __exception)
         {
-            (Dictionary<string, object?> stats, IStatLabelPatcher proccesser) = __state;
+            (Dictionary<string, object?> stats, IStatLabelPatcher processer) = __state;
             if (stats != null &&
-                proccesser != null
+                processer != null
             )
-                __result = proccesser.FinalStatWorker_GetStatDrawEntryLabel(__instance, stat, value, numberSense, optionalReq, finalized, __result, stats, __exception) ?? __result;
+                __result = processer.FinalStatWorker_GetStatDrawEntryLabel(__instance, stat, value, numberSense, optionalReq, finalized, __result, stats, __exception) ?? __result;
         }
 
         public static void PatchStatDrawEntry(Type type, Harmony patcher)

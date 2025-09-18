@@ -53,61 +53,61 @@ namespace RW_NodeTree.Patch
 
         private static bool PreStatWorker_ShouldShowFor(StatWorker __instance, MethodInfo __originalMethod, StatRequest req, ref (Dictionary<string, object?>, IStatShowPatcher) __state)
         {
-            IStatShowPatcher? proccesser = req.Thing as IStatShowPatcher;
-            if (proccesser != null &&
+            IStatShowPatcher? processer = req.Thing as IStatShowPatcher;
+            if (processer != null &&
                 __originalMethod.MethodHandle == GetMethodInfo_ShouldShowFor_OfType(__instance.GetType()).MethodHandle
             )
             {
                 __state.Item1 = new Dictionary<string, object?>();
-                __state.Item2 = proccesser;
-                return proccesser.PreStatWorker_ShouldShowFor(__instance, StatWorker_stat(__instance), req, __state.Item1);
+                __state.Item2 = processer;
+                return processer.PreStatWorker_ShouldShowFor(__instance, StatWorker_stat(__instance), req, __state.Item1);
             }
             return true;
         }
         private static bool PreStatWorker_IsDisabledFor(StatWorker __instance, MethodInfo __originalMethod, Thing thing, ref (Dictionary<string, object?>, IStatShowPatcher) __state)
         {
-            IStatShowPatcher? proccesser = thing as IStatShowPatcher;
-            if (proccesser != null &&
+            IStatShowPatcher? processer = thing as IStatShowPatcher;
+            if (processer != null &&
                 __originalMethod.MethodHandle == GetMethodInfo_IsDisabledFor_OfType(__instance.GetType()).MethodHandle
             )
             {
                 __state.Item1 = new Dictionary<string, object?>();
-                __state.Item2 = proccesser;
-                return proccesser.PreStatWorker_IsDisabledFor(__instance, StatWorker_stat(__instance), thing, __state.Item1);
+                __state.Item2 = processer;
+                return processer.PreStatWorker_IsDisabledFor(__instance, StatWorker_stat(__instance), thing, __state.Item1);
             }
             return true;
         }
         private static void PostStatWorker_ShouldShowFor(StatWorker __instance, StatRequest req, ref bool __result, (Dictionary<string, object?>, IStatShowPatcher) __state)
         {
-            (Dictionary<string, object?> stats, IStatShowPatcher proccesser) = __state;
+            (Dictionary<string, object?> stats, IStatShowPatcher processer) = __state;
             if (stats != null &&
-                proccesser != null
+                processer != null
             )
-                __result = proccesser.PostStatWorker_ShouldShowFor(__instance, StatWorker_stat(__instance), req, __result, stats);
+                __result = processer.PostStatWorker_ShouldShowFor(__instance, StatWorker_stat(__instance), req, __result, stats);
         }
         private static void PostStatWorker_IsDisabledFor(StatWorker __instance, Thing thing, ref bool __result, (Dictionary<string, object?>, IStatShowPatcher) __state)
         {
-            (Dictionary<string, object?> stats, IStatShowPatcher proccesser) = __state;
+            (Dictionary<string, object?> stats, IStatShowPatcher processer) = __state;
             if (stats != null &&
-                proccesser != null
+                processer != null
             )
-                __result = proccesser.PostStatWorker_IsDisabledFor(__instance, StatWorker_stat(__instance), thing, __result, stats);
+                __result = processer.PostStatWorker_IsDisabledFor(__instance, StatWorker_stat(__instance), thing, __result, stats);
         }
         private static void FinalStatWorker_ShouldShowFor(StatWorker __instance, StatRequest req, ref bool __result, (Dictionary<string, object?>, IStatShowPatcher) __state, Exception __exception)
         {
-            (Dictionary<string, object?> stats, IStatShowPatcher proccesser) = __state;
+            (Dictionary<string, object?> stats, IStatShowPatcher processer) = __state;
             if (stats != null &&
-                proccesser != null
+                processer != null
             )
-                __result = proccesser.FinalStatWorker_ShouldShowFor(__instance, StatWorker_stat(__instance), req, __result, stats, __exception);
+                __result = processer.FinalStatWorker_ShouldShowFor(__instance, StatWorker_stat(__instance), req, __result, stats, __exception);
         }
         private static void FinalStatWorker_IsDisabledFor(StatWorker __instance, Thing thing, ref bool __result, (Dictionary<string, object?>, IStatShowPatcher) __state, Exception __exception)
         {
-            (Dictionary<string, object?> stats, IStatShowPatcher proccesser) = __state;
+            (Dictionary<string, object?> stats, IStatShowPatcher processer) = __state;
             if (stats != null &&
-                proccesser != null
+                processer != null
             )
-                __result = proccesser.FinalStatWorker_IsDisabledFor(__instance, StatWorker_stat(__instance), thing, __result, stats, __exception);
+                __result = processer.FinalStatWorker_IsDisabledFor(__instance, StatWorker_stat(__instance), thing, __result, stats, __exception);
         }
 
         public static void PatchShouldShowForAndIsDisabledFor(Type type, Harmony patcher)

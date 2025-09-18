@@ -33,11 +33,11 @@ namespace RW_NodeTree.Patch
         private static void PostStatWorker_GetInfoCardHyperlinks(StatWorker __instance, MethodInfo __originalMethod, StatRequest statRequest, ref IEnumerable<Dialog_InfoCard.Hyperlink> __result)
         {
             //if (Prefs.DevMode) Log.Message("__originalMethod.GetType() : " + __originalMethod.GetType() + "; _GetInfoCardHyperlinks.GetType() : " + _GetInfoCardHyperlinks.GetType() + "; same : " + (_GetInfoCardHyperlinks == __originalMethod));
-            IStatHyperlinksPatcher? proccesser = statRequest.Thing as IStatHyperlinksPatcher;
-            if (proccesser != null &&
+            IStatHyperlinksPatcher? processer = statRequest.Thing as IStatHyperlinksPatcher;
+            if (processer != null &&
                 __originalMethod.MethodHandle == GetMethodInfo_GetInfoCardHyperlinks_OfType(__instance.GetType()).MethodHandle
             )
-                __result = proccesser.PostStatWorker_GetInfoCardHyperlinks(__instance, StatWorker_stat(__instance), statRequest, __result) ?? __result;
+                __result = processer.PostStatWorker_GetInfoCardHyperlinks(__instance, StatWorker_stat(__instance), statRequest, __result) ?? __result;
         }
 
         public static void PatchGetInfoCardHyperlinks(Type type, Harmony patcher)

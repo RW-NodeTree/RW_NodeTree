@@ -67,8 +67,8 @@ namespace RW_NodeTree.Patch
             )]
         private static void PostStatWorker_GearHasCompsThatAffectStat(Thing gear, StatDef stat, ref bool __result, Dictionary<string, object?> __state)
         {
-            IStatGearAffectPatcher? proccesser = gear as IStatGearAffectPatcher;
-            __result = proccesser?.PostStatWorker_GearHasCompsThatAffectStat(gear, stat, __result, __state) ?? __result;
+            IStatGearAffectPatcher? processer = gear as IStatGearAffectPatcher;
+            __result = processer?.PostStatWorker_GearHasCompsThatAffectStat(gear, stat, __result, __state) ?? __result;
         }
 
         [HarmonyPostfix]
@@ -78,8 +78,8 @@ namespace RW_NodeTree.Patch
             )]
         private static void PostStatWorker_StatOffsetFromGear(Thing gear, StatDef stat, ref float __result, Dictionary<string, object?> __state)
         {
-            IStatGearAffectPatcher? proccesser = gear as IStatGearAffectPatcher;
-            __result = proccesser?.PostStatWorker_StatOffsetFromGear(gear, stat, __result, __state) ?? __result;
+            IStatGearAffectPatcher? processer = gear as IStatGearAffectPatcher;
+            __result = processer?.PostStatWorker_StatOffsetFromGear(gear, stat, __result, __state) ?? __result;
         }
 
 
@@ -90,8 +90,8 @@ namespace RW_NodeTree.Patch
             )]
         private static void PostStatWorker_InfoTextLineFromGear(Thing gear, StatDef stat, ref string __result, Dictionary<string, object?> __state)
         {
-            IStatGearAffectPatcher? proccesser = gear as IStatGearAffectPatcher;
-            __result = proccesser?.PostStatWorker_InfoTextLineFromGear(gear, stat, __result, __state) ?? __result;
+            IStatGearAffectPatcher? processer = gear as IStatGearAffectPatcher;
+            __result = processer?.PostStatWorker_InfoTextLineFromGear(gear, stat, __result, __state) ?? __result;
         }
 
         [HarmonyPostfix]
@@ -101,15 +101,15 @@ namespace RW_NodeTree.Patch
             )]
         private static void PostStatWorker_RelevantGear(Pawn pawn, StatDef stat, ref IEnumerable<Thing> __result)
         {
-            IStatGearAffectPatcher? proccesser = pawn as IStatGearAffectPatcher;
-            __result = proccesser?.PostStatWorker_RelevantGear(pawn, stat, __result) ?? __result;
+            IStatGearAffectPatcher? processer = pawn as IStatGearAffectPatcher;
+            __result = processer?.PostStatWorker_RelevantGear(pawn, stat, __result) ?? __result;
 
             if (pawn.apparel != null)
             {
                 foreach (Apparel thing in pawn.apparel.WornApparel)
                 {
-                    proccesser = thing as IStatGearAffectPatcher;
-                    __result = proccesser?.PostStatWorker_RelevantGear(thing, stat, __result) ?? __result;
+                    processer = thing as IStatGearAffectPatcher;
+                    __result = processer?.PostStatWorker_RelevantGear(thing, stat, __result) ?? __result;
                 }
             }
 
@@ -117,8 +117,8 @@ namespace RW_NodeTree.Patch
             {
                 foreach (ThingWithComps thing in pawn.equipment.AllEquipmentListForReading)
                 {
-                    proccesser = thing as IStatGearAffectPatcher;
-                    __result = proccesser?.PostStatWorker_RelevantGear(thing, stat, __result) ?? __result;
+                    processer = thing as IStatGearAffectPatcher;
+                    __result = processer?.PostStatWorker_RelevantGear(thing, stat, __result) ?? __result;
                 }
             }
         }
@@ -130,8 +130,8 @@ namespace RW_NodeTree.Patch
             )]
         private static void FinalStatWorker_GearHasCompsThatAffectStat(Thing gear, StatDef stat, ref bool __result, Dictionary<string, object?> __state, Exception __exception)
         {
-            IStatGearAffectPatcher? proccesser = gear as IStatGearAffectPatcher;
-            __result = proccesser?.FinalStatWorker_GearHasCompsThatAffectStat(gear, stat, __result, __state, __exception) ?? __result;
+            IStatGearAffectPatcher? processer = gear as IStatGearAffectPatcher;
+            __result = processer?.FinalStatWorker_GearHasCompsThatAffectStat(gear, stat, __result, __state, __exception) ?? __result;
         }
 
         [HarmonyFinalizer]
@@ -141,8 +141,8 @@ namespace RW_NodeTree.Patch
             )]
         private static void FinalStatWorker_StatOffsetFromGear(Thing gear, StatDef stat, ref float __result, Dictionary<string, object?> __state, Exception __exception)
         {
-            IStatGearAffectPatcher? proccesser = gear as IStatGearAffectPatcher;
-            __result = proccesser?.FinalStatWorker_StatOffsetFromGear(gear, stat, __result, __state, __exception) ?? __result;
+            IStatGearAffectPatcher? processer = gear as IStatGearAffectPatcher;
+            __result = processer?.FinalStatWorker_StatOffsetFromGear(gear, stat, __result, __state, __exception) ?? __result;
         }
 
 
@@ -153,8 +153,8 @@ namespace RW_NodeTree.Patch
             )]
         private static void FinalStatWorker_InfoTextLineFromGear(Thing gear, StatDef stat, ref string __result, Dictionary<string, object?> __state, Exception __exception)
         {
-            IStatGearAffectPatcher? proccesser = gear as IStatGearAffectPatcher;
-            __result = proccesser?.FinalStatWorker_InfoTextLineFromGear(gear, stat, __result, __state, __exception) ?? __result;
+            IStatGearAffectPatcher? processer = gear as IStatGearAffectPatcher;
+            __result = processer?.FinalStatWorker_InfoTextLineFromGear(gear, stat, __result, __state, __exception) ?? __result;
         }
     }
     

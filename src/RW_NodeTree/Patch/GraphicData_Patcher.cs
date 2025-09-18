@@ -16,8 +16,8 @@ namespace RW_NodeTree.Patch
         )]
         private static void PostGraphicData_GraphicColoredFor(/**GraphicData __instance, **/Thing t, ref Graphic __result)
         {
-            INodeProcesser? proccesser = t as INodeProcesser;
-            if (proccesser != null && __result != null)
+            INodeProcesser? processer = t as INodeProcesser;
+            if (processer != null && __result != null)
             {
                 __result = __result.GetColoredVersion(__result.Shader, t.DrawColor, t.DrawColorTwo);
                 if (__result is Graphic_Linked graphic_Linked)

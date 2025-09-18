@@ -53,61 +53,61 @@ namespace RW_NodeTree.Patch
 
         private static bool PreStatWorker_GetValueUnfinalized(StatWorker __instance, MethodInfo __originalMethod, StatRequest req, bool applyPostProcess, ref (Dictionary<string, object?>, IStatValuePatcher) __state)
         {
-            IStatValuePatcher? proccesser = req.Thing as IStatValuePatcher;
-            if (proccesser != null &&
+            IStatValuePatcher? processer = req.Thing as IStatValuePatcher;
+            if (processer != null &&
                 __originalMethod.MethodHandle == GetMethodInfo_GetValueUnfinalized_OfType(__instance.GetType()).MethodHandle
             )
             {
                 __state.Item1 = new Dictionary<string, object?>();
-                __state.Item2 = proccesser;
-                return proccesser.PreStatWorker_GetValueUnfinalized(__instance, StatWorker_stat(__instance), req, applyPostProcess, __state.Item1);
+                __state.Item2 = processer;
+                return processer.PreStatWorker_GetValueUnfinalized(__instance, StatWorker_stat(__instance), req, applyPostProcess, __state.Item1);
             }
             return true;
         }
         private static bool PreStatWorker_FinalizeValue(StatWorker __instance, MethodInfo __originalMethod, StatRequest req, bool applyPostProcess, ref float val, ref (Dictionary<string, object?>, IStatValuePatcher) __state)
         {
-            IStatValuePatcher? proccesser = req.Thing as IStatValuePatcher;
-            if (proccesser != null &&
+            IStatValuePatcher? processer = req.Thing as IStatValuePatcher;
+            if (processer != null &&
                 __originalMethod.MethodHandle == GetMethodInfo_FinalizeValue_OfType(__instance.GetType()).MethodHandle
             )
             {
                 __state.Item1 = new Dictionary<string, object?>();
-                __state.Item2 = proccesser;
-                return proccesser.PreStatWorker_FinalizeValue(__instance, StatWorker_stat(__instance), req, applyPostProcess, ref val, __state.Item1);
+                __state.Item2 = processer;
+                return processer.PreStatWorker_FinalizeValue(__instance, StatWorker_stat(__instance), req, applyPostProcess, ref val, __state.Item1);
             }
             return true;
         }
         private static void PostStatWorker_GetValueUnfinalized(StatWorker __instance, StatRequest req, bool applyPostProcess, ref float __result, (Dictionary<string, object?>, IStatValuePatcher) __state)
         {
-            (Dictionary<string, object?> stats, IStatValuePatcher proccesser) = __state;
+            (Dictionary<string, object?> stats, IStatValuePatcher processer) = __state;
             if (stats != null &&
-                proccesser != null
+                processer != null
             )
-                __result = proccesser.PostStatWorker_GetValueUnfinalized(__instance, StatWorker_stat(__instance), req, applyPostProcess, __result, __state.Item1);
+                __result = processer.PostStatWorker_GetValueUnfinalized(__instance, StatWorker_stat(__instance), req, applyPostProcess, __result, __state.Item1);
         }
         private static void PostStatWorker_FinalizeValue(StatWorker __instance, StatRequest req, bool applyPostProcess, ref float val, (Dictionary<string, object?>, IStatValuePatcher) __state)
         {
-            (Dictionary<string, object?> stats, IStatValuePatcher proccesser) = __state;
+            (Dictionary<string, object?> stats, IStatValuePatcher processer) = __state;
             if (stats != null &&
-                proccesser != null
+                processer != null
             )
-                val = proccesser.PostStatWorker_FinalizeValue(__instance, StatWorker_stat(__instance), req, applyPostProcess, val, __state.Item1);
+                val = processer.PostStatWorker_FinalizeValue(__instance, StatWorker_stat(__instance), req, applyPostProcess, val, __state.Item1);
         }
         private static void FinalStatWorker_GetValueUnfinalized(StatWorker __instance, StatRequest req, bool applyPostProcess, ref float __result, (Dictionary<string, object?>, IStatValuePatcher) __state, Exception __exception)
         {
-            (Dictionary<string, object?> stats, IStatValuePatcher proccesser) = __state;
+            (Dictionary<string, object?> stats, IStatValuePatcher processer) = __state;
             if (stats != null &&
-                proccesser != null
+                processer != null
             )
-                __result = proccesser.FinalStatWorker_GetValueUnfinalized(__instance, StatWorker_stat(__instance), req, applyPostProcess, __result, __state.Item1, __exception);
+                __result = processer.FinalStatWorker_GetValueUnfinalized(__instance, StatWorker_stat(__instance), req, applyPostProcess, __result, __state.Item1, __exception);
         }
         private static void FinalStatWorker_FinalizeValue(StatWorker __instance, StatRequest req, bool applyPostProcess, ref float val, (Dictionary<string, object?>, IStatValuePatcher) __state, Exception __exception)
         {
-            (Dictionary<string, object?> stats, IStatValuePatcher proccesser) = __state;
+            (Dictionary<string, object?> stats, IStatValuePatcher processer) = __state;
             if (stats != null &&
-                proccesser != null
+                processer != null
             )
-                val = proccesser.FinalStatWorker_FinalizeValue(__instance, StatWorker_stat(__instance), req, applyPostProcess, val, __state.Item1, __exception);
+                val = processer.FinalStatWorker_FinalizeValue(__instance, StatWorker_stat(__instance), req, applyPostProcess, val, __state.Item1, __exception);
         }
 
         public static void PatchValue(Type type, Harmony patcher)

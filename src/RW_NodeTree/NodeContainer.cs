@@ -15,7 +15,7 @@ using Verse;
 namespace RW_NodeTree
 {
     /// <summary>
-    /// Node storge proccesser
+    /// Node storge processer
     /// </summary>
     public class NodeContainer : ThingOwner, IList<string>, IList<Thing>, IDictionary<string, Thing?>, IDictionary<Thing, string?>, IList<(string, Thing)>
     {
@@ -33,11 +33,11 @@ namespace RW_NodeTree
             public readonly ReadOnlyDictionary<string, ReadOnlyCollection<RenderInfo>>?[] nodeRenderingInfos = new ReadOnlyDictionary<string, ReadOnlyCollection<RenderInfo>>?[4];
         }
 
-        public NodeContainer(Thing proccesser) : base(proccesser as INodeProcesser)
+        public NodeContainer(Thing processer) : base(processer as INodeProcesser)
         {
-            if (proccesser is not INodeProcesser)
+            if (processer is not INodeProcesser)
             {
-                throw new InvalidCastException("Invalid proccesser type");
+                throw new InvalidCastException("Invalid processer type");
             }
         }
 
@@ -115,9 +115,9 @@ namespace RW_NodeTree
             }
         }
 
-        public INodeProcesser Proccesser => (INodeProcesser)Owner;
-        public INodeProcesser? ParentProccesser => Proccesser.ParentHolder as INodeProcesser;
-        public NodeContainer? ParentContainer => ParentProccesser?.ChildNodes;
+        public INodeProcesser Processer => (INodeProcesser)Owner;
+        public INodeProcesser? ParentProcesser => Processer.ParentHolder as INodeProcesser;
+        public NodeContainer? ParentContainer => ParentProcesser?.ChildNodes;
 
         private (string?, int) CurrentKey
         {
@@ -149,15 +149,15 @@ namespace RW_NodeTree
             get
             {
                 if (cachedRootNode != null) return cachedRootNode;
-                INodeProcesser proccesser = Proccesser;
-                INodeProcesser? next = ParentProccesser;
+                INodeProcesser processer = Processer;
+                INodeProcesser? next = ParentProcesser;
                 while (next != null)
                 {
-                    proccesser = next;
+                    processer = next;
                     next = next.ParentHolder as INodeProcesser;
                 }
-                cachedRootNode = proccesser;
-                return proccesser;
+                cachedRootNode = processer;
+                return processer;
             }
         }
 
@@ -388,7 +388,7 @@ namespace RW_NodeTree
             if (readOnlyNodeRenderingInfos != null) return readOnlyNodeRenderingInfos;
             updated = true;
             Dictionary<string, List<RenderInfo>> nodeRenderingInfos = new Dictionary<string, List<RenderInfo>>(Count + 1);
-            Thing parent = (Thing)Proccesser;
+            Thing parent = (Thing)Processer;
 
             //if (Prefs.DevMode)
             //{
@@ -409,7 +409,7 @@ namespace RW_NodeTree
 
             Dictionary<string, object?> cachingData = new Dictionary<string, object?>();
 
-            HashSet<string>? ChildForDraw = Proccesser.PreGenRenderInfos(rot, cachingData);
+            HashSet<string>? ChildForDraw = Processer.PreGenRenderInfos(rot, cachingData);
 
             subGraphic = (subGraphic ?? parent.Graphic)?.GetGraphic_ChildNode()?.SubGraphic ?? subGraphic ?? parent.Graphic;
             if (ChildForDraw != null)
@@ -455,7 +455,7 @@ namespace RW_NodeTree
                     }
                 }
             }
-            nodeRenderingInfos = Proccesser.PostGenRenderInfos(nodeRenderingInfos, rot, subGraphic, cachingData) ?? nodeRenderingInfos;
+            nodeRenderingInfos = Processer.PostGenRenderInfos(nodeRenderingInfos, rot, subGraphic, cachingData) ?? nodeRenderingInfos;
             Dictionary<string, ReadOnlyCollection<RenderInfo>> mid = new Dictionary<string, ReadOnlyCollection<RenderInfo>>(nodeRenderingInfos.Count);
             foreach (var kv in nodeRenderingInfos)
             {
@@ -477,7 +477,7 @@ namespace RW_NodeTree
         {
 
 
-            INodeProcesser proccess = this.Proccesser;
+            INodeProcesser proccess = this.Processer;
             if (proccess == null) return;
 
             if (actionNode == null)
@@ -598,7 +598,7 @@ namespace RW_NodeTree
                 nodeRenderingInfo.Reset();
                 try
                 {
-                    Thing parent = (Thing)Proccesser;
+                    Thing parent = (Thing)Processer;
                     if (parent.Spawned && parent.def.drawerType >= DrawerType.MapMeshOnly) parent.DirtyMapMesh(parent.Map);
                 }
                 catch (Exception ex)
@@ -628,7 +628,7 @@ namespace RW_NodeTree
             if (item?.Destroyed ?? false) return 0;
             if (item?.holdingOwner != null) return 0;
             if (IsChildOf(item)) return 0;
-            if (Proccesser.AllowNode(item, currentKey.Item1))
+            if (Processer.AllowNode(item, currentKey.Item1))
             {
                 return base.GetCountCanAccept(item, false);
             }
@@ -753,10 +753,10 @@ namespace RW_NodeTree
                     return false;
                 }
 
-                INodeProcesser? proccesser = item as INodeProcesser;
+                INodeProcesser? processer = item as INodeProcesser;
                 if (!CanAcceptAnyOf(item, canMergeWithExistingStacks) || item.holdingOwner != null || IsChildOf(item))
                 {
-                    proccesser?.Added(this, currentKey.Item1, false);
+                    processer?.Added(this, currentKey.Item1, false);
                     return false;
                 }
                 readerWriterLockSlim.EnterWriteLock();
@@ -784,10 +784,10 @@ namespace RW_NodeTree
                 {
                     readerWriterLockSlim.ExitWriteLock();
                 }
-                if (proccesser != null)
+                if (processer != null)
                 {
-                    proccesser.ChildNodes.CachedRootNodeNeedUpdate();
-                    proccesser.Added(this, currentKey.Item1, true);
+                    processer.ChildNodes.CachedRootNodeNeedUpdate();
+                    processer.Added(this, currentKey.Item1, true);
                 }
                 //NeedUpdate = true;
                 return true;
@@ -1001,10 +1001,10 @@ namespace RW_NodeTree
 
                 string key = innerList[index].Item1;
 
-                INodeProcesser? proccesser = item as INodeProcesser;
-                if (!Proccesser.AllowNode(null, key))
+                INodeProcesser? processer = item as INodeProcesser;
+                if (!Processer.AllowNode(null, key))
                 {
-                    proccesser?.Removed(this, key, false);
+                    processer?.Removed(this, key, false);
                     return false;
                 }
 
@@ -1027,15 +1027,15 @@ namespace RW_NodeTree
                 }
                 if (item.holdingOwner != this)
                 {
-                    proccesser?.Removed(this, key, false);
+                    processer?.Removed(this, key, false);
                     return false;
                 }
 
                 item.holdingOwner = null;
-                if (proccesser != null)
+                if (processer != null)
                 {
-                    proccesser.ChildNodes.CachedRootNodeNeedUpdate();
-                    proccesser.Removed(this, key, true);
+                    processer.ChildNodes.CachedRootNodeNeedUpdate();
+                    processer.Removed(this, key, true);
                 }
                 //NeedUpdate = true;
                 return true;

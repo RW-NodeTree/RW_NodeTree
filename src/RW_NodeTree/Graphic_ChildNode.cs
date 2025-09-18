@@ -14,8 +14,8 @@ namespace RW_NodeTree
         {
             if (thing == null) throw new ArgumentNullException(nameof(thing));
             if (org == null) throw new ArgumentNullException(nameof(org));
-            if (thing is not INodeProcesser nodeProccesser) throw new ArgumentNullException(nameof(thing));
-            else currentProccesser = nodeProccesser;
+            if (thing is not INodeProcesser nodeProcesser) throw new ArgumentNullException(nameof(thing));
+            else currentProcesser = nodeProcesser;
             subGraphic = org;
             //base.drawSize = _THING.DrawSize(_THING.parent.Rotation);
             //base.data = _GRAPHIC.data;
@@ -23,7 +23,7 @@ namespace RW_NodeTree
 
         public Graphic SubGraphic => subGraphic;
 
-        public override Material? MatSingle => MatAt(((Thing)currentProccesser).Rotation);
+        public override Material? MatSingle => MatAt(((Thing)currentProcesser).Rotation);
 
         public override Material? MatNorth => MatAt(Rot4.North);
 
@@ -45,13 +45,13 @@ namespace RW_NodeTree
 
         public override Material MatAt(Rot4 rot, Thing? thing = null)
         {
-            thing = thing ?? (Thing)currentProccesser;
-            if ((thing as INodeProcesser) != currentProccesser) return SubGraphic.MatAt(rot, thing);
+            thing = thing ?? (Thing)currentProcesser;
+            if ((thing as INodeProcesser) != currentProcesser) return SubGraphic.MatAt(rot, thing);
 
 
             (Material? material, Texture2D? texture, RenderTexture? cachedRenderTarget) = defaultRenderingCache[rot];
 
-            ReadOnlyDictionary<string, ReadOnlyCollection<RenderInfo>> commands = currentProccesser.ChildNodes.GetNodeRenderingInfos(rot, out bool needUpdate, subGraphic);
+            ReadOnlyDictionary<string, ReadOnlyCollection<RenderInfo>> commands = currentProcesser.ChildNodes.GetNodeRenderingInfos(rot, out bool needUpdate, subGraphic);
             if (needUpdate || material == null || texture == null || cachedRenderTarget == null)
             {
                 List<RenderInfo> final = new List<RenderInfo>();
@@ -59,10 +59,10 @@ namespace RW_NodeTree
                 {
                     if (!infos.Value.NullOrEmpty()) final.AddRange(infos.Value);
                 }
-                RenderingTools.RenderToTarget(final, ref cachedRenderTarget!, ref texture!, default(Vector2Int), currentProccesser.TextureSizeFactor, currentProccesser.ExceedanceFactor, currentProccesser.ExceedanceOffset, currentProccesser.HasPostFX(true) ? currentProccesser.PostFX : default);
+                RenderingTools.RenderToTarget(final, ref cachedRenderTarget!, ref texture!, default(Vector2Int), currentProcesser.TextureSizeFactor, currentProcesser.ExceedanceFactor, currentProcesser.ExceedanceOffset, currentProcesser.HasPostFX(true) ? currentProcesser.PostFX : default);
                 Shader shader = subGraphic.Shader;
                 texture.wrapMode = TextureWrapMode.Clamp;
-                texture.filterMode = currentProccesser.TextureFilterMode;
+                texture.filterMode = currentProcesser.TextureFilterMode;
 
                 if (material == null)
                 {
@@ -76,7 +76,7 @@ namespace RW_NodeTree
                 defaultRenderingCache[rot] = (material, texture, cachedRenderTarget);
             }
 
-            Vector2 size = new Vector2(texture.width, texture.height) / currentProccesser.TextureSizeFactor;
+            Vector2 size = new Vector2(texture.width, texture.height) / currentProcesser.TextureSizeFactor;
 
             Graphic? graphic = thing.Graphic;
             //if (graphic.GetGraphic_ChildNode() == this)
@@ -92,21 +92,21 @@ namespace RW_NodeTree
 
         public override Material? MatSingleFor(Thing? thing)
         {
-            thing = thing ?? (Thing)currentProccesser;
-            if ((thing as INodeProcesser) != currentProccesser) return SubGraphic.MatSingleFor(thing);
+            thing = thing ?? (Thing)currentProcesser;
+            if ((thing as INodeProcesser) != currentProcesser) return SubGraphic.MatSingleFor(thing);
             return MatAt(thing.Rotation, thing);
         }
 
         public override void DrawWorker(Vector3 loc, Rot4 rot, ThingDef? thingDef, Thing? thing, float extraRotation)
         {
-            thing = thing ?? (Thing)currentProccesser;
-            if ((thing as INodeProcesser) != currentProccesser) SubGraphic?.DrawWorker(loc, rot, thingDef, thing, extraRotation);
-            else if (!RenderingTools.StartOrEndDrawCatchingBlock || currentProccesser.HasPostFX(false)) base.DrawWorker(loc, rot, thingDef, thing, extraRotation);
+            thing = thing ?? (Thing)currentProcesser;
+            if ((thing as INodeProcesser) != currentProcesser) SubGraphic?.DrawWorker(loc, rot, thingDef, thing, extraRotation);
+            else if (!RenderingTools.StartOrEndDrawCatchingBlock || currentProcesser.HasPostFX(false)) base.DrawWorker(loc, rot, thingDef, thing, extraRotation);
             else
             {
                 MatAt(rot, thing);
                 List<RenderInfo> final = new List<RenderInfo>();
-                foreach (var infos in currentProccesser.ChildNodes.GetNodeRenderingInfos(rot, out _, subGraphic))
+                foreach (var infos in currentProcesser.ChildNodes.GetNodeRenderingInfos(rot, out _, subGraphic))
                 {
                     if (!infos.Value.NullOrEmpty()) final.AddRange(infos.Value);
                 }
@@ -127,8 +127,8 @@ namespace RW_NodeTree
 
         public override void Print(SectionLayer layer, Thing thing, float extraRotation)
         {
-            thing = thing ?? (Thing)currentProccesser;
-            if ((thing as INodeProcesser) != currentProccesser) SubGraphic?.Print(layer, thing, extraRotation);
+            thing = thing ?? (Thing)currentProcesser;
+            if ((thing as INodeProcesser) != currentProcesser) SubGraphic?.Print(layer, thing, extraRotation);
             else
             {
                 MatAt(thing.Rotation, thing);
@@ -209,7 +209,7 @@ namespace RW_NodeTree
         }
 
         private readonly OffScreenRenderingCache defaultRenderingCache = new OffScreenRenderingCache();
-        private INodeProcesser currentProccesser;
+        private INodeProcesser currentProcesser;
         private Graphic subGraphic;
     }
 }

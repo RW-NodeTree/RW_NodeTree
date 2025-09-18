@@ -22,8 +22,8 @@ namespace RW_NodeTree.Patch
         {
             try
             {
-                IStatsToDrawPatcher? proccesser = thing as IStatsToDrawPatcher;
-                __result = proccesser?.PostStatsReportUtility_StatsToDraw(thing, __result)?.ToList() ?? __result;
+                IStatsToDrawPatcher? processer = thing as IStatsToDrawPatcher;
+                __result = processer?.PostStatsReportUtility_StatsToDraw(thing, __result)?.ToList() ?? __result;
             }
             catch (Exception ex)
             {

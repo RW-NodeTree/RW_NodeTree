@@ -54,72 +54,72 @@ namespace RW_NodeTree.Patch
 
         private static bool PreStatWorker_GetExplanationUnfinalized(StatWorker __instance, MethodInfo __originalMethod, StatRequest req, ToStringNumberSense numberSense, ref (Dictionary<string, object?>, IStatExplanationPatcher) __state)
         {
-            IStatExplanationPatcher? proccesser = req.Thing as IStatExplanationPatcher;
+            IStatExplanationPatcher? processer = req.Thing as IStatExplanationPatcher;
             if (
-                proccesser != null &&
+                processer != null &&
                 __originalMethod.MethodHandle == GetMethodInfo_GetExplanationUnfinalized_OfType(__instance.GetType()).MethodHandle
             )
             {
                 __state.Item1 = new Dictionary<string, object?>();
-                __state.Item2 = proccesser;
-                return proccesser.PreStatWorker_GetExplanationUnfinalized(__instance, StatWorker_stat(__instance), req, numberSense, __state.Item1);
+                __state.Item2 = processer;
+                return processer.PreStatWorker_GetExplanationUnfinalized(__instance, StatWorker_stat(__instance), req, numberSense, __state.Item1);
             }
             return true;
         }
         private static bool PreStatWorker_GetExplanationFinalizePart(StatWorker __instance, MethodBase __originalMethod, StatRequest req, ToStringNumberSense numberSense, float finalVal, ref (Dictionary<string, object?>, IStatExplanationPatcher) __state)
         {
-            IStatExplanationPatcher? proccesser = req.Thing as IStatExplanationPatcher;
+            IStatExplanationPatcher? processer = req.Thing as IStatExplanationPatcher;
             if (
-                proccesser != null &&
+                processer != null &&
                 __originalMethod.MethodHandle
                 ==
                 GetMethodInfo_GetExplanationFinalizePart_OfType(__instance.GetType()).MethodHandle
             )
             {
                 __state.Item1 = new Dictionary<string, object?>();
-                __state.Item2 = proccesser;
-                return proccesser.PreStatWorker_GetExplanationFinalizePart(__instance, StatWorker_stat(__instance), req, numberSense, finalVal, __state.Item1);
+                __state.Item2 = processer;
+                return processer.PreStatWorker_GetExplanationFinalizePart(__instance, StatWorker_stat(__instance), req, numberSense, finalVal, __state.Item1);
             }
             return true;
         }
         private static void PostStatWorker_GetExplanationUnfinalized(StatWorker __instance, StatRequest req, ToStringNumberSense numberSense, ref string __result, (Dictionary<string, object?>, IStatExplanationPatcher) __state)
         {
-            (Dictionary<string, object?> stats, IStatExplanationPatcher proccesser) = __state;
+            (Dictionary<string, object?> stats, IStatExplanationPatcher processer) = __state;
             if (stats != null &&
-                proccesser != null
+                processer != null
             )
             {
-                __result = proccesser.PostStatWorker_GetExplanationUnfinalized(__instance, StatWorker_stat(__instance), req, numberSense, __result, stats) ?? __result;
+                __result = processer.PostStatWorker_GetExplanationUnfinalized(__instance, StatWorker_stat(__instance), req, numberSense, __result, stats) ?? __result;
             }
         }
         private static void PostStatWorker_GetExplanationFinalizePart(StatWorker __instance, StatRequest req, ToStringNumberSense numberSense, float finalVal, ref string __result, (Dictionary<string, object?>, IStatExplanationPatcher) __state)
         {
-            (Dictionary<string, object?> stats, IStatExplanationPatcher proccesser) = __state;
+            (Dictionary<string, object?> stats, IStatExplanationPatcher processer) = __state;
             if (stats != null &&
-                proccesser != null
+                processer != null
             )
             {
-                __result = proccesser.PostStatWorker_GetExplanationFinalizePart(__instance, StatWorker_stat(__instance), req, numberSense, finalVal, __result, stats) ?? __result;
+                __result = processer.PostStatWorker_GetExplanationFinalizePart(__instance, StatWorker_stat(__instance), req, numberSense, finalVal, __result, stats) ?? __result;
             }
         }
         private static void FinalStatWorker_GetExplanationUnfinalized(StatWorker __instance, StatRequest req, ToStringNumberSense numberSense, ref string __result, (Dictionary<string, object?>, IStatExplanationPatcher) __state, Exception __exception)
         {
-            (Dictionary<string, object?> stats, IStatExplanationPatcher proccesser) = __state;
+            (Dictionary<string, object?> stats, IStatExplanationPatcher processer) = __state;
             if (stats != null &&
-                proccesser != null
+                processer != null
             )
             {
-                __result = proccesser.FinalStatWorker_GetExplanationUnfinalized(__instance, StatWorker_stat(__instance), req, numberSense, __result, stats, __exception) ?? __result;
+                __result = processer.FinalStatWorker_GetExplanationUnfinalized(__instance, StatWorker_stat(__instance), req, numberSense, __result, stats, __exception) ?? __result;
             }
         }
         private static void FinalStatWorker_GetExplanationFinalizePart(StatWorker __instance, StatRequest req, ToStringNumberSense numberSense, float finalVal, ref string __result, (Dictionary<string, object?>, IStatExplanationPatcher) __state, Exception __exception)
         {
-            (Dictionary<string, object?> stats, IStatExplanationPatcher proccesser) = __state;
+            (Dictionary<string, object?> stats, IStatExplanationPatcher processer) = __state;
             if (stats != null &&
-                proccesser != null
+                processer != null
             )
             {
-                __result = proccesser.FinalStatWorker_GetExplanationFinalizePart(__instance, StatWorker_stat(__instance), req, numberSense, finalVal, __result, stats, __exception) ?? __result;
+                __result = processer.FinalStatWorker_GetExplanationFinalizePart(__instance, StatWorker_stat(__instance), req, numberSense, finalVal, __result, stats, __exception) ?? __result;
             }
         }
 
