@@ -23,7 +23,7 @@ namespace RW_NodeTree.Patch
             try
             {
                 IStatsToDrawPatcher? processer = thing as IStatsToDrawPatcher;
-                __result = processer?.PostStatsReportUtility_StatsToDraw(thing, __result)?.ToList() ?? __result;
+                __result = processer?.PostStatsReportUtility_StatsToDraw(__result)?.ToList() ?? __result;
             }
             catch (Exception ex)
             {
@@ -34,6 +34,6 @@ namespace RW_NodeTree.Patch
     
     public partial interface IStatsToDrawPatcher
     {
-        IEnumerable<StatDrawEntry> PostStatsReportUtility_StatsToDraw(Thing thing, IEnumerable<StatDrawEntry> result);
+        IEnumerable<StatDrawEntry> PostStatsReportUtility_StatsToDraw(IEnumerable<StatDrawEntry> result);
     }
 }

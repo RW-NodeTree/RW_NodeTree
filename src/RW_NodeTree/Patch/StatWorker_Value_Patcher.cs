@@ -60,7 +60,7 @@ namespace RW_NodeTree.Patch
             {
                 __state.Item1 = new Dictionary<string, object?>();
                 __state.Item2 = processer;
-                return processer.PreStatWorker_GetValueUnfinalized(__instance, StatWorker_stat(__instance), req, applyPostProcess, __state.Item1);
+                return processer.PreStatWorker_GetValueUnfinalized(__instance, StatWorker_stat(__instance), applyPostProcess, __state.Item1);
             }
             return true;
         }
@@ -73,41 +73,41 @@ namespace RW_NodeTree.Patch
             {
                 __state.Item1 = new Dictionary<string, object?>();
                 __state.Item2 = processer;
-                return processer.PreStatWorker_FinalizeValue(__instance, StatWorker_stat(__instance), req, applyPostProcess, ref val, __state.Item1);
+                return processer.PreStatWorker_FinalizeValue(__instance, StatWorker_stat(__instance), applyPostProcess, ref val, __state.Item1);
             }
             return true;
         }
-        private static void PostStatWorker_GetValueUnfinalized(StatWorker __instance, StatRequest req, bool applyPostProcess, ref float __result, (Dictionary<string, object?>, IStatValuePatcher) __state)
+        private static void PostStatWorker_GetValueUnfinalized(StatWorker __instance, bool applyPostProcess, ref float __result, (Dictionary<string, object?>, IStatValuePatcher) __state)
         {
             (Dictionary<string, object?> stats, IStatValuePatcher processer) = __state;
             if (stats != null &&
                 processer != null
             )
-                __result = processer.PostStatWorker_GetValueUnfinalized(__instance, StatWorker_stat(__instance), req, applyPostProcess, __result, __state.Item1);
+                __result = processer.PostStatWorker_GetValueUnfinalized(__instance, StatWorker_stat(__instance), applyPostProcess, __result, __state.Item1);
         }
-        private static void PostStatWorker_FinalizeValue(StatWorker __instance, StatRequest req, bool applyPostProcess, ref float val, (Dictionary<string, object?>, IStatValuePatcher) __state)
+        private static void PostStatWorker_FinalizeValue(StatWorker __instance, bool applyPostProcess, ref float val, (Dictionary<string, object?>, IStatValuePatcher) __state)
         {
             (Dictionary<string, object?> stats, IStatValuePatcher processer) = __state;
             if (stats != null &&
                 processer != null
             )
-                val = processer.PostStatWorker_FinalizeValue(__instance, StatWorker_stat(__instance), req, applyPostProcess, val, __state.Item1);
+                val = processer.PostStatWorker_FinalizeValue(__instance, StatWorker_stat(__instance), applyPostProcess, val, __state.Item1);
         }
-        private static void FinalStatWorker_GetValueUnfinalized(StatWorker __instance, StatRequest req, bool applyPostProcess, ref float __result, (Dictionary<string, object?>, IStatValuePatcher) __state, Exception __exception)
+        private static void FinalStatWorker_GetValueUnfinalized(StatWorker __instance, bool applyPostProcess, ref float __result, (Dictionary<string, object?>, IStatValuePatcher) __state, Exception __exception)
         {
             (Dictionary<string, object?> stats, IStatValuePatcher processer) = __state;
             if (stats != null &&
                 processer != null
             )
-                __result = processer.FinalStatWorker_GetValueUnfinalized(__instance, StatWorker_stat(__instance), req, applyPostProcess, __result, __state.Item1, __exception);
+                __result = processer.FinalStatWorker_GetValueUnfinalized(__instance, StatWorker_stat(__instance), applyPostProcess, __result, __state.Item1, __exception);
         }
-        private static void FinalStatWorker_FinalizeValue(StatWorker __instance, StatRequest req, bool applyPostProcess, ref float val, (Dictionary<string, object?>, IStatValuePatcher) __state, Exception __exception)
+        private static void FinalStatWorker_FinalizeValue(StatWorker __instance, bool applyPostProcess, ref float val, (Dictionary<string, object?>, IStatValuePatcher) __state, Exception __exception)
         {
             (Dictionary<string, object?> stats, IStatValuePatcher processer) = __state;
             if (stats != null &&
                 processer != null
             )
-                val = processer.FinalStatWorker_FinalizeValue(__instance, StatWorker_stat(__instance), req, applyPostProcess, val, __state.Item1, __exception);
+                val = processer.FinalStatWorker_FinalizeValue(__instance, StatWorker_stat(__instance), applyPostProcess, val, __state.Item1, __exception);
         }
 
         public static void PatchValue(Type type, Harmony patcher)
@@ -144,17 +144,17 @@ namespace RW_NodeTree.Patch
     
     public partial interface IStatValuePatcher
     {
-        bool PreStatWorker_GetValueUnfinalized(StatWorker statWorker, StatDef stateDef, StatRequest req, bool applyPostProcess, Dictionary<string, object?> stats);
+        bool PreStatWorker_GetValueUnfinalized(StatWorker statWorker, StatDef stateDef, bool applyPostProcess, Dictionary<string, object?> stats);
 
-        bool PreStatWorker_FinalizeValue(StatWorker statWorker, StatDef stateDef, StatRequest req, bool applyPostProcess, ref float value, Dictionary<string, object?> stats);
+        bool PreStatWorker_FinalizeValue(StatWorker statWorker, StatDef stateDef, bool applyPostProcess, ref float value, Dictionary<string, object?> stats);
 
-        float PostStatWorker_GetValueUnfinalized(StatWorker statWorker, StatDef stateDef, StatRequest req, bool applyPostProcess, float result, Dictionary<string, object?> stats);
+        float PostStatWorker_GetValueUnfinalized(StatWorker statWorker, StatDef stateDef, bool applyPostProcess, float result, Dictionary<string, object?> stats);
 
-        float PostStatWorker_FinalizeValue(StatWorker statWorker, StatDef stateDef, StatRequest req, bool applyPostProcess, float result, Dictionary<string, object?> stats);
+        float PostStatWorker_FinalizeValue(StatWorker statWorker, StatDef stateDef, bool applyPostProcess, float result, Dictionary<string, object?> stats);
 
-        float FinalStatWorker_GetValueUnfinalized(StatWorker statWorker, StatDef stateDef, StatRequest req, bool applyPostProcess, float result, Dictionary<string, object?> stats, Exception exception);
+        float FinalStatWorker_GetValueUnfinalized(StatWorker statWorker, StatDef stateDef, bool applyPostProcess, float result, Dictionary<string, object?> stats, Exception exception);
 
-        float FinalStatWorker_FinalizeValue(StatWorker statWorker, StatDef stateDef, StatRequest req, bool applyPostProcess, float result, Dictionary<string, object?> stats, Exception exception);
+        float FinalStatWorker_FinalizeValue(StatWorker statWorker, StatDef stateDef, bool applyPostProcess, float result, Dictionary<string, object?> stats, Exception exception);
 
     }
 }

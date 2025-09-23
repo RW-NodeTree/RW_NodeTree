@@ -41,25 +41,25 @@ namespace RW_NodeTree.Patch
             {
                 __state.Item1 = new Dictionary<string, object?>();
                 __state.Item2 = processer;
-                return processer.PreStatWorker_GetStatDrawEntryLabel(__instance, stat, value, numberSense, optionalReq, finalized, __state.Item1);
+                return processer.PreStatWorker_GetStatDrawEntryLabel(__instance, stat, value, numberSense, finalized, __state.Item1);
             }
             return true;
         }
-        private static void PostStatWorker_GetStatDrawEntryLabel(StatWorker __instance, StatDef stat, float value, ToStringNumberSense numberSense, StatRequest optionalReq, bool finalized, ref string __result, (Dictionary<string, object?>, IStatLabelPatcher) __state)
+        private static void PostStatWorker_GetStatDrawEntryLabel(StatWorker __instance, StatDef stat, float value, ToStringNumberSense numberSense, bool finalized, ref string __result, (Dictionary<string, object?>, IStatLabelPatcher) __state)
         {
             (Dictionary<string, object?> stats, IStatLabelPatcher processer) = __state;
             if (stats != null &&
                 processer != null
             )
-                __result = processer.PostStatWorker_GetStatDrawEntryLabel(__instance, stat, value, numberSense, optionalReq, finalized, __result, stats) ?? __result;
+                __result = processer.PostStatWorker_GetStatDrawEntryLabel(__instance, stat, value, numberSense, finalized, __result, stats) ?? __result;
         }
-        private static void FinalStatWorker_GetStatDrawEntryLabel(StatWorker __instance, StatDef stat, float value, ToStringNumberSense numberSense, StatRequest optionalReq, bool finalized, ref string __result, (Dictionary<string, object?>, IStatLabelPatcher) __state, Exception __exception)
+        private static void FinalStatWorker_GetStatDrawEntryLabel(StatWorker __instance, StatDef stat, float value, ToStringNumberSense numberSense, bool finalized, ref string __result, (Dictionary<string, object?>, IStatLabelPatcher) __state, Exception __exception)
         {
             (Dictionary<string, object?> stats, IStatLabelPatcher processer) = __state;
             if (stats != null &&
                 processer != null
             )
-                __result = processer.FinalStatWorker_GetStatDrawEntryLabel(__instance, stat, value, numberSense, optionalReq, finalized, __result, stats, __exception) ?? __result;
+                __result = processer.FinalStatWorker_GetStatDrawEntryLabel(__instance, stat, value, numberSense, finalized, __result, stats, __exception) ?? __result;
         }
 
         public static void PatchStatDrawEntry(Type type, Harmony patcher)
@@ -84,9 +84,9 @@ namespace RW_NodeTree.Patch
     
     public partial interface IStatLabelPatcher : IThingHolder
     {
-        bool PreStatWorker_GetStatDrawEntryLabel(StatWorker statWorker, StatDef stat, float value, ToStringNumberSense numberSense, StatRequest optionalReq, bool finalized, Dictionary<string, object?> stats);
-        string PostStatWorker_GetStatDrawEntryLabel(StatWorker statWorker, StatDef stat, float value, ToStringNumberSense numberSense, StatRequest optionalReq, bool finalized, string result, Dictionary<string, object?> stats);
-        string FinalStatWorker_GetStatDrawEntryLabel(StatWorker statWorker, StatDef stat, float value, ToStringNumberSense numberSense, StatRequest optionalReq, bool finalized, string result, Dictionary<string, object?> stats, Exception exception);
+        bool PreStatWorker_GetStatDrawEntryLabel(StatWorker statWorker, StatDef stat, float value, ToStringNumberSense numberSense, bool finalized, Dictionary<string, object?> stats);
+        string PostStatWorker_GetStatDrawEntryLabel(StatWorker statWorker, StatDef stat, float value, ToStringNumberSense numberSense, bool finalized, string result, Dictionary<string, object?> stats);
+        string FinalStatWorker_GetStatDrawEntryLabel(StatWorker statWorker, StatDef stat, float value, ToStringNumberSense numberSense, bool finalized, string result, Dictionary<string, object?> stats, Exception exception);
 
     }
 }

@@ -60,7 +60,7 @@ namespace RW_NodeTree.Patch
             {
                 __state.Item1 = new Dictionary<string, object?>();
                 __state.Item2 = processer;
-                return processer.PreStatWorker_ShouldShowFor(__instance, StatWorker_stat(__instance), req, __state.Item1);
+                return processer.PreStatWorker_ShouldShowFor(__instance, StatWorker_stat(__instance), __state.Item1);
             }
             return true;
         }
@@ -73,41 +73,41 @@ namespace RW_NodeTree.Patch
             {
                 __state.Item1 = new Dictionary<string, object?>();
                 __state.Item2 = processer;
-                return processer.PreStatWorker_IsDisabledFor(__instance, StatWorker_stat(__instance), thing, __state.Item1);
+                return processer.PreStatWorker_IsDisabledFor(__instance, StatWorker_stat(__instance), __state.Item1);
             }
             return true;
         }
-        private static void PostStatWorker_ShouldShowFor(StatWorker __instance, StatRequest req, ref bool __result, (Dictionary<string, object?>, IStatShowPatcher) __state)
+        private static void PostStatWorker_ShouldShowFor(StatWorker __instance, ref bool __result, (Dictionary<string, object?>, IStatShowPatcher) __state)
         {
             (Dictionary<string, object?> stats, IStatShowPatcher processer) = __state;
             if (stats != null &&
                 processer != null
             )
-                __result = processer.PostStatWorker_ShouldShowFor(__instance, StatWorker_stat(__instance), req, __result, stats);
+                __result = processer.PostStatWorker_ShouldShowFor(__instance, StatWorker_stat(__instance), __result, stats);
         }
-        private static void PostStatWorker_IsDisabledFor(StatWorker __instance, Thing thing, ref bool __result, (Dictionary<string, object?>, IStatShowPatcher) __state)
+        private static void PostStatWorker_IsDisabledFor(StatWorker __instance, ref bool __result, (Dictionary<string, object?>, IStatShowPatcher) __state)
         {
             (Dictionary<string, object?> stats, IStatShowPatcher processer) = __state;
             if (stats != null &&
                 processer != null
             )
-                __result = processer.PostStatWorker_IsDisabledFor(__instance, StatWorker_stat(__instance), thing, __result, stats);
+                __result = processer.PostStatWorker_IsDisabledFor(__instance, StatWorker_stat(__instance), __result, stats);
         }
-        private static void FinalStatWorker_ShouldShowFor(StatWorker __instance, StatRequest req, ref bool __result, (Dictionary<string, object?>, IStatShowPatcher) __state, Exception __exception)
+        private static void FinalStatWorker_ShouldShowFor(StatWorker __instance, ref bool __result, (Dictionary<string, object?>, IStatShowPatcher) __state, Exception __exception)
         {
             (Dictionary<string, object?> stats, IStatShowPatcher processer) = __state;
             if (stats != null &&
                 processer != null
             )
-                __result = processer.FinalStatWorker_ShouldShowFor(__instance, StatWorker_stat(__instance), req, __result, stats, __exception);
+                __result = processer.FinalStatWorker_ShouldShowFor(__instance, StatWorker_stat(__instance), __result, stats, __exception);
         }
-        private static void FinalStatWorker_IsDisabledFor(StatWorker __instance, Thing thing, ref bool __result, (Dictionary<string, object?>, IStatShowPatcher) __state, Exception __exception)
+        private static void FinalStatWorker_IsDisabledFor(StatWorker __instance, ref bool __result, (Dictionary<string, object?>, IStatShowPatcher) __state, Exception __exception)
         {
             (Dictionary<string, object?> stats, IStatShowPatcher processer) = __state;
             if (stats != null &&
                 processer != null
             )
-                __result = processer.FinalStatWorker_IsDisabledFor(__instance, StatWorker_stat(__instance), thing, __result, stats, __exception);
+                __result = processer.FinalStatWorker_IsDisabledFor(__instance, StatWorker_stat(__instance), __result, stats, __exception);
         }
 
         public static void PatchShouldShowForAndIsDisabledFor(Type type, Harmony patcher)
@@ -144,12 +144,12 @@ namespace RW_NodeTree.Patch
     
     public partial interface IStatShowPatcher
     {
-        bool PreStatWorker_ShouldShowFor(StatWorker statWorker, StatDef stateDef, StatRequest req, Dictionary<string, object?> stats);
-        bool PreStatWorker_IsDisabledFor(StatWorker statWorker, StatDef stateDef, Thing thing, Dictionary<string, object?> stats);
-        bool PostStatWorker_ShouldShowFor(StatWorker statWorker, StatDef stateDef, StatRequest req, bool result, Dictionary<string, object?> stats);
-        bool PostStatWorker_IsDisabledFor(StatWorker statWorker, StatDef stateDef, Thing thing, bool result, Dictionary<string, object?> stats);
-        bool FinalStatWorker_ShouldShowFor(StatWorker statWorker, StatDef stateDef, StatRequest req, bool result, Dictionary<string, object?> stats, Exception exception);
-        bool FinalStatWorker_IsDisabledFor(StatWorker statWorker, StatDef stateDef, Thing thing, bool result, Dictionary<string, object?> stats, Exception exception);
+        bool PreStatWorker_ShouldShowFor(StatWorker statWorker, StatDef stateDef, Dictionary<string, object?> stats);
+        bool PreStatWorker_IsDisabledFor(StatWorker statWorker, StatDef stateDef, Dictionary<string, object?> stats);
+        bool PostStatWorker_ShouldShowFor(StatWorker statWorker, StatDef stateDef, bool result, Dictionary<string, object?> stats);
+        bool PostStatWorker_IsDisabledFor(StatWorker statWorker, StatDef stateDef, bool result, Dictionary<string, object?> stats);
+        bool FinalStatWorker_ShouldShowFor(StatWorker statWorker, StatDef stateDef, bool result, Dictionary<string, object?> stats, Exception exception);
+        bool FinalStatWorker_IsDisabledFor(StatWorker statWorker, StatDef stateDef, bool result, Dictionary<string, object?> stats, Exception exception);
 
     }
 }

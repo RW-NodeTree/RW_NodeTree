@@ -37,7 +37,7 @@ namespace RW_NodeTree.Patch
             if (processer != null &&
                 __originalMethod.MethodHandle == GetMethodInfo_GetInfoCardHyperlinks_OfType(__instance.GetType()).MethodHandle
             )
-                __result = processer.PostStatWorker_GetInfoCardHyperlinks(__instance, StatWorker_stat(__instance), statRequest, __result) ?? __result;
+                __result = processer.PostStatWorker_GetInfoCardHyperlinks(__instance, StatWorker_stat(__instance), __result) ?? __result;
         }
 
         public static void PatchGetInfoCardHyperlinks(Type type, Harmony patcher)
@@ -57,6 +57,6 @@ namespace RW_NodeTree.Patch
     public partial interface IStatHyperlinksPatcher
     {
 
-        IEnumerable<Dialog_InfoCard.Hyperlink> PostStatWorker_GetInfoCardHyperlinks(StatWorker statWorker, StatDef stateDef, StatRequest statRequest, IEnumerable<Dialog_InfoCard.Hyperlink> result);
+        IEnumerable<Dialog_InfoCard.Hyperlink> PostStatWorker_GetInfoCardHyperlinks(StatWorker statWorker, StatDef stateDef, IEnumerable<Dialog_InfoCard.Hyperlink> result);
     }
 }

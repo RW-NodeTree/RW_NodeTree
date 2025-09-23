@@ -20,12 +20,12 @@ namespace RW_NodeTree.Patch
         private static void PostThingDef_SpecialDisplayStats(ThingDef __instance, StatRequest req, ref IEnumerable<StatDrawEntry> __result)
         {
             IThingDefStatsPatcher? processer = req.Thing as IThingDefStatsPatcher;
-            __result = processer?.PostThingDef_SpecialDisplayStats(__instance, req, __result) ?? __result;
+            __result = processer?.PostThingDef_SpecialDisplayStats(__instance, __result) ?? __result;
         }
     }
     
     public partial interface IThingDefStatsPatcher
     {
-        IEnumerable<StatDrawEntry> PostThingDef_SpecialDisplayStats(ThingDef def, StatRequest req, IEnumerable<StatDrawEntry> result);
+        IEnumerable<StatDrawEntry> PostThingDef_SpecialDisplayStats(ThingDef def, IEnumerable<StatDrawEntry> result);
     }
 }
