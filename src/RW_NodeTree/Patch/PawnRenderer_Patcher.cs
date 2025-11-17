@@ -81,7 +81,34 @@ namespace RW_NodeTree.Patch
                     }
                 }
             }
-            for (int i = 0; i < count; i++) yield return codes[i];
+            if (count == 8 &&
+                codes[0].opcode == OpCodes.Ldloc_0 && codes[1].opcode == OpCodes.Ldarg_2 &&
+                codes[2].opcode == OpCodes.Ldloc_1 && codes[3].Calls(Vector3_get_up) &&
+                codes[4].Calls(Quaternion_AngleAxis) && codes[5].opcode == OpCodes.Ldloc_3 &&
+                codes[6].opcode == OpCodes.Ldc_I4_0 && codes[7].Calls(Graphics_DrawMeshOrg))
+            {
+                yield return codes[0];
+                yield return codes[1];
+                yield return codes[2];
+                yield return codes[3];
+                yield return codes[4];
+                yield return new CodeInstruction(OpCodes.Ldarg_1);
+                yield return new CodeInstruction(OpCodes.Callvirt, Thing_get_Graphic);
+                //yield return new CodeInstruction(OpCodes.Call, GraphicHelper_GetGraphic_ChildNode);
+                yield return new CodeInstruction(OpCodes.Ldfld, Graphic_drawSize);
+                yield return new CodeInstruction(OpCodes.Call, PawnRenderer_internalConvert);
+                yield return new CodeInstruction(OpCodes.Call, Matrix4x4_TRS);
+                yield return codes[5];
+                yield return codes[6];
+                yield return new CodeInstruction(OpCodes.Call, Graphics_DrawMeshTar);
+            }
+            else
+            {
+                for (int i = 0; i < count; i++)
+                {
+                    yield return codes[i];
+                }
+            }
         }
 
         private static Vector3 internalConvert(Vector2 vector)

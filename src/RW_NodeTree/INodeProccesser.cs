@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using UnityEngine;
+using UnityEngine.Experimental.Rendering;
 using Verse;
 
 namespace RW_NodeTree
@@ -14,6 +15,7 @@ namespace RW_NodeTree
 
         float ExceedanceOffset { get; }
 
+        GraphicsFormat TextureFormat { get; }
 
         FilterMode TextureFilterMode { get; }
 
@@ -21,11 +23,6 @@ namespace RW_NodeTree
         /// node container
         /// </summary>
         NodeContainer ChildNodes { get; }
-
-
-        void PostFX(RenderTexture tar);
-
-        bool HasPostFX(bool textureMode);
 
         /// <summary>
         /// update event
@@ -38,7 +35,7 @@ namespace RW_NodeTree
         /// </summary>
         /// <param name="actionNode">update event action node</param>
         /// <returns>stope bubble</returns>
-        void PostUpdateChilds(INodeProcesser actionNode, Dictionary<string, object?> cachedDataFromPerUpdate, ReadOnlyDictionary<string, Thing> prveChilds, out bool notUpdateTexture);
+        void PostUpdateChilds(INodeProcesser actionNode, Dictionary<string, object?> cachedDataFromPerUpdate, ReadOnlyDictionary<string, Thing> prveChilds);
 
         /// <summary>
         /// allow node to append into container
@@ -65,19 +62,20 @@ namespace RW_NodeTree
         /// <summary>
         /// Adapte draw steep of this node
         /// </summary>
-        /// <param name="nodeRenderingInfos">Corresponding rendering infos with id and part</param>
         /// <param name="rot">rotation</param>
-        /// <param name="graphic">original graphic</param>
+        /// <param name="invokeSource">Rendering Invoke Source</param>
+        /// <param name="cachedDataToPostDrawStep">cached data for PostGenRenderInfos</param>
         /// <returns></returns>
-        HashSet<string> PreGenRenderInfos(Rot4 rot, Dictionary<string, object?> cachedDataToPostDrawStep);
+        HashSet<string> PreGenRenderInfos(Rot4 rot, Graphic_ChildNode invokeSource, Dictionary<string, object?> cachedDataToPostDrawStep);
 
         /// <summary>
         /// Adapte draw steep of this node
         /// </summary>
-        /// <param name="nodeRenderingInfos">Corresponding rendering infos with id and part</param>
         /// <param name="rot">rotation</param>
-        /// <param name="graphic">original graphic</param>
+        /// <param name="invokeSource">Rendering Invoke Source</param>
+        /// <param name="nodeRenderingInfos">Corresponding rendering infos with id and part</param>
+        /// <param name="cachedDataFromPerDrawStep">cached data from PreGenRenderInfos</param>
         /// <returns></returns>
-        Dictionary<string, List<RenderInfo>>? PostGenRenderInfos(Dictionary<string, List<RenderInfo>> nodeRenderingInfos, Rot4 rot, Graphic? graphic, Dictionary<string, object?> cachedDataFromPerDrawStep);
+        Dictionary<string, List<RenderInfo>>? PostGenRenderInfos(Rot4 rot, Graphic_ChildNode invokeSource, Dictionary<string, List<RenderInfo>> nodeRenderingInfos, Dictionary<string, object?> cachedDataFromPerDrawStep);
     }
 }

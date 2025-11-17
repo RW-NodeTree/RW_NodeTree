@@ -10,6 +10,7 @@ using System.Collections.ObjectModel;
 using System.Threading;
 using System.Xml;
 using UnityEngine;
+using UnityEngine.Experimental.Rendering;
 using Verse;
 
 namespace RW_NodeTree
@@ -19,19 +20,6 @@ namespace RW_NodeTree
     /// </summary>
     public class NodeContainer : ThingOwner, IList<string>, IList<Thing>, IDictionary<string, Thing?>, IDictionary<Thing, string?>, IList<(string, Thing)>
     {
-        public class NodeRenderingInfoForRot4
-        {
-            public ReadOnlyDictionary<string, ReadOnlyCollection<RenderInfo>>? this[Rot4 rot]
-            {
-                get => nodeRenderingInfos[rot.AsInt];
-                set => nodeRenderingInfos[rot.AsInt] = value;
-            }
-            public void Reset()
-            {
-                for (int i = 0; i < nodeRenderingInfos.Length; i++) nodeRenderingInfos[i] = null;
-            }
-            public readonly ReadOnlyDictionary<string, ReadOnlyCollection<RenderInfo>>?[] nodeRenderingInfos = new ReadOnlyDictionary<string, ReadOnlyCollection<RenderInfo>>?[4];
-        }
 
         public NodeContainer(Thing processer) : base(processer as INodeProcesser)
         {
@@ -379,14 +367,10 @@ namespace RW_NodeTree
         }
 
 
-        public ReadOnlyDictionary<string, ReadOnlyCollection<RenderInfo>> GetNodeRenderingInfos(Rot4 rot, out bool updated, Graphic? subGraphic = null)
+        public void GetNodeRenderingResult(Rot4 rot, ref RenderTexture? cachedRenderTarget, ref Texture2D? target, Graphic_ChildNode invokeSource, Action<RenderTexture>? PostFX = null)
         {
             UpdateNode();
-            updated = false;
             if (!UnityData.IsInMainThread) throw new InvalidOperationException("not in main thread");
-            ReadOnlyDictionary<string, ReadOnlyCollection<RenderInfo>>? readOnlyNodeRenderingInfos = this.nodeRenderingInfo[rot];
-            if (readOnlyNodeRenderingInfos != null) return readOnlyNodeRenderingInfos;
-            updated = true;
             Dictionary<string, List<RenderInfo>> nodeRenderingInfos = new Dictionary<string, List<RenderInfo>>(Count + 1);
             Thing parent = (Thing)Processer;
 
@@ -409,25 +393,20 @@ namespace RW_NodeTree
 
             Dictionary<string, object?> cachingData = new Dictionary<string, object?>();
 
-            HashSet<string>? ChildForDraw = Processer.PreGenRenderInfos(rot, cachingData);
-
-            subGraphic = (subGraphic ?? parent.Graphic)?.GetGraphic_ChildNode()?.SubGraphic ?? subGraphic ?? parent.Graphic;
+            HashSet<string>? ChildForDraw = null;
+            RenderingTools.StartOrEndDrawCatchingBlock = true;
+            try
+            {
+                ChildForDraw = Processer.PreGenRenderInfos(rot, invokeSource, cachingData);
+                nodeRenderingInfos[""] = RenderingTools.RenderInfos!;
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex.ToString());
+            }
+            RenderingTools.StartOrEndDrawCatchingBlock = false;
             if (ChildForDraw != null)
             {
-                if (subGraphic != null && ChildForDraw.Contains(""))
-                {
-                    RenderingTools.StartOrEndDrawCatchingBlock = true;
-                    try
-                    {
-                        subGraphic.Draw(Vector3.zero, rot, parent);
-                        nodeRenderingInfos[""] = RenderingTools.RenderInfos!;
-                    }
-                    catch (Exception ex)
-                    {
-                        Log.Error(ex.ToString());
-                    }
-                    RenderingTools.StartOrEndDrawCatchingBlock = false;
-                }
 
                 foreach (string id in ChildForDraw)
                 {
@@ -455,15 +434,15 @@ namespace RW_NodeTree
                     }
                 }
             }
-            nodeRenderingInfos = Processer.PostGenRenderInfos(nodeRenderingInfos, rot, subGraphic, cachingData) ?? nodeRenderingInfos;
-            Dictionary<string, ReadOnlyCollection<RenderInfo>> mid = new Dictionary<string, ReadOnlyCollection<RenderInfo>>(nodeRenderingInfos.Count);
-            foreach (var kv in nodeRenderingInfos)
+            nodeRenderingInfos = Processer.PostGenRenderInfos(rot, invokeSource, nodeRenderingInfos, cachingData) ?? nodeRenderingInfos;
+            List<RenderInfo> final = new List<RenderInfo>();
+            foreach (var infos in nodeRenderingInfos)
             {
-                mid[kv.Key] = new ReadOnlyCollection<RenderInfo>(kv.Value);
+                if (!infos.Value.NullOrEmpty()) final.AddRange(infos.Value);
             }
-            readOnlyNodeRenderingInfos = new ReadOnlyDictionary<string, ReadOnlyCollection<RenderInfo>>(mid);
-            this.nodeRenderingInfo[rot] = readOnlyNodeRenderingInfos;
-            return readOnlyNodeRenderingInfos;
+
+            RenderingTools.RenderToTarget(final, ref cachedRenderTarget, ref target, Processer.TextureFormat, default, Processer.TextureSizeFactor, Processer.ExceedanceFactor, Processer.ExceedanceOffset, PostFX);
+            return;
         }
 
 
@@ -556,8 +535,6 @@ namespace RW_NodeTree
                     readerWriterLockSlim.ExitUpgradeableReadLock();
                 }
 
-                bool reset = true;
-
                 foreach (Thing? node in prveChilds.Values)
                 {
                     NodeContainer? container = (node as INodeProcesser)?.ChildNodes;
@@ -573,40 +550,13 @@ namespace RW_NodeTree
                     if (container != null && container.NeedUpdate)
                     {
                         container.internal_UpdateNode(actionNode);
-                        reset = false;
                     }
                 }
 
                 ReadOnlyDictionary<string, Thing> prveChildsReadOnly = new ReadOnlyDictionary<string, Thing>(prveChilds);
-                proccess.PostUpdateChilds(actionNode, cachingData, prveChildsReadOnly, out bool notUpdateTexture);
-                if (reset && !notUpdateTexture)
-                {
-                    ResetRenderedTexture();
-                }
+                proccess.PostUpdateChilds(actionNode, cachingData, prveChildsReadOnly);
                 return;
             }
-        }
-
-
-        /// <summary>
-        /// set all texture need regenerate
-        /// </summary>
-        public void ResetRenderedTexture()
-        {
-            lock (nodeRenderingInfo)
-            {
-                nodeRenderingInfo.Reset();
-                try
-                {
-                    Thing parent = (Thing)Processer;
-                    if (parent.Spawned && parent.def.drawerType >= DrawerType.MapMeshOnly) parent.DirtyMapMesh(parent.Map);
-                }
-                catch (Exception ex)
-                {
-                    Log.Warning(ex.ToString());
-                }
-            }
-            ParentContainer?.ResetRenderedTexture();
         }
 
         public override int GetCountCanAccept(Thing? item, bool canMergeWithExistingStacks = true)
@@ -1209,7 +1159,6 @@ namespace RW_NodeTree
         private readonly Dictionary<string, int> indicesById = new Dictionary<string, int>();
         private readonly Dictionary<Thing, int> indicesByThing = new Dictionary<Thing, int>();
         private readonly ConcurrentDictionary<int, (string?, int)> currentKey = new ConcurrentDictionary<int, (string?, int)>();
-        private readonly NodeRenderingInfoForRot4 nodeRenderingInfo = new NodeRenderingInfoForRot4();
 
         private static bool blockUpdate = false;
 

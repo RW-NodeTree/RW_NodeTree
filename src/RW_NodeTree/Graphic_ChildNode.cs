@@ -10,18 +10,15 @@ namespace RW_NodeTree
 {
     public class Graphic_ChildNode : Graphic
     {
-        public Graphic_ChildNode(Thing thing, Graphic org)
+        public Graphic_ChildNode(INodeProcesser proccesser, Action<RenderTexture>? PostFX = null)
         {
-            if (thing == null) throw new ArgumentNullException(nameof(thing));
-            if (org == null) throw new ArgumentNullException(nameof(org));
-            if (thing is not INodeProcesser nodeProcesser) throw new ArgumentNullException(nameof(thing));
-            else currentProcesser = nodeProcesser;
-            subGraphic = org;
+            if (proccesser == null) throw new ArgumentNullException(nameof(proccesser));
+            if (proccesser is not Thing) throw new ArgumentException("Invalid processer type", nameof(proccesser));
+            currentProcesser = proccesser;
+            postFX = PostFX;
             //base.drawSize = _THING.DrawSize(_THING.parent.Rotation);
             //base.data = _GRAPHIC.data;
         }
-
-        public Graphic SubGraphic => subGraphic;
 
         public override Material? MatSingle => MatAt(((Thing)currentProcesser).Rotation);
 
@@ -42,26 +39,18 @@ namespace RW_NodeTree
         public override bool EastFlipped => false;
 
         public override float DrawRotatedExtraAngleOffset => 0f;
-
+        
         public override Material MatAt(Rot4 rot, Thing? thing = null)
         {
-            thing = thing ?? (Thing)currentProcesser;
-            if ((thing as INodeProcesser) != currentProcesser) return SubGraphic.MatAt(rot, thing);
+            thing = (Thing)currentProcesser;
 
+            (bool needUpdate, Material? material, Texture2D? texture, RenderTexture? cachedRenderTarget) = defaultRenderingCache[rot];
 
-            (Material? material, Texture2D? texture, RenderTexture? cachedRenderTarget) = defaultRenderingCache[rot];
-
-            ReadOnlyDictionary<string, ReadOnlyCollection<RenderInfo>> commands = currentProcesser.ChildNodes.GetNodeRenderingInfos(rot, out bool needUpdate, subGraphic);
             if (needUpdate || material == null || texture == null || cachedRenderTarget == null)
             {
-                List<RenderInfo> final = new List<RenderInfo>();
-                foreach (var infos in commands)
-                {
-                    if (!infos.Value.NullOrEmpty()) final.AddRange(infos.Value);
-                }
-                RenderingTools.RenderToTarget(final, ref cachedRenderTarget!, ref texture!, default(Vector2Int), currentProcesser.TextureSizeFactor, currentProcesser.ExceedanceFactor, currentProcesser.ExceedanceOffset, currentProcesser.HasPostFX(true) ? currentProcesser.PostFX : default);
-                Shader shader = subGraphic.Shader;
-                texture.wrapMode = TextureWrapMode.Clamp;
+                currentProcesser.ChildNodes.GetNodeRenderingResult(rot, ref cachedRenderTarget, ref texture, this, postFX);
+                Shader shader = thing.DefaultGraphic.Shader;
+                texture!.wrapMode = TextureWrapMode.Clamp;
                 texture.filterMode = currentProcesser.TextureFilterMode;
 
                 if (material == null)
@@ -73,67 +62,37 @@ namespace RW_NodeTree
                     material.shader = shader;
                 }
                 material.mainTexture = texture;
-                defaultRenderingCache[rot] = (material, texture, cachedRenderTarget);
+                defaultRenderingCache[rot] = (false, material, texture, cachedRenderTarget);
             }
 
-            Vector2 size = new Vector2(texture.width, texture.height) / currentProcesser.TextureSizeFactor;
-
-            Graphic? graphic = thing.Graphic;
-            //if (graphic.GetGraphic_ChildNode() == this)
-            while (graphic != null && graphic != this)
-            {
-                graphic.drawSize = size;
-                graphic = graphic.GetSubGraphic();
-            }
-            this.drawSize = size;
-
+            drawSize = new Vector2(texture.width, texture.height) / currentProcesser.TextureSizeFactor;
             return material;
-        }
-
-        public override Material? MatSingleFor(Thing? thing)
-        {
-            thing = thing ?? (Thing)currentProcesser;
-            if ((thing as INodeProcesser) != currentProcesser) return SubGraphic.MatSingleFor(thing);
-            return MatAt(thing.Rotation, thing);
         }
 
         public override void DrawWorker(Vector3 loc, Rot4 rot, ThingDef? thingDef, Thing? thing, float extraRotation)
         {
-            thing = thing ?? (Thing)currentProcesser;
-            if ((thing as INodeProcesser) != currentProcesser) SubGraphic?.DrawWorker(loc, rot, thingDef, thing, extraRotation);
-            else if (!RenderingTools.StartOrEndDrawCatchingBlock || currentProcesser.HasPostFX(false)) base.DrawWorker(loc, rot, thingDef, thing, extraRotation);
-            else
-            {
-                MatAt(rot, thing);
-                List<RenderInfo> final = new List<RenderInfo>();
-                foreach (var infos in currentProcesser.ChildNodes.GetNodeRenderingInfos(rot, out _, subGraphic))
-                {
-                    if (!infos.Value.NullOrEmpty()) final.AddRange(infos.Value);
-                }
-                Matrix4x4 matrix = Matrix4x4.TRS(loc, Quaternion.AngleAxis(extraRotation, Vector3.up), Vector3.one);
-                for (int i = 0; i < final.Count; i++)
-                {
-                    RenderInfo info = final[i];
-                    Matrix4x4[] matrices = new Matrix4x4[info.matrices.Length];
-                    for (int j = 0; j < info.matrices.Length; j++)
-                    {
-                        matrices[j] = matrix * info.matrices[j];
-                    }
-                    info.matrices = matrices;
-                    info.DrawInfo(null);
-                }
-            }
+            MatAt(rot);
+            base.DrawWorker(loc, rot, thingDef, thing, extraRotation);
         }
 
         public override void Print(SectionLayer layer, Thing thing, float extraRotation)
         {
-            thing = thing ?? (Thing)currentProcesser;
-            if ((thing as INodeProcesser) != currentProcesser) SubGraphic?.Print(layer, thing, extraRotation);
-            else
-            {
-                MatAt(thing.Rotation, thing);
-                base.Print(layer, thing, extraRotation);
-            }
+            MatAt(thing.Rotation);
+            base.Print(layer, thing, extraRotation);
+        }
+
+        public void ForceUpdate(Rot4 rot)
+        {
+            (bool needUpdate, Material? material, Texture2D? texture, RenderTexture? cachedRenderTarget) = defaultRenderingCache[rot];
+            defaultRenderingCache[rot] = (true, material, texture, cachedRenderTarget);
+        }
+
+        public void ForceUpdateAll()
+        {
+            ForceUpdate(Rot4.North);
+            ForceUpdate(Rot4.East);
+            ForceUpdate(Rot4.South);
+            ForceUpdate(Rot4.West);
         }
 
 
@@ -154,17 +113,17 @@ namespace RW_NodeTree
                 if (cachedRenderTargetSouth != null) GameObject.Destroy(cachedRenderTargetSouth);
                 if (cachedRenderTargetWest != null) GameObject.Destroy(cachedRenderTargetWest);
             }
-            public (Material?, Texture2D?, RenderTexture?) this[Rot4 index]
+            public (bool, Material?, Texture2D?, RenderTexture?) this[Rot4 index]
             {
                 get
                 {
                     switch (index.AsByte)
                     {
-                        case 0: return (materialNorth, textureNorth, cachedRenderTargetNorth);
-                        case 1: return (materialEast, textureEast, cachedRenderTargetEast);
-                        case 2: return (materialSouth, textureSouth, cachedRenderTargetSouth);
-                        case 3: return (materialWest, textureWest, cachedRenderTargetWest);
-                        default: return (materialNorth, textureNorth, cachedRenderTargetNorth);
+                        case 0: return (needUpdateNorth, materialNorth, textureNorth, cachedRenderTargetNorth);
+                        case 1: return (needUpdateEast, materialEast, textureEast, cachedRenderTargetEast);
+                        case 2: return (needUpdateSouth, materialSouth, textureSouth, cachedRenderTargetSouth);
+                        case 3: return (needUpdateWest, materialWest, textureWest, cachedRenderTargetWest);
+                        default: return (needUpdateNorth, materialNorth, textureNorth, cachedRenderTargetNorth);
                     }
                 }
                 set
@@ -172,34 +131,41 @@ namespace RW_NodeTree
                     switch (index.AsByte)
                     {
                         case 0:
-                            materialNorth = value.Item1;
-                            textureNorth = value.Item2;
-                            cachedRenderTargetNorth = value.Item3;
+                            needUpdateNorth = value.Item1;
+                            materialNorth = value.Item2;
+                            textureNorth = value.Item3;
+                            cachedRenderTargetNorth = value.Item4;
                             break;
                         case 1:
-                            materialEast = value.Item1;
-                            textureEast = value.Item2;
-                            cachedRenderTargetEast = value.Item3;
+                            needUpdateEast = value.Item1;
+                            materialEast = value.Item2;
+                            textureEast = value.Item3;
+                            cachedRenderTargetEast = value.Item4;
                             break;
                         case 2:
-                            materialSouth = value.Item1;
-                            textureSouth = value.Item2;
-                            cachedRenderTargetSouth = value.Item3;
+                            needUpdateSouth = value.Item1;
+                            materialSouth = value.Item2;
+                            textureSouth = value.Item3;
+                            cachedRenderTargetSouth = value.Item4;
                             break;
                         case 3:
-                            materialWest = value.Item1;
-                            textureWest = value.Item2;
-                            cachedRenderTargetWest = value.Item3;
+                            needUpdateWest = value.Item1;
+                            materialWest = value.Item2;
+                            textureWest = value.Item3;
+                            cachedRenderTargetWest = value.Item4;
                             break;
                         default:
-                            materialNorth = value.Item1;
-                            textureNorth = value.Item2;
-                            cachedRenderTargetNorth = value.Item3;
+                            needUpdateNorth = value.Item1;
+                            materialNorth = value.Item2;
+                            textureNorth = value.Item3;
+                            cachedRenderTargetNorth = value.Item4;
                             break;
                     }
 
                 }
             }
+
+            public bool needUpdateNorth, needUpdateEast, needUpdateSouth, needUpdateWest;
 
             public Material? materialNorth, materialEast, materialSouth, materialWest;
 
@@ -208,8 +174,8 @@ namespace RW_NodeTree
             public RenderTexture? cachedRenderTargetNorth, cachedRenderTargetEast, cachedRenderTargetSouth, cachedRenderTargetWest;
         }
 
+        private readonly INodeProcesser currentProcesser;
+        private readonly Action<RenderTexture>? postFX;
         private readonly OffScreenRenderingCache defaultRenderingCache = new OffScreenRenderingCache();
-        private INodeProcesser currentProcesser;
-        private Graphic subGraphic;
     }
 }

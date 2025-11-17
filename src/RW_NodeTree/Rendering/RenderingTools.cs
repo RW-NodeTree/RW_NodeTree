@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 using UnityEngine;
+using UnityEngine.Experimental.Rendering;
 using UnityEngine.Rendering;
 using Verse;
 
@@ -126,17 +127,17 @@ namespace RW_NodeTree.Rendering
         /// </summary>
         /// <param name="infos">all arranged render infos</param>
         /// <param name="cachedRenderTarget"></param>
-        /// <param name="target"></param>
+        /// <param name="target">target texture2D</param>
+        /// <param name="textureFormat">render texture format</param>
         /// <param name="size">force render texture size</param>
         /// <param name="TextureSizeFactor"></param>
-        public static void RenderToTarget(List<RenderInfo> infos, ref RenderTexture? cachedRenderTarget, ref Texture2D? target, Vector2Int size = default(Vector2Int), uint TextureSizeFactor = DefaultTextureSizeFactor, float ExceedanceFactor = 1f, float ExceedanceOffset = 1f, Action<RenderTexture>? PostFX = null)
+        public static void RenderToTarget(List<RenderInfo> infos, ref RenderTexture? cachedRenderTarget, ref Texture2D? target, GraphicsFormat textureFormat, Vector2Int size = default(Vector2Int), uint TextureSizeFactor = DefaultTextureSizeFactor, float ExceedanceFactor = 1f, float ExceedanceOffset = 1f, Action<RenderTexture>? PostFX = null)
         {
-            RenderToTarget(infos, ref cachedRenderTarget, size, TextureSizeFactor, ExceedanceFactor, ExceedanceOffset);
-            PostFX?.Invoke(cachedRenderTarget!);
+            RenderToTarget(infos, ref cachedRenderTarget, textureFormat, size, TextureSizeFactor, ExceedanceFactor, ExceedanceOffset, PostFX);
             if (target == null || target.width != cachedRenderTarget!.width || target.height != cachedRenderTarget.height)
             {
                 if (target != null) GameObject.Destroy(target);
-                target = new Texture2D(cachedRenderTarget!.width, cachedRenderTarget.height, TextureFormat.ARGB32, false);
+                target = new Texture2D(cachedRenderTarget!.width, cachedRenderTarget.height, textureFormat, TextureCreationFlags.None);
             }
             //Camera.targetTexture = null;
             Graphics.CopyTexture(cachedRenderTarget, target);
@@ -157,9 +158,10 @@ namespace RW_NodeTree.Rendering
         /// </summary>
         /// <param name="infos">all arranged render infos</param>
         /// <param name="cachedRenderTarget"></param>
+        /// <param name="textureFormat">render texture format</param>
         /// <param name="size">force render texture size</param>
         /// <param name="TextureSizeFactor"></param>
-        public static void RenderToTarget(List<RenderInfo> infos, ref RenderTexture? cachedRenderTarget, Vector2Int size = default(Vector2Int), uint TextureSizeFactor = DefaultTextureSizeFactor, float ExceedanceFactor = 1f, float ExceedanceOffset = 1f)
+        public static void RenderToTarget(List<RenderInfo> infos, ref RenderTexture? cachedRenderTarget, GraphicsFormat textureFormat, Vector2Int size = default(Vector2Int), uint TextureSizeFactor = DefaultTextureSizeFactor, float ExceedanceFactor = 1f, float ExceedanceOffset = 1f, Action<RenderTexture>? PostFX = null)
         {
 
             if (size.x <= 0 || size.y <= 0)
@@ -172,7 +174,7 @@ namespace RW_NodeTree.Rendering
                 size.y = Mathf.Clamp(size.y, 1, MaxTexSize);
             }
 
-            size = CheckAndResizeRenderTexture(ref cachedRenderTarget, size, TextureSizeFactor, ExceedanceFactor, ExceedanceOffset);
+            size = CheckAndResizeRenderTexture(ref cachedRenderTarget, textureFormat, size, TextureSizeFactor, ExceedanceFactor, ExceedanceOffset);
 
             //if (Prefs.DevMode) Log.Message("RenderToTarget size:" + size);
             //Debug.Log("RenderToTarget size:" + size);
@@ -221,10 +223,11 @@ namespace RW_NodeTree.Rendering
                 Camera.Render();
                 Camera.targetTexture = empty;
             }
+            PostFX?.Invoke(cachedRenderTarget!);
         }
 
 
-        public static Vector2Int CheckAndResizeRenderTexture(ref RenderTexture? renderTexture, Vector2Int size, uint TextureSizeFactor = DefaultTextureSizeFactor, float ExceedanceFactor = 1f, float ExceedanceOffset = 1f)
+        public static Vector2Int CheckAndResizeRenderTexture(ref RenderTexture? renderTexture, GraphicsFormat renderTextureFormat, Vector2Int size, uint TextureSizeFactor = DefaultTextureSizeFactor, float ExceedanceFactor = 1f, float ExceedanceOffset = 1f)
         {
             if (renderTexture != null)
             {
@@ -247,7 +250,7 @@ namespace RW_NodeTree.Rendering
             if (renderTexture == null || renderTexture.width != size.x || renderTexture.height != size.y)
             {
                 if (renderTexture != null) GameObject.Destroy(renderTexture);
-                renderTexture = new RenderTexture(size.x, size.y, 16, RenderTextureFormat.ARGB32);
+                renderTexture = new RenderTexture(size.x, size.y, 16, renderTextureFormat);
             }
             return size;
         }
