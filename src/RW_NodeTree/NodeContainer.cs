@@ -376,7 +376,7 @@ namespace RW_NodeTree
 
             Dictionary<string, object?> cachingData = new Dictionary<string, object?>();
 
-            HashSet<string>? ChildForDraw = null;
+            Dictionary<string, Rot4>? ChildForDraw = null;
             RenderingTools.StartOrEndDrawCatchingBlock = true;
             try
             {
@@ -391,20 +391,21 @@ namespace RW_NodeTree
             if (ChildForDraw != null)
             {
 
-                foreach (string id in ChildForDraw)
+                foreach (var kv in ChildForDraw)
                 {
-                    Thing? child = this[id];
-                    if (child != null && id != null)
+                    if (kv.Key == null) continue;
+                    Thing? child = this[kv.Key];
+                    if (child != null)
                     {
                         INodeProcesser? childProcesser = child as INodeProcesser;
                         if(childProcesser != null)
                         {
                             List<RenderInfo> renderInfos = new List<RenderInfo>();
-                            foreach(var kv in childProcesser.ChildNodes.GetNodeRenderingInfos(rot, invokeSource))
+                            foreach(var val in childProcesser.ChildNodes.GetNodeRenderingInfos(kv.Value, invokeSource).Values)
                             {
-                                renderInfos.AddRange(kv.Value);
+                                renderInfos.AddRange(val);
                             }
-                            nodeRenderingInfos[id] = renderInfos;
+                            nodeRenderingInfos[kv.Key] = renderInfos;
                         }
                         else
                         {
@@ -412,14 +413,14 @@ namespace RW_NodeTree
                             try
                             {
                                 Rot4 rotCache = child.Rotation;
-                                child.Rotation = new Rot4((rot.AsInt + rotCache.AsInt) & 3);
+                                child.Rotation = kv.Value;
     #if V13 || V14
                                 child.DrawAt(Vector3.zero);
     #else
                                 child.DrawNowAt(Vector3.zero);
     #endif
                                 child.Rotation = rotCache;
-                                nodeRenderingInfos[id] = RenderingTools.RenderInfos!;
+                                nodeRenderingInfos[kv.Key] = RenderingTools.RenderInfos!;
                             }
                             catch (Exception ex)
                             {

@@ -57,7 +57,7 @@ namespace RW_NodeTree
         /// <param name="invokeSource">Rendering Invoke Source</param>
         /// <param name="cachedDataToPostDrawStep">cached data for PostGenRenderInfos</param>
         /// <returns></returns>
-        HashSet<string> PreGenRenderInfos(Rot4 rot, Graphic_ChildNode invokeSource, Dictionary<string, object?> cachedDataToPostDrawStep);
+        Dictionary<string, Rot4> PreGenRenderInfos(Rot4 rot, Graphic_ChildNode invokeSource, Dictionary<string, object?> cachedDataToPostDrawStep);
 
         /// <summary>
         /// Adapte draw steep of this node
