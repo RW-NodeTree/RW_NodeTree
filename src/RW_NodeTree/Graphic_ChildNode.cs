@@ -54,13 +54,7 @@ namespace RW_NodeTree
 
             if (needUpdate || material == null || texture == null || cachedRenderTarget == null)
             {
-                Dictionary<string, List<RenderInfo>> nodeRenderingInfos = currentProcesser.ChildNodes.GetNodeRenderingInfos(rot, this);
-
-                List<RenderInfo> final = new List<RenderInfo>();
-                foreach (var infos in nodeRenderingInfos)
-                {
-                    if (!infos.Value.NullOrEmpty()) final.AddRange(infos.Value);
-                }
+                List<RenderInfo> final = currentProcesser.ChildNodes.GetNodeRenderingInfos(rot, this);
 
                 RenderingTools.RenderToTarget(final, ref cachedRenderTarget, ref texture, textureFormat, default, textureSizeFactor, exceedanceFactor, exceedanceOffset, postFX);
                 

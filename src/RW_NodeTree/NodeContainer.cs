@@ -367,7 +367,7 @@ namespace RW_NodeTree
         }
 
 
-        internal Dictionary<string, List<RenderInfo>> GetNodeRenderingInfos(Rot4 rot, Graphic_ChildNode invokeSource)
+        internal List<RenderInfo> GetNodeRenderingInfos(Rot4 rot, Graphic_ChildNode invokeSource)
         {
             UpdateNode();
             if (!UnityData.IsInMainThread) throw new InvalidOperationException("not in main thread");
@@ -400,12 +400,7 @@ namespace RW_NodeTree
                         INodeProcesser? childProcesser = child as INodeProcesser;
                         if(childProcesser != null)
                         {
-                            List<RenderInfo> renderInfos = new List<RenderInfo>();
-                            foreach(var val in childProcesser.ChildNodes.GetNodeRenderingInfos(kv.Value, invokeSource).Values)
-                            {
-                                renderInfos.AddRange(val);
-                            }
-                            nodeRenderingInfos[kv.Key] = renderInfos;
+                            nodeRenderingInfos[kv.Key] = childProcesser.ChildNodes.GetNodeRenderingInfos(kv.Value, invokeSource);
                         }
                         else
                         {
@@ -432,7 +427,7 @@ namespace RW_NodeTree
                     }
                 }
             }
-            return Processer.PostGenRenderInfos(rot, invokeSource, nodeRenderingInfos, cachingData) ?? nodeRenderingInfos;
+            return Processer.PostGenRenderInfos(rot, invokeSource, nodeRenderingInfos, cachingData);
             //Humm, I think i should not use state mechine to handle this...
             //Time to instead every state check by using various specific method.
             //But that has too many parts to refactor, FXXK!

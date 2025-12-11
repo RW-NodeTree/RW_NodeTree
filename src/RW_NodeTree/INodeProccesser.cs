@@ -67,6 +67,6 @@ namespace RW_NodeTree
         /// <param name="nodeRenderingInfos">Corresponding rendering infos with id and part</param>
         /// <param name="cachedDataFromPerDrawStep">cached data from PreGenRenderInfos</param>
         /// <returns></returns>
-        Dictionary<string, List<RenderInfo>>? PostGenRenderInfos(Rot4 rot, Graphic_ChildNode invokeSource, Dictionary<string, List<RenderInfo>> nodeRenderingInfos, Dictionary<string, object?> cachedDataFromPerDrawStep);
+        List<RenderInfo> PostGenRenderInfos(Rot4 rot, Graphic_ChildNode invokeSource, Dictionary<string, List<RenderInfo>> nodeRenderingInfos, Dictionary<string, object?> cachedDataFromPerDrawStep);
     }
 }
