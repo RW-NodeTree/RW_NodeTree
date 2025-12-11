@@ -485,7 +485,7 @@ namespace RW_NodeTree
                 }
                 //Log.Message("1:"+state.ToString());
                 Dictionary<string, object?> cachingData = new Dictionary<string, object?>();
-                Dictionary<string, Thing> nextChilds = proccess.PreUpdateChilds(actionNode, cachingData) ?? new Dictionary<string, Thing>();
+                Dictionary<string, Thing> nextChilds = proccess.GenChilds(actionNode, cachingData) ?? new Dictionary<string, Thing>();
                 //Log.Message("2:" + state.ToString());
                 //Log.Message("3:" + state.ToString());
                 //Log.Message("4:" + state.ToString());
@@ -494,17 +494,7 @@ namespace RW_NodeTree
                 {
                     prveChilds[child.Item1] = child.Item2;
                 }
-                Dictionary<string, Thing?> diff = new Dictionary<string, Thing?>(nextChilds.Count + innerList.Count);
-                foreach (var child in nextChilds)
-                {
-                    if (!prveChilds.TryGetValue(child.Key, out Thing? thing) || thing != child.Value)
-                        diff[child.Key] = child.Value;
-                }
-                foreach (var child in prveChilds)
-                {
-                    if (!nextChilds.ContainsKey(child.Key))
-                        diff[child.Key] = null;
-                }
+                ReadOnlyDictionary<string, Thing> prveChildsReadOnly = new ReadOnlyDictionary<string, Thing>(prveChilds);
                 //Log.Message("6:" + state.ToString());
 
                 //Log.Message("7:" + state.ToString());
@@ -512,7 +502,12 @@ namespace RW_NodeTree
                 try
                 {
                     enableWrite = true;
-                    foreach (KeyValuePair<string, Thing?> pair in diff)
+                    foreach (KeyValuePair<string, Thing> pair in prveChilds)
+                    {
+                        if (!nextChilds.ContainsKey(pair.Key))
+                            this[pair.Key] = null;
+                    }
+                    foreach (KeyValuePair<string, Thing> pair in nextChilds)
                     {
                         this[pair.Key] = pair.Value;
                     }
@@ -522,6 +517,8 @@ namespace RW_NodeTree
                 {
                     readerWriterLockSlim.ExitUpgradeableReadLock();
                 }
+                
+                proccess.PreUpdateChilds(actionNode, cachingData, prveChildsReadOnly);
 
                 foreach (Thing? node in prveChilds.Values)
                 {
@@ -541,7 +538,6 @@ namespace RW_NodeTree
                     }
                 }
 
-                ReadOnlyDictionary<string, Thing> prveChildsReadOnly = new ReadOnlyDictionary<string, Thing>(prveChilds);
                 proccess.PostUpdateChilds(actionNode, cachingData, prveChildsReadOnly);
                 return;
             }
@@ -694,7 +690,6 @@ namespace RW_NodeTree
                 INodeProcesser? processer = item as INodeProcesser;
                 if (!CanAcceptAnyOf(item, canMergeWithExistingStacks) || item.holdingOwner != null || IsChildOf(item))
                 {
-                    processer?.Added(this, currentKey.Item1, false);
                     return false;
                 }
                 readerWriterLockSlim.EnterWriteLock();
@@ -725,7 +720,6 @@ namespace RW_NodeTree
                 if (processer != null)
                 {
                     processer.ChildNodes.CachedRootNodeNeedUpdate();
-                    processer.Added(this, currentKey.Item1, true);
                 }
                 //NeedUpdate = true;
                 return true;
@@ -942,7 +936,6 @@ namespace RW_NodeTree
                 INodeProcesser? processer = item as INodeProcesser;
                 if (!Processer.AllowNode(null, key))
                 {
-                    processer?.Removed(this, key, false);
                     return false;
                 }
 
@@ -965,7 +958,6 @@ namespace RW_NodeTree
                 }
                 if (item.holdingOwner != this)
                 {
-                    processer?.Removed(this, key, false);
                     return false;
                 }
 
@@ -973,7 +965,6 @@ namespace RW_NodeTree
                 if (processer != null)
                 {
                     processer.ChildNodes.CachedRootNodeNeedUpdate();
-                    processer.Removed(this, key, true);
                 }
                 //NeedUpdate = true;
                 return true;

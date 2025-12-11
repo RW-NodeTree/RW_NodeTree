@@ -15,11 +15,19 @@ namespace RW_NodeTree
         /// </summary>
         NodeContainer ChildNodes { get; }
 
+
         /// <summary>
         /// update event
         /// </summary>
         /// <param name="actionNode">update event action node</param>
-        Dictionary<string, Thing>? PreUpdateChilds(INodeProcesser actionNode, Dictionary<string, object?> cachedDataToPostUpatde);
+        Dictionary<string, Thing>? GenChilds(INodeProcesser actionNode, Dictionary<string, object?> cachedDataToPostUpatde);
+
+
+        /// <summary>
+        /// update event
+        /// </summary>
+        /// <param name="actionNode">update event action node</param>
+        void PreUpdateChilds(INodeProcesser actionNode, Dictionary<string, object?> cachedDataToPostUpatde, ReadOnlyDictionary<string, Thing> prveChilds);
 
         /// <summary>
         /// update event
@@ -35,20 +43,6 @@ namespace RW_NodeTree
         /// <param name="id">id</param>
         /// <returns>able to add into container</returns>
         bool AllowNode(Thing? node, string? id);
-
-        /// <summary>
-        /// Invoke when this item added in to container
-        /// </summary>
-        /// <param name="container"></param>
-        /// <param name="id"></param>
-        void Added(NodeContainer container, string? id, bool success);
-
-        /// <summary>
-        /// Invoke when this item removed from container
-        /// </summary>
-        /// <param name="container"></param>
-        /// <param name="id"></param>
-        void Removed(NodeContainer container, string? id, bool success);
 
         /// <summary>
         /// Adapte draw steep of this node
