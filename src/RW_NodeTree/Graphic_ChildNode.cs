@@ -4,18 +4,24 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using UnityEngine;
+using UnityEngine.Experimental.Rendering;
 using Verse;
 
 namespace RW_NodeTree
 {
     public class Graphic_ChildNode : Graphic
     {
-        public Graphic_ChildNode(INodeProcesser proccesser, Action<RenderTexture>? PostFX = null)
+        public Graphic_ChildNode(INodeProcesser proccesser, uint textureSizeFactor = RenderingTools.DefaultTextureSizeFactor, float exceedanceFactor = 1f, float exceedanceOffset = 1f, GraphicsFormat textureFormat = GraphicsFormat.R8G8B8A8_SRGB, FilterMode textureFilterMode = FilterMode.Bilinear, Action<RenderTexture>? PostFX = null)
         {
             if (proccesser == null) throw new ArgumentNullException(nameof(proccesser));
             if (proccesser is not Thing) throw new ArgumentException("Invalid processer type", nameof(proccesser));
             currentProcesser = proccesser;
             postFX = PostFX;
+            this.textureSizeFactor = textureSizeFactor;
+            this.exceedanceFactor = exceedanceFactor;
+            this.exceedanceOffset = exceedanceOffset;
+            this.textureFormat = textureFormat;
+            this.textureFilterMode = textureFilterMode;
             //base.drawSize = _THING.DrawSize(_THING.parent.Rotation);
             //base.data = _GRAPHIC.data;
         }
@@ -48,10 +54,19 @@ namespace RW_NodeTree
 
             if (needUpdate || material == null || texture == null || cachedRenderTarget == null)
             {
-                currentProcesser.ChildNodes.GetNodeRenderingResult(rot, ref cachedRenderTarget, ref texture, this, postFX);
+                Dictionary<string, List<RenderInfo>> nodeRenderingInfos = currentProcesser.ChildNodes.GetNodeRenderingInfos(rot, this);
+
+                List<RenderInfo> final = new List<RenderInfo>();
+                foreach (var infos in nodeRenderingInfos)
+                {
+                    if (!infos.Value.NullOrEmpty()) final.AddRange(infos.Value);
+                }
+
+                RenderingTools.RenderToTarget(final, ref cachedRenderTarget, ref texture, textureFormat, default, textureSizeFactor, exceedanceFactor, exceedanceOffset, postFX);
+                
                 Shader shader = thing.DefaultGraphic.Shader;
                 texture!.wrapMode = TextureWrapMode.Clamp;
-                texture.filterMode = currentProcesser.TextureFilterMode;
+                texture.filterMode = textureFilterMode;
 
                 if (material == null)
                 {
@@ -65,8 +80,14 @@ namespace RW_NodeTree
                 defaultRenderingCache[rot] = (false, material, texture, cachedRenderTarget);
             }
 
-            drawSize = new Vector2(texture.width, texture.height) / currentProcesser.TextureSizeFactor;
+            drawSize = new Vector2(texture.width, texture.height) / textureSizeFactor;
             return material;
+        }
+
+        public override Mesh MeshAt(Rot4 rot)
+        {
+            MatAt(rot);
+            return base.MeshAt(rot);
         }
 
         public override void DrawWorker(Vector3 loc, Rot4 rot, ThingDef? thingDef, Thing? thing, float extraRotation)
@@ -174,8 +195,14 @@ namespace RW_NodeTree
             public RenderTexture? cachedRenderTargetNorth, cachedRenderTargetEast, cachedRenderTargetSouth, cachedRenderTargetWest;
         }
 
-        private readonly INodeProcesser currentProcesser;
-        private readonly Action<RenderTexture>? postFX;
+
+        public readonly uint textureSizeFactor;
+        public readonly float exceedanceFactor;
+        public readonly float exceedanceOffset;
+        public readonly GraphicsFormat textureFormat;
+        public readonly FilterMode textureFilterMode;
+        public readonly INodeProcesser currentProcesser;
+        public readonly Action<RenderTexture>? postFX;
         private readonly OffScreenRenderingCache defaultRenderingCache = new OffScreenRenderingCache();
     }
 }

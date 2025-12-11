@@ -9,15 +9,6 @@ namespace RW_NodeTree
 {
     public partial interface INodeProcesser : IThingHolder
     {
-        uint TextureSizeFactor { get; }
-
-        float ExceedanceFactor { get; }
-
-        float ExceedanceOffset { get; }
-
-        GraphicsFormat TextureFormat { get; }
-
-        FilterMode TextureFilterMode { get; }
 
         /// <summary>
         /// node container

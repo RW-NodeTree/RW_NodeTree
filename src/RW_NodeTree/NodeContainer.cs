@@ -367,29 +367,12 @@ namespace RW_NodeTree
         }
 
 
-        public void GetNodeRenderingResult(Rot4 rot, ref RenderTexture? cachedRenderTarget, ref Texture2D? target, Graphic_ChildNode invokeSource, Action<RenderTexture>? PostFX = null)
+        internal Dictionary<string, List<RenderInfo>> GetNodeRenderingInfos(Rot4 rot, Graphic_ChildNode invokeSource)
         {
             UpdateNode();
             if (!UnityData.IsInMainThread) throw new InvalidOperationException("not in main thread");
             Dictionary<string, List<RenderInfo>> nodeRenderingInfos = new Dictionary<string, List<RenderInfo>>(Count + 1);
             Thing parent = (Thing)Processer;
-
-            //if (Prefs.DevMode)
-            //{
-            //    StackTrace stack = new StackTrace();
-            //    string stackReport = "";
-            //    for(int i =0; i < 8; i++)
-            //    {
-            //        StackFrame sf = stack.GetFrame(i);
-            //        MethodBase method = sf.GetMethod();
-            //        stackReport += method.DeclaringType + " -> " + method + " " + sf + "\n";
-            //    }
-            //    Log.Message(parent + " graphic : " + parent.Graphic + ";\nstack : " + stackReport);
-            //}
-
-
-            //ORIGIN
-
 
             Dictionary<string, object?> cachingData = new Dictionary<string, object?>();
 
@@ -413,36 +396,45 @@ namespace RW_NodeTree
                     Thing? child = this[id];
                     if (child != null && id != null)
                     {
-                        RenderingTools.StartOrEndDrawCatchingBlock = true;
-                        try
+                        INodeProcesser? childProcesser = child as INodeProcesser;
+                        if(childProcesser != null)
                         {
-                            Rot4 rotCache = child.Rotation;
-                            child.Rotation = new Rot4((rot.AsInt + rotCache.AsInt) & 3);
-#if V13 || V14
-                            child.DrawAt(Vector3.zero);
-#else
-                            child.DrawNowAt(Vector3.zero);
-#endif
-                            child.Rotation = rotCache;
-                            nodeRenderingInfos[id] = RenderingTools.RenderInfos!;
+                            List<RenderInfo> renderInfos = new List<RenderInfo>();
+                            foreach(var kv in childProcesser.ChildNodes.GetNodeRenderingInfos(rot, invokeSource))
+                            {
+                                renderInfos.AddRange(kv.Value);
+                            }
+                            nodeRenderingInfos[id] = renderInfos;
                         }
-                        catch (Exception ex)
+                        else
                         {
-                            Log.Error(ex.ToString());
+                            RenderingTools.StartOrEndDrawCatchingBlock = true;
+                            try
+                            {
+                                Rot4 rotCache = child.Rotation;
+                                child.Rotation = new Rot4((rot.AsInt + rotCache.AsInt) & 3);
+    #if V13 || V14
+                                child.DrawAt(Vector3.zero);
+    #else
+                                child.DrawNowAt(Vector3.zero);
+    #endif
+                                child.Rotation = rotCache;
+                                nodeRenderingInfos[id] = RenderingTools.RenderInfos!;
+                            }
+                            catch (Exception ex)
+                            {
+                                Log.Error(ex.ToString());
+                            }
+                            RenderingTools.StartOrEndDrawCatchingBlock = false;
+                            
                         }
-                        RenderingTools.StartOrEndDrawCatchingBlock = false;
                     }
                 }
             }
-            nodeRenderingInfos = Processer.PostGenRenderInfos(rot, invokeSource, nodeRenderingInfos, cachingData) ?? nodeRenderingInfos;
-            List<RenderInfo> final = new List<RenderInfo>();
-            foreach (var infos in nodeRenderingInfos)
-            {
-                if (!infos.Value.NullOrEmpty()) final.AddRange(infos.Value);
-            }
-
-            RenderingTools.RenderToTarget(final, ref cachedRenderTarget, ref target, Processer.TextureFormat, default, Processer.TextureSizeFactor, Processer.ExceedanceFactor, Processer.ExceedanceOffset, PostFX);
-            return;
+            return Processer.PostGenRenderInfos(rot, invokeSource, nodeRenderingInfos, cachingData) ?? nodeRenderingInfos;
+            //Humm, I think i should not use state mechine to handle this...
+            //Time to instead every state check by using various specific method.
+            //But that has too many parts to refactor, FXXK!
         }
 
 
