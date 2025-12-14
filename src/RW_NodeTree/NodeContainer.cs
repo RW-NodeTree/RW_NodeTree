@@ -485,7 +485,16 @@ namespace RW_NodeTree
                 }
                 //Log.Message("1:"+state.ToString());
                 Dictionary<string, object?> cachingData = new Dictionary<string, object?>();
-                Dictionary<string, Thing> nextChilds = proccess.GenChilds(actionNode, cachingData) ?? new Dictionary<string, Thing>();
+                Dictionary<string, Thing> nextChilds;
+                try
+                {
+                    nextChilds = proccess.GenChilds(actionNode, cachingData) ?? new Dictionary<string, Thing>();
+                }
+                catch (Exception ex)
+                {
+                    nextChilds = new Dictionary<string, Thing>();
+                    Log.Error(ex.ToString());
+                }
                 //Log.Message("2:" + state.ToString());
                 //Log.Message("3:" + state.ToString());
                 //Log.Message("4:" + state.ToString());
@@ -518,7 +527,14 @@ namespace RW_NodeTree
                     readerWriterLockSlim.ExitUpgradeableReadLock();
                 }
                 
-                proccess.PreUpdateChilds(actionNode, cachingData, prveChildsReadOnly);
+                try
+                {
+                    proccess.PreUpdateChilds(actionNode, cachingData, prveChildsReadOnly);
+                }
+                catch (Exception ex)
+                {
+                    Log.Error(ex.ToString());
+                }
 
                 foreach (Thing? node in prveChilds.Values)
                 {
@@ -538,7 +554,14 @@ namespace RW_NodeTree
                     }
                 }
 
-                proccess.PostUpdateChilds(actionNode, cachingData, prveChildsReadOnly);
+                try
+                {
+                    proccess.PostUpdateChilds(actionNode, cachingData, prveChildsReadOnly);
+                }
+                catch (Exception ex)
+                {
+                    Log.Error(ex.ToString());
+                }
                 return;
             }
         }
