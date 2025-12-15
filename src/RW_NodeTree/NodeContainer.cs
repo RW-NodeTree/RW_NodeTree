@@ -341,22 +341,30 @@ namespace RW_NodeTree
                 RootNode.ChildNodes.internal_UpdateNode(proccess);
                 return;
             }
-            readerWriterLockSlim.EnterWriteLock();
+            readerWriterLockSlim.EnterUpgradeableReadLock();
             try
             {
                 if (!NeedUpdate) return;
 
                 NeedUpdate = false;
 
-                enableWrite = true;
-                for (int i = Count - 1; i >= 0; i--)
+                readerWriterLockSlim.EnterWriteLock();
+                try
                 {
-                    if (this[i].Destroyed)
+                    enableWrite = true;
+                    for (int i = Count - 1; i >= 0; i--)
                     {
-                        RemoveAt(i);
+                        if (this[i].Destroyed)
+                        {
+                            RemoveAt(i);
+                        }
                     }
+                    enableWrite = false;
                 }
-                enableWrite = false;
+                finally
+                {
+                    readerWriterLockSlim.ExitWriteLock();
+                }
 
                 
                 Dictionary<string, object?> cachingData = new Dictionary<string, object?>();
@@ -379,6 +387,7 @@ namespace RW_NodeTree
                 ReadOnlyDictionary<string, Thing> prveChildsReadOnly = new ReadOnlyDictionary<string, Thing>(prveChilds);
 
                 
+                readerWriterLockSlim.EnterWriteLock();
                 try
                 {
                     enableWrite = true;
@@ -400,6 +409,10 @@ namespace RW_NodeTree
                 {
                     Log.Error(ex.ToString());
                 }
+                finally
+                {
+                    readerWriterLockSlim.ExitWriteLock();
+                }
 
 
                 try
@@ -417,7 +430,14 @@ namespace RW_NodeTree
                     NodeContainer? container = (node as INodeProcesser)?.ChildNodes;
                     if (container != null && container.NeedUpdate && !this.Contains(node))
                     {
-                        container.internal_UpdateNode(actionNode);
+                        try
+                        {
+                            container.internal_UpdateNode(actionNode);
+                        }
+                        catch (Exception ex)
+                        {
+                            Log.Error(ex.ToString());
+                        }
                     }
                 }
 
@@ -426,7 +446,14 @@ namespace RW_NodeTree
                     NodeContainer? container = (node as INodeProcesser)?.ChildNodes;
                     if (container != null && container.NeedUpdate)
                     {
-                        container.internal_UpdateNode(actionNode);
+                        try
+                        {
+                            container.internal_UpdateNode(actionNode);
+                        }
+                        catch (Exception ex)
+                        {
+                            Log.Error(ex.ToString());
+                        }
                     }
                 }
 
@@ -441,7 +468,7 @@ namespace RW_NodeTree
             }
             finally
             {
-                readerWriterLockSlim.ExitWriteLock();
+                readerWriterLockSlim.ExitUpgradeableReadLock();
             }
             return;
         }

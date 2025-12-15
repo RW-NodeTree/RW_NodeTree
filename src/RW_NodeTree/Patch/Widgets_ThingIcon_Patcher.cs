@@ -31,14 +31,14 @@ namespace RW_NodeTree.Patch
             ThingStyleDef styleDef = thing.StyleDef;
             if (thing?.def?.graphicData != null && (styleDef == null || styleDef.UIIcon == null) && thing.def.uiIconPath.NullOrEmpty() && !(thing is Pawn || thing is Corpse))
             {
-                INodeProcesser? processer = thing as INodeProcesser;
+                Graphic_ChildNode? processer = thing.Graphic as Graphic_ChildNode;
                 if (processer != null)
                 {
                     Rot4 defaultPlacingRot = thing.def.defaultPlacingRot;
                     ref Vector2 drawSize = ref thing.def.graphicData.drawSize;
                     ref float scale = ref thing.def.uiIconScale;
                     __state = (drawSize, scale);
-                    drawSize = thing.Graphic.drawSize;
+                    drawSize = processer.drawSize;
                     if (defaultPlacingRot.IsHorizontal)
                     {
                         drawSize = drawSize.Rotated();
