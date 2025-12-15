@@ -491,7 +491,7 @@ namespace RW_NodeTree
             }
         }
 
-        protected override Thing? GetAt(int index) => ((IList<(string, Thing)>)this)[index].Item2;
+        protected override Thing? GetAt(int index) => ((IReadOnlyList<(string, Thing)>)this)[index].Item2;
 
         public override int GetCountCanAccept(Thing? item, bool canMergeWithExistingStacks = true)
         {
