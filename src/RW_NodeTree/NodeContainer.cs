@@ -400,8 +400,11 @@ namespace RW_NodeTree
                     }
                     foreach (KeyValuePair<string, Thing> pair in nextChilds)
                     {
-                        CurrentKey = (pair.Key, -1);
-                        TryAdd(pair.Value);
+                        if(!prveChilds.TryGetValue(pair.Key, out Thing? prveNode) || prveNode != pair.Value)
+                        {
+                            CurrentKey = (pair.Key, -1);
+                            TryAdd(pair.Value);
+                        }
                     }
                     enableWrite = false;
                 }
