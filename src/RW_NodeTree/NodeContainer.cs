@@ -7,6 +7,7 @@ using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Data;
 using System.Threading;
 using System.Xml;
 using UnityEngine;
@@ -18,7 +19,7 @@ namespace RW_NodeTree
     /// <summary>
     /// Node storge processer
     /// </summary>
-    public class NodeContainer : ThingOwner, IList<string>, IList<Thing>, IDictionary<string, Thing?>, IDictionary<Thing, string?>, IList<(string, Thing)>
+    public class NodeContainer : ThingOwner, IReadOnlyList<string>, IReadOnlyList<Thing>, IReadOnlyDictionary<string, Thing?>, IReadOnlyDictionary<Thing, string?>, IReadOnlyList<(string, Thing)>
     {
 
         public NodeContainer(Thing processer) : base(processer as INodeProcesser)
@@ -36,34 +37,6 @@ namespace RW_NodeTree
                 TryGetValue(key, out Thing? result);
                 return result;
             }
-            set
-            {
-                bool isUpgradeableReadLockHeld = readerWriterLockSlim.IsUpgradeableReadLockHeld;
-                if (!isUpgradeableReadLockHeld) readerWriterLockSlim.EnterUpgradeableReadLock();
-                try
-                {
-                    if (!enableWrite || key == null) return;
-                    if (indicesById.TryGetValue(key, out int index))
-                    {
-                        if (value == null) RemoveAt(index);
-                        else
-                        {
-                            IList<(string, Thing)> convertedSelf = this;
-                            convertedSelf[index] = (key, value);
-                        }
-                    }
-                    else if (value != null && key.IsVaildityKeyFormat())
-                    {
-                        CurrentKey = (key, -1);
-                        TryAdd(value);
-                        CurrentKey = (null, -1);
-                    }
-                }
-                finally
-                {
-                    if (!isUpgradeableReadLockHeld) readerWriterLockSlim.ExitUpgradeableReadLock();
-                }
-            }
         }
 
         public string? this[Thing key]
@@ -72,34 +45,6 @@ namespace RW_NodeTree
             {
                 TryGetValue(key, out string? result);
                 return result;
-            }
-            set
-            {
-                bool isUpgradeableReadLockHeld = readerWriterLockSlim.IsUpgradeableReadLockHeld;
-                if (!isUpgradeableReadLockHeld) readerWriterLockSlim.EnterUpgradeableReadLock();
-                try
-                {
-                    if (!enableWrite || key == null) return;
-                    if (indicesByThing.TryGetValue(key, out int index))
-                    {
-                        if (value == null) RemoveAt(index);
-                        else
-                        {
-                            IList<(string, Thing)> convertedSelf = this;
-                            convertedSelf[index] = (value, key);
-                        }
-                    }
-                    else if (key != null && value.IsVaildityKeyFormat())
-                    {
-                        CurrentKey = (value, -1);
-                        TryAdd(key);
-                        CurrentKey = (null, -1);
-                    }
-                }
-                finally
-                {
-                    if (!isUpgradeableReadLockHeld) readerWriterLockSlim.ExitUpgradeableReadLock();
-                }
             }
         }
 
@@ -115,16 +60,34 @@ namespace RW_NodeTree
 
         public bool NeedUpdate
         {
-            get => needUpdate;
+            get
+            {
+                bool isReadLockHeld = readerWriterLockSlim.IsReadLockHeld || readerWriterLockSlim.IsWriteLockHeld || readerWriterLockSlim.IsUpgradeableReadLockHeld;
+                if (!isReadLockHeld) readerWriterLockSlim.EnterReadLock();
+                try
+                {
+                    return needUpdate;
+                }
+                finally
+                {
+                    if (!isReadLockHeld) readerWriterLockSlim.ExitReadLock();
+                }
+            }
             set
             {
-                lock (this)
+                bool isWriteLockHeld = readerWriterLockSlim.IsWriteLockHeld;
+                if (!isWriteLockHeld) readerWriterLockSlim.EnterWriteLock();
+                try
                 {
                     if (needUpdate != value && (needUpdate = value))
                     {
                         NodeContainer? parent = ParentContainer;
                         if (parent != null) parent.NeedUpdate = true;
                     }
+                }
+                finally
+                {
+                    if (!isWriteLockHeld) readerWriterLockSlim.ExitWriteLock();
                 }
             }
         }
@@ -136,131 +99,56 @@ namespace RW_NodeTree
         {
             get
             {
-                if (cachedRootNode != null) return cachedRootNode;
-                INodeProcesser processer = Processer;
-                INodeProcesser? next = ParentProcesser;
-                while (next != null)
+                bool isUpgradeableReadLockHeld = readerWriterLockSlim.IsUpgradeableReadLockHeld || readerWriterLockSlim.IsWriteLockHeld;
+                if (!isUpgradeableReadLockHeld) readerWriterLockSlim.EnterUpgradeableReadLock();
+                try
                 {
-                    processer = next;
-                    next = next.ParentHolder as INodeProcesser;
+                    if (cachedRootNode != null) return cachedRootNode;
+                    INodeProcesser processer = Processer;
+                    INodeProcesser? next = ParentProcesser;
+                    while (next != null)
+                    {
+                        processer = next;
+                        next = next.ParentHolder as INodeProcesser;
+                    }
+                    cachedRootNode = processer;
+                    return processer;
                 }
-                cachedRootNode = processer;
-                return processer;
+                finally
+                {
+                    if (!isUpgradeableReadLockHeld) readerWriterLockSlim.ExitUpgradeableReadLock();
+                }
             }
         }
 
-        public ICollection<string> Keys => this;
-
-        public ICollection<Thing?> Values => this;
 
         public override int Count => innerList.Count;
 
-        public bool IsReadOnly => !enableWrite;
+        public IEnumerable<string> Keys => this;
 
-        ICollection<Thing> IDictionary<Thing, string?>.Keys => this;
+        public IEnumerable<Thing?> Values => this;
 
-        ICollection<string?> IDictionary<Thing, string?>.Values => this!;
+        IEnumerable<Thing> IReadOnlyDictionary<Thing, string?>.Keys => this;
 
-        string IList<string>.this[int index]
-        {
-            get => ((IList<(string, Thing)>)this)[index].Item1;
-            set
-            {
-                bool isUpgradeableReadLockHeld = readerWriterLockSlim.IsUpgradeableReadLockHeld;
-                if (!isUpgradeableReadLockHeld) readerWriterLockSlim.EnterUpgradeableReadLock();
-                try
-                {
-                    if (!enableWrite) return;
-                    var origin = innerList[index];
-                    if (origin.Item1 == value) return;
-                    CurrentKey = (value, index);
-                    if (Remove(origin.Item2) && value.IsVaildityKeyFormat() && !TryAdd(origin.Item2))
-                    {
-                        CurrentKey = (origin.Item1, index);
-                        if (!TryAdd(origin.Item2))
-                        {
-                            CurrentKey = (null, -1);
-                            throw new InvalidOperationException("Fail to reset after value adding fail");
-                        }
-                    }
-                    CurrentKey = (null, -1);
-                }
-                finally
-                {
-                    if (!isUpgradeableReadLockHeld) readerWriterLockSlim.ExitUpgradeableReadLock();
-                }
-            }
-        }
+        IEnumerable<string?> IReadOnlyDictionary<Thing, string?>.Values => this;
 
-        Thing IList<Thing>.this[int index]
-        {
-            get => ((IList<(string, Thing)>)this)[index].Item2;
-            set
-            {
-                bool isUpgradeableReadLockHeld = readerWriterLockSlim.IsUpgradeableReadLockHeld;
-                if (!isUpgradeableReadLockHeld) readerWriterLockSlim.EnterUpgradeableReadLock();
-                try
-                {
-                    if (!enableWrite) return;
-                    var origin = innerList[index];
-                    if (origin.Item2 == value) return;
-                    CurrentKey = (origin.Item1, index);
-                    if (Remove(origin.Item2) && value != null && !TryAdd(value))
-                    {
-                        CurrentKey = (origin.Item1, index);
-                        if (!TryAdd(origin.Item2))
-                        {
-                            CurrentKey = (null, -1);
-                            throw new InvalidOperationException("Fail to reset after value adding fail");
-                        }
-                    }
-                    CurrentKey = (null, -1);
-                }
-                finally
-                {
-                    if (!isUpgradeableReadLockHeld) readerWriterLockSlim.ExitUpgradeableReadLock();
-                }
-            }
-        }
+        string IReadOnlyList<string>.this[int index] => ((IReadOnlyList<(string, Thing)>)this)[index].Item1;
 
-        (string, Thing) IList<(string, Thing)>.this[int index]
+        Thing IReadOnlyList<Thing>.this[int index] => ((IReadOnlyList<(string, Thing)>)this)[index].Item2;
+
+        (string, Thing) IReadOnlyList<(string, Thing)>.this[int index]
         {
             get
             {
-                readerWriterLockSlim.EnterReadLock();
+                bool isReadLockHeld = readerWriterLockSlim.IsReadLockHeld || readerWriterLockSlim.IsWriteLockHeld || readerWriterLockSlim.IsUpgradeableReadLockHeld;
+                if (!isReadLockHeld) readerWriterLockSlim.EnterReadLock();
                 try
                 {
                     return innerList[index];
                 }
                 finally
                 {
-                    readerWriterLockSlim.ExitReadLock();
-                }
-            }
-            set
-            {
-                bool isUpgradeableReadLockHeld = readerWriterLockSlim.IsUpgradeableReadLockHeld;
-                if (!isUpgradeableReadLockHeld) readerWriterLockSlim.EnterUpgradeableReadLock();
-                try
-                {
-                    if (!enableWrite || !value.Item1.IsVaildityKeyFormat()) return;
-                    var origin = innerList[index];
-                    if(origin == value) return;
-                    CurrentKey = (value.Item1, index);
-                    if (Remove(origin.Item2) && !TryAdd(value.Item2))
-                    {
-                        CurrentKey = (origin.Item1, index);
-                        if (!TryAdd(origin.Item2))
-                        {
-                            CurrentKey = (null, -1);
-                            throw new InvalidOperationException("Fail to reset after value adding fail");
-                        }
-                    }
-                    CurrentKey = (null, -1);
-                }
-                finally
-                {
-                    if (!isUpgradeableReadLockHeld) readerWriterLockSlim.ExitUpgradeableReadLock();
+                    if (!isReadLockHeld) readerWriterLockSlim.ExitReadLock();
                 }
             }
         }
@@ -271,7 +159,8 @@ namespace RW_NodeTree
 
             if (Scribe.EnterNode("InnerList"))
             {
-                readerWriterLockSlim.EnterWriteLock();
+                bool isWriteLockHeld = readerWriterLockSlim.IsWriteLockHeld;
+                if (!isWriteLockHeld) readerWriterLockSlim.EnterWriteLock();
                 try
                 {
                     if (Scribe.mode == LoadSaveMode.Saving)
@@ -349,7 +238,7 @@ namespace RW_NodeTree
                 }
                 finally
                 {
-                    readerWriterLockSlim.ExitWriteLock();
+                    if (!isWriteLockHeld) readerWriterLockSlim.ExitWriteLock();
                     Scribe.ExitNode();
                 }
             }
@@ -357,7 +246,7 @@ namespace RW_NodeTree
             //if (Scribe.mode == LoadSaveMode.PostLoadInit) needUpdate = false;
         }
 
-        public void CachedRootNodeNeedUpdate()
+        private void CachedRootNodeNeedUpdate()
         {
             cachedRootNode = null;
             for (int i = Count - 1; i >= 0; i--)
@@ -449,41 +338,27 @@ namespace RW_NodeTree
 
             if (actionNode == null)
             {
-                lock (typeof(NodeContainer))
-                {
-                    if (blockUpdate) return;
-                    blockUpdate = true;
-                    RootNode.ChildNodes.internal_UpdateNode(proccess);
-                    blockUpdate = false;
-                    return;
-                }
+                RootNode.ChildNodes.internal_UpdateNode(proccess);
+                return;
             }
-            lock (this)
+            readerWriterLockSlim.EnterWriteLock();
+            try
             {
                 if (!NeedUpdate) return;
 
                 NeedUpdate = false;
 
-                readerWriterLockSlim.EnterUpgradeableReadLock();
-                try
+                enableWrite = true;
+                for (int i = Count - 1; i >= 0; i--)
                 {
-
-                    enableWrite = true;
-                    for (int i = Count - 1; i >= 0; i--)
+                    if (this[i].Destroyed)
                     {
-                        if (this[i].Destroyed)
-                        {
-                            RemoveAt(i);
-                        }
+                        RemoveAt(i);
                     }
-                    //lockUpdate = true;
-                    enableWrite = false;
                 }
-                finally
-                {
-                    readerWriterLockSlim.ExitUpgradeableReadLock();
-                }
-                //Log.Message("1:"+state.ToString());
+                enableWrite = false;
+
+                
                 Dictionary<string, object?> cachingData = new Dictionary<string, object?>();
                 Dictionary<string, Thing> nextChilds;
                 try
@@ -495,38 +370,38 @@ namespace RW_NodeTree
                     nextChilds = new Dictionary<string, Thing>();
                     Log.Error(ex.ToString());
                 }
-                //Log.Message("2:" + state.ToString());
-                //Log.Message("3:" + state.ToString());
-                //Log.Message("4:" + state.ToString());
+                
                 Dictionary<string, Thing> prveChilds = new Dictionary<string, Thing>(innerList.Count);
                 foreach (var child in innerList)
                 {
                     prveChilds[child.Item1] = child.Item2;
                 }
                 ReadOnlyDictionary<string, Thing> prveChildsReadOnly = new ReadOnlyDictionary<string, Thing>(prveChilds);
-                //Log.Message("6:" + state.ToString());
 
-                //Log.Message("7:" + state.ToString());
-                readerWriterLockSlim.EnterUpgradeableReadLock();
+                
                 try
                 {
                     enableWrite = true;
                     foreach (KeyValuePair<string, Thing> pair in prveChilds)
                     {
                         if (!nextChilds.ContainsKey(pair.Key))
-                            this[pair.Key] = null;
+                        {
+                            Remove(pair.Value);
+                        }
                     }
                     foreach (KeyValuePair<string, Thing> pair in nextChilds)
                     {
-                        this[pair.Key] = pair.Value;
+                        CurrentKey = (pair.Key, -1);
+                        TryAdd(pair.Value);
                     }
                     enableWrite = false;
                 }
-                finally
+                catch (Exception ex)
                 {
-                    readerWriterLockSlim.ExitUpgradeableReadLock();
+                    Log.Error(ex.ToString());
                 }
-                
+
+
                 try
                 {
                     proccess.PreUpdateChilds(actionNode, cachingData, prveChildsReadOnly);
@@ -535,6 +410,7 @@ namespace RW_NodeTree
                 {
                     Log.Error(ex.ToString());
                 }
+
 
                 foreach (Thing? node in prveChilds.Values)
                 {
@@ -562,15 +438,37 @@ namespace RW_NodeTree
                 {
                     Log.Error(ex.ToString());
                 }
-                return;
+            }
+            finally
+            {
+                readerWriterLockSlim.ExitWriteLock();
+            }
+            return;
+        }
+
+        public override int IndexOf(Thing? item)
+        {
+            bool isReadLockHeld = readerWriterLockSlim.IsReadLockHeld || readerWriterLockSlim.IsWriteLockHeld || readerWriterLockSlim.IsUpgradeableReadLockHeld;
+            if (!isReadLockHeld) readerWriterLockSlim.EnterReadLock();
+            try
+            {
+                if (item == null) return -1;
+                return indicesByThing.TryGetValue(item, out int index) ? index : -1;
+            }
+            finally
+            {
+                if (!isReadLockHeld) readerWriterLockSlim.ExitReadLock();
             }
         }
+
+        protected override Thing? GetAt(int index) => ((IList<(string, Thing)>)this)[index].Item2;
 
         public override int GetCountCanAccept(Thing? item, bool canMergeWithExistingStacks = true)
         {
             var currentKey = CurrentKey;
             bool hasIndex = currentKey.Item2 >= 0 && currentKey.Item2 < innerList.Count;
-            readerWriterLockSlim.EnterReadLock();
+            bool isReadLockHeld = readerWriterLockSlim.IsReadLockHeld || readerWriterLockSlim.IsWriteLockHeld || readerWriterLockSlim.IsUpgradeableReadLockHeld;
+            if (!isReadLockHeld) readerWriterLockSlim.EnterReadLock();
             try
             {
                 if (!currentKey.Item1.IsVaildityKeyFormat() && hasIndex)
@@ -580,10 +478,10 @@ namespace RW_NodeTree
             }
             finally
             {
-                readerWriterLockSlim.ExitReadLock();
+                if (!isReadLockHeld) readerWriterLockSlim.ExitReadLock();
             }
             if (item?.Destroyed ?? false) return 0;
-            if (item?.holdingOwner != null) return 0;
+            if (item?.holdingOwner != null && item.holdingOwner != this) return 0;
             if (IsChildOf(item)) return 0;
             if (Processer.AllowNode(item, currentKey.Item1))
             {
@@ -612,7 +510,7 @@ namespace RW_NodeTree
                 return 0;
             }
 
-            bool isUpgradeableReadLockHeld = readerWriterLockSlim.IsUpgradeableReadLockHeld;
+            bool isUpgradeableReadLockHeld = readerWriterLockSlim.IsUpgradeableReadLockHeld || readerWriterLockSlim.IsWriteLockHeld;
             if (!isUpgradeableReadLockHeld) readerWriterLockSlim.EnterUpgradeableReadLock();
             try
             {
@@ -671,7 +569,7 @@ namespace RW_NodeTree
                 Log.Warning("Tried to add destroyed item to ThingOwner.");
                 return false;
             }
-            bool isUpgradeableReadLockHeld = readerWriterLockSlim.IsUpgradeableReadLockHeld;
+            bool isUpgradeableReadLockHeld = readerWriterLockSlim.IsUpgradeableReadLockHeld || readerWriterLockSlim.IsWriteLockHeld;
             if (!isUpgradeableReadLockHeld) readerWriterLockSlim.EnterUpgradeableReadLock();
             try
             {
@@ -685,7 +583,8 @@ namespace RW_NodeTree
                 var currentKey = CurrentKey;
                 bool hasIndex = currentKey.Item2 >= 0 && currentKey.Item2 < innerList.Count;
 
-                if (!currentKey.Item1.IsVaildityKeyFormat())
+
+                if (currentKey.Item1 == null || !currentKey.Item1.IsVaildityKeyFormat())
                 {
                     if (hasIndex)
                     {
@@ -698,51 +597,143 @@ namespace RW_NodeTree
                     }
                 }
 
-                if (indicesById.ContainsKey(currentKey.Item1!))
+                if (!hasIndex && indicesById.TryGetValue(currentKey.Item1, out int existingIndex))
                 {
-                    Log.Warning("Key has arrady exist : " + currentKey);
+                    currentKey.Item2 = existingIndex;
+                    hasIndex = true;
+                }
+
+                bool itemExists = indicesByThing.TryGetValue(item, out existingIndex);
+
+                if (!CanAcceptAnyOf(item, canMergeWithExistingStacks) || (!itemExists && IsChildOf(item)))
+                {
                     return false;
                 }
 
-                if (indicesByThing.ContainsKey(item))
-                {
-                    Log.Warning("Thing has arrady exist : " + item);
-                    return false;
-                }
-
-                INodeProcesser? processer = item as INodeProcesser;
-                if (!CanAcceptAnyOf(item, canMergeWithExistingStacks) || item.holdingOwner != null || IsChildOf(item))
-                {
-                    return false;
-                }
-                readerWriterLockSlim.EnterWriteLock();
+                bool isWriteLockHeld = readerWriterLockSlim.IsWriteLockHeld;
+                if (!isWriteLockHeld) readerWriterLockSlim.EnterWriteLock();
                 try
                 {
-                    indicesByThing[item] = innerList.Count;
-                    indicesById[currentKey.Item1!] = innerList.Count;
+
                     if (hasIndex)
                     {
-                        innerList.Insert(currentKey.Item2, (currentKey.Item1!, item));
-                        for (int i = currentKey.Item2 + 1; i < innerList.Count; i++)
+                        (string, Thing) kv;
+                        if (itemExists)
                         {
-                            var kv = innerList[i];
-                            indicesById[kv.Item1] = i;
-                            indicesByThing[kv.Item2] = i;
+                            //remove item
+                            kv = innerList[existingIndex];
+                            innerList.RemoveAt(existingIndex);
+                            if(currentKey.Item1 != kv.Item1) indicesById.Remove(kv.Item1);
+                            for(int i = existingIndex; i < innerList.Count; i++)
+                            {
+                                var innerKv = innerList[i];
+                                indicesById[innerKv.Item1] = i;
+                                indicesByThing[innerKv.Item2] = i;
+                            }
                         }
+                        //replace existing
+                        kv = innerList[currentKey.Item2];
+                        innerList[currentKey.Item2] = (currentKey.Item1, item);
+
+                        indicesById[currentKey.Item1] = currentKey.Item2;
+                        if(currentKey.Item1 != kv.Item1) indicesById.Remove(kv.Item1);
+
+                        indicesByThing[item] = currentKey.Item2;
+
+                        if(item != kv.Item2)
+                        {
+                            indicesByThing.Remove(kv.Item2);
+                            kv.Item2.holdingOwner = null;
+                            item.holdingOwner = this;
+                            (kv.Item2 as INodeProcesser)?.ChildNodes.CachedRootNodeNeedUpdate();
+                        }
+                    }
+                    else if(itemExists)
+                    {
+                        //change key
+                        var kv = innerList[existingIndex];
+                        innerList[existingIndex] = (currentKey.Item1, item);
+                        indicesById.Remove(kv.Item1);
+                        indicesById[currentKey.Item1] = existingIndex;
                     }
                     else
                     {
-                        innerList.Add((currentKey.Item1!, item));
+                        //add new
+                        indicesByThing[item] = innerList.Count;
+                        indicesById[currentKey.Item1] = innerList.Count;
+                        innerList.Add((currentKey.Item1, item));
+                        item.holdingOwner = this;
                     }
-                    item.holdingOwner = this;
+                    if (!itemExists)
+                    {
+                        (item as INodeProcesser)?.ChildNodes.CachedRootNodeNeedUpdate();
+                    }
                 }
                 finally
                 {
-                    readerWriterLockSlim.ExitWriteLock();
+                    if (!isWriteLockHeld) readerWriterLockSlim.ExitWriteLock();
                 }
-                if (processer != null)
+                //NeedUpdate = true;
+                return true;
+            }
+            finally
+            {
+                if (!isUpgradeableReadLockHeld) readerWriterLockSlim.ExitUpgradeableReadLock();
+            }
+        }
+
+        public override bool Remove(Thing? item)
+        {
+            if (item == null)
+            {
+                Log.Warning("Tried to remove null item from ThingOwner.");
+                return false;
+            }
+
+            bool isUpgradeableReadLockHeld = readerWriterLockSlim.IsUpgradeableReadLockHeld || readerWriterLockSlim.IsWriteLockHeld;
+            if (!isUpgradeableReadLockHeld) readerWriterLockSlim.EnterUpgradeableReadLock();
+            try
+            {
+                if (!enableWrite)
                 {
-                    processer.ChildNodes.CachedRootNodeNeedUpdate();
+                    if (item.Destroyed && Contains(item)) NeedUpdate = true;
+                    else Log.Warning("Tried to remove item out side of preUpdate. Blocked...");
+                    return false;
+                }
+
+                if (!indicesByThing.TryGetValue(item, out int index))
+                {
+                    Log.Warning("Tried to remove item not in list. Blocked...");
+                    return false;
+                }
+
+                string key = innerList[index].Item1;
+
+                if (!Processer.AllowNode(null, key))
+                {
+                    return false;
+                }
+
+                bool isWriteLockHeld = readerWriterLockSlim.IsWriteLockHeld;
+                if (!isWriteLockHeld) readerWriterLockSlim.EnterWriteLock();
+                try
+                {
+                    indicesById.Remove(key);
+                    indicesByThing.Remove(item);
+                    innerList.RemoveAt(index);
+                    for (int i = index; i < innerList.Count; i++)
+                    {
+                        var kv = innerList[i];
+                        indicesById[kv.Item1] = i;
+                        indicesByThing[kv.Item2] = i;
+                    }
+
+                    item.holdingOwner = null;
+                    (item as INodeProcesser)?.ChildNodes.CachedRootNodeNeedUpdate();
+                }
+                finally
+                {
+                    if (!isWriteLockHeld) readerWriterLockSlim.ExitWriteLock();
                 }
                 //NeedUpdate = true;
                 return true;
@@ -778,54 +769,10 @@ namespace RW_NodeTree
             return Owner == this;
         }
 
-        public override int IndexOf(Thing? item)
-        {
-            readerWriterLockSlim.EnterReadLock();
-            try
-            {
-                if (item == null) return -1;
-                return indicesByThing.TryGetValue(item, out int index) ? index : -1;
-            }
-            finally
-            {
-                readerWriterLockSlim.ExitReadLock();
-            }
-        }
-
-        public int IndexOf(string? item)
-        {
-            readerWriterLockSlim.EnterReadLock();
-            try
-            {
-                if (item == null) return -1;
-                return indicesById.TryGetValue(item, out int index) ? index : -1;
-            }
-            finally
-            {
-                readerWriterLockSlim.ExitReadLock();
-            }
-        }
-
-        public int IndexOf((string, Thing) item)
-        {
-            readerWriterLockSlim.EnterReadLock();
-            try
-            {
-                int finalIndex = -1;
-                bool findById = indicesById.TryGetValue(item.Item1, out int indexById);
-                bool findByThing = indicesByThing.TryGetValue(item.Item2, out int indexByThing);
-                if (findById && findByThing && indexById == indexByThing && innerList[indexById] == item) finalIndex = indexById;
-                return finalIndex;
-            }
-            finally
-            {
-                readerWriterLockSlim.ExitReadLock();
-            }
-        }
-
         public bool ContainsKey(string key)
         {
-            readerWriterLockSlim.EnterReadLock();
+            bool isReadLockHeld = readerWriterLockSlim.IsReadLockHeld || readerWriterLockSlim.IsWriteLockHeld || readerWriterLockSlim.IsUpgradeableReadLockHeld;
+            if (!isReadLockHeld) readerWriterLockSlim.EnterReadLock();
             try
             {
                 if (key.IsVaildityKeyFormat()) return indicesById.ContainsKey(key!);
@@ -833,13 +780,14 @@ namespace RW_NodeTree
             }
             finally
             {
-                readerWriterLockSlim.ExitReadLock();
+                if (!isReadLockHeld) readerWriterLockSlim.ExitReadLock();
             }
         }
 
         public bool ContainsKey(Thing key)
         {
-            readerWriterLockSlim.EnterReadLock();
+            bool isReadLockHeld = readerWriterLockSlim.IsReadLockHeld || readerWriterLockSlim.IsWriteLockHeld || readerWriterLockSlim.IsUpgradeableReadLockHeld;
+            if (!isReadLockHeld) readerWriterLockSlim.EnterReadLock();
             try
             {
                 if (key != null) return indicesByThing.ContainsKey(key);
@@ -847,183 +795,14 @@ namespace RW_NodeTree
             }
             finally
             {
-                readerWriterLockSlim.ExitReadLock();
+                if (!isReadLockHeld) readerWriterLockSlim.ExitReadLock();
             }
         }
-
-        public bool Contains((string, Thing) item)
-        {
-            int index = IndexOf(item);
-            return index >= 0 && index < innerList.Count;
-        }
-
-        public bool Contains(KeyValuePair<string, Thing?> item) => item.Key != null && item.Value != null && Contains((item.Key, item.Value));
-
-        public bool Contains(KeyValuePair<Thing, string?> item) => item.Key != null && item.Value != null && Contains((item.Value, item.Key));
-
-        public bool Contains(string item) => ContainsKey(item);
-
-        public void Add((string, Thing) item) => this[item.Item1] = item.Item2;
-
-        public void Add(string item) => CurrentKey = (item, -1);
-
-        public void Add(Thing item) => TryAdd(item);
-
-        public void Add(KeyValuePair<string, Thing?> item) => this[item.Key] = item.Value;
-
-        public void Add(KeyValuePair<Thing, string?> item) => this[item.Key] = item.Value;
-
-        public void Add(string key, Thing? value) => this[key] = value;
-
-        public void Add(Thing key, string? value) => this[key] = value;
-
-        public void Insert(int index, (string, Thing) item)
-        {
-            bool isUpgradeableReadLockHeld = readerWriterLockSlim.IsUpgradeableReadLockHeld;
-            if (!isUpgradeableReadLockHeld) readerWriterLockSlim.EnterUpgradeableReadLock();
-            try
-            {
-                if (!enableWrite || !item.Item1.IsVaildityKeyFormat()) return;
-                CurrentKey = (item.Item1, index);
-                TryAdd(item.Item2);
-                CurrentKey = (null, -1);
-            }
-            finally
-            {
-                if (!isUpgradeableReadLockHeld) readerWriterLockSlim.ExitUpgradeableReadLock();
-            }
-        }
-
-        public void Insert(int index, Thing item)
-        {
-            bool isUpgradeableReadLockHeld = readerWriterLockSlim.IsUpgradeableReadLockHeld;
-            if (!isUpgradeableReadLockHeld) readerWriterLockSlim.EnterUpgradeableReadLock();
-            try
-            {
-                (string?, int) key = CurrentKey;
-                if (!enableWrite || !key.Item1.IsVaildityKeyFormat()) return;
-                CurrentKey = (key.Item1, index);
-                TryAdd(item);
-                CurrentKey = key;
-            }
-            finally
-            {
-                if (!isUpgradeableReadLockHeld) readerWriterLockSlim.ExitUpgradeableReadLock();
-            }
-        }
-
-        void IList<string>.Insert(int index, string item) => CurrentKey = (item, index);
-
-        public bool Remove(string key)
-        {
-
-            bool isUpgradeableReadLockHeld = readerWriterLockSlim.IsUpgradeableReadLockHeld;
-            if (!isUpgradeableReadLockHeld) readerWriterLockSlim.EnterUpgradeableReadLock();
-            try
-            {
-                return Remove(this[key]);
-            }
-            finally
-            {
-                if (!isUpgradeableReadLockHeld) readerWriterLockSlim.ExitUpgradeableReadLock();
-            }
-        }
-
-        public override bool Remove(Thing? item)
-        {
-            if (item == null)
-            {
-                Log.Warning("Tried to remove null item from ThingOwner.");
-                return false;
-            }
-
-            bool isUpgradeableReadLockHeld = readerWriterLockSlim.IsUpgradeableReadLockHeld;
-            if (!isUpgradeableReadLockHeld) readerWriterLockSlim.EnterUpgradeableReadLock();
-            try
-            {
-                if (!enableWrite)
-                {
-                    if (item.Destroyed && Contains(item)) NeedUpdate = true;
-                    else Log.Warning("Tried to remove item out side of preUpdate. Blocked...");
-                    return false;
-                }
-
-                if (!indicesByThing.TryGetValue(item, out int index))
-                {
-                    Log.Warning("Tried to remove item not in list. Blocked...");
-                    return false;
-                }
-
-                string key = innerList[index].Item1;
-
-                INodeProcesser? processer = item as INodeProcesser;
-                if (!Processer.AllowNode(null, key))
-                {
-                    return false;
-                }
-
-                readerWriterLockSlim.EnterWriteLock();
-                try
-                {
-                    indicesById.Remove(key);
-                    indicesByThing.Remove(item);
-                    innerList.RemoveAt(index);
-                    for (int i = index; i < innerList.Count; i++)
-                    {
-                        var kv = innerList[i];
-                        indicesById[kv.Item1] = i;
-                        indicesByThing[kv.Item2] = i;
-                    }
-                }
-                finally
-                {
-                    readerWriterLockSlim.ExitWriteLock();
-                }
-                if (item.holdingOwner != this)
-                {
-                    return false;
-                }
-
-                item.holdingOwner = null;
-                if (processer != null)
-                {
-                    processer.ChildNodes.CachedRootNodeNeedUpdate();
-                }
-                //NeedUpdate = true;
-                return true;
-            }
-            finally
-            {
-                if (!isUpgradeableReadLockHeld) readerWriterLockSlim.ExitUpgradeableReadLock();
-            }
-        }
-
-        public bool Remove((string, Thing) item)
-        {
-            bool isUpgradeableReadLockHeld = readerWriterLockSlim.IsUpgradeableReadLockHeld;
-            if (!isUpgradeableReadLockHeld) readerWriterLockSlim.EnterUpgradeableReadLock();
-            try
-            {
-                int index = IndexOf(item);
-                if (index >= 0 && index < innerList.Count)
-                {
-                    return Remove(item.Item2);
-                }
-                return false;
-            }
-            finally
-            {
-                if (!isUpgradeableReadLockHeld) readerWriterLockSlim.ExitUpgradeableReadLock();
-            }
-        }
-
-        public bool Remove(KeyValuePair<string, Thing?> item) => item.Key != null && item.Value != null && Remove((item.Key, item.Value));
-
-        public bool Remove(KeyValuePair<Thing, string?> item) => item.Key != null && item.Value != null && Remove((item.Value, item.Key));
 
         public bool TryGetValue(string key, out Thing? value)
         {
-            readerWriterLockSlim.EnterReadLock();
+            bool isReadLockHeld = readerWriterLockSlim.IsReadLockHeld || readerWriterLockSlim.IsWriteLockHeld || readerWriterLockSlim.IsUpgradeableReadLockHeld;
+            if (!isReadLockHeld) readerWriterLockSlim.EnterReadLock();
             try
             {
                 value = null;
@@ -1034,13 +813,14 @@ namespace RW_NodeTree
             }
             finally
             {
-                readerWriterLockSlim.ExitReadLock();
+                if (!isReadLockHeld) readerWriterLockSlim.ExitReadLock();
             }
         }
 
         public bool TryGetValue(Thing key, out string? value)
         {
-            readerWriterLockSlim.EnterReadLock();
+            bool isReadLockHeld = readerWriterLockSlim.IsReadLockHeld || readerWriterLockSlim.IsWriteLockHeld || readerWriterLockSlim.IsUpgradeableReadLockHeld;
+            if (!isReadLockHeld) readerWriterLockSlim.EnterReadLock();
             try
             {
                 value = null;
@@ -1051,58 +831,14 @@ namespace RW_NodeTree
             }
             finally
             {
-                readerWriterLockSlim.ExitReadLock();
-            }
-        }
-
-        public void CopyTo((string, Thing)[] array, int arrayIndex)
-        {
-            readerWriterLockSlim.EnterReadLock();
-            try
-            {
-                innerList.CopyTo(array, arrayIndex);
-            }
-            finally
-            {
-                readerWriterLockSlim.ExitReadLock();
-            }
-        }
-
-        public void CopyTo(KeyValuePair<string, Thing?>[] array, int arrayIndex)
-        {
-            foreach (var kv in this)
-            {
-                array[arrayIndex++] = new KeyValuePair<string, Thing?>(kv.Item1, kv.Item2);
-            }
-        }
-
-        public void CopyTo(KeyValuePair<Thing, string?>[] array, int arrayIndex)
-        {
-            foreach (var kv in this)
-            {
-                array[arrayIndex++] = new KeyValuePair<Thing, string?>(kv.Item2, kv.Item1);
-            }
-        }
-
-        public void CopyTo(string[] array, int arrayIndex)
-        {
-            foreach (var kv in this)
-            {
-                array[arrayIndex++] = kv.Item1;
-            }
-        }
-
-        public void CopyTo(Thing[] array, int arrayIndex)
-        {
-            foreach (var kv in this)
-            {
-                array[arrayIndex++] = kv.Item2;
+                if (!isReadLockHeld) readerWriterLockSlim.ExitReadLock();
             }
         }
 
         public IEnumerator<(string, Thing)> GetEnumerator()
         {
-            readerWriterLockSlim.EnterReadLock();
+            bool isReadLockHeld = readerWriterLockSlim.IsReadLockHeld || readerWriterLockSlim.IsWriteLockHeld || readerWriterLockSlim.IsUpgradeableReadLockHeld;
+            if (!isReadLockHeld) readerWriterLockSlim.EnterReadLock();
             try
             {
                 foreach (var kv in innerList)
@@ -1112,7 +848,7 @@ namespace RW_NodeTree
             }
             finally
             {
-                readerWriterLockSlim.ExitReadLock();
+                if (!isReadLockHeld) readerWriterLockSlim.ExitReadLock();
             }
         }
 
@@ -1148,8 +884,6 @@ namespace RW_NodeTree
             }
         }
 
-        protected override Thing? GetAt(int index) => ((IList<(string, Thing)>)this)[index].Item2;
-
         private bool needUpdate = true;
 
         private bool enableWrite = false;
@@ -1161,8 +895,6 @@ namespace RW_NodeTree
         private readonly Dictionary<string, int> indicesById = new Dictionary<string, int>();
         private readonly Dictionary<Thing, int> indicesByThing = new Dictionary<Thing, int>();
         private readonly ConcurrentDictionary<int, (string?, int)> currentKey = new ConcurrentDictionary<int, (string?, int)>();
-
-        private static bool blockUpdate = false;
 
     }
 }
