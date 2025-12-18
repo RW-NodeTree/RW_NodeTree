@@ -181,7 +181,6 @@ namespace RW_NodeTree
                     }
                     else if (Scribe.mode == LoadSaveMode.LoadingVars)
                     {
-                        int i = 0;
                         for (XmlNode xmlNode = Scribe.loader.curXmlParent.FirstChild; xmlNode != null; xmlNode = xmlNode.NextSibling)
                         {
                             if (xmlNode.NodeType == XmlNodeType.Element)
@@ -203,7 +202,6 @@ namespace RW_NodeTree
                                 {
                                     Log.Error(e.ToString());
                                 }
-                                i++;
                             }
                         }
                     }
