@@ -22,13 +22,8 @@ namespace RW_NodeTree
     public class NodeContainer : ThingOwner, IReadOnlyList<string>, IReadOnlyList<Thing>, IReadOnlyDictionary<string, Thing?>, IReadOnlyDictionary<Thing, string?>, IReadOnlyList<(string, Thing)>
     {
 
-        public NodeContainer(Thing processer) : base(processer as INodeProcesser)
-        {
-            if (processer is not INodeProcesser)
-            {
-                throw new InvalidCastException("Invalid processer type");
-            }
-        }
+        public NodeContainer(Thing processer) : base((INodeProcesser)processer) {}
+
 
         public Thing? this[string key]
         {
@@ -103,16 +98,21 @@ namespace RW_NodeTree
                 if (!isUpgradeableReadLockHeld) readerWriterLockSlim.EnterUpgradeableReadLock();
                 try
                 {
-                    if (cachedRootNode != null) return cachedRootNode;
-                    INodeProcesser processer = Processer;
-                    INodeProcesser? next = ParentProcesser;
-                    while (next != null)
+                    if (cachedRootNode == null)
                     {
-                        processer = next;
-                        next = next.ParentHolder as INodeProcesser;
+                        INodeProcesser processer = ParentProcesser?.ChildNodes.RootNode ?? Processer;
+                        bool isWriteLockHeld = readerWriterLockSlim.IsWriteLockHeld;
+                        if (!isWriteLockHeld) readerWriterLockSlim.EnterWriteLock();
+                        try
+                        {
+                            cachedRootNode = processer;
+                        }
+                        finally
+                        {
+                            if (!isWriteLockHeld) readerWriterLockSlim.ExitWriteLock();
+                        }
                     }
-                    cachedRootNode = processer;
-                    return processer;
+                    return cachedRootNode;
                 }
                 finally
                 {
@@ -156,7 +156,7 @@ namespace RW_NodeTree
         public override void ExposeData()
         {
             base.ExposeData();
-
+            Scribe_Values.Look(ref needUpdate, "needUpdate");
             if (Scribe.EnterNode("InnerList"))
             {
                 bool isWriteLockHeld = readerWriterLockSlim.IsWriteLockHeld;
@@ -256,7 +256,6 @@ namespace RW_NodeTree
 
         internal List<RenderInfo> GetNodeRenderingInfos(Rot4 rot, Graphic_ChildNode invokeSource)
         {
-            UpdateNode();
             if (!UnityData.IsInMainThread) throw new InvalidOperationException("not in main thread");
             Dictionary<string, List<RenderInfo>> nodeRenderingInfos = new Dictionary<string, List<RenderInfo>>(Count + 1);
             Thing parent = (Thing)Processer;
@@ -342,129 +341,111 @@ namespace RW_NodeTree
             readerWriterLockSlim.EnterUpgradeableReadLock();
             try
             {
-                if (!NeedUpdate) return;
-
-                NeedUpdate = false;
-
-                readerWriterLockSlim.EnterWriteLock();
-                try
+                while (NeedUpdate)
                 {
-                    enableWrite = true;
-                    for (int i = Count - 1; i >= 0; i--)
+                    NeedUpdate = false;
+                    
+                    Dictionary<string, object?> cachingData = new Dictionary<string, object?>();
+                    Dictionary<string, Thing> nextChilds;
+                    try
                     {
-                        if (this[i].Destroyed)
+                        nextChilds = proccess.GenChilds(actionNode, cachingData) ?? new Dictionary<string, Thing>();
+                    }
+                    catch (Exception ex)
+                    {
+                        nextChilds = new Dictionary<string, Thing>();
+                        Log.Error(ex.ToString());
+                    }
+                    
+                    Dictionary<string, Thing> prveChilds = new Dictionary<string, Thing>(innerList.Count);
+                    foreach (var child in innerList)
+                    {
+                        prveChilds[child.Item1] = child.Item2;
+                    }
+                    ReadOnlyDictionary<string, Thing> prveChildsReadOnly = new ReadOnlyDictionary<string, Thing>(prveChilds);
+
+                    
+                    readerWriterLockSlim.EnterWriteLock();
+                    try
+                    {
+                        enableWrite = true;
+                        foreach (KeyValuePair<string, Thing> pair in prveChilds)
                         {
-                            RemoveAt(i);
+                            if (!nextChilds.ContainsKey(pair.Key))
+                            {
+                                Remove(pair.Value);
+                            }
+                        }
+                        foreach (KeyValuePair<string, Thing> pair in nextChilds)
+                        {
+                            if(!prveChilds.TryGetValue(pair.Key, out Thing? prveNode) || prveNode != pair.Value)
+                            {
+                                CurrentKey = (pair.Key, -1);
+                                TryAdd(pair.Value);
+                            }
+                        }
+                        enableWrite = false;
+                    }
+                    catch (Exception ex)
+                    {
+                        Log.Error(ex.ToString());
+                    }
+                    finally
+                    {
+                        readerWriterLockSlim.ExitWriteLock();
+                    }
+
+
+                    try
+                    {
+                        proccess.PreUpdateChilds(actionNode, cachingData, prveChildsReadOnly);
+                    }
+                    catch (Exception ex)
+                    {
+                        Log.Error(ex.ToString());
+                    }
+
+
+                    foreach (Thing? node in prveChilds.Values)
+                    {
+                        NodeContainer? container = (node as INodeProcesser)?.ChildNodes;
+                        if (container != null && !this.Contains(node))
+                        {
+                            try
+                            {
+                                container.internal_UpdateNode(actionNode);
+                            }
+                            catch (Exception ex)
+                            {
+                                Log.Error(ex.ToString());
+                            }
                         }
                     }
-                    enableWrite = false;
-                }
-                finally
-                {
-                    readerWriterLockSlim.ExitWriteLock();
-                }
 
-                
-                Dictionary<string, object?> cachingData = new Dictionary<string, object?>();
-                Dictionary<string, Thing> nextChilds;
-                try
-                {
-                    nextChilds = proccess.GenChilds(actionNode, cachingData) ?? new Dictionary<string, Thing>();
-                }
-                catch (Exception ex)
-                {
-                    nextChilds = new Dictionary<string, Thing>();
-                    Log.Error(ex.ToString());
-                }
-                
-                Dictionary<string, Thing> prveChilds = new Dictionary<string, Thing>(innerList.Count);
-                foreach (var child in innerList)
-                {
-                    prveChilds[child.Item1] = child.Item2;
-                }
-                ReadOnlyDictionary<string, Thing> prveChildsReadOnly = new ReadOnlyDictionary<string, Thing>(prveChilds);
-
-                
-                readerWriterLockSlim.EnterWriteLock();
-                try
-                {
-                    enableWrite = true;
-                    foreach (KeyValuePair<string, Thing> pair in prveChilds)
+                    foreach (Thing? node in this.Values)
                     {
-                        if (!nextChilds.ContainsKey(pair.Key))
+                        NodeContainer? container = (node as INodeProcesser)?.ChildNodes;
+                        if (container != null)
                         {
-                            Remove(pair.Value);
+                            try
+                            {
+                                container.internal_UpdateNode(actionNode);
+                            }
+                            catch (Exception ex)
+                            {
+                                Log.Error(ex.ToString());
+                            }
                         }
                     }
-                    foreach (KeyValuePair<string, Thing> pair in nextChilds)
+
+                    try
                     {
-                        if(!prveChilds.TryGetValue(pair.Key, out Thing? prveNode) || prveNode != pair.Value)
-                        {
-                            CurrentKey = (pair.Key, -1);
-                            TryAdd(pair.Value);
-                        }
+                        proccess.PostUpdateChilds(actionNode, cachingData, prveChildsReadOnly);
                     }
-                    enableWrite = false;
-                }
-                catch (Exception ex)
-                {
-                    Log.Error(ex.ToString());
-                }
-                finally
-                {
-                    readerWriterLockSlim.ExitWriteLock();
-                }
-
-
-                try
-                {
-                    proccess.PreUpdateChilds(actionNode, cachingData, prveChildsReadOnly);
-                }
-                catch (Exception ex)
-                {
-                    Log.Error(ex.ToString());
-                }
-
-
-                foreach (Thing? node in prveChilds.Values)
-                {
-                    NodeContainer? container = (node as INodeProcesser)?.ChildNodes;
-                    if (container != null && container.NeedUpdate && !this.Contains(node))
+                    catch (Exception ex)
                     {
-                        try
-                        {
-                            container.internal_UpdateNode(actionNode);
-                        }
-                        catch (Exception ex)
-                        {
-                            Log.Error(ex.ToString());
-                        }
+                        Log.Error(ex.ToString());
                     }
-                }
-
-                foreach (Thing? node in this.Values)
-                {
-                    NodeContainer? container = (node as INodeProcesser)?.ChildNodes;
-                    if (container != null && container.NeedUpdate)
-                    {
-                        try
-                        {
-                            container.internal_UpdateNode(actionNode);
-                        }
-                        catch (Exception ex)
-                        {
-                            Log.Error(ex.ToString());
-                        }
-                    }
-                }
-
-                try
-                {
-                    proccess.PostUpdateChilds(actionNode, cachingData, prveChildsReadOnly);
-                }
-                catch (Exception ex)
-                {
-                    Log.Error(ex.ToString());
                 }
             }
             finally
@@ -508,7 +489,6 @@ namespace RW_NodeTree
             {
                 if (!isReadLockHeld) readerWriterLockSlim.ExitReadLock();
             }
-            if (item?.Destroyed ?? false) return 0;
             if (item?.holdingOwner != null && item.holdingOwner != this) return 0;
             if (IsChildOf(item)) return 0;
             if (Processer.AllowNode(item, currentKey.Item1))
@@ -532,12 +512,6 @@ namespace RW_NodeTree
                 return 0;
             }
 
-            if (item.Destroyed)
-            {
-                Log.Warning("Tried to add destroyed item to ThingOwner.");
-                return 0;
-            }
-
             bool isUpgradeableReadLockHeld = readerWriterLockSlim.IsUpgradeableReadLockHeld || readerWriterLockSlim.IsWriteLockHeld;
             if (!isUpgradeableReadLockHeld) readerWriterLockSlim.EnterUpgradeableReadLock();
             try
@@ -545,7 +519,7 @@ namespace RW_NodeTree
 
                 if (!enableWrite)
                 {
-                    Log.Warning("Tried to add item out side of preUpdate. Blocked...");
+                    NeedUpdate = true;
                     return 0;
                 }
 
@@ -591,12 +565,6 @@ namespace RW_NodeTree
                 Log.Warning("Tried to add null item to ThingOwner.");
                 return false;
             }
-
-            if (item.Destroyed)
-            {
-                Log.Warning("Tried to add destroyed item to ThingOwner.");
-                return false;
-            }
             bool isUpgradeableReadLockHeld = readerWriterLockSlim.IsUpgradeableReadLockHeld || readerWriterLockSlim.IsWriteLockHeld;
             if (!isUpgradeableReadLockHeld) readerWriterLockSlim.EnterUpgradeableReadLock();
             try
@@ -604,7 +572,7 @@ namespace RW_NodeTree
 
                 if (!enableWrite)
                 {
-                    Log.Warning("Tried to add item out side of preUpdate. Blocked...");
+                    NeedUpdate = true;
                     return false;
                 }
 
@@ -724,8 +692,7 @@ namespace RW_NodeTree
             {
                 if (!enableWrite)
                 {
-                    if (item.Destroyed && Contains(item)) NeedUpdate = true;
-                    else Log.Warning("Tried to remove item out side of preUpdate. Blocked...");
+                    NeedUpdate = true;
                     return false;
                 }
 
@@ -912,7 +879,7 @@ namespace RW_NodeTree
             }
         }
 
-        private bool needUpdate = true;
+        private bool needUpdate = false;
 
         private bool enableWrite = false;
 
